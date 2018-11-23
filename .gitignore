@@ -4,5 +4,6 @@ __pycache__
 venv
 *.pyc
 *.mwb.bak
+*.mwb
 tests/data/lettres-test.sqlite
 /app/client/node_modules/

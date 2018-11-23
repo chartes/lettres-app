@@ -3,6 +3,21 @@ from app import db
 from app.search import add_to_index, remove_from_index, query_index
 
 
+association_document_has_language = db.Table('document_has_language',
+    db.Column('document_id', db.Integer, db.ForeignKey('document.id'), primary_key=True),
+    db.Column('language_id', db.Integer, db.ForeignKey('language.id'), primary_key=True)
+)
+association_document_has_correspondent = db.Table('document_has_correspondent',
+    db.Column('document_id', db.Integer, db.ForeignKey('document.id'), primary_key=True),
+    db.Column('correspondent_id', db.Integer, db.ForeignKey('correspondent.id'), primary_key=True),
+    db.Column('correspondent_role_id', db.Integer, db.ForeignKey('correspondent_role.id'))
+)
+association_whitelist_has_user = db.Table('whitelist_has_user',
+    db.Column('whitelist_id', db.Integer, db.ForeignKey('whitelist.id'), primary_key=True),
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True)
+)
+
+
 class SearchableMixin(object):
     @classmethod
     def search(cls, expression, fields=None, page=None, per_page=None, index=None):
@@ -68,148 +83,157 @@ db.event.listen(db.session, 'before_commit', SearchableMixin.before_commit)
 db.event.listen(db.session, 'after_commit', SearchableMixin.after_commit)
 
 
-class Placename(SearchableMixin, db.Model):
-    """Illustrate class-level docstring.
-
-    Classes use a special whitespace convention: the opening and closing quotes
-    are preceded and followed by a blank line, respectively. No other
-    docstrings should be preceded or followed by anything but code.
-
-    A blank line at the end of a multi-line docstring before the closing
-    quotation marks simply makes it easier for tooling to auto-format
-    paragraphs (wrapping them at 79 characters, per PEP8), without the closing
-    quotation marks interfering. For example, in Vim, you can use `gqip` to
-    "apply text formatting inside the paragraph." In Emacs, the equivalent
-    would be the `fill-paragraph` command. While it's not required, the
-    presence of a blank line is quite common and much appreciated. Regardless,
-    the closing quotation marks should certainly be on a line by themselves.
+class Document(SearchableMixin, db.Model):
+    """Un document transcrit – ici, une lettre.
 
     """
 
-    __tablename__ = 'placename'
-    __searchable__ = ['label']
-
-    id = db.Column("placename_id", db.String(10), primary_key=True)
-    label = db.Column(db.String(200), nullable=False)
-    country = db.Column(db.String(2), nullable=False)
-    dpt = db.Column(db.String(2), nullable=False)
-    # not null if the placename is known as being commune
-    commune_insee_code = db.Column(db.String(5), db.ForeignKey('insee_commune.insee_code'), index=True)
-    # not null if the placename is localized somewhere
-    localization_commune_insee_code = db.Column(db.String(5), db.ForeignKey('insee_commune.insee_code'), index=True)
-    localization_placename_id = db.Column(db.String(10), db.ForeignKey('placename.placename_id'), index=True)
-    localization_certainty = db.Column(db.Enum('high', 'low'))
-    # description of the placename
-    desc = db.Column(db.Text)
-    # first num of the page where the placename appears (within its source)
-    num_start_page = db.Column(db.Integer, index=True)
-    # comment on the placename
-    comment = db.Column(db.Text)
-
-    # relationships
-    commune = db.relationship(
-        'InseeCommune', backref=db.backref('placename', uselist=False),
-        primaryjoin="InseeCommune.id==Placename.commune_insee_code",
-        uselist=False
-    )
-    localization_commune = db.relationship(
-        'InseeCommune', backref=db.backref('localized_placenames'),
-        primaryjoin="InseeCommune.id==Placename.localization_commune_insee_code",
-        uselist=False
-    )
-    linked_placenames = db.relationship('Placename')
-
-
-class PlacenameAltLabel(SearchableMixin, db.Model):
-    """ """
-    __tablename__ = 'placename_alt_label'
-    __table_args__ = (
-        db.UniqueConstraint('placename_id', 'label', name='_placename_label_uc'),
-    )
-    __searchable__ = ['label']
+    __tablename__ = 'document'
+    __searchable__ = ['title']
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    placename_id = db.Column(db.String(10), db.ForeignKey(Placename.id), index=True)
-    label = db.Column(db.String(200))
+    title = db.Column(db.String(200), nullable=False)
+    witness_label = db.Column(db.String(200))
+    institution_id = db.Column(db.Integer, db.ForeignKey('institution.id'), index=True)
+    classification_mark = db.Column(db.String(100))
+    tradition_id = db.Column(db.Integer, db.ForeignKey('tradition.id'), index=True)
+    argument = db.Column(db.Text)
+    creation = db.Column(db.String)
+    creation_label = db.Column(db.String)
+    location_date_label = db.Column(db.String)
+    location_date_ref = db.Column(db.String)
+    # prev_document_id = db.Column(db.Integer, db.ForeignKey('document.id'), index=True)
+    next_document_id = db.Column(db.Integer, db.ForeignKey('document.id'), index=True)
+    transcription = db.Column(db.Text)
+    date_insert = db.Column(db.String)
+    date_update = db.Column(db.String)
+    is_published = db.Column(db.Boolean)
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
+    whitelist_id = db.Column(db.Integer, db.ForeignKey('whitelist.id'), index=True)
 
     # relationships
-    placename = db.relationship(Placename, backref=db.backref('alt_labels'))
+    images = db.relationship("Image", backref="document")
+    notes = db.relationship("Note", backref="document")
+    languages = db.relationship("Language",
+                                secondary=association_document_has_language,
+                                backref=db.backref('documents', ))
+    correspondents = db.relationship("Language",
+                                     secondary=association_document_has_correspondent,
+                                     backref=db.backref('documents', ))
+    # relation unaire (liste ? ordonnée ?)
+    next_document = db.relationship("Document", backref=db.backref('prev_document', remote_side=[next_document_id]))
 
 
-class PlacenameOldLabel(SearchableMixin, db.Model):
-    """ """
-    __tablename__ = 'placename_old_label'
-    __searchable__ = ['text_label_node', 'text_date']
+class Note(SearchableMixin, db.Model):
+    """ Note (appel point) de transcription non typée ; contenu riche """
+    __tablename__ = 'note'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    old_label_id = db.Column(db.String(13), nullable=False, unique=True)
-    placename_id = db.Column(db.String(10), db.ForeignKey('placename.placename_id'), nullable=False, index=True)
-    rich_label = db.Column(db.String(250), nullable=False)
-    # date with tags
-    rich_date = db.Column(db.String(100))
-    # date wo tags
-    text_date = db.Column(db.String(100))
-    # bibl reference with tags
-    rich_reference = db.Column(db.Text)
-    # full old label with tags
-    rich_label_node = db.Column(db.Text)
-    # full old label wo tags
-    text_label_node = db.Column(db.Text)
-
-    # relationships
-    placename = db.relationship(Placename, backref=db.backref('old_labels'))
+    content = db.Column(db.String)
+    label = db.Column(db.String(45))
+    document_id = db.Column(db.Integer, db.ForeignKey('document.id'), index=True)
 
 
-class InseeCommune(SearchableMixin, db.Model):
-    """ """
-    __tablename__ = 'insee_commune'
-    __searchable__ = ['NCCENR']
-
-    id = db.Column("insee_code", db.String(5), primary_key=True)
-    REG_id = db.Column(db.String(6), db.ForeignKey('insee_ref.id'), nullable=False, index=True)
-    DEP_id = db.Column(db.String(7), db.ForeignKey('insee_ref.id'), nullable=False, index=True)
-    AR_id = db.Column(db.String(8), db.ForeignKey('insee_ref.id'), index=True)
-    CT_id = db.Column(db.String(9), db.ForeignKey('insee_ref.id'), index=True)
-    NCCENR = db.Column(db.String(70), nullable=False)
-    ARTMIN = db.Column(db.String(10))
-    longlat = db.Column(db.String(100))
-
-    # relationships
-    region = db.relationship('InseeRef', primaryjoin="InseeCommune.REG_id==InseeRef.id", backref=db.backref('communes_region'))
-    departement = db.relationship('InseeRef', primaryjoin="InseeCommune.DEP_id==InseeRef.id", backref=db.backref('communes_departement'))
-    arrondissement = db.relationship('InseeRef', primaryjoin="InseeCommune.AR_id==InseeRef.id", backref=db.backref('communes_arrondissement'))
-    canton = db.relationship('InseeRef', primaryjoin="InseeCommune.CT_id==InseeRef.id", backref=db.backref('communes_canton'))
-
-
-class InseeRef(SearchableMixin, db.Model):
-    """ """
-    __tablename__ = 'insee_ref'
-    __searchable__ = ['label']
-
-    id = db.Column(db.String(10), primary_key=True)
-    type = db.Column(db.String(4), nullable=False, index=True)
-    insee_code = db.Column(db.String(3), nullable=False, index=True)
-    parent_id = db.Column(db.String(10), db.ForeignKey('insee_ref.id'), index=True)
-    level = db.Column(db.Integer, nullable=False, index=True)
-    label = db.Column(db.String(50), nullable=False)
-
-    # relationships
-    children = db.relationship("InseeRef", backref=db.backref('parent', remote_side=[id]))
-
-
-class FeatureType(SearchableMixin, db.Model):
-    """ """
-    __tablename__ = 'feature_type'
-    __table_args__ = (
-        db.UniqueConstraint('placename_id', 'term', name='_placename_term_uc'),
-    )
-    __searchable__ = ['term']
+class Institution(SearchableMixin, db.Model):
+    """ Institution de conservation du témoin édité """
+    __tablename__ = "institution"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    placename_id = db.Column(db.String(10), db.ForeignKey('placename.placename_id'), index=True)
-    term = db.Column(db.String(400))
+    name = db.Column(db.String(45))
+    ref = db.Column(db.String(200))
 
     # relationships
-    placename = db.relationship(Placename, backref=db.backref('feature_types'))
+    documents = db.relationship("Document", backref="institution")
 
 
+class Image(SearchableMixin, db.Model):
+    """ Liens aux images du témoin """
+    __tablename__ = "image"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    img_url = db.Column(db.String(45))
+    manifest_url = db.Column(db.String(200))
+    document_id = db.Column(db.Integer, db.ForeignKey('document.id'), index=True)
+
+
+class Language(SearchableMixin, db.Model):
+    """ Langue(s) de la lettre transcrite """
+    __tablename__ = 'language'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    code = db.Column(db.String(3))
+    label = db.Column(db.String(45))
+
+
+class Tradition(SearchableMixin, db.Model):
+    """ Mode de tradition du témoin transcrit (original, copie, etc.) """
+    __tablename__ = "tradition"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    label = db.Column(db.String(45))
+    description = db.Column(db.String(200))
+
+    # relationships
+    documents = db.relationship("Document", backref="tradition")
+
+
+class Correspondent(SearchableMixin, db.Model):
+    """ Correspondants d’une lettre (expéditeur(s) et destinataire(s)) """
+    __tablename__ = 'correspondent'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    firstname = db.Column(db.String)
+    lastname = db.Column(db.String)
+    key = db.Column(db.String)
+    ref = db.Column(db.String)
+
+    # relationships
+    document = db.relationship(Document, backref=db.backref('correspondents'))
+
+
+class CorrespondentRole(SearchableMixin, db.Model):
+    """ Rôle des correspondants (expéditeur, destinataire) """
+    __tablename__ = 'correspondent_role'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    label = db.Column(db.String(50))
+    description = db.Column(db.String(100))
+
+
+class User(SearchableMixin, db.Model):
+    """ Utilisateur """
+    __tablename__ = 'user'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    username = db.Column(db.String(45))
+    passwd = db.Column(db.String(8))
+    email = db.Column(db.String(45))
+    confirmed_at = db.Column(db.DATETIME)
+    firstname = db.Column(db.String(45))
+    lastname = db.Column(db.String(45))
+    role_id = db.Column(db.Integer, db.ForeignKey('user_role.id'), index=True)
+
+    # relationships
+    whitelists = db.relationship("Whitelist",
+                                     secondary=association_whitelist_has_user,
+                                     backref=db.backref('users', ))
+
+
+class UserRole(SearchableMixin, db.Model):
+    """ Rôle des utilisateurs (administrateur ou contributeur) """
+    __tablename__ = 'user_role'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    label = db.Column(db.String(45))
+    description = db.Column(db.String(200))
+
+    # relationships
+    users = db.relationship(User, backref="user_role")
+
+
+class Whitelist(SearchableMixin, db.Model):
+    """ Liste d’utilisateur(s) """
+    __tablename__ = 'whitelist'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    label = db.Column(db.String(45))
