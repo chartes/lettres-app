@@ -1,14 +1,15 @@
 from app import db
 from app.api.abstract_facade import JSONAPIAbstractFacade
-from app.models import Correspondent, CorrespondentRole
+from app.models import Tradition
 
 
-class CorrespondentRoleFacade(JSONAPIAbstractFacade):
+class TraditionFacade(JSONAPIAbstractFacade):
     """
 
     """
-    TYPE = "correspondent-role"
-    TYPE_PLURAL = "correspondent-roles"
+
+    TYPE = "tradition"
+    TYPE_PLURAL = "traditions"
 
     @property
     def id(self):
@@ -16,12 +17,12 @@ class CorrespondentRoleFacade(JSONAPIAbstractFacade):
 
     @staticmethod
     def get_resource_facade(url_prefix, id, **kwargs):
-        e = CorrespondentRole.query.filter(CorrespondentRole.id == id).first()
+        e = Tradition.query.filter(Tradition.id == id).first()
         if e is None:
             kwargs = {"status": 404}
-            errors = [{"status": 404, "title": "correspondent role %s does not exist" % id}]
+            errors = [{"status": 404, "title": "tradition %s does not exist" % id}]
         else:
-            e = CorrespondentRoleFacade(url_prefix, e, **kwargs)
+            e = TraditionFacade(url_prefix, e, **kwargs)
             kwargs = {}
             errors = []
         return e, kwargs, errors
@@ -33,7 +34,7 @@ class CorrespondentRoleFacade(JSONAPIAbstractFacade):
         errors = None
         try:
             _g = attributes.get
-            co = Correspondent(
+            co = Tradition(
                 id=id,
                 label=_g("label"),
                 description=_g("description"),
@@ -43,14 +44,15 @@ class CorrespondentRoleFacade(JSONAPIAbstractFacade):
             resource = co
         except Exception as e:
             print(e)
-            errors = [{"status": 403, "title": "Error creating resource 'CorrespondentRole' with data: %s" % (str([id, attributes, related_resources]))}]
+            errors = [{"status": 403, "title": "Error creating resource 'Tradition' with data: %s" % (
+                str([id, attributes, related_resources]))}]
             db.session.rollback()
         return resource, errors
 
-
     def __init__(self, *args, **kwargs):
-        super(CorrespondentRoleFacade, self).__init__(*args, **kwargs)
-        """Make a JSONAPI resource object describing what is a correspondent role
+        super(TraditionFacade, self).__init__(*args, **kwargs)
+        """Make a JSONAPI resource object describing what is a tradition
+
         """
 
         self.relationships = {

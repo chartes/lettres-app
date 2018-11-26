@@ -82,13 +82,19 @@ def create_app(config_name="dev"):
     from app.api.correspondent_has_role.routes import register_correspondent_has_role_api_urls
     from app.api.correspondent_role.routes import register_correspondent_role_api_urls
     from app.api.document.routes import register_document_api_urls
+    from app.api.tradition.routes import register_tradition_role_api_urls
+    from app.api.institution.routes import register_institution_role_api_urls
+    from app.api.language.routes import register_language_role_api_urls
 
     with app.app_context():
-        # generate  routes for the API
+        # generate routes for the API
         register_correspondent_api_urls(app)
         register_correspondent_has_role_api_urls(app)
         register_correspondent_role_api_urls(app)
         register_document_api_urls(app)
+        register_tradition_role_api_urls(app)
+        register_institution_role_api_urls(app)
+        register_language_role_api_urls(app)
 
     app.register_blueprint(app_bp)
     app.register_blueprint(api_bp)

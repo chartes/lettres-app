@@ -212,7 +212,6 @@ class CorrespondentHasRole(SearchableMixin, db.Model):
     correspondent_role = db.relationship("CorrespondentRole", backref=db.backref("correspondents_have_roles"), cascade="all, delete-orphan", single_parent=True)
 
 
-
 class User(SearchableMixin, db.Model):
     """ Utilisateur """
     __tablename__ = 'user'

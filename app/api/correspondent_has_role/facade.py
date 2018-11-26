@@ -88,17 +88,7 @@ class CorrespondentHasRoleFacade(JSONAPIAbstractFacade):
 
     def __init__(self, *args, **kwargs):
         super(CorrespondentHasRoleFacade, self).__init__(*args, **kwargs)
-        """Make a JSONAPI resource object describing what is a correspondent
-
-        A document is made of:
-        attributes:
-            id:
-            name:
-        relationships:
-            roles
-        Returns
-        -------
-            A dict describing the corresponding JSONAPI resource object
+        """Make a JSONAPI resource object describing what is the relation between a correspondent and its role within a document
         """
 
         self.relationships = {

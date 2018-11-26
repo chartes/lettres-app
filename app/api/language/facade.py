@@ -1,14 +1,14 @@
 from app import db
 from app.api.abstract_facade import JSONAPIAbstractFacade
-from app.models import Correspondent, CorrespondentRole
+from app.models import Language
 
 
-class CorrespondentRoleFacade(JSONAPIAbstractFacade):
+class LanguageFacade(JSONAPIAbstractFacade):
     """
 
     """
-    TYPE = "correspondent-role"
-    TYPE_PLURAL = "correspondent-roles"
+    TYPE = "language"
+    TYPE_PLURAL = "languages"
 
     @property
     def id(self):
@@ -16,12 +16,12 @@ class CorrespondentRoleFacade(JSONAPIAbstractFacade):
 
     @staticmethod
     def get_resource_facade(url_prefix, id, **kwargs):
-        e = CorrespondentRole.query.filter(CorrespondentRole.id == id).first()
+        e = Language.query.filter(Language.id == id).first()
         if e is None:
             kwargs = {"status": 404}
-            errors = [{"status": 404, "title": "correspondent role %s does not exist" % id}]
+            errors = [{"status": 404, "title": "language %s does not exist" % id}]
         else:
-            e = CorrespondentRoleFacade(url_prefix, e, **kwargs)
+            e = LanguageFacade(url_prefix, e, **kwargs)
             kwargs = {}
             errors = []
         return e, kwargs, errors
@@ -33,24 +33,24 @@ class CorrespondentRoleFacade(JSONAPIAbstractFacade):
         errors = None
         try:
             _g = attributes.get
-            co = Correspondent(
+            co = Language(
                 id=id,
+                code=_g("code"),
                 label=_g("label"),
-                description=_g("description"),
             )
             db.session.add(co)
             db.session.commit()
             resource = co
         except Exception as e:
             print(e)
-            errors = [{"status": 403, "title": "Error creating resource 'CorrespondentRole' with data: %s" % (str([id, attributes, related_resources]))}]
+            errors = [{"status": 403, "title": "Error creating resource 'Language' with data: %s" % (
+                str([id, attributes, related_resources]))}]
             db.session.rollback()
         return resource, errors
 
-
     def __init__(self, *args, **kwargs):
-        super(CorrespondentRoleFacade, self).__init__(*args, **kwargs)
-        """Make a JSONAPI resource object describing what is a correspondent role
+        super(LanguageFacade, self).__init__(*args, **kwargs)
+        """Make a JSONAPI resource object describing what is a language
         """
 
         self.relationships = {
@@ -60,8 +60,8 @@ class CorrespondentRoleFacade(JSONAPIAbstractFacade):
             **self.resource_identifier,
             "attributes": {
                 "id": self.obj.id,
-                "label": self.obj.label,
-                "description": self.obj.description
+                "name": self.obj.name,
+                "ref": self.obj.ref
             },
             "meta": self.meta,
             "links": {
