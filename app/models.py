@@ -7,11 +7,7 @@ association_document_has_language = db.Table('document_has_language',
     db.Column('document_id', db.Integer, db.ForeignKey('document.id'), primary_key=True),
     db.Column('language_id', db.Integer, db.ForeignKey('language.id'), primary_key=True)
 )
-association_document_has_correspondent = db.Table('document_has_correspondent',
-    db.Column('document_id', db.Integer, db.ForeignKey('document.id'), primary_key=True),
-    db.Column('correspondent_id', db.Integer, db.ForeignKey('correspondent.id'), primary_key=True),
-    db.Column('correspondent_role_id', db.Integer, db.ForeignKey('correspondent_role.id'))
-)
+
 association_whitelist_has_user = db.Table('whitelist_has_user',
     db.Column('whitelist_id', db.Integer, db.ForeignKey('whitelist.id'), primary_key=True),
     db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True)
@@ -19,6 +15,9 @@ association_whitelist_has_user = db.Table('whitelist_has_user',
 
 
 class SearchableMixin(object):
+
+    __searchable__ = []
+
     @classmethod
     def search(cls, expression, fields=None, page=None, per_page=None, index=None):
 
@@ -103,12 +102,12 @@ class Document(SearchableMixin, db.Model):
     location_date_label = db.Column(db.String)
     location_date_ref = db.Column(db.String)
     # prev_document_id = db.Column(db.Integer, db.ForeignKey('document.id'), index=True)
-    next_document_id = db.Column(db.Integer, db.ForeignKey('document.id'), index=True)
+    prev_document_id = db.Column(db.Integer, db.ForeignKey('document.id'), index=True)
     transcription = db.Column(db.Text)
     date_insert = db.Column(db.String)
     date_update = db.Column(db.String)
     is_published = db.Column(db.Boolean)
-    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), index=True)
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, index=True)
     whitelist_id = db.Column(db.Integer, db.ForeignKey('whitelist.id'), index=True)
 
     # relationships
@@ -117,11 +116,9 @@ class Document(SearchableMixin, db.Model):
     languages = db.relationship("Language",
                                 secondary=association_document_has_language,
                                 backref=db.backref('documents', ))
-    correspondents = db.relationship("Language",
-                                     secondary=association_document_has_correspondent,
-                                     backref=db.backref('documents', ))
+
     # relation unaire (liste ? ordonnée ?)
-    next_document = db.relationship("Document", backref=db.backref('prev_document', remote_side=[next_document_id]))
+    next_document = db.relationship("Document", backref=db.backref('prev_document', remote_side=id),  uselist=False)
 
 
 class Note(SearchableMixin, db.Model):
@@ -129,7 +126,7 @@ class Note(SearchableMixin, db.Model):
     __tablename__ = 'note'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    content = db.Column(db.String)
+    content = db.Column(db.String, nullable=False)
     label = db.Column(db.String(45))
     document_id = db.Column(db.Integer, db.ForeignKey('document.id'), index=True)
 
@@ -151,9 +148,9 @@ class Image(SearchableMixin, db.Model):
     __tablename__ = "image"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    img_url = db.Column(db.String(45))
+    img_url = db.Column(db.String(45), nullable=False)
     manifest_url = db.Column(db.String(200))
-    document_id = db.Column(db.Integer, db.ForeignKey('document.id'), index=True)
+    document_id = db.Column(db.Integer, db.ForeignKey('document.id'), nullable=False, index=True)
 
 
 class Language(SearchableMixin, db.Model):
@@ -161,7 +158,7 @@ class Language(SearchableMixin, db.Model):
     __tablename__ = 'language'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    code = db.Column(db.String(3))
+    code = db.Column(db.String(3), nullable=False)
     label = db.Column(db.String(45))
 
 
@@ -170,7 +167,7 @@ class Tradition(SearchableMixin, db.Model):
     __tablename__ = "tradition"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    label = db.Column(db.String(45))
+    label = db.Column(db.String(45), nullable=False)
     description = db.Column(db.String(200))
 
     # relationships
@@ -187,17 +184,29 @@ class Correspondent(SearchableMixin, db.Model):
     key = db.Column(db.String)
     ref = db.Column(db.String)
 
-    # relationships
-    document = db.relationship(Document, backref=db.backref('correspondents'))
-
 
 class CorrespondentRole(SearchableMixin, db.Model):
     """ Rôle des correspondants (expéditeur, destinataire) """
     __tablename__ = 'correspondent_role'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    label = db.Column(db.String(50))
+    label = db.Column(db.String(50), nullable=False)
     description = db.Column(db.String(100))
+
+
+class CorrespondentHasRole(SearchableMixin, db.Model):
+    __tablename__ = 'correspondent_has_role'
+
+    correspondent_id = db.Column(db.Integer, db.ForeignKey('correspondent.id', ondelete='CASCADE'), primary_key=True)
+    document_id = db.Column(db.Integer, db.ForeignKey('document.id', ondelete='CASCADE'), primary_key=True)
+    correspondent_role_id = db.Column(db.Integer, db.ForeignKey('correspondent_role.id', ondelete='CASCADE'))
+
+    correspondent = db.relationship("Correspondent", backref=db.backref("correspondents_have_roles"), cascade="all, delete-orphan", single_parent=True)
+
+    document = db.relationship("Document", backref=db.backref("correspondents_have_roles"), cascade="all, delete-orphan", single_parent=True)
+
+    correspondent_role = db.relationship("CorrespondentRole", backref=db.backref("correspondents_have_roles"), cascade="all, delete-orphan", single_parent=True)
+
 
 
 class User(SearchableMixin, db.Model):
@@ -205,15 +214,24 @@ class User(SearchableMixin, db.Model):
     __tablename__ = 'user'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    username = db.Column(db.String(45))
-    passwd = db.Column(db.String(8))
-    email = db.Column(db.String(45))
-    confirmed_at = db.Column(db.DATETIME)
-    firstname = db.Column(db.String(45))
-    lastname = db.Column(db.String(45))
-    role_id = db.Column(db.Integer, db.ForeignKey('user_role.id'), index=True)
+
+    # User authentication information
+    username = db.Column(db.String(), nullable=False, unique=True)
+    password = db.Column(db.String(), nullable=False, server_default='')
+
+    # User email information
+    email = db.Column(db.String(), nullable=False, unique=True)
+    email_confirmed_at = db.Column('confirmed_at', db.DateTime())
+
+    # User information
+    active = db.Column('is_active', db.Boolean(), nullable=False, server_default='0')
+    first_name = db.Column('firstname', db.String(), nullable=False, server_default='')
+    last_name = db.Column('lastname', db.String(), nullable=False, server_default='')
+
+    role_id = db.Column(db.Integer, db.ForeignKey('user_role.id'), nullable=False, index=True)
 
     # relationships
+    role = db.relationship("UserRole")
     whitelists = db.relationship("Whitelist",
                                      secondary=association_whitelist_has_user,
                                      backref=db.backref('users', ))
@@ -224,11 +242,20 @@ class UserRole(SearchableMixin, db.Model):
     __tablename__ = 'user_role'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    label = db.Column(db.String(45))
+    label = db.Column(db.String(45), nullable=False)
     description = db.Column(db.String(200))
 
     # relationships
     users = db.relationship(User, backref="user_role")
+
+
+class UserInvitation(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    # UserInvitation email information. The collation='NOCASE' is required
+    # to search case insensitively when USER_IFIND_MODE is 'nocase_collation'.
+    email = db.Column(db.String(255, collation='NOCASE'), nullable=False)
+    # save the user of the invitee
+    invited_by_user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
 
 
 class Whitelist(SearchableMixin, db.Model):

@@ -2,27 +2,23 @@ from flask import current_app
 
 
 def add_to_index(index, model):
-    if not current_app.elasticsearch:
-        print("WARNING: elasticsearch not properly configured")
-        return
-    payload = {}
-    for field in model.__searchable__:
-        payload[field] = getattr(model, field)
-    current_app.elasticsearch.index(index=index, doc_type=index, id=model.id,
-                                    body=payload)
-
+    try:
+        payload = {}
+        for field in model.__searchable__:
+            payload[field] = getattr(model, field)
+        current_app.elasticsearch.index(index=index, doc_type=index, id=model.id,
+                                        body=payload)
+    except AttributeError as e:
+        print("WARNING_1: elasticsearch not properly configured", e)
 
 def remove_from_index(index, model):
-    if not current_app.elasticsearch:
-        print("WARNING: elasticsearch not properly configured")
-        return
-    current_app.elasticsearch.delete(index=index, doc_type=index, id=model.id)
+    try:
+        current_app.elasticsearch.delete(index=index, doc_type=index, id=model.id)
+    except AttributeError as e:
+        print("WARNING_2: elasticsearch not properly configured", e)
 
 
 def query_index(index, query, fields=None, page=None, per_page=None):
-    if not current_app.elasticsearch:
-        print("WARNING: elasticsearch not properly configured")
-        return [], 0
     body = {
         'query': {
             'query_string': {

@@ -12,6 +12,7 @@ from app.api.response_factory import JSONAPIResponseFactory
 
 
 # Initialize Flask extensions
+
 db = SQLAlchemy()
 
 api_bp = Blueprint('api_bp', __name__)
@@ -101,5 +102,9 @@ def create_app(config_name="dev"):
         with app.app_context():
             db.drop_all()
             db.create_all()
+
+            # === load some test data
+            from db.fixtures.lorem_ipsum import load_fixtures
+            load_fixtures(db)
 
     return app
