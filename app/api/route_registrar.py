@@ -438,16 +438,14 @@ class JSONAPIRouteRegistrar(object):
              if the sort/filter criteriae are incorrect
             """
             url_prefix = request.host_url[:-1] + self.url_prefix
-            f_obj, kwargs, errors = facade_class.get_resource_facade(url_prefix, id)
 
+            w_rel_links, w_rel_data = JSONAPIRouteRegistrar.get_relationships_mode(request.args)
+            f_obj, kwargs, errors = facade_class.get_resource_facade(url_prefix, id,
+                                                                     with_relationships_links=w_rel_links,
+                                                                     with_relationships_data=w_rel_data)
             if f_obj is None:
                 return JSONAPIResponseFactory.make_errors_response(errors, **kwargs)
             else:
-
-                # should we retrieve relationships too ?
-                w_rel_links, w_rel_data = JSONAPIRouteRegistrar.get_relationships_mode(request.args)
-                f_obj.set_relationships_mode(w_rel_links, w_rel_data)
-
                 links = {
                     "self": request.url
                 }

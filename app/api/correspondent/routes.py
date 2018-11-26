@@ -1,10 +1,10 @@
-from app.api.document.facade import DocumentFacade
-from app.models import Document
+from app.api.correspondent.facade import CorrespondentFacade
+from app.models import Correspondent
 
 
-def register_document_api_urls(app):
+def register_correspondent_api_urls(app):
     registrar = app.api_url_registrar
-    registrar.register_get_routes(Document, DocumentFacade)
-    registrar.register_relationship_get_route(DocumentFacade, 'editors')
+    registrar.register_get_routes(Correspondent, CorrespondentFacade)
+    registrar.register_relationship_get_route(CorrespondentFacade, 'roles-within-document')
 
-    registrar.register_post_routes(Document, DocumentFacade)
+    #registrar.register_post_routes(Correspondent, DocumentFacade)

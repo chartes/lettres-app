@@ -78,21 +78,17 @@ def create_app(config_name="dev"):
 
     from app.api import routes
 
-    #from app.api.insee_commune.routes import register_insee_commune_api_urls
-    #from app.api.insee_ref.routes import register_insee_ref_api_urls
-    #from app.api.placename.routes import register_placename_api_urls
-    #from app.api.placename_alt_label.routes import register_placename_alt_label_api_urls
-    #from app.api.placename_old_label.routes import register_placename_old_label_api_urls
-    #from app.api.feature_type.routes import register_feature_type_api_urls
-    #
-    #with app.app_context():
-    #    # generate GET routes for the API
-    #    register_placename_api_urls(app)
-    #    register_placename_alt_label_api_urls(app)
-    #    register_placename_old_label_api_urls(app)
-    #    register_insee_commune_api_urls(app)
-    #    register_insee_ref_api_urls(app)
-    #    register_feature_type_api_urls(app)
+    from app.api.correspondent.routes import register_correspondent_api_urls
+    from app.api.correspondent_has_role.routes import register_correspondent_has_role_api_urls
+    from app.api.correspondent_role.routes import register_correspondent_role_api_urls
+    from app.api.document.routes import register_document_api_urls
+
+    with app.app_context():
+        # generate  routes for the API
+        register_correspondent_api_urls(app)
+        register_correspondent_has_role_api_urls(app)
+        register_correspondent_role_api_urls(app)
+        register_document_api_urls(app)
 
     app.register_blueprint(app_bp)
     app.register_blueprint(api_bp)

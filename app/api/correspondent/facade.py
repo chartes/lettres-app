@@ -15,15 +15,15 @@ class CorrespondentFacade(JSONAPIAbstractFacade):
         return self.obj.id
 
     @staticmethod
-    def get_resource_facade(url_prefix, doc_id):
-        e = Correspondent.query.filter(Correspondent.id == doc_id).first()
+    def get_resource_facade(url_prefix, id, **kwargs):
+        e = Correspondent.query.filter(Correspondent.id == id).first()
         if e is None:
             kwargs = {"status": 404}
-            errors = [{"status": 404, "title": "correspondent %s does not exist" % doc_id}]
+            errors = [{"status": 404, "title": "correspondent %s does not exist" % id}]
         else:
+            e = CorrespondentFacade(url_prefix, e, **kwargs)
             kwargs = {}
             errors = []
-            e = CorrespondentFacade(url_prefix, e)
         return e, kwargs, errors
 
     # noinspection PyArgumentList
@@ -52,19 +52,19 @@ class CorrespondentFacade(JSONAPIAbstractFacade):
         return resource, errors
 
     def get_roles_resource_identifiers(self):
-        from app.api.user_role.facade import UserRoleFacade
-        return [] if self.obj.editors is None else [UserRoleFacade.make_resource_identifier(e.id, UserRoleFacade.TYPE)
-                                                    for e in self.obj.editors]
+        from app.api.correspondent_has_role.facade import CorrespondentHasRoleFacade
+        return [] if self.obj.correspondents_have_roles is None else [CorrespondentHasRoleFacade.make_resource_identifier(e.id, CorrespondentHasRoleFacade.TYPE)
+                                                    for e in self.obj.correspondents_have_roles]
 
     def get_roles_resources(self):
         from app.api.correspondent_has_role.facade import CorrespondentHasRoleFacade
-        return [] if self.obj.correspondents_have_roles is None else [CorrespondentRoleFacade(self.url_prefix, e,
+        return [] if self.obj.correspondents_have_roles is None else [CorrespondentHasRoleFacade(self.url_prefix, e,
                                                                  self.with_relationships_links,
                                                                  self.with_relationships_data).resource
                                                     for e in self.obj.correspondents_have_roles]
 
     def __init__(self, *args, **kwargs):
-        super(DocumentFacade, self).__init__(*args, **kwargs)
+        super(CorrespondentFacade, self).__init__(*args, **kwargs)
         """Make a JSONAPI resource object describing what is a correspondent
 
         A document is made of:
@@ -79,15 +79,10 @@ class CorrespondentFacade(JSONAPIAbstractFacade):
         """
 
         self.relationships = {
-            "roles": {
-                "links": self._get_links(rel_name="roles"),
+            "roles-within-document": {
+                "links": self._get_links(rel_name="roles-within-document"),
                 "resource_identifier_getter": self.get_roles_resource_identifiers,
                 "resource_getter": self.get_roles_resources
-            },
-            "documents": {
-                "links": self._get_links(rel_name="documents"),
-                "resource_identifier_getter": self.get_documents_resource_identifiers,
-                "resource_getter": self.get_documents_resources
             },
         }
         self.resource = {

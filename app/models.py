@@ -196,9 +196,13 @@ class CorrespondentRole(SearchableMixin, db.Model):
 
 class CorrespondentHasRole(SearchableMixin, db.Model):
     __tablename__ = 'correspondent_has_role'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    __table_args__ = (
+        db.UniqueConstraint('correspondent_id', 'document_id', name='_correspondent_has_role_document_uc'),
+    )
 
-    correspondent_id = db.Column(db.Integer, db.ForeignKey('correspondent.id', ondelete='CASCADE'), primary_key=True)
-    document_id = db.Column(db.Integer, db.ForeignKey('document.id', ondelete='CASCADE'), primary_key=True)
+    correspondent_id = db.Column(db.Integer, db.ForeignKey('correspondent.id', ondelete='CASCADE'))
+    document_id = db.Column(db.Integer, db.ForeignKey('document.id', ondelete='CASCADE'))
     correspondent_role_id = db.Column(db.Integer, db.ForeignKey('correspondent_role.id', ondelete='CASCADE'))
 
     correspondent = db.relationship("Correspondent", backref=db.backref("correspondents_have_roles"), cascade="all, delete-orphan", single_parent=True)
