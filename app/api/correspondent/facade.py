@@ -52,6 +52,21 @@ class CorrespondentFacade(JSONAPIAbstractFacade):
             db.session.rollback()
         return resource, errors
 
+    def get_document_resource_identifiers(self):
+        from app.api.document.facade import DocumentFacade
+        return [] if self.obj.correspondents_having_roles is None else [
+            DocumentFacade.make_resource_identifier(c_h_r.document.id, DocumentFacade.TYPE)
+            for c_h_r in self.obj.correspondents_having_roles
+        ]
+
+    def get_document_resources(self):
+        from app.api.document.facade import DocumentFacade
+        return [] if self.obj.correspondents_having_roles is None else [
+            DocumentFacade(self.url_prefix, c.document, self.with_relationships_links,
+                           self.with_relationships_data).resource
+            for c in self.obj.correspondents_having_roles
+        ]
+
     def get_roles_resource_identifiers(self):
         from app.api.correspondent_has_role.facade import CorrespondentHasRoleFacade
         return [] if self.obj.correspondents_having_roles is None else [
@@ -75,6 +90,11 @@ class CorrespondentFacade(JSONAPIAbstractFacade):
                 "links": self._get_links(rel_name="roles-within-documents"),
                 "resource_identifier_getter": self.get_roles_resource_identifiers,
                 "resource_getter": self.get_roles_resources
+            },
+            "documents": {
+                "links": self._get_links(rel_name="documents"),
+                "resource_identifier_getter": self.get_document_resource_identifiers,
+                "resource_getter": self.get_document_resources
             },
         }
         self.resource = {
