@@ -15,19 +15,18 @@ def documentation():
 
 @app_bp.route("/recreate-database")
 def recreate_database():
-    if current_app.config["DEBUG"] and current_app.config["ENV"] != "production":
+    if current_app.config["DEBUG"] and current_app.config["ENV"] != "production" and current_app.config["GENERATE_FAKE_DATA"]:
         print("Recreating database...")
         with current_app.app_context():
             db.drop_all()
             db.create_all()
 
-            if current_app.config["GENERATE_FAKE_DATA"]:
-                # === load some fake data
-                from db.fixtures.create_fake_data import create_fake_documents, create_fake_users
-                print("Generating fake data...", end=" ", flush=True)
-                create_fake_users(db, nb_users=10)
-                create_fake_documents(db, nb_docs=50, nb_correspondents=20)
-                print("done !")
-                flash('Database recreated with fake data !')
+            # === load some fake data
+            from db.fixtures.create_fake_data import create_fake_documents, create_fake_users
+            print("Generating fake data...", end=" ", flush=True)
+            create_fake_users(db, nb_users=10)
+            create_fake_documents(db, nb_docs=50, nb_correspondents=20)
+            print("done !")
+            flash('Database recreated with fake data !')
 
     return redirect(url_for('app_bp.index'))
