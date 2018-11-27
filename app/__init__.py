@@ -85,6 +85,11 @@ def create_app(config_name="dev"):
     from app.api.tradition.routes import register_tradition_role_api_urls
     from app.api.institution.routes import register_institution_role_api_urls
     from app.api.language.routes import register_language_role_api_urls
+    from app.api.image.routes import register_image_api_urls
+    from app.api.note.routes import register_note_api_urls
+    from app.api.user.routes import register_user_api_urls
+    from app.api.user_role.routes import register_user_role_api_urls
+    from app.api.whitelist.routes import register_whitelist_api_urls
 
     with app.app_context():
         # generate routes for the API
@@ -95,18 +100,27 @@ def create_app(config_name="dev"):
         register_tradition_role_api_urls(app)
         register_institution_role_api_urls(app)
         register_language_role_api_urls(app)
+        register_image_api_urls(app)
+        register_note_api_urls(app)
+        register_user_api_urls(app)
+        register_user_role_api_urls(app)
+        register_whitelist_api_urls(app)
 
     app.register_blueprint(app_bp)
     app.register_blueprint(api_bp)
 
     if app.config["DB_DROP_AND_CREATE_ALL"]:
-        print("DB_DROP_AND_CREATE_ALL")
+        print("Recreating database...")
         with app.app_context():
             db.drop_all()
             db.create_all()
 
-            # === load some test data
-            from db.fixtures.lorem_ipsum import load_fixtures
-            load_fixtures(db)
+            if app.config["GENERATE_FAKE_DATA"]:
+                # === load some fake data
+                from db.fixtures.create_fake_data import create_fake_documents, create_fake_users
+                print("Generating fake data...", end=" ", flush=True)
+                create_fake_users(db, nb_users=10)
+                create_fake_documents(db, nb_docs=50, nb_correspondents=20)
+                print("done !")
 
     return app

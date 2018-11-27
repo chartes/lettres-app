@@ -2,20 +2,21 @@ from app import db
 
 from app.search import add_to_index, remove_from_index, query_index
 
-
 association_document_has_language = db.Table('document_has_language',
-    db.Column('document_id', db.Integer, db.ForeignKey('document.id'), primary_key=True),
-    db.Column('language_id', db.Integer, db.ForeignKey('language.id'), primary_key=True)
-)
+                                             db.Column('document_id', db.Integer, db.ForeignKey('document.id'),
+                                                       primary_key=True),
+                                             db.Column('language_id', db.Integer, db.ForeignKey('language.id'),
+                                                       primary_key=True)
+                                             )
 
 association_whitelist_has_user = db.Table('whitelist_has_user',
-    db.Column('whitelist_id', db.Integer, db.ForeignKey('whitelist.id'), primary_key=True),
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True)
-)
+                                          db.Column('whitelist_id', db.Integer, db.ForeignKey('whitelist.id'),
+                                                    primary_key=True),
+                                          db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True)
+                                          )
 
 
 class SearchableMixin(object):
-
     __searchable__ = []
 
     @classmethod
@@ -29,12 +30,12 @@ class SearchableMixin(object):
         # perform the query
         print(page, per_page)
         results, total = query_index(index=index, query=expression,
-                                 fields=fields, page=page, per_page=per_page)
+                                     fields=fields, page=page, per_page=per_page)
         print(expression, results, total)
         if total == 0:
             return cls.query.filter_by(id=0), 0
         when = []
-        #TODO recuperer les indexes et faire les bonnes requetes/jointures
+        # TODO recuperer les indexes et faire les bonnes requetes/jointures
         ids = [r.id for r in results]
 
         if len(ids) == 0:
@@ -43,9 +44,9 @@ class SearchableMixin(object):
         for i in range(len(ids)):
             when.append((ids[i], i))
 
-        #print("test")
-        #print("when:", when)
-        #for idx in index.split(","):
+        # print("test")
+        # print("when:", when)
+        # for idx in index.split(","):
         #    obj = db.session.query(MODELS_HASH_TABLE[idx]).filter()
         #    print(idx, obj)
         return cls.query.filter(cls.id.in_(ids)).order_by(
@@ -113,12 +114,14 @@ class Document(SearchableMixin, db.Model):
     # relationships
     images = db.relationship("Image", backref="document")
     notes = db.relationship("Note", backref="document")
+    owner = db.relationship("User", backref="owned_documents")
+
     languages = db.relationship("Language",
                                 secondary=association_document_has_language,
                                 backref=db.backref('documents', ))
 
     # relation unaire (liste ? ordonnée ?)
-    next_document = db.relationship("Document", backref=db.backref('prev_document', remote_side=id),  uselist=False)
+    next_document = db.relationship("Document", backref=db.backref('prev_document', remote_side=id), uselist=False)
 
 
 class Note(SearchableMixin, db.Model):
@@ -205,11 +208,14 @@ class CorrespondentHasRole(SearchableMixin, db.Model):
     document_id = db.Column(db.Integer, db.ForeignKey('document.id', ondelete='CASCADE'))
     correspondent_role_id = db.Column(db.Integer, db.ForeignKey('correspondent_role.id', ondelete='CASCADE'))
 
-    correspondent = db.relationship("Correspondent", backref=db.backref("correspondents_have_roles"), cascade="all, delete-orphan", single_parent=True)
+    correspondent = db.relationship("Correspondent", backref=db.backref("correspondents_having_roles"),
+                                    cascade="all, delete-orphan", single_parent=True)
 
-    document = db.relationship("Document", backref=db.backref("correspondents_have_roles"), cascade="all, delete-orphan", single_parent=True)
+    document = db.relationship("Document", backref=db.backref("correspondents_having_roles"),
+                               cascade="all, delete-orphan", single_parent=True)
 
-    correspondent_role = db.relationship("CorrespondentRole", backref=db.backref("correspondents_have_roles"), cascade="all, delete-orphan", single_parent=True)
+    correspondent_role = db.relationship("CorrespondentRole", backref=db.backref("correspondents_having_roles"),
+                                         cascade="all, delete-orphan", single_parent=True)
 
 
 class User(SearchableMixin, db.Model):
@@ -233,12 +239,6 @@ class User(SearchableMixin, db.Model):
 
     role_id = db.Column(db.Integer, db.ForeignKey('user_role.id'), nullable=False, index=True)
 
-    # relationships
-    role = db.relationship("UserRole")
-    whitelists = db.relationship("Whitelist",
-                                     secondary=association_whitelist_has_user,
-                                     backref=db.backref('users', ))
-
 
 class UserRole(SearchableMixin, db.Model):
     """ Rôle des utilisateurs (administrateur ou contributeur) """
@@ -249,7 +249,7 @@ class UserRole(SearchableMixin, db.Model):
     description = db.Column(db.String(200))
 
     # relationships
-    users = db.relationship(User, backref="user_role")
+    users = db.relationship(User, backref="role")
 
 
 class UserInvitation(db.Model):
@@ -267,3 +267,9 @@ class Whitelist(SearchableMixin, db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     label = db.Column(db.String(45))
+
+    # relationships
+    documents = db.relationship(Document, backref="whitelist")
+    users = db.relationship(User,
+                            secondary=association_whitelist_has_user,
+                            backref=db.backref('whitelists', ))

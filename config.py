@@ -18,9 +18,11 @@ def parse_var_env(var_name):
 class Config(object):
     SECRET_KEY = parse_var_env('SECRET_KEY')
 
-    DB_DROP_AND_CREATE_ALL = parse_var_env('DB_DROP_AND_CREATE_ALL') or False
     SQLALCHEMY_DATABASE_URI = 'sqlite:////' + os.path.join(os.path.abspath(os.getcwd()), parse_var_env('DATABASE_URI'))
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    DB_DROP_AND_CREATE_ALL = parse_var_env('DB_DROP_AND_CREATE_ALL') or False
+    GENERATE_FAKE_DATA = parse_var_env('GENERATE_FAKE_DATA') or False
 
     ELASTICSEARCH_URL = parse_var_env('ELASTICSEARCH_URL')
 
@@ -48,6 +50,7 @@ class DevelopmentConfig(Config):
 
 class TestConfig(Config):
     DB_DROP_AND_CREATE_ALL = True
+    GENERATE_FAKE_DATA = False
 
 
 config = {

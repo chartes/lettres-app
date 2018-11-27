@@ -47,21 +47,23 @@ class CorrespondentFacade(JSONAPIAbstractFacade):
             resource = co
         except Exception as e:
             print(e)
-            errors = [{"status": 403, "title": "Error creating resource 'Correspondent' with data: %s" % (str([id, attributes, related_resources]))}]
+            errors = [{"status": 403, "title": "Error creating resource 'Correspondent' with data: %s" % (
+                str([id, attributes, related_resources]))}]
             db.session.rollback()
         return resource, errors
 
     def get_roles_resource_identifiers(self):
         from app.api.correspondent_has_role.facade import CorrespondentHasRoleFacade
-        return [] if self.obj.correspondents_have_roles is None else [CorrespondentHasRoleFacade.make_resource_identifier(e.id, CorrespondentHasRoleFacade.TYPE)
-                                                    for e in self.obj.correspondents_have_roles]
+        return [] if self.obj.correspondents_having_roles is None else [
+            CorrespondentHasRoleFacade.make_resource_identifier(e.id, CorrespondentHasRoleFacade.TYPE)
+            for e in self.obj.correspondents_having_roles]
 
     def get_roles_resources(self):
         from app.api.correspondent_has_role.facade import CorrespondentHasRoleFacade
-        return [] if self.obj.correspondents_have_roles is None else [CorrespondentHasRoleFacade(self.url_prefix, e,
-                                                                 self.with_relationships_links,
-                                                                 self.with_relationships_data).resource
-                                                    for e in self.obj.correspondents_have_roles]
+        return [] if self.obj.correspondents_having_roles is None else [CorrespondentHasRoleFacade(self.url_prefix, e,
+                                                                                                   self.with_relationships_links,
+                                                                                                   self.with_relationships_data).resource
+                                                                        for e in self.obj.correspondents_having_roles]
 
     def __init__(self, *args, **kwargs):
         super(CorrespondentFacade, self).__init__(*args, **kwargs)
@@ -69,8 +71,8 @@ class CorrespondentFacade(JSONAPIAbstractFacade):
         """
 
         self.relationships = {
-            "roles-within-document": {
-                "links": self._get_links(rel_name="roles-within-document"),
+            "roles-within-documents": {
+                "links": self._get_links(rel_name="roles-within-documents"),
                 "resource_identifier_getter": self.get_roles_resource_identifiers,
                 "resource_getter": self.get_roles_resources
             },

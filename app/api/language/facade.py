@@ -60,8 +60,8 @@ class LanguageFacade(JSONAPIAbstractFacade):
             **self.resource_identifier,
             "attributes": {
                 "id": self.obj.id,
-                "name": self.obj.name,
-                "ref": self.obj.ref
+                "code": self.obj.code,
+                "label": self.obj.label
             },
             "meta": self.meta,
             "links": {
