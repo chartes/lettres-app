@@ -14,18 +14,22 @@ def parse_var_env(var_name):
     return v
 
 
-#TODO:   parser si boolean
 class Config(object):
     SECRET_KEY = parse_var_env('SECRET_KEY')
+    ENV ='production'
+    DEBUG = parse_var_env('DEBUG') or False
 
     SQLALCHEMY_DATABASE_URI = 'sqlite:////' + os.path.join(os.path.abspath(os.getcwd()), parse_var_env('DATABASE_URI'))
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_TRACK_MODIFICATIONS = parse_var_env('SQLALCHEMY_TRACK_MODIFICATIONS') or False
+    SQLALCHEMY_ECHO = parse_var_env('SQLALCHEMY_ECHO') or False
+    SQLALCHEMY_RECORD_QUERIES = parse_var_env('SQLALCHEMY_RECORD_QUERIES') or False
 
     DB_DROP_AND_CREATE_ALL = parse_var_env('DB_DROP_AND_CREATE_ALL') or False
     GENERATE_FAKE_DATA = parse_var_env('GENERATE_FAKE_DATA') or False
 
     ELASTICSEARCH_URL = parse_var_env('ELASTICSEARCH_URL')
 
+    ASSETS_DEBUG = parse_var_env('ASSETS_DEBUG') or False
     SCSS_STATIC_DIR = os.path.join(basedir, "app ", "static", "css")
     SCSS_ASSET_DIR = os.path.join(basedir, "app", "assets", "scss")
     CSRF_ENABLED = parse_var_env('CSRF_ENABLED')
@@ -37,9 +41,11 @@ class Config(object):
 
 class DevelopmentConfig(Config):
 
+    ENV = 'development'
+
     @staticmethod
     def init_app(app):
-        print('THIS APP IS IN DEBUG MODE. YOU SHOULD NOT SEE THIS IN PRODUCTION.')
+        print('THIS APP IS IN DEV MODE. YOU SHOULD NOT SEE THIS IN PRODUCTION.')
         with app.app_context():
             db_url = app.config["SQLALCHEMY_DATABASE_URI"]
             if not database_exists(db_url):
@@ -49,6 +55,8 @@ class DevelopmentConfig(Config):
 
 
 class TestConfig(Config):
+    ENV = 'testing'
+
     DB_DROP_AND_CREATE_ALL = True
     GENERATE_FAKE_DATA = False
 

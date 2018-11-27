@@ -11,7 +11,32 @@
                 </p>
             </div>
 
-        </div>
+            <section>
+                <header>
+                    <h1>Routes de l'API</h1>
+                </header>
+                <ul>
+                    <li><a href="{{url_for('api_bp.correspondents_collection_endpoint')}}" target="_blank">Correspondents</a></li>
+                    <li><a href="{{url_for('api_bp.correspondents_having_roles_collection_endpoint')}}" target="_blank">Correspondents having roles</a></li>
+                    <li><a href="{{url_for('api_bp.correspondent_roles_collection_endpoint')}}" target="_blank">Correspondent roles</a></li>
+                    <li><a href="{{url_for('api_bp.documents_collection_endpoint')}}" target="_blank">Documents</a></li>
+                    <li><a href="{{url_for('api_bp.images_collection_endpoint')}}" target="_blank">Images</a></li>
+                    <li><a href="{{url_for('api_bp.institutions_collection_endpoint')}}" target="_blank">Institutions</a></li>
+                    <li><a href="{{url_for('api_bp.languages_collection_endpoint')}}" target="_blank">Languages</a></li>
+                    <li><a href="{{url_for('api_bp.notes_collection_endpoint')}}" target="_blank">Notes</a></li>
+                    <li><a href="{{url_for('api_bp.traditions_collection_endpoint')}}" target="_blank">Traditions</a></li>
+                    <li><a href="{{url_for('api_bp.users_collection_endpoint')}}" target="_blank">Users</a></li>
+                    <li><a href="{{url_for('api_bp.user_roles_collection_endpoint')}}" target="_blank">User roles</a></li>
+                    <li><a href="{{url_for('api_bp.whitelists_collection_endpoint')}}" target="_blank">Whitelists</a></li>
+                </ul>
+            </section>
+
+            <div>
+                Recréer la base avec des données aléatoires :
+                <a href="{{url_for('app_bp.recreate_database')}}">Lancer</a>
+            </div>
+
+
     </section>
 
 {% endblock content %}

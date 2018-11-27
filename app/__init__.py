@@ -56,10 +56,10 @@ def create_app(config_name="dev"):
         app.config.from_object(config[config_name])
 
     app.wsgi_app = PrefixMiddleware(app.wsgi_app, prefix=app.config["APP_URL_PREFIX"])
+    app.debug = app.config["DEBUG"]
 
     db.init_app(app)
     config[config_name].init_app(app)
-
     #app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) if app.config['ELASTICSEARCH_URL'] else None
 
     # =====================================
@@ -109,7 +109,7 @@ def create_app(config_name="dev"):
     app.register_blueprint(app_bp)
     app.register_blueprint(api_bp)
 
-    if app.config["DB_DROP_AND_CREATE_ALL"]:
+    if app.config["DB_DROP_AND_CREATE_ALL"] and app.config["ENV"] != "production":
         print("Recreating database...")
         with app.app_context():
             db.drop_all()

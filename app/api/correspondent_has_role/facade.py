@@ -8,7 +8,7 @@ class CorrespondentHasRoleFacade(JSONAPIAbstractFacade):
 
     """
     TYPE = "correspondent-has-role"
-    TYPE_PLURAL = "correspondent-has-roles"
+    TYPE_PLURAL = "correspondents-having-roles"
 
     @property
     def id(self):
