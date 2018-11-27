@@ -595,7 +595,7 @@ class JSONAPIRouteRegistrar(object):
                 if resource_data is None:
                     count = 0
                 else:
-                    count = 1
+                    count = len(resource_data)
                 paginated_links = {}
                 links = {
                     "self": request.url

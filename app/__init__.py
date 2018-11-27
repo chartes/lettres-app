@@ -120,7 +120,7 @@ def create_app(config_name="dev"):
                 from db.fixtures.create_fake_data import create_fake_documents, create_fake_users
                 print("Generating fake data...", end=" ", flush=True)
                 create_fake_users(db, nb_users=10)
-                create_fake_documents(db, nb_docs=50, nb_correspondents=20)
+                create_fake_documents(db, nb_docs=100, nb_correspondents=50)
                 print("done !")
 
     return app
