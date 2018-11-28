@@ -57,8 +57,11 @@ class InstitutionFacade(JSONAPIAbstractFacade):
             resource = co
         except Exception as e:
             print(e)
-            errors = [{"status": 403, "title": "Error creating resource 'Institution' with data: %s" % (
-                str([id, attributes, related_resources]))}]
+            errors = {
+                "status": 403,
+                "title": "Error creating resource 'Institution' with data: %s" % str([id, attributes, related_resources]),
+                "detail": str(e)
+            }
             db.session.rollback()
         return resource, errors
 
@@ -71,13 +74,13 @@ class InstitutionFacade(JSONAPIAbstractFacade):
             "documents": {
                 "links": self._get_links(rel_name="documents"),
                 "resource_identifier_getter": self.get_document_resource_identifiers,
-                "resource_getter": self.get_document_resources
+                "resource_getter": self.get_document_resources,
+                "resource_attribute": "documents"
             },
         }
         self.resource = {
             **self.resource_identifier,
             "attributes": {
-                "id": self.obj.id,
                 "name": self.obj.name,
                 "ref": self.obj.ref
             },

@@ -33,23 +33,21 @@ class CorrespondentHasRoleFacade(JSONAPIAbstractFacade):
         errors = None
         try:
             _g = attributes.get
-            co = CorrespondentHasRole(
-                correspondent_id=_g("correspondent-id"),
-                document_id=_g("document-id"),
-                correspondent_role_id=_g("correspondent-role-id")
-            )
-
-            co.correspondent = related_resources.get("correspondent")
-            co.document = related_resources.get("document")
-            co.document = related_resources.get("role")
+            co = CorrespondentHasRole(correspondent_id=-1, document_id=-1, correspondent_role_id=-1)
+            co.correspondent = related_resources["correspondent"][0] if related_resources.get("correspondent") else None
+            co.correspondent_role = related_resources["correspondent-role"][0] if related_resources.get("correspondent-role") else None
+            co.document = related_resources["document"][0] if related_resources.get("document") else None
 
             db.session.add(co)
             db.session.commit()
             resource = co
         except Exception as e:
             print(e)
-            errors = [{"status": 403, "title": "Error creating resource 'CorrespondentHasRole' with data: %s" % (
-                str([id, attributes, related_resources]))}]
+            errors = {
+                "status": 403,
+                "title": "Error creating resource 'CorrespondentHasRole' with data: %s" % str([id, attributes, related_resources]),
+                "detail": str(e)
+            }
             db.session.rollback()
         return resource, errors
 
@@ -92,18 +90,18 @@ class CorrespondentHasRoleFacade(JSONAPIAbstractFacade):
         """
 
         self.relationships = {
-            "role": {
-                "links": self._get_links(rel_name="role"),
+            "correspondent-role": {
+                "links": self._get_links(rel_name="correspondent-role"),
                 "resource_identifier_getter": self.get_role_resource_identifier,
                 "resource_getter": self.get_role_resource
             },
             "document": {
-                "links": self._get_links(rel_name="role"),
+                "links": self._get_links(rel_name="document"),
                 "resource_identifier_getter": self.get_document_resource_identifier,
                 "resource_getter": self.get_document_resource
             },
             "correspondent": {
-                "links": self._get_links(rel_name="role"),
+                "links": self._get_links(rel_name="correspondent"),
                 "resource_identifier_getter": self.get_correspondent_resource_identifier,
                 "resource_getter": self.get_correspondent_resource
             },
@@ -111,7 +109,6 @@ class CorrespondentHasRoleFacade(JSONAPIAbstractFacade):
         self.resource = {
             **self.resource_identifier,
             "attributes": {
-                "id": self.obj.id
             },
             "meta": self.meta,
             "links": {

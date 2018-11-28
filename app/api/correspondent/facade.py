@@ -35,20 +35,31 @@ class CorrespondentFacade(JSONAPIAbstractFacade):
             _g = attributes.get
             co = Correspondent(
                 id=id,
-                firstname=_g("title"),
-                lastname=_g("subtitle"),
+                firstname=_g("firstname"),
+                lastname=_g("lastname"),
                 key=_g("key"),
                 ref=_g("ref")
             )
-            co.roles = related_resources.get("roles")
-            co.document = related_resources.get("documents")
+            roles = related_resources.get("roles-within-documents", [])
+            if len(roles) > 0 and id is None:
+                raise ValueError("Since you did not provide a resource id, you must POST or PATCH this relationship "
+                                 "after the creation of the resource.")
+            else:
+                for r in roles:
+                    if r.correspondent.id != id:
+                        raise ValueError("Invalid CorrespondentHasRole id value: %s " % r.correspondent.id)
+
+            co.correspondents_having_roles = roles
             db.session.add(co)
             db.session.commit()
             resource = co
         except Exception as e:
             print(e)
-            errors = [{"status": 403, "title": "Error creating resource 'Correspondent' with data: %s" % (
-                str([id, attributes, related_resources]))}]
+            errors = {
+                "status": 403,
+                "title": "Error creating resource 'Correspondent' with data: %s" % str([id, attributes, related_resources]),
+                "detail": str(e)
+            }
             db.session.rollback()
         return resource, errors
 
@@ -88,6 +99,7 @@ class CorrespondentFacade(JSONAPIAbstractFacade):
         self.relationships = {
             "roles-within-documents": {
                 "links": self._get_links(rel_name="roles-within-documents"),
+                #"resource_attribute": "correspondents_having_roles",
                 "resource_identifier_getter": self.get_roles_resource_identifiers,
                 "resource_getter": self.get_roles_resources
             },
@@ -100,7 +112,6 @@ class CorrespondentFacade(JSONAPIAbstractFacade):
         self.resource = {
             **self.resource_identifier,
             "attributes": {
-                "id": self.obj.id,
                 "firstname": self.obj.firstname,
                 "lastname": self.obj.lastname,
                 "key": self.obj.key,

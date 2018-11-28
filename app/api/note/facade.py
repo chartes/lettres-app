@@ -44,7 +44,11 @@ class NoteFacade(JSONAPIAbstractFacade):
             resource = co
         except Exception as e:
             print(e)
-            errors = [{"status": 403, "title": "Error creating resource 'Note' with data: %s" % (str([id, attributes, related_resources]))}]
+            errors = {
+                "status": 403,
+                "title": "Error creating resource 'Note' with data: %s" % str([id, attributes, related_resources]),
+                "detail": str(e)
+            }
             db.session.rollback()
         return resource, errors
 
@@ -75,7 +79,6 @@ class NoteFacade(JSONAPIAbstractFacade):
         self.resource = {
             **self.resource_identifier,
             "attributes": {
-                "id": self.obj.id,
                 "label": self.obj.label,
                 "content": self.obj.content,
             },

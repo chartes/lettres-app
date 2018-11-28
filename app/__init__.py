@@ -119,8 +119,8 @@ def create_app(config_name="dev"):
                 # === load some fake data
                 from db.fixtures.create_fake_data import create_fake_documents, create_fake_users
                 print("Generating fake data...", end=" ", flush=True)
-                create_fake_users(db, nb_users=10)
-                create_fake_documents(db, nb_docs=100, nb_correspondents=50)
+                create_fake_users(db, nb_users=5)
+                create_fake_documents(db, nb_docs=10, nb_correspondents=5)
                 print("done !")
 
     return app

@@ -153,13 +153,15 @@ class Image(SearchableMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     img_url = db.Column(db.String(45), nullable=False)
     manifest_url = db.Column(db.String(200))
-    document_id = db.Column(db.Integer, db.ForeignKey('document.id'), nullable=False, index=True)
+    document_id = db.Column(db.Integer, db.ForeignKey('document.id'), index=True)
 
 
 class Language(SearchableMixin, db.Model):
     """ Langue(s) de la lettre transcrite """
     __tablename__ = 'language'
-
+    __table_args__ = (
+        db.UniqueConstraint('code',  name='_language_code_uc'),
+    )
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     code = db.Column(db.String(3), nullable=False)
     label = db.Column(db.String(45))
@@ -204,9 +206,9 @@ class CorrespondentHasRole(SearchableMixin, db.Model):
         db.UniqueConstraint('correspondent_id', 'document_id', name='_correspondent_has_role_document_uc'),
     )
 
-    correspondent_id = db.Column(db.Integer, db.ForeignKey('correspondent.id', ondelete='CASCADE'))
-    document_id = db.Column(db.Integer, db.ForeignKey('document.id', ondelete='CASCADE'))
-    correspondent_role_id = db.Column(db.Integer, db.ForeignKey('correspondent_role.id', ondelete='CASCADE'))
+    correspondent_id = db.Column(db.Integer, db.ForeignKey('correspondent.id', ondelete='CASCADE'), nullable=False)
+    document_id = db.Column(db.Integer, db.ForeignKey('document.id', ondelete='CASCADE'), nullable=False)
+    correspondent_role_id = db.Column(db.Integer, db.ForeignKey('correspondent_role.id', ondelete='CASCADE'), nullable=False)
 
     correspondent = db.relationship("Correspondent", backref=db.backref("correspondents_having_roles"),
                                     cascade="all, delete-orphan", single_parent=True)

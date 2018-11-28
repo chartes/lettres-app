@@ -44,8 +44,11 @@ class WhitelistFacade(JSONAPIAbstractFacade):
             resource = co
         except Exception as e:
             print(e)
-            errors = [{"status": 403, "title": "Error creating resource 'Whitelist' with data: %s" % (
-                str([id, attributes, related_resources]))}]
+            errors = {
+                "status": 403,
+                "title": "Error creating resource 'Whitelist' with data: %s" % str([id, attributes, related_resources]),
+                "detail": str(e)
+            }
             db.session.rollback()
         return resource, errors
 
@@ -84,18 +87,19 @@ class WhitelistFacade(JSONAPIAbstractFacade):
             "users": {
                 "links": self._get_links(rel_name="users"),
                 "resource_identifier_getter": self.get_users_resource_identifiers,
-                "resource_getter": self.get_users_resources
+                "resource_getter": self.get_users_resources,
+                "resource_attribute": "users"
             },
             "documents": {
                 "links": self._get_links(rel_name="documents"),
                 "resource_identifier_getter": self.get_documents_resource_identifiers,
-                "resource_getter": self.get_documents_resources
+                "resource_getter": self.get_documents_resources,
+                "resource_attribute": "documents"
             },
         }
         self.resource = {
             **self.resource_identifier,
             "attributes": {
-                "id": self.obj.id,
                 "label": self.obj.label,
             },
             "meta": self.meta,

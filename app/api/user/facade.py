@@ -69,18 +69,19 @@ class UserFacade(JSONAPIAbstractFacade):
             "role": {
                 "links": self._get_links(rel_name="role"),
                 "resource_identifier_getter": self.get_role_resource_identifier,
-                "resource_getter": self.get_role_resource
+                "resource_getter": self.get_role_resource,
+                "resource_attribute": "role"
             },
             "owned-documents": {
                 "links": self._get_links(rel_name="owned-documents"),
                 "resource_identifier_getter": self.get_owned_document_resource_identifiers,
-                "resource_getter": self.get_owned_document_having_roles_resources
+                "resource_getter": self.get_owned_document_having_roles_resources,
+                "resource_attribute": "owned_documents"
             }
         }
         self.resource = {
             **self.resource_identifier,
             "attributes": {
-                "id": self.obj.id,
                 "username": self.obj.username,
                 "email": self.obj.email,
                 "confirmed-at": self.obj.email_confirmed_at,

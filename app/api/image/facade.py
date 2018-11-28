@@ -36,15 +36,18 @@ class ImageFacade(JSONAPIAbstractFacade):
             co = Image(
                 id=id,
                 img_url=_g("img-url"),
-                manifest_url=_g("manifest-url"),
-                document_id=_g("document-id"),
+                manifest_url=_g("manifest-url")
             )
             db.session.add(co)
             db.session.commit()
             resource = co
         except Exception as e:
             print(e)
-            errors = [{"status": 403, "title": "Error creating resource 'Image' with data: %s" % (str([id, attributes, related_resources]))}]
+            errors = {
+                "status": 403,
+                "title": "Error creating resource 'Image' with data: %s" % str([id, attributes, related_resources]),
+                "detail": str(e)
+            }
             db.session.rollback()
         return resource, errors
 
@@ -69,13 +72,13 @@ class ImageFacade(JSONAPIAbstractFacade):
             "document": {
                 "links": self._get_links(rel_name="document"),
                 "resource_identifier_getter": self.get_document_resource_identifier,
-                "resource_getter": self.get_document_resource
+                "resource_getter": self.get_document_resource,
+                "resource_attribute": "document"
             },
         }
         self.resource = {
             **self.resource_identifier,
             "attributes": {
-                "id": self.obj.id,
                 "img-url": self.obj.img_url,
                 "manifest-url": self.obj.manifest_url,
             },

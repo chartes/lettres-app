@@ -33,17 +33,33 @@ class DocumentFacade(JSONAPIAbstractFacade):
         errors = None
         try:
             _g = attributes.get
-            co = Document(
+            resource = Document(
                 id=id,
-                title=_g("title")
+                title=_g("title"),
+                owner_id=-1
             )
-            db.session.add(co)
+            #images = related_resources.get("images", [])
+            #for img in images:
+            #    if img.document_id is not None:
+            #        raise ValueError("The image '%s' is already linked to document '%s'" % (img.id, img.document_id))
+            resource.images = related_resources.get("images", [])
+            resource.notes = related_resources.get("notes", [])
+            resource.languages = related_resources.get("languages", [])
+            resource.institution = related_resources["institution"][0] if related_resources.get("institution") else None
+            resource.tradition = related_resources["tradition"][0] if related_resources.get("tradition") else None
+            resource.next_document = related_resources["next-document"][0] if related_resources.get("next-document") else None
+            resource.owner = related_resources["owner"][0] if related_resources.get("owner") else None
+            resource.whitelist = related_resources["whitelist"][0] if related_resources.get("whitelist") else None
+
+            db.session.add(resource)
             db.session.commit()
-            resource = co
         except Exception as e:
             print(e)
-            errors = [{"status": 403, "title": "Error creating resource 'Document' with data: %s" % (
-                str([id, attributes, related_resources]))}]
+            errors = {
+                "status": 403,
+                "title": "Error creating resource 'Document' with data: %s" % str([id, attributes, related_resources]),
+                "detail": str(e)
+            }
             db.session.rollback()
         return resource, errors
 
@@ -219,32 +235,38 @@ class DocumentFacade(JSONAPIAbstractFacade):
             "images": {
                 "links": self._get_links(rel_name="images"),
                 "resource_identifier_getter": self.get_image_resource_identifiers,
-                "resource_getter": self.get_image_resources
+                "resource_getter": self.get_image_resources,
+                "resource_attribute": "images"
             },
             "notes": {
                 "links": self._get_links(rel_name="notes"),
                 "resource_identifier_getter": self.get_note_resource_identifiers,
-                "resource_getter": self.get_note_resources
+                "resource_getter": self.get_note_resources,
+                "resource_attribute": "notes"
             },
             "languages": {
                 "links": self._get_links(rel_name="languages"),
                 "resource_identifier_getter": self.get_language_resource_identifiers,
-                "resource_getter": self.get_language_resources
+                "resource_getter": self.get_language_resources,
+                "resource_attribute": "languages"
             },
             "institution": {
                 "links": self._get_links(rel_name="institution"),
                 "resource_identifier_getter": self.get_institution_resource_identifier,
-                "resource_getter": self.get_institution_resource
+                "resource_getter": self.get_institution_resource,
+                "resource_attribute": "institution"
             },
             "tradition": {
                 "links": self._get_links(rel_name="tradition"),
                 "resource_identifier_getter": self.get_tradition_resource_identifier,
-                "resource_getter": self.get_tradition_resource
+                "resource_getter": self.get_tradition_resource,
+                "resource_attribute": "tradition"
             },
             "correspondents-having-roles": {
                 "links": self._get_links(rel_name="correspondents-having-roles"),
                 "resource_identifier_getter": self.get_correspondents_having_roles_resource_identifiers,
-                "resource_getter": self.get_correspondents_having_roles_resources
+                "resource_getter": self.get_correspondents_having_roles_resources,
+                "resource_attribute": "correspondents_having_roles"
             },
             "roles": {
                 "links": self._get_links(rel_name="roles"),
@@ -264,15 +286,17 @@ class DocumentFacade(JSONAPIAbstractFacade):
             "next-document": {
                 "links": self._get_links(rel_name="next-document"),
                 "resource_identifier_getter": self.get_next_document_resource_identifier,
-                "resource_getter": self.get_next_document_resource
+                "resource_getter": self.get_next_document_resource,
+                "resource_attribute": "next_document"
             },
             "owner": {
                 "links": self._get_links(rel_name="owner"),
                 "resource_identifier_getter": self.get_owner_resource_identifier,
-                "resource_getter": self.get_owner_resource
+                "resource_getter": self.get_owner_resource,
+                "resource_attribute": "owner"
             },
             "whitelist": {
-                "links": self._get_links(rel_name="owner"),
+                "links": self._get_links(rel_name="whitelist"),
                 "resource_identifier_getter": self.get_whitelist_resource_identifier,
                 "resource_getter": self.get_whitelist_resource
             },
@@ -280,7 +304,6 @@ class DocumentFacade(JSONAPIAbstractFacade):
         self.resource = {
             **self.resource_identifier,
             "attributes": {
-                "id": self.obj.id,
                 "title": self.obj.title,
                 "witness-label": self.obj.witness_label,
                 "classification-mark": self.obj.classification_mark,

@@ -61,7 +61,6 @@ class UserRoleFacade(JSONAPIAbstractFacade):
         self.resource = {
             **self.resource_identifier,
             "attributes": {
-                "id": self.obj.id,
                 "label": self.obj.label,
                 "description": self.obj.description,
             },
