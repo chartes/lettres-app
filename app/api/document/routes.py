@@ -8,6 +8,7 @@ def register_document_api_urls(app):
     registrar.register_get_routes(Document, DocumentFacade)
     registrar.register_post_routes(Document, DocumentFacade)
     registrar.register_patch_routes(Document, DocumentFacade)
+    registrar.register_delete_routes(Document, DocumentFacade)
 
     for rel in ('images', 'notes', 'languages', 'institution', 'tradition',
                 'correspondents-having-roles', 'roles', 'correspondents',

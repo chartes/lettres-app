@@ -8,6 +8,7 @@ def register_whitelist_api_urls(app):
     registrar.register_get_routes(Whitelist, WhitelistFacade)
     registrar.register_post_routes(Whitelist, WhitelistFacade)
     registrar.register_patch_routes(Whitelist, WhitelistFacade)
+    registrar.register_delete_routes(Whitelist, WhitelistFacade)
 
     registrar.register_relationship_get_route(WhitelistFacade, 'documents')
     registrar.register_relationship_post_route(WhitelistFacade, 'documents')

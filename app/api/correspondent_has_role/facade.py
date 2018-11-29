@@ -1,6 +1,6 @@
 
 from app.api.abstract_facade import JSONAPIAbstractFacade
-from app.models import  CorrespondentHasRole
+from app.models import CorrespondentHasRole
 
 
 class CorrespondentHasRoleFacade(JSONAPIAbstractFacade):

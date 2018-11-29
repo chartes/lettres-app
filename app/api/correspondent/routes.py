@@ -7,6 +7,7 @@ def register_correspondent_api_urls(app):
     registrar.register_get_routes(Correspondent, CorrespondentFacade)
     registrar.register_post_routes(Correspondent, CorrespondentFacade)
     registrar.register_patch_routes(Correspondent, CorrespondentFacade)
+    registrar.register_delete_routes(Correspondent, CorrespondentFacade)
 
     registrar.register_relationship_get_route(CorrespondentFacade, 'documents')
     registrar.register_relationship_post_route(CorrespondentFacade, 'documents')

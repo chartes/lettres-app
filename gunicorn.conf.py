@@ -1,8 +1,8 @@
 import multiprocessing
 
 bind = "localhost:5004"
-workers = 1
-worker_class = 'eventlet'
+workers = 5
+#worker_class = 'eventlet'
 timeout = 1000000000
 reload = True
 #accesslog='/var/log/flask/adele-app-access.log'

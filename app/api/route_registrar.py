@@ -92,12 +92,12 @@ class JSONAPIRouteRegistrar(object):
         else:
             return url
 
-    def get_obj_from_resource_identifier(self, resource_identifer, relationship_name):
+    def get_obj_from_resource_identifier(self, resource_identifer):
         related_model = self.models.get(resource_identifer["type"].replace("-", "_"), None)
         if related_model is None:
             return None, {"status": 403,
-                          "title": "Resource %s from the relationship '%s' has a wrong 'type' value" % (
-                              resource_identifer, relationship_name)
+                          "title": "Resource '%s' has a wrong 'type' value" % (
+                              resource_identifer)
                           }
         return related_model.query.filter(related_model.id == resource_identifer["id"]).first(), None
 
@@ -627,7 +627,7 @@ class JSONAPIRouteRegistrar(object):
                                 status=403
                             )
                         else:
-                            related_resource, errors = self.get_obj_from_resource_identifier(rel_item, rel_name)
+                            related_resource, errors = self.get_obj_from_resource_identifier(rel_item)
                             if related_resource is None:
                                 e = {
                                         "status": 404,
@@ -699,7 +699,7 @@ class JSONAPIRouteRegistrar(object):
 
                 related_resources = {rel_name: []}
                 for rdi in request_data:
-                    related_resource, errors = self.get_obj_from_resource_identifier(rdi, rel_name)
+                    related_resource, errors = self.get_obj_from_resource_identifier(rdi)
                     if errors:
                         return JSONAPIResponseFactory.make_errors_response(errors, status=403)
 
@@ -837,7 +837,7 @@ class JSONAPIRouteRegistrar(object):
                                 status=403
                             )
                         else:
-                            related_resource, errors = self.get_obj_from_resource_identifier(rel_item, rel_name)
+                            related_resource, errors = self.get_obj_from_resource_identifier(rel_item)
                             if related_resource is None:
                                 e = {
                                         "status": 404,
@@ -912,7 +912,7 @@ class JSONAPIRouteRegistrar(object):
                     if rdi is None:
                         related_resources[rel_name].append(None)
                     else:
-                        related_resource, errors = self.get_obj_from_resource_identifier(rdi, rel_name)
+                        related_resource, errors = self.get_obj_from_resource_identifier(rdi)
                         if errors:
                             return JSONAPIResponseFactory.make_errors_response(errors, status=403)
 
@@ -956,3 +956,43 @@ class JSONAPIRouteRegistrar(object):
             view_func=resource_relationship_endpoint,
             methods=["PATCH"]
         )
+
+    def register_delete_routes(self, model, facade_class):
+        """
+
+        :param model:
+        :param facade_class:
+        :return:
+        """
+
+        single_obj_rule = '/api/{api_version}/{type_plural}/<id>'.format(
+            api_version=self.api_version,
+            type_plural=facade_class.TYPE_PLURAL
+        )
+
+        def single_obj_endpoint(id):
+            rdi = facade_class.make_resource_identifier(id, facade_class.TYPE)
+            obj, errors = self.get_obj_from_resource_identifier(rdi)
+
+            if errors is not None:
+                return JSONAPIResponseFactory.make_errors_response({
+                    "status": 404,
+                    "title": "This resource does not exist"},
+                    status=404
+                )
+
+            #======================
+            # Delete the resource
+            # =====================
+            errors = facade_class.delete_resource(obj)
+            if errors is not None:
+                return JSONAPIResponseFactory.make_errors_response(errors, status=404)
+
+            return JSONAPIResponseFactory.make_data_response(None, None, None, None, status=204)
+
+        single_obj_endpoint.__name__ = "delete_%s_%s" % (
+            facade_class.TYPE_PLURAL.replace("-", "_"), single_obj_endpoint.__name__
+        )
+        # register the rule
+        api_bp.add_url_rule(single_obj_rule, endpoint=single_obj_endpoint.__name__, view_func=single_obj_endpoint,
+                            methods=["DELETE"])

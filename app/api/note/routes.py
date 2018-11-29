@@ -8,6 +8,7 @@ def register_note_api_urls(app):
     registrar.register_get_routes(Note, NoteFacade)
     registrar.register_post_routes(Note, NoteFacade)
     registrar.register_patch_routes(Note, NoteFacade)
+    registrar.register_delete_routes(Note, NoteFacade)
 
     registrar.register_relationship_get_route(NoteFacade, 'document')
 

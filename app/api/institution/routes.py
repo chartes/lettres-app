@@ -8,6 +8,7 @@ def register_institution_role_api_urls(app):
     registrar.register_get_routes(Institution, InstitutionFacade)
     registrar.register_post_routes(Institution, InstitutionFacade)
     registrar.register_patch_routes(Institution, InstitutionFacade)
+    registrar.register_delete_routes(Institution, InstitutionFacade)
 
     registrar.register_relationship_get_route(InstitutionFacade, 'documents')
     registrar.register_relationship_post_route(InstitutionFacade, 'documents')

@@ -176,8 +176,19 @@ class JSONAPIAbstractFacade(object):
         return resource, errors
 
     @staticmethod
-    def delete_resource():
-        raise NotImplementedError
+    def delete_resource(obj):
+        errors = None
+        try:
+            print("DELETING RESOURCE:", obj)
+            db.session.delete(obj)
+            db.session.commit()
+        except Exception as e:
+            errors = {
+                "status": 404,
+                "title": "This resource does not exist"
+            }
+            db.session.rollback()
+        return errors
 
     def set_relationships_mode(self, w_rel_links, w_rel_data):
         self.with_relationships_links = w_rel_links
