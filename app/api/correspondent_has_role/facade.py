@@ -1,6 +1,6 @@
-from app import db
+
 from app.api.abstract_facade import JSONAPIAbstractFacade
-from app.models import Correspondent, CorrespondentHasRole
+from app.models import  CorrespondentHasRole
 
 
 class CorrespondentHasRoleFacade(JSONAPIAbstractFacade):
@@ -25,31 +25,6 @@ class CorrespondentHasRoleFacade(JSONAPIAbstractFacade):
             kwargs = {}
             errors = []
         return e, kwargs, errors
-
-    # noinspection PyArgumentList
-    @staticmethod
-    def create_resource(id, attributes, related_resources):
-        resource = None
-        errors = None
-        try:
-            _g = attributes.get
-            co = CorrespondentHasRole(correspondent_id=-1, document_id=-1, correspondent_role_id=-1)
-            co.correspondent = related_resources["correspondent"][0] if related_resources.get("correspondent") else None
-            co.correspondent_role = related_resources["correspondent-role"][0] if related_resources.get("correspondent-role") else None
-            co.document = related_resources["document"][0] if related_resources.get("document") else None
-
-            db.session.add(co)
-            db.session.commit()
-            resource = co
-        except Exception as e:
-            print(e)
-            errors = {
-                "status": 403,
-                "title": "Error creating resource 'CorrespondentHasRole' with data: %s" % str([id, attributes, related_resources]),
-                "detail": str(e)
-            }
-            db.session.rollback()
-        return resource, errors
 
     def get_role_resource_identifier(self):
         from app.api.correspondent_role.facade import CorrespondentRoleFacade

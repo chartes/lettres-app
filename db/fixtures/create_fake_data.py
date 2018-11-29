@@ -3,13 +3,14 @@ import sqlalchemy
 from faker import Faker
 from sqlalchemy.exc import IntegrityError
 
-fake = Faker()
 
-
-def create_fake_users(db, nb_users=50):
+def create_fake_users(db, nb_users=50, fake=None):
     from app.models import User
     from app.models import UserRole
     from app.models import Whitelist
+
+    if fake is None:
+        fake = Faker()
 
     wl1 = Whitelist(label="Whitelist1")
     admin = UserRole(label="admin")
@@ -40,7 +41,7 @@ def create_fake_users(db, nb_users=50):
         db.session.rollback()
 
 
-def create_fake_documents(db, nb_docs=1000, nb_correspondents=None):
+def create_fake_documents(db, nb_docs=1000, nb_correspondents=None, fake=None):
     from app.models import Document
     from app.models import Institution
     from app.models import Tradition
@@ -51,6 +52,9 @@ def create_fake_documents(db, nb_docs=1000, nb_correspondents=None):
     from app.models import Language
     from app.models import CorrespondentRole
     from app.models import Correspondent
+
+    if fake is None:
+        fake = Faker()
 
     users = User.query.all()
     whitelists = Whitelist.query.all()

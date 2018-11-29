@@ -64,20 +64,109 @@ class JSONAPIAbstractFacade(object):
         raise NotImplementedError
 
     @staticmethod
-    def create_resource(id, attributes, related_resources):
-        resource = None
+    def post_resource(model, obj_id, attributes, related_resources):
+        """
+        Instantiate the obj but do not commit it
+        :param model:
+        :param obj_id:
+        :param attributes:
+        :param related_resources:
+        :return:
+        """
+        print("CREATING RESOURCE:", obj_id, attributes, related_resources)
+
+        for att in attributes.keys():
+            attributes[att.replace("-", "_")] = attributes.pop(att)
+
+        attributes["id"] = obj_id
+        print("  setting attributes", attributes)
+        resource = model(**attributes)
+
+        # set related resources
+        for rel_name, rel_data in related_resources.items():
+            rel_name = rel_name.replace("-", "_")
+            print("  setting", rel_name, rel_data)
+            if hasattr(resource, rel_name):
+                try:
+                    setattr(resource, rel_name, rel_data)
+                except Exception:
+                    setattr(resource, rel_name, rel_data[0])
+
+        return resource
+
+    @staticmethod
+    def create_resource(model, obj_id, attributes, related_resources):
         errors = None
-        print("creating resource '%s' from: " % id, attributes, related_resources)
-        #return resource, errors
-        raise NotImplementedError
+        resource = None
+        try:
+            resource = JSONAPIAbstractFacade.post_resource(model, obj_id, attributes, related_resources)
+            db.session.add(resource)
+            db.session.commit()
+        except Exception as e:
+            print(e)
+            errors = {
+                "status": 403,
+                "title": "Error creating resource with data: %s" % str([attributes, related_resources]),
+                "detail": str(e)
+            }
+            db.session.rollback()
+        return resource, errors
 
+    # noinspection PyArgumentList
+    @staticmethod
+    def patch_resource(obj, obj_type, attributes, related_resources):
+        """
+        Update the obj but do not commit it
+        :param obj:
+        :param obj_type:
+        :param attributes:
+        :param related_resources:
+        :return:
+        """
+        print("UPDATING RESOURCE:", obj, obj_type, attributes, related_resources)
+        # update attributes
+        for att, att_value in attributes.items():
+            att_name = att.replace("-", "_")
+            print("  setting", att, att_value)
+            if hasattr(obj, att_name):
+                setattr(obj, att_name, att_value)
+            else:
+                raise AttributeError("Attribute %s does not exist" % att_name)
+
+        # update related resources
+        for rel_name, rel_data in related_resources.items():
+            rel_name = rel_name.replace("-", "_")
+            print("  setting", rel_name, rel_data)
+            if hasattr(obj, rel_name):
+                try:
+                    setattr(obj, rel_name, rel_data)
+                except Exception:
+                    setattr(obj, rel_name, rel_data[0])
+            else:
+                raise AttributeError("Relationship %s does not exist" % rel_name)
+        return obj
 
     @staticmethod
-    def update_resource(*args, **kwargs):
-        raise NotImplementedError
+    def update_resource(obj, obj_type, attributes, related_resources):
+        errors = None
+        resource = None
+        try:
+            resource = JSONAPIAbstractFacade.patch_resource(obj, obj_type, attributes, related_resources)
+            db.session.add(resource)
+            db.session.commit()
+        except Exception as e:
+            print(e)
+            errors = {
+                "status": 403,
+                "title": "Error updating resource '%s' with data: %s" % (
+                    obj_type, str([id, attributes, related_resources])),
+                "detail": str(e)
+            }
+            db.session.rollback()
+        return resource, errors
 
     @staticmethod
-    def delete_resource(*args, **kwargs):
+    def delete_resource():
         raise NotImplementedError
 
     def set_relationships_mode(self, w_rel_links, w_rel_data):

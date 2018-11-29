@@ -26,42 +26,11 @@ class DocumentFacade(JSONAPIAbstractFacade):
             errors = []
         return e, kwargs, errors
 
-    # noinspection PyArgumentList
     @staticmethod
-    def create_resource(id, attributes, related_resources):
-        resource = None
-        errors = None
-        try:
-            _g = attributes.get
-            resource = Document(
-                id=id,
-                title=_g("title"),
-                owner_id=-1
-            )
-            #images = related_resources.get("images", [])
-            #for img in images:
-            #    if img.document_id is not None:
-            #        raise ValueError("The image '%s' is already linked to document '%s'" % (img.id, img.document_id))
-            resource.images = related_resources.get("images", [])
-            resource.notes = related_resources.get("notes", [])
-            resource.languages = related_resources.get("languages", [])
-            resource.institution = related_resources["institution"][0] if related_resources.get("institution") else None
-            resource.tradition = related_resources["tradition"][0] if related_resources.get("tradition") else None
-            resource.next_document = related_resources["next-document"][0] if related_resources.get("next-document") else None
-            resource.owner = related_resources["owner"][0] if related_resources.get("owner") else None
-            resource.whitelist = related_resources["whitelist"][0] if related_resources.get("whitelist") else None
-
-            db.session.add(resource)
-            db.session.commit()
-        except Exception as e:
-            print(e)
-            errors = {
-                "status": 403,
-                "title": "Error creating resource 'Document' with data: %s" % str([id, attributes, related_resources]),
-                "detail": str(e)
-            }
-            db.session.rollback()
-        return resource, errors
+    def create_resource(model, obj_id, attributes, related_resources):
+        if "last-update" in attributes:
+            attributes["date_update"] = attributes.pop("last-update")
+        return JSONAPIAbstractFacade.create_resource(model, obj_id, attributes, related_resources)
 
     def get_image_resource_identifiers(self):
         from app.api.image.facade import ImageFacade

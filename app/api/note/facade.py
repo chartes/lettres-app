@@ -26,32 +26,6 @@ class NoteFacade(JSONAPIAbstractFacade):
             errors = []
         return e, kwargs, errors
 
-    # noinspection PyArgumentList
-    @staticmethod
-    def create_resource(id, attributes, related_resources):
-        resource = None
-        errors = None
-        try:
-            _g = attributes.get
-            co = Note(
-                id=id,
-                content=_g("content"),
-                label=_g("label"),
-                document_id=_g("document-id"),
-            )
-            db.session.add(co)
-            db.session.commit()
-            resource = co
-        except Exception as e:
-            print(e)
-            errors = {
-                "status": 403,
-                "title": "Error creating resource 'Note' with data: %s" % str([id, attributes, related_resources]),
-                "detail": str(e)
-            }
-            db.session.rollback()
-        return resource, errors
-
     def get_document_resource_identifier(self):
         from app.api.document.facade import DocumentFacade
         return None if self.obj.document is None else DocumentFacade.make_resource_identifier(

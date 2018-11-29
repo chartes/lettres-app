@@ -38,6 +38,10 @@ class Config(object):
     API_VERSION = parse_var_env('API_VERSION')
     API_URL_PREFIX = parse_var_env('API_URL_PREFIX')
 
+    @staticmethod
+    def init_app(app):
+        pass
+
 
 class DevelopmentConfig(Config):
 
@@ -57,9 +61,9 @@ class DevelopmentConfig(Config):
 class TestConfig(Config):
     ENV = 'testing'
 
-    DB_DROP_AND_CREATE_ALL = True
-    GENERATE_FAKE_DATA = False
-
+    @staticmethod
+    def init_app(app):
+        print('THIS APP IS IN TEST MODE. YOU SHOULD NOT SEE THIS IN PRODUCTION.')
 
 config = {
     "dev": DevelopmentConfig,

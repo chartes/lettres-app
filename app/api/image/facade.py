@@ -26,31 +26,6 @@ class ImageFacade(JSONAPIAbstractFacade):
             errors = []
         return e, kwargs, errors
 
-    # noinspection PyArgumentList
-    @staticmethod
-    def create_resource(id, attributes, related_resources):
-        resource = None
-        errors = None
-        try:
-            _g = attributes.get
-            co = Image(
-                id=id,
-                img_url=_g("img-url"),
-                manifest_url=_g("manifest-url")
-            )
-            db.session.add(co)
-            db.session.commit()
-            resource = co
-        except Exception as e:
-            print(e)
-            errors = {
-                "status": 403,
-                "title": "Error creating resource 'Image' with data: %s" % str([id, attributes, related_resources]),
-                "detail": str(e)
-            }
-            db.session.rollback()
-        return resource, errors
-
     def get_document_resource_identifier(self):
         from app.api.document.facade import DocumentFacade
         return None if self.obj.document is None else DocumentFacade.make_resource_identifier(

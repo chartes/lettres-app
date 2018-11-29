@@ -55,7 +55,7 @@ class UserFacade(JSONAPIAbstractFacade):
         ]
 
     @staticmethod
-    def create_resource(id, attributes, related_resources):
+    def create_resource(model, obj_id, attributes, related_resources):
         resource = None
         errors = [{"status": 403, "title": "You cannot create a 'User' from the API"}]
         return resource, errors

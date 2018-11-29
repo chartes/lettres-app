@@ -117,10 +117,13 @@ def create_app(config_name="dev"):
 
             if app.config["GENERATE_FAKE_DATA"]:
                 # === load some fake data
+                from faker import Faker
+                fake = Faker()
+                fake.seed(12345)
                 from db.fixtures.create_fake_data import create_fake_documents, create_fake_users
                 print("Generating fake data...", end=" ", flush=True)
-                create_fake_users(db, nb_users=5)
-                create_fake_documents(db, nb_docs=10, nb_correspondents=5)
+                create_fake_users(db, nb_users=5, fake=fake)
+                create_fake_documents(db, nb_docs=10, nb_correspondents=5, fake=fake)
                 print("done !")
 
     return app

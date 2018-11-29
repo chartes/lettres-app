@@ -1,4 +1,4 @@
-from app import db
+
 from app.api.abstract_facade import JSONAPIAbstractFacade
 from app.models import Correspondent
 
@@ -25,43 +25,6 @@ class CorrespondentFacade(JSONAPIAbstractFacade):
             kwargs = {}
             errors = []
         return e, kwargs, errors
-
-    # noinspection PyArgumentList
-    @staticmethod
-    def create_resource(id, attributes, related_resources):
-        resource = None
-        errors = None
-        try:
-            _g = attributes.get
-            co = Correspondent(
-                id=id,
-                firstname=_g("firstname"),
-                lastname=_g("lastname"),
-                key=_g("key"),
-                ref=_g("ref")
-            )
-            roles = related_resources.get("roles-within-documents", [])
-            if len(roles) > 0 and id is None:
-                raise ValueError("Since you did not provide a resource id, you must POST or PATCH this relationship "
-                                 "after the creation of the resource.")
-            else:
-                for r in roles:
-                    if r.correspondent.id != id:
-                        raise ValueError("Invalid CorrespondentHasRole id value: %s " % r.correspondent.id)
-
-            co.correspondents_having_roles = roles
-            db.session.add(co)
-            db.session.commit()
-            resource = co
-        except Exception as e:
-            print(e)
-            errors = {
-                "status": 403,
-                "title": "Error creating resource 'Correspondent' with data: %s" % str([id, attributes, related_resources]),
-                "detail": str(e)
-            }
-            db.session.rollback()
-        return resource, errors
 
     def get_document_resource_identifiers(self):
         from app.api.document.facade import DocumentFacade
@@ -99,7 +62,6 @@ class CorrespondentFacade(JSONAPIAbstractFacade):
         self.relationships = {
             "roles-within-documents": {
                 "links": self._get_links(rel_name="roles-within-documents"),
-                #"resource_attribute": "correspondents_having_roles",
                 "resource_identifier_getter": self.get_roles_resource_identifiers,
                 "resource_getter": self.get_roles_resources
             },

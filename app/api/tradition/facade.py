@@ -27,31 +27,6 @@ class TraditionFacade(JSONAPIAbstractFacade):
             errors = []
         return e, kwargs, errors
 
-    # noinspection PyArgumentList
-    @staticmethod
-    def create_resource(id, attributes, related_resources):
-        resource = None
-        errors = None
-        try:
-            _g = attributes.get
-            co = Tradition(
-                id=id,
-                label=_g("label"),
-                description=_g("description"),
-            )
-            db.session.add(co)
-            db.session.commit()
-            resource = co
-        except Exception as e:
-            print(e)
-            errors = {
-                "status": 403,
-                "title": "Error creating resource 'Tradition' with data: %s" % str([id, attributes, related_resources]),
-                "detail": str(e)
-            }
-            db.session.rollback()
-        return resource, errors
-
     def get_document_resource_identifiers(self):
         from app.api.document.facade import DocumentFacade
         return [] if self.obj.documents is None else [

@@ -40,31 +40,6 @@ class InstitutionFacade(JSONAPIAbstractFacade):
             for c in self.obj.documents
         ]
 
-    # noinspection PyArgumentList
-    @staticmethod
-    def create_resource(id, attributes, related_resources):
-        resource = None
-        errors = None
-        try:
-            _g = attributes.get
-            co = Institution(
-                id=id,
-                name=_g("name"),
-                ref=_g("ref"),
-            )
-            db.session.add(co)
-            db.session.commit()
-            resource = co
-        except Exception as e:
-            print(e)
-            errors = {
-                "status": 403,
-                "title": "Error creating resource 'Institution' with data: %s" % str([id, attributes, related_resources]),
-                "detail": str(e)
-            }
-            db.session.rollback()
-        return resource, errors
-
     def __init__(self, *args, **kwargs):
         super(InstitutionFacade, self).__init__(*args, **kwargs)
         """Make a JSONAPI resource object describing what is an institution

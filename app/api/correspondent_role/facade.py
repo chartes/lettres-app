@@ -1,6 +1,6 @@
-from app import db
+
 from app.api.abstract_facade import JSONAPIAbstractFacade
-from app.models import Correspondent, CorrespondentRole
+from app.models import CorrespondentRole
 
 
 class CorrespondentRoleFacade(JSONAPIAbstractFacade):
@@ -25,28 +25,6 @@ class CorrespondentRoleFacade(JSONAPIAbstractFacade):
             kwargs = {}
             errors = []
         return e, kwargs, errors
-
-    # noinspection PyArgumentList
-    @staticmethod
-    def create_resource(id, attributes, related_resources):
-        resource = None
-        errors = None
-        try:
-            _g = attributes.get
-            co = Correspondent(
-                id=id,
-                label=_g("label"),
-                description=_g("description"),
-            )
-            db.session.add(co)
-            db.session.commit()
-            resource = co
-        except Exception as e:
-            print(e)
-            errors = [{"status": 403, "title": "Error creating resource 'CorrespondentRole' with data: %s" % (str([id, attributes, related_resources]))}]
-            db.session.rollback()
-        return resource, errors
-
 
     def __init__(self, *args, **kwargs):
         super(CorrespondentRoleFacade, self).__init__(*args, **kwargs)
