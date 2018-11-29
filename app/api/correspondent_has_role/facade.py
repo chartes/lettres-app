@@ -58,6 +58,21 @@ class CorrespondentHasRoleFacade(JSONAPIAbstractFacade):
         return None if self.obj.document is None else DocumentFacade(self.url_prefix, self.obj.document,
                                                                           self.with_relationships_links,
                                                                           self.with_relationships_data).resource
+    @property
+    def resource(self):
+        resource = {
+            **self.resource_identifier,
+            "attributes": {
+            },
+            "meta": self.meta,
+            "links": {
+                "self": self.self_link
+            }
+        }
+
+        if self.with_relationships_links:
+            resource["relationships"] = self.get_exposed_relationships()
+        return resource
 
     def __init__(self, *args, **kwargs):
         super(CorrespondentHasRoleFacade, self).__init__(*args, **kwargs)
@@ -81,16 +96,4 @@ class CorrespondentHasRoleFacade(JSONAPIAbstractFacade):
                 "resource_getter": self.get_correspondent_resource
             },
         }
-        self.resource = {
-            **self.resource_identifier,
-            "attributes": {
-            },
-            "meta": self.meta,
-            "links": {
-                "self": self.self_link
-            }
-        }
 
-        print(self.with_relationships_data)
-        if self.with_relationships_links:
-            self.resource["relationships"] = self.get_exposed_relationships()

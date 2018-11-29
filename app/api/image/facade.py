@@ -38,6 +38,23 @@ class ImageFacade(JSONAPIAbstractFacade):
             self.url_prefix, self.obj.document, self.with_relationships_links, self.with_relationships_data
         ).resource
 
+    @property
+    def resource(self):
+        resource = {
+            **self.resource_identifier,
+            "attributes": {
+                "img-url": self.obj.img_url,
+                "manifest-url": self.obj.manifest_url,
+            },
+            "meta": self.meta,
+            "links": {
+                "self": self.self_link
+            }
+        }
+        if self.with_relationships_links:
+            resource["relationships"] = self.get_exposed_relationships()
+        return resource
+
     def __init__(self, *args, **kwargs):
         super(ImageFacade, self).__init__(*args, **kwargs)
         """Make a JSONAPI resource object describing what is an image
@@ -51,17 +68,3 @@ class ImageFacade(JSONAPIAbstractFacade):
                 "resource_attribute": "document"
             },
         }
-        self.resource = {
-            **self.resource_identifier,
-            "attributes": {
-                "img-url": self.obj.img_url,
-                "manifest-url": self.obj.manifest_url,
-            },
-            "meta": self.meta,
-            "links": {
-                "self": self.self_link
-            }
-        }
-
-        if self.with_relationships_links:
-            self.resource["relationships"] = self.get_exposed_relationships()

@@ -38,19 +38,9 @@ class NoteFacade(JSONAPIAbstractFacade):
             self.url_prefix, self.obj.document, self.with_relationships_links, self.with_relationships_data
         ).resource
 
-    def __init__(self, *args, **kwargs):
-        super(NoteFacade, self).__init__(*args, **kwargs)
-        """Make a JSONAPI resource object describing what is an note
-        """
-
-        self.relationships = {
-            "document": {
-                "links": self._get_links(rel_name="document"),
-                "resource_identifier_getter": self.get_document_resource_identifier,
-                "resource_getter": self.get_document_resource
-            },
-        }
-        self.resource = {
+    @property
+    def resource(self):
+        resource = {
             **self.resource_identifier,
             "attributes": {
                 "label": self.obj.label,
@@ -63,4 +53,19 @@ class NoteFacade(JSONAPIAbstractFacade):
         }
 
         if self.with_relationships_links:
-            self.resource["relationships"] = self.get_exposed_relationships()
+            resource["relationships"] = self.get_exposed_relationships()
+
+        return resource
+
+    def __init__(self, *args, **kwargs):
+        super(NoteFacade, self).__init__(*args, **kwargs)
+        """Make a JSONAPI resource object describing what is an note
+        """
+
+        self.relationships = {
+            "document": {
+                "links": self._get_links(rel_name="document"),
+                "resource_identifier_getter": self.get_document_resource_identifier,
+                "resource_getter": self.get_document_resource
+            },
+        }

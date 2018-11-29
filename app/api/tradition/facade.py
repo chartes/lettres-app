@@ -41,6 +41,25 @@ class TraditionFacade(JSONAPIAbstractFacade):
             for c in self.obj.documents
         ]
 
+    @property
+    def resource(self):
+        resource = {
+            **self.resource_identifier,
+            "attributes": {
+                "label": self.obj.label,
+                "description": self.obj.description
+            },
+            "meta": self.meta,
+            "links": {
+                "self": self.self_link
+            }
+        }
+
+        if self.with_relationships_links:
+            resource["relationships"] = self.get_exposed_relationships()
+
+        return resource
+
     def __init__(self, *args, **kwargs):
         super(TraditionFacade, self).__init__(*args, **kwargs)
         """Make a JSONAPI resource object describing what is a tradition
@@ -55,17 +74,3 @@ class TraditionFacade(JSONAPIAbstractFacade):
                 "resource_attribute": "documents"
             },
         }
-        self.resource = {
-            **self.resource_identifier,
-            "attributes": {
-                "label": self.obj.label,
-                "description": self.obj.description
-            },
-            "meta": self.meta,
-            "links": {
-                "self": self.self_link
-            }
-        }
-
-        if self.with_relationships_links:
-            self.resource["relationships"] = self.get_exposed_relationships()

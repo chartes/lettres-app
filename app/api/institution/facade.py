@@ -40,6 +40,24 @@ class InstitutionFacade(JSONAPIAbstractFacade):
             for c in self.obj.documents
         ]
 
+    @property
+    def resource(self):
+        resource = {
+            **self.resource_identifier,
+            "attributes": {
+                "name": self.obj.name,
+                "ref": self.obj.ref
+            },
+            "meta": self.meta,
+            "links": {
+                "self": self.self_link
+            }
+        }
+
+        if self.with_relationships_links:
+            resource["relationships"] = self.get_exposed_relationships()
+        return resource
+
     def __init__(self, *args, **kwargs):
         super(InstitutionFacade, self).__init__(*args, **kwargs)
         """Make a JSONAPI resource object describing what is an institution
@@ -53,17 +71,3 @@ class InstitutionFacade(JSONAPIAbstractFacade):
                 "resource_attribute": "documents"
             },
         }
-        self.resource = {
-            **self.resource_identifier,
-            "attributes": {
-                "name": self.obj.name,
-                "ref": self.obj.ref
-            },
-            "meta": self.meta,
-            "links": {
-                "self": self.self_link
-            }
-        }
-
-        if self.with_relationships_links:
-            self.resource["relationships"] = self.get_exposed_relationships()

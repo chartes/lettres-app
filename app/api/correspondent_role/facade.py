@@ -26,15 +26,9 @@ class CorrespondentRoleFacade(JSONAPIAbstractFacade):
             errors = []
         return e, kwargs, errors
 
-    def __init__(self, *args, **kwargs):
-        super(CorrespondentRoleFacade, self).__init__(*args, **kwargs)
-        """Make a JSONAPI resource object describing what is a correspondent role
-        """
-
-        self.relationships = {
-
-        }
-        self.resource = {
+    @property
+    def resource(self):
+        resource = {
             **self.resource_identifier,
             "attributes": {
                 "id": self.obj.id,
@@ -46,6 +40,15 @@ class CorrespondentRoleFacade(JSONAPIAbstractFacade):
                 "self": self.self_link
             }
         }
-
         if self.with_relationships_links:
-            self.resource["relationships"] = self.get_exposed_relationships()
+            resource["relationships"] = self.get_exposed_relationships()
+        return resource
+
+    def __init__(self, *args, **kwargs):
+        super(CorrespondentRoleFacade, self).__init__(*args, **kwargs)
+        """Make a JSONAPI resource object describing what is a correspondent role
+        """
+
+        self.relationships = {
+
+        }

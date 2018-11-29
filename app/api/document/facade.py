@@ -195,6 +195,32 @@ class DocumentFacade(JSONAPIAbstractFacade):
                                                                        self.with_relationships_links,
                                                                        self.with_relationships_data).resource
 
+    @property
+    def resource(self):
+        resource = {
+            **self.resource_identifier,
+            "attributes": {
+                "title": self.obj.title,
+                "witness-label": self.obj.witness_label,
+                "classification-mark": self.obj.classification_mark,
+                "argument": self.obj.argument,
+                "creation": self.obj.creation,
+                "creation-label": self.obj.creation_label,
+                "location-date-label": self.obj.location_date_label,
+                "location-date-ref": self.obj.location_date_ref,
+                "transcription": self.obj.transcription,
+                "last-update": self.obj.date_update,
+                "is-published": self.obj.is_published,
+            },
+            "meta": self.meta,
+            "links": {
+                "self": self.self_link
+            }
+        }
+        if self.with_relationships_links:
+            resource["relationships"] = self.get_exposed_relationships()
+        return resource
+
     def __init__(self, *args, **kwargs):
         super(DocumentFacade, self).__init__(*args, **kwargs)
         """Make a JSONAPI resource object describing what is a document
@@ -270,26 +296,4 @@ class DocumentFacade(JSONAPIAbstractFacade):
                 "resource_getter": self.get_whitelist_resource
             },
         }
-        self.resource = {
-            **self.resource_identifier,
-            "attributes": {
-                "title": self.obj.title,
-                "witness-label": self.obj.witness_label,
-                "classification-mark": self.obj.classification_mark,
-                "argument": self.obj.argument,
-                "creation": self.obj.creation,
-                "creation-label": self.obj.creation_label,
-                "location-date-label": self.obj.location_date_label,
-                "location-date-ref": self.obj.location_date_ref,
-                "transcription": self.obj.transcription,
-                "last-update": self.obj.date_update,
-                "is-published": self.obj.is_published,
-            },
-            "meta": self.meta,
-            "links": {
-                "self": self.self_link
-            }
-        }
 
-        if self.with_relationships_links:
-            self.resource["relationships"] = self.get_exposed_relationships()

@@ -54,6 +54,26 @@ class CorrespondentFacade(JSONAPIAbstractFacade):
                                                                                                    self.with_relationships_data).resource
                                                                         for e in self.obj.correspondents_having_roles]
 
+    @property
+    def resource(self):
+        resource = {
+            **self.resource_identifier,
+            "attributes": {
+                "firstname": self.obj.firstname,
+                "lastname": self.obj.lastname,
+                "key": self.obj.key,
+                "ref": self.obj.ref,
+            },
+            "meta": self.meta,
+            "links": {
+                "self": self.self_link
+            }
+        }
+
+        if self.with_relationships_links:
+            resource["relationships"] = self.get_exposed_relationships()
+        return resource
+
     def __init__(self, *args, **kwargs):
         super(CorrespondentFacade, self).__init__(*args, **kwargs)
         """Make a JSONAPI resource object describing what is a correspondent
@@ -71,19 +91,3 @@ class CorrespondentFacade(JSONAPIAbstractFacade):
                 "resource_getter": self.get_document_resources
             },
         }
-        self.resource = {
-            **self.resource_identifier,
-            "attributes": {
-                "firstname": self.obj.firstname,
-                "lastname": self.obj.lastname,
-                "key": self.obj.key,
-                "ref": self.obj.ref,
-            },
-            "meta": self.meta,
-            "links": {
-                "self": self.self_link
-            }
-        }
-
-        if self.with_relationships_links:
-            self.resource["relationships"] = self.get_exposed_relationships()

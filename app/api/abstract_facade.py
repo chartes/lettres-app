@@ -37,11 +37,13 @@ class JSONAPIAbstractFacade(object):
         }
 
         self.relationships = {}
-        self.resource = {}
-        self.resource_decorators = {}
 
     @property
     def id(self):
+        raise NotImplementedError
+
+    @property
+    def resource(self):
         raise NotImplementedError
 
     @property
@@ -114,9 +116,10 @@ class JSONAPIAbstractFacade(object):
 
     # noinspection PyArgumentList
     @staticmethod
-    def patch_resource(obj, obj_type, attributes, related_resources):
+    def patch_resource(obj, obj_type, attributes, related_resources, append):
         """
         Update the obj but do not commit it
+        :param append:
         :param obj:
         :param obj_type:
         :param attributes:
@@ -138,20 +141,27 @@ class JSONAPIAbstractFacade(object):
             rel_name = rel_name.replace("-", "_")
             print("  setting", rel_name, rel_data)
             if hasattr(obj, rel_name):
-                try:
-                    setattr(obj, rel_name, rel_data)
-                except Exception:
-                    setattr(obj, rel_name, rel_data[0])
+                # append (POST) or replace (PATCH) replace related resources ?
+                if not append:
+                    try:
+                        setattr(obj, rel_name, rel_data)
+                    except Exception:
+                        setattr(obj, rel_name, rel_data[0])
+                else:
+                    try:
+                        setattr(obj, rel_name, getattr(obj, rel_name, []) + rel_data)
+                    except Exception:
+                        setattr(obj, rel_name, getattr(obj, rel_name, []) + rel_data[0])
             else:
                 raise AttributeError("Relationship %s does not exist" % rel_name)
         return obj
 
     @staticmethod
-    def update_resource(obj, obj_type, attributes, related_resources):
+    def update_resource(obj, obj_type, attributes, related_resources, append=False):
         errors = None
         resource = None
         try:
-            resource = JSONAPIAbstractFacade.patch_resource(obj, obj_type, attributes, related_resources)
+            resource = JSONAPIAbstractFacade.patch_resource(obj, obj_type, attributes, related_resources, append)
             db.session.add(resource)
             db.session.commit()
         except Exception as e:
@@ -159,7 +169,7 @@ class JSONAPIAbstractFacade(object):
             errors = {
                 "status": 403,
                 "title": "Error updating resource '%s' with data: %s" % (
-                    obj_type, str([id, attributes, related_resources])),
+                    obj_type, str([id, attributes, related_resources, append])),
                 "detail": str(e)
             }
             db.session.rollback()
@@ -178,36 +188,6 @@ class JSONAPIAbstractFacade(object):
             "self": "{template}/{rel_name}".format(template=self._links_template["self"], rel_name=rel_name),
             "related": "{template}/{rel_name}".format(template=self._links_template["related"], rel_name=rel_name)
         }
-
-    def set_resource_identifiers(self, attr, resource_identifiers, append_mode):
-        errors = {}
-        try:
-            if append_mode:
-                # append
-                old_vals = getattr(self.obj, attr)
-                setattr(self.obj, attr, old_vals + resource_identifiers)
-            else:
-                # replace
-                setattr(self.obj, attr, resource_identifiers)
-
-            db.session.add(self.obj)
-            db.session.commit()
-        except Exception as e:
-            print(e)
-            errors = {
-                "status": 403,
-                "title": "Error setting relationship",
-                "detail": str(e)
-            }
-            db.session.rollback()
-        return errors
-
-    def set_relationships(self, rel_name, resources, append_mode=True):
-        rel = self.relationships[rel_name]
-        if "resource_attribute" in rel:
-            self.set_resource_identifiers(rel["resource_attribute"], resources, append_mode)
-        else:
-            raise KeyError("Relationship '%s' has no resource identifier setter" % rel_name)
 
     def get_exposed_relationships(self):
         if self.with_relationships_data:

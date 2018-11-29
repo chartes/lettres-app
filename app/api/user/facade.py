@@ -60,6 +60,29 @@ class UserFacade(JSONAPIAbstractFacade):
         errors = [{"status": 403, "title": "You cannot create a 'User' from the API"}]
         return resource, errors
 
+    @property
+    def resource(self):
+        resource = {
+            **self.resource_identifier,
+            "attributes": {
+                "username": self.obj.username,
+                "email": self.obj.email,
+                "confirmed-at": self.obj.email_confirmed_at,
+                "is-active": self.obj.active,
+                "firstname": self.obj.first_name,
+                "lastname": self.obj.last_name
+            },
+            "meta": self.meta,
+            "links": {
+                "self": self.self_link
+            }
+        }
+
+        if self.with_relationships_links:
+            resource["relationships"] = self.get_exposed_relationships()
+
+        return resource
+
     def __init__(self, *args, **kwargs):
         super(UserFacade, self).__init__(*args, **kwargs)
         """Make a JSONAPI resource object describing what is a user 
@@ -79,21 +102,3 @@ class UserFacade(JSONAPIAbstractFacade):
                 "resource_attribute": "owned_documents"
             }
         }
-        self.resource = {
-            **self.resource_identifier,
-            "attributes": {
-                "username": self.obj.username,
-                "email": self.obj.email,
-                "confirmed-at": self.obj.email_confirmed_at,
-                "is-active": self.obj.active,
-                "firstname": self.obj.first_name,
-                "lastname": self.obj.last_name
-            },
-            "meta": self.meta,
-            "links": {
-                "self": self.self_link
-            }
-        }
-
-        if self.with_relationships_links:
-            self.resource["relationships"] = self.get_exposed_relationships()

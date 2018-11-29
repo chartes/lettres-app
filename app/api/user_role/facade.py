@@ -46,19 +46,9 @@ class UserRoleFacade(JSONAPIAbstractFacade):
         errors = [{"status": 403, "title": "You cannot create a 'User Role' from the API"}]
         return resource, errors
 
-    def __init__(self, *args, **kwargs):
-        super(UserRoleFacade, self).__init__(*args, **kwargs)
-        """Make a JSONAPI resource object describing what is a user role
-        """
-
-        self.relationships = {
-            "users": {
-                "links": self._get_links(rel_name="users"),
-                "resource_identifier_getter": self.get_user_resource_identifiers,
-                "resource_getter": self.get_users_resources
-            }
-        }
-        self.resource = {
+    @property
+    def resource(self):
+        resource = {
             **self.resource_identifier,
             "attributes": {
                 "label": self.obj.label,
@@ -71,4 +61,19 @@ class UserRoleFacade(JSONAPIAbstractFacade):
         }
 
         if self.with_relationships_links:
-            self.resource["relationships"] = self.get_exposed_relationships()
+            resource["relationships"] = self.get_exposed_relationships()
+
+        return resource
+
+    def __init__(self, *args, **kwargs):
+        super(UserRoleFacade, self).__init__(*args, **kwargs)
+        """Make a JSONAPI resource object describing what is a user role
+        """
+
+        self.relationships = {
+            "users": {
+                "links": self._get_links(rel_name="users"),
+                "resource_identifier_getter": self.get_user_resource_identifiers,
+                "resource_getter": self.get_users_resources
+            }
+        }

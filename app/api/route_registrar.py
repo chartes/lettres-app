@@ -697,7 +697,7 @@ class JSONAPIRouteRegistrar(object):
                 else:
                     request_data = request_data["data"]
 
-                related_resources = []
+                related_resources = {rel_name: []}
                 for rdi in request_data:
                     related_resource, errors = self.get_obj_from_resource_identifier(rdi, rel_name)
                     if errors:
@@ -707,21 +707,30 @@ class JSONAPIRouteRegistrar(object):
                         return JSONAPIResponseFactory.make_errors_response(
                             {"status": 404, "title": "Resource %s does not exist" % rdi}, status=404
                         )
-                    related_resources.append(related_resource)
+                    related_resources[rel_name].append(related_resource)
 
                 # ==============================
                 # post the relationships links
                 # ==============================
-                url_prefix = request.host_url[:-1] + self.url_prefix
-                f_obj, kwargs, errors = facade_class.get_resource_facade(url_prefix, id)
+                model = self.models[facade_class.TYPE]
+                obj = model.query.filter(model.id == id).first()
+                resource, e = facade_class.update_resource(obj, facade_class.TYPE, {}, related_resources, append=True)
+                if e is None:
+                    url_prefix = request.host_url[:-1] + self.url_prefix
 
-                if f_obj is None:
-                    return JSONAPIResponseFactory.make_errors_response(errors, **kwargs)
-
-                f_obj.set_relationships(rel_name, related_resources, append_mode=True)
-
-                # return 204 NO CONTENT  (why is 204 that slow ??)
-                return JSONAPIResponseFactory.make_data_response(None, None, None, None, status=204)
+                    f_obj = facade_class(url_prefix, resource, with_relationships_links=True,
+                                         with_relationships_data=True)
+                    # RESPOND 200
+                    if "links" in f_obj.resource and "self" in f_obj.resource["links"]:
+                        headers = {"Location": f_obj.resource["links"]["self"]}
+                    else:
+                        headers = {}
+                    meta = {"search-fields": getattr(model, "__searchable__", []), "total-count": 1}
+                    return JSONAPIResponseFactory.make_data_response(f_obj.resource, None, None, meta=meta,
+                                                                     status=200,
+                                                                     headers=headers)
+                else:
+                    return JSONAPIResponseFactory.make_errors_response(e)
 
         resource_relationship_endpoint.__name__ = "post_%s_%s_%s" % (
             facade_class.TYPE_PLURAL.replace("-", "_"), rel_name.replace("-", "_"),
@@ -898,10 +907,10 @@ class JSONAPIRouteRegistrar(object):
                 else:
                     request_data = request_data["data"]
 
-                related_resources = []
+                related_resources = {rel_name: []}
                 for rdi in request_data:
                     if rdi is None:
-                        related_resources.append(None)
+                        related_resources[rel_name].append(None)
                     else:
                         related_resource, errors = self.get_obj_from_resource_identifier(rdi, rel_name)
                         if errors:
@@ -911,21 +920,30 @@ class JSONAPIRouteRegistrar(object):
                             return JSONAPIResponseFactory.make_errors_response(
                                 {"status": 404, "title": "Resource %s does not exist" % rdi}, status=404
                             )
-                        related_resources.append(related_resource)
+                        related_resources[rel_name].append(related_resource)
 
                 # ==============================
                 # patch the relationships links
                 # ==============================
-                url_prefix = request.host_url[:-1] + self.url_prefix
-                f_obj, kwargs, errors = facade_class.get_resource_facade(url_prefix, id)
+                model = self.models[facade_class.TYPE]
+                obj = model.query.filter(model.id == id).first()
+                resource, e = facade_class.update_resource(obj, facade_class.TYPE, {}, related_resources, append=False)
+                if e is None:
+                    url_prefix = request.host_url[:-1] + self.url_prefix
 
-                if f_obj is None:
-                    return JSONAPIResponseFactory.make_errors_response(errors, **kwargs)
-
-                f_obj.set_relationships(rel_name, related_resources, append_mode=False)
-
-                # return 200
-                return JSONAPIResponseFactory.make_data_response(f_obj.resource, None, None, None, status=200)
+                    f_obj = facade_class(url_prefix, resource, with_relationships_links=True,
+                                         with_relationships_data=True)
+                    # RESPOND 200
+                    if "links" in f_obj.resource and "self" in f_obj.resource["links"]:
+                        headers = {"Location": f_obj.resource["links"]["self"]}
+                    else:
+                        headers = {}
+                    meta = {"search-fields": getattr(model, "__searchable__", []), "total-count": 1}
+                    return JSONAPIResponseFactory.make_data_response(f_obj.resource, None, None, meta=meta,
+                                                                     status=200,
+                                                                     headers=headers)
+                else:
+                    return JSONAPIResponseFactory.make_errors_response(e)
 
         resource_relationship_endpoint.__name__ = "patch_%s_%s_%s" % (
             facade_class.TYPE_PLURAL.replace("-", "_"), rel_name.replace("-", "_"),
