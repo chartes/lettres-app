@@ -11,4 +11,4 @@ def register_image_api_urls(app):
 
     registrar.register_relationship_get_route(ImageFacade, 'document')
     registrar.register_relationship_post_route(ImageFacade, 'document')
-
+    registrar.register_relationship_patch_route(ImageFacade, 'document')

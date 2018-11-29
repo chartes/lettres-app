@@ -11,4 +11,5 @@ def register_tradition_role_api_urls(app):
 
     registrar.register_relationship_get_route(TraditionFacade, 'documents')
     registrar.register_relationship_post_route(TraditionFacade, 'documents')
+    registrar.register_relationship_patch_route(TraditionFacade, 'documents')
 
