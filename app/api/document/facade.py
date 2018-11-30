@@ -1,4 +1,3 @@
-from app import db
 from app.api.abstract_facade import JSONAPIAbstractFacade
 from app.models import Document
 
@@ -31,76 +30,6 @@ class DocumentFacade(JSONAPIAbstractFacade):
         if "last-update" in attributes:
             attributes["date_update"] = attributes.pop("last-update")
         return JSONAPIAbstractFacade.create_resource(model, obj_id, attributes, related_resources)
-
-    def get_image_resource_identifiers(self):
-        from app.api.image.facade import ImageFacade
-        return [] if self.obj.images is None else [
-            ImageFacade.make_resource_identifier(c.id, ImageFacade.TYPE)
-            for c in self.obj.images
-        ]
-
-    def get_image_resources(self):
-        from app.api.image.facade import ImageFacade
-        return [] if self.obj.images is None else [
-            ImageFacade(self.url_prefix, c, self.with_relationships_links, self.with_relationships_data).resource
-            for c in self.obj.images
-        ]
-
-    def get_note_resource_identifiers(self):
-        from app.api.note.facade import NoteFacade
-        return [] if self.obj.notes is None else [
-            NoteFacade.make_resource_identifier(c.id, NoteFacade.TYPE)
-            for c in self.obj.notes
-        ]
-
-    def get_note_resources(self):
-        from app.api.note.facade import NoteFacade
-        return [] if self.obj.notes is None else [
-            NoteFacade(self.url_prefix, c, self.with_relationships_links, self.with_relationships_data).resource
-            for c in self.obj.notes
-        ]
-
-    def get_language_resource_identifiers(self):
-        from app.api.language.facade import LanguageFacade
-        return [] if self.obj.languages is None else [
-            LanguageFacade.make_resource_identifier(c.id, LanguageFacade.TYPE)
-            for c in self.obj.languages
-        ]
-
-    def get_language_resources(self):
-        from app.api.language.facade import LanguageFacade
-        return [] if self.obj.languages is None else [
-            LanguageFacade(self.url_prefix, c, self.with_relationships_links, self.with_relationships_data).resource
-            for c in self.obj.languages
-        ]
-
-    def get_institution_resource_identifier(self):
-        from app.api.institution.facade import InstitutionFacade
-        return None if self.obj.institution is None else InstitutionFacade.make_resource_identifier(
-            self.obj.institution.id,
-            InstitutionFacade.TYPE
-        )
-
-    def get_institution_resource(self):
-        from app.api.institution.facade import InstitutionFacade
-        return None if self.obj.institution is None else InstitutionFacade(self.url_prefix,
-                                                                           self.obj.institution,
-                                                                           self.with_relationships_links,
-                                                                           self.with_relationships_data).resource
-
-    def get_tradition_resource_identifier(self):
-        from app.api.tradition.facade import TraditionFacade
-        return None if self.obj.tradition is None else TraditionFacade.make_resource_identifier(
-            self.obj.institution.id,
-            TraditionFacade.TYPE
-        )
-
-    def get_tradition_resource(self):
-        from app.api.tradition.facade import TraditionFacade
-        return None if self.obj.tradition is None else TraditionFacade(self.url_prefix,
-                                                                       self.obj.tradition,
-                                                                       self.with_relationships_links,
-                                                                       self.with_relationships_data).resource
 
     def get_correspondents_having_roles_resource_identifiers(self):
         from app.api.correspondent_has_role.facade import CorrespondentHasRoleFacade
@@ -147,54 +76,6 @@ class DocumentFacade(JSONAPIAbstractFacade):
             for c in self.obj.correspondents_having_roles
         ]
 
-    def get_next_document_resource_identifier(self):
-        return None if self.obj.next_document is None else DocumentFacade.make_resource_identifier(
-            self.obj.next_document.id, DocumentFacade.TYPE
-        )
-
-    def get_next_document_resource(self):
-        return None if self.obj.next_document is None else DocumentFacade(self.url_prefix,
-                                                                          self.obj.next_document,
-                                                                          self.with_relationships_links,
-                                                                          self.with_relationships_data).resource
-
-    def get_prev_document_resource_identifier(self):
-        return None if self.obj.prev_document is None else DocumentFacade.make_resource_identifier(
-            self.obj.prev_document.id, DocumentFacade.TYPE
-        )
-
-    def get_prev_document_resource(self):
-        return None if self.obj.next_document is None else DocumentFacade(self.url_prefix,
-                                                                          self.obj.prev_document,
-                                                                          self.with_relationships_links,
-                                                                          self.with_relationships_data).resource
-
-    def get_owner_resource_identifier(self):
-        from app.api.user.facade import UserFacade
-        return None if self.obj.owner is None else UserFacade.make_resource_identifier(
-            self.obj.owner.id, UserFacade.TYPE
-        )
-
-    def get_owner_resource(self):
-        from app.api.user.facade import UserFacade
-        return None if self.obj.owner is None else UserFacade(self.url_prefix,
-                                                              self.obj.owner,
-                                                              self.with_relationships_links,
-                                                              self.with_relationships_data).resource
-
-    def get_whitelist_resource_identifier(self):
-        from app.api.whitelist.facade import WhitelistFacade
-        return None if self.obj.whitelist is None else WhitelistFacade.make_resource_identifier(
-            self.obj.whitelist.id, WhitelistFacade.TYPE
-        )
-
-    def get_whitelist_resource(self):
-        from app.api.whitelist.facade import WhitelistFacade
-        return None if self.obj.whitelist is None else WhitelistFacade(self.url_prefix,
-                                                                       self.obj.whitelist,
-                                                                       self.with_relationships_links,
-                                                                       self.with_relationships_data).resource
-
     @property
     def resource(self):
         resource = {
@@ -227,41 +108,10 @@ class DocumentFacade(JSONAPIAbstractFacade):
         """
 
         self.relationships = {
-            "images": {
-                "links": self._get_links(rel_name="images"),
-                "resource_identifier_getter": self.get_image_resource_identifiers,
-                "resource_getter": self.get_image_resources,
-                "resource_attribute": "images"
-            },
-            "notes": {
-                "links": self._get_links(rel_name="notes"),
-                "resource_identifier_getter": self.get_note_resource_identifiers,
-                "resource_getter": self.get_note_resources,
-                "resource_attribute": "notes"
-            },
-            "languages": {
-                "links": self._get_links(rel_name="languages"),
-                "resource_identifier_getter": self.get_language_resource_identifiers,
-                "resource_getter": self.get_language_resources,
-                "resource_attribute": "languages"
-            },
-            "institution": {
-                "links": self._get_links(rel_name="institution"),
-                "resource_identifier_getter": self.get_institution_resource_identifier,
-                "resource_getter": self.get_institution_resource,
-                "resource_attribute": "institution"
-            },
-            "tradition": {
-                "links": self._get_links(rel_name="tradition"),
-                "resource_identifier_getter": self.get_tradition_resource_identifier,
-                "resource_getter": self.get_tradition_resource,
-                "resource_attribute": "tradition"
-            },
             "correspondents-having-roles": {
                 "links": self._get_links(rel_name="correspondents-having-roles"),
                 "resource_identifier_getter": self.get_correspondents_having_roles_resource_identifiers,
-                "resource_getter": self.get_correspondents_having_roles_resources,
-                "resource_attribute": "correspondents_having_roles"
+                "resource_getter": self.get_correspondents_having_roles_resources
             },
             "roles": {
                 "links": self._get_links(rel_name="roles"),
@@ -273,27 +123,50 @@ class DocumentFacade(JSONAPIAbstractFacade):
                 "resource_identifier_getter": self.get_correspondent_resource_identifiers,
                 "resource_getter": self.get_correspondent_resources
             },
-            "prev-document": {
-                "links": self._get_links(rel_name="prev-document"),
-                "resource_identifier_getter": self.get_prev_document_resource_identifier,
-                "resource_getter": self.get_prev_document_resource
-            },
-            "next-document": {
-                "links": self._get_links(rel_name="next-document"),
-                "resource_identifier_getter": self.get_next_document_resource_identifier,
-                "resource_getter": self.get_next_document_resource,
-                "resource_attribute": "next_document"
-            },
-            "owner": {
-                "links": self._get_links(rel_name="owner"),
-                "resource_identifier_getter": self.get_owner_resource_identifier,
-                "resource_getter": self.get_owner_resource,
-                "resource_attribute": "owner"
-            },
-            "whitelist": {
-                "links": self._get_links(rel_name="whitelist"),
-                "resource_identifier_getter": self.get_whitelist_resource_identifier,
-                "resource_getter": self.get_whitelist_resource
-            },
         }
 
+        # ===================================
+        # Add simple relationships
+        # ===================================
+        from app.api.image.facade import ImageFacade
+        from app.api.note.facade import NoteFacade
+        from app.api.language.facade import LanguageFacade
+        from app.api.institution.facade import InstitutionFacade
+        from app.api.tradition.facade import TraditionFacade
+        from app.api.user.facade import UserFacade
+        from app.api.whitelist.facade import WhitelistFacade
+
+        # decorator for test purposes
+        def decorator_function_with_arguments(arg1, arg2, arg3):
+            def wrap(f):
+                print("Wrapping", f)
+
+                def wrapped_f(*args, **kwargs):
+                    print("Inside wrapped_f()")
+                    print(arg1, arg2, arg3)
+                    res = f(*args, **kwargs)
+                    return res
+
+                return wrapped_f
+
+            return wrap
+        test_decorator = lambda *args, **kwargs : decorator_function_with_arguments(*args, **kwargs)
+
+        for rel_name, (rel_facade, to_many) in {
+            "images": (ImageFacade, True),
+            "notes": (NoteFacade, True),
+            "languages": (LanguageFacade, True),
+            "institution": (InstitutionFacade, False),
+            "tradition": (TraditionFacade, False),
+            "owner": (UserFacade, False),
+            "whitelist": (WhitelistFacade, False),
+            "prev-document": (DocumentFacade, False),
+            "next-document": (DocumentFacade, False)
+        }.items():
+            u_rel_name = rel_name.replace("-", "_")
+
+            self.relationships[rel_name] = {
+                "links": self._get_links(rel_name=rel_name),
+                "resource_identifier_getter": self.get_related_resource_identifiers(rel_facade, u_rel_name, to_many),
+                "resource_getter": self.get_related_resources(rel_facade, u_rel_name, to_many),
+            }

@@ -9,7 +9,7 @@ def register_correspondent_has_role_api_urls(app):
     registrar.register_patch_routes(CorrespondentHasRole, CorrespondentHasRoleFacade)
     registrar.register_delete_routes(CorrespondentHasRole, CorrespondentHasRoleFacade)
 
-    registrar.register_relationship_get_route(CorrespondentHasRoleFacade, 'roles-within-document')
-    registrar.register_relationship_post_route(CorrespondentHasRoleFacade, 'roles-within-document')
-    registrar.register_relationship_patch_route(CorrespondentHasRoleFacade, 'roles-within-document')
+    registrar.register_relationship_post_route(CorrespondentHasRoleFacade, 'document')
+    registrar.register_relationship_patch_route(CorrespondentHasRoleFacade, 'correspondent')
+    registrar.register_relationship_get_route(CorrespondentHasRoleFacade, 'correspondent-role')
 

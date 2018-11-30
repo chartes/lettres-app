@@ -26,38 +26,6 @@ class CorrespondentHasRoleFacade(JSONAPIAbstractFacade):
             errors = []
         return e, kwargs, errors
 
-    def get_role_resource_identifier(self):
-        from app.api.correspondent_role.facade import CorrespondentRoleFacade
-        return None if self.obj.correspondent_role is None else CorrespondentRoleFacade.make_resource_identifier(self.obj.correspondent_role.id,
-                                                                                                   CorrespondentRoleFacade.TYPE)
-
-    def get_role_resource(self):
-        from app.api.correspondent_role.facade import CorrespondentRoleFacade
-        return None if self.obj.correspondent_role is None else CorrespondentRoleFacade(self.url_prefix, self.obj.correspondent_role,
-                                                                          self.with_relationships_links,
-                                                                          self.with_relationships_data).resource
-
-    def get_correspondent_resource_identifier(self):
-        from app.api.correspondent.facade import CorrespondentFacade
-        return None if self.obj.correspondent is None else CorrespondentFacade.make_resource_identifier(self.obj.correspondent.id,
-                                                                                                        CorrespondentFacade.TYPE)
-
-    def get_correspondent_resource(self):
-        from app.api.correspondent.facade import CorrespondentFacade
-        return None if self.obj.correspondent is None else CorrespondentFacade(self.url_prefix, self.obj.correspondent,
-                                                                          self.with_relationships_links,
-                                                                          self.with_relationships_data).resource
-
-    def get_document_resource_identifier(self):
-        from app.api.document.facade import DocumentFacade
-        return None if self.obj.document is None else DocumentFacade.make_resource_identifier(self.obj.document.id,
-                                                                                              DocumentFacade.TYPE)
-
-    def get_document_resource(self):
-        from app.api.document.facade import DocumentFacade
-        return None if self.obj.document is None else DocumentFacade(self.url_prefix, self.obj.document,
-                                                                          self.with_relationships_links,
-                                                                          self.with_relationships_data).resource
     @property
     def resource(self):
         resource = {
@@ -78,22 +46,23 @@ class CorrespondentHasRoleFacade(JSONAPIAbstractFacade):
         super(CorrespondentHasRoleFacade, self).__init__(*args, **kwargs)
         """Make a JSONAPI resource object describing what is the relation between a correspondent and its role within a document
         """
+        # ===================================
+        # Add simple relationships
+        # ===================================
+        from app.api.document.facade import DocumentFacade
+        from app.api.correspondent.facade import CorrespondentFacade
+        from app.api.correspondent_role.facade import CorrespondentRoleFacade
 
-        self.relationships = {
-            "correspondent-role": {
-                "links": self._get_links(rel_name="correspondent-role"),
-                "resource_identifier_getter": self.get_role_resource_identifier,
-                "resource_getter": self.get_role_resource
-            },
-            "document": {
-                "links": self._get_links(rel_name="document"),
-                "resource_identifier_getter": self.get_document_resource_identifier,
-                "resource_getter": self.get_document_resource
-            },
-            "correspondent": {
-                "links": self._get_links(rel_name="correspondent"),
-                "resource_identifier_getter": self.get_correspondent_resource_identifier,
-                "resource_getter": self.get_correspondent_resource
-            },
-        }
+        for rel_name, (rel_facade, to_many) in {
+            "correspondent-role": (CorrespondentRoleFacade, False),
+            "document": (DocumentFacade, False),
+            "correspondent": (CorrespondentFacade, False)
+        }.items():
+            u_rel_name = rel_name.replace("-", "_")
+
+            self.relationships[rel_name] = {
+                "links": self._get_links(rel_name=rel_name),
+                "resource_identifier_getter": self.get_related_resource_identifiers(rel_facade, u_rel_name, to_many),
+                "resource_getter": self.get_related_resources(rel_facade, u_rel_name, to_many),
+            }
 

@@ -26,18 +26,6 @@ class NoteFacade(JSONAPIAbstractFacade):
             errors = []
         return e, kwargs, errors
 
-    def get_document_resource_identifier(self):
-        from app.api.document.facade import DocumentFacade
-        return None if self.obj.document is None else DocumentFacade.make_resource_identifier(
-            self.obj.document.id, DocumentFacade.TYPE
-        )
-
-    def get_document_resource(self):
-        from app.api.document.facade import DocumentFacade
-        return None if self.obj.document is None else DocumentFacade(
-            self.url_prefix, self.obj.document, self.with_relationships_links, self.with_relationships_data
-        ).resource
-
     @property
     def resource(self):
         resource = {
@@ -62,10 +50,11 @@ class NoteFacade(JSONAPIAbstractFacade):
         """Make a JSONAPI resource object describing what is an note
         """
 
+        from app.api.document.facade import DocumentFacade
         self.relationships = {
             "document": {
                 "links": self._get_links(rel_name="document"),
-                "resource_identifier_getter": self.get_document_resource_identifier,
-                "resource_getter": self.get_document_resource
+                "resource_identifier_getter": self.get_related_resource_identifiers(DocumentFacade, "document"),
+                "resource_getter": self.get_related_resources(DocumentFacade, "document"),
             },
         }

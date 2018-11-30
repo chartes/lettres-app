@@ -17,7 +17,6 @@ class JSONAPIAbstractFacade(object):
         self.url_prefix = url_prefix
         self.with_relationships_data = with_relationships_data
         self.with_relationships_links = with_relationships_links
-
         self.self_link = "{url_prefix}/{type_plural}/{id}".format(
             url_prefix=self.url_prefix, type_plural=self.TYPE_PLURAL, id=self.id
         )
@@ -189,6 +188,48 @@ class JSONAPIAbstractFacade(object):
             }
             db.session.rollback()
         return errors
+
+    def get_related_resource_identifiers(self, facade_class, rel_field, to_many=False, decorators=()):
+        def func():
+            field = getattr(self.obj, rel_field)
+            if to_many:
+                return [] if field is None else [
+                    facade_class.make_resource_identifier(f.id, facade_class.TYPE)
+                    for f in field
+                ]
+            else:
+                return None if field is None else facade_class.make_resource_identifier(field.id, facade_class.TYPE)
+
+        # APPLY decorators if any
+        for dec in decorators:
+            func = dec(func)
+
+        return func
+
+    def get_related_resources(self, facade_class,  rel_field, to_many=False, decorators=()):
+        def func():
+            field = getattr(self.obj, rel_field)
+            if to_many:
+                if field is None:
+                    return []
+                else:
+                    return [
+                        facade_class(self.url_prefix, rel_obj,
+                                     self.with_relationships_links,  self.with_relationships_data).resource
+                        for rel_obj in field
+                    ]
+            else:
+                if field is None:
+                    return None
+                else:
+                    return facade_class(self.url_prefix, field,
+                                        self.with_relationships_links, self.with_relationships_data).resource
+
+        # APPLY decorators if any
+        for dec in decorators:
+            func = dec(func)
+
+        return func
 
     def set_relationships_mode(self, w_rel_links, w_rel_data):
         self.with_relationships_links = w_rel_links

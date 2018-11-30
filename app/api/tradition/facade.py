@@ -27,20 +27,6 @@ class TraditionFacade(JSONAPIAbstractFacade):
             errors = []
         return e, kwargs, errors
 
-    def get_document_resource_identifiers(self):
-        from app.api.document.facade import DocumentFacade
-        return [] if self.obj.documents is None else [
-            DocumentFacade.make_resource_identifier(c.id, DocumentFacade.TYPE)
-            for c in self.obj.documents
-        ]
-
-    def get_document_resources(self):
-        from app.api.document.facade import DocumentFacade
-        return [] if self.obj.documents is None else [
-            DocumentFacade(self.url_prefix, c, self.with_relationships_links, self.with_relationships_data).resource
-            for c in self.obj.documents
-        ]
-
     @property
     def resource(self):
         resource = {
@@ -66,11 +52,11 @@ class TraditionFacade(JSONAPIAbstractFacade):
 
         """
 
+        from app.api.document.facade import DocumentFacade
         self.relationships = {
             "documents": {
                 "links": self._get_links(rel_name="documents"),
-                "resource_identifier_getter": self.get_document_resource_identifiers,
-                "resource_getter": self.get_document_resources,
-                "resource_attribute": "documents"
+                "resource_identifier_getter": self.get_related_resource_identifiers(DocumentFacade, "documents", to_many=True),
+                "resource_getter": self.get_related_resources(DocumentFacade, "documents", to_many=True),
             },
         }
