@@ -115,7 +115,14 @@ def create_fake_documents(db, nb_docs=1000, nb_correspondents=None, fake=None):
                 witness_label=fake.sentence(nb_words=5),
                 classification_mark=fake.sentence(nb_words=10),
                 transcription=fake.text(max_nb_chars=random.randint(100, 7500)),
-                argument=fake.text()
+                argument=fake.text(),
+                creation=fake.sentence(nb_words=1),
+                creation_label=fake.sentence(nb_words=1),
+                location_date_label=fake.sentence(nb_words=1),
+                location_date_ref=fake.sentence(nb_words=1),
+                date_insert="2018/01/01",
+                date_update="2018/01/02",
+                is_published=True
             )
             doc.institution = random.choice(institutions)
             doc.tradition = random.choice(traditions)
