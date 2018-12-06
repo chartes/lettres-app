@@ -131,7 +131,7 @@ class Note(SearchableMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     content = db.Column(db.String, nullable=False)
     label = db.Column(db.String(45))
-    document_id = db.Column(db.Integer, db.ForeignKey('document.id'), index=True)
+    document_id = db.Column(db.Integer, db.ForeignKey('document.id', ondelete='CASCADE'), nullable=False, index=True)
 
 
 class Institution(SearchableMixin, db.Model):
@@ -153,7 +153,7 @@ class Image(SearchableMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     img_url = db.Column(db.String(45), nullable=False)
     manifest_url = db.Column(db.String(200))
-    document_id = db.Column(db.Integer, db.ForeignKey('document.id'), index=True)
+    document_id = db.Column(db.Integer, db.ForeignKey('document.id', ondelete='CASCADE'), index=True)
 
 
 class Language(SearchableMixin, db.Model):
@@ -210,14 +210,9 @@ class CorrespondentHasRole(SearchableMixin, db.Model):
     document_id = db.Column(db.Integer, db.ForeignKey('document.id', ondelete='CASCADE'), nullable=False)
     correspondent_role_id = db.Column(db.Integer, db.ForeignKey('correspondent_role.id', ondelete='CASCADE'), nullable=False)
 
-    correspondent = db.relationship("Correspondent", backref=db.backref("correspondents_having_roles"),
-                                    cascade="all, delete-orphan", single_parent=True)
-
-    document = db.relationship("Document", backref=db.backref("correspondents_having_roles"),
-                               cascade="all, delete-orphan", single_parent=True)
-
-    correspondent_role = db.relationship("CorrespondentRole", backref=db.backref("correspondents_having_roles"),
-                                         cascade="all, delete-orphan", single_parent=True)
+    correspondent = db.relationship("Correspondent", backref=db.backref("correspondents_having_roles"), single_parent=True)
+    document = db.relationship("Document", backref=db.backref("correspondents_having_roles"), single_parent=True)
+    correspondent_role = db.relationship("CorrespondentRole", backref=db.backref("correspondents_having_roles"), single_parent=True)
 
 
 class User(SearchableMixin, db.Model):
@@ -255,6 +250,8 @@ class UserRole(SearchableMixin, db.Model):
 
 
 class UserInvitation(db.Model):
+    __tablename__ = 'user_invitation'
+
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     # UserInvitation email information. The collation='NOCASE' is required
     # to search case insensitively when USER_IFIND_MODE is 'nocase_collation'.

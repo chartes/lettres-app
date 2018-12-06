@@ -61,22 +61,22 @@ class TestBaseServer(TestCase):
     def post(self, url, data, absolute=False, **kwargs):
         if not absolute:
             url = "%s/%s" % (self.url_prefix, url)
-        return self.client.post("%s/%s" % (self.url_prefix, url), data=json.dumps(data), follow_redirects=True, **kwargs)
+        return self.client.post(url, data=json.dumps(data), follow_redirects=True, **kwargs)
 
     def put(self, data, url, absolute=False, **kwargs):
         if not absolute:
             url = "%s/%s" % (self.url_prefix, url)
-        return self.client.put("%s/%s" % (self.url_prefix, url), data=json.dumps(data), follow_redirects=True, **kwargs)
+        return self.client.put(url, data=json.dumps(data), follow_redirects=True, **kwargs)
 
     def patch(self, url, data, absolute=False, **kwargs):
         if not absolute:
             url = "%s/%s" % (self.url_prefix, url)
-        return self.client.patch("%s/%s" % (self.url_prefix, url), data=json.dumps(data), follow_redirects=True, **kwargs)
+        return self.client.patch(url, data=json.dumps(data), follow_redirects=True, **kwargs)
 
     def delete(self, url, absolute=False, **kwargs):
         if not absolute:
             url = "%s/%s" % (self.url_prefix, url)
-        return self.client.delete("%s/%s" % (self.url_prefix, url), follow_redirects=True, **kwargs)
+        return self.client.delete(url, follow_redirects=True, **kwargs)
 
     @staticmethod
     def api_query(method, *args, **kwargs):

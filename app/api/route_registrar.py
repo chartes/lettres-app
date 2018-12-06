@@ -1,15 +1,17 @@
 import json
+import pprint
 import urllib
 import sys
 
 from math import ceil
 from collections import OrderedDict
 
-from flask import request
+from flask import request, current_app
 from sqlalchemy import func, desc, asc
 from sqlalchemy.exc import OperationalError
 
 from app import JSONAPIResponseFactory, api_bp, db
+from app.search import query_index
 
 if sys.version_info < (3, 6):
     json_loads = lambda s: json_loads(s.decode("utf-8")) if isinstance(s, bytes) else json.loads(s)
@@ -55,28 +57,28 @@ class JSONAPIRouteRegistrar(object):
 
     @staticmethod
     def get_included_resources(asked_relationships, facade_obj):
-        try:
+            errors = []
             included_resources = OrderedDict({})
             relationships = facade_obj.relationships
             # iter over the relationships to be included
             for inclusion in asked_relationships:
-                # try bring the related resources and add them to the list
-                related_resources = relationships[inclusion]["resource_getter"]()
-                # make unique keys to avoid duplicates
-                if isinstance(related_resources, list):
-                    for related_resource in related_resources:
-                        unique_key = (related_resource["type"], related_resource["id"])
-                        included_resources[unique_key] = related_resource
-                else:
-                    # the resource is a single object
-                    if related_resources is not None:
-                        unique_key = (related_resources["type"], related_resources["id"])
-                        included_resources[unique_key] = related_resources
+                try:
+                    # try bring the related resources and add them to the list
+                    related_resources = relationships[inclusion]["resource_getter"]()
+                    # make unique keys to avoid duplicates
+                    if isinstance(related_resources, list):
+                        for related_resource in related_resources:
+                            unique_key = (related_resource["type"], related_resource["id"])
+                            included_resources[unique_key] = related_resource
+                    else:
+                        # the resource is a single object
+                        if related_resources is not None:
+                            unique_key = (related_resources["type"], related_resources["id"])
+                            included_resources[unique_key] = related_resources
+                except KeyError as e:
+                    errors.append({"status": 403, "title": "Cannot include the relationship %s" % str(e)})
             return list(included_resources.values()), None
-        except KeyError as e:
-            return None, JSONAPIResponseFactory.make_errors_response(
-                {"status": 404, "title": "Cannot include the relationship %s" % str(e)}, status=404
-            )
+
 
     @staticmethod
     def count(model):
@@ -100,6 +102,153 @@ class JSONAPIRouteRegistrar(object):
                               resource_identifer)
                           }
         return related_model.query.filter(related_model.id == resource_identifer["id"]).first(), None
+
+    def search(self, index, query):
+        # query the search engine
+        results, total = query_index(index=index, query=query)
+        if total == 0:
+            return {}, 0
+
+        res_dict = {}
+        for _idx, res in results.items():
+            when = []
+            ids = [r["id"] for r in res]
+
+            for i in range(len(ids)):
+                when.append((ids[i], i))
+
+            m = self.models[_idx]
+            # query database from the results of the search engine
+            res_dict[_idx] = db.session.query(m).filter(m.id.in_(ids)).order_by(db.case(when, value=m.id))
+
+        return res_dict, total
+
+    def register_search_route(self):
+
+        search_rule = '/api/{api_version}/search'.format(api_version=self.api_version)
+
+        def search_endpoint():
+            # TODO: implementer la pagination et le include resources
+            # TODO: attention pour le total-count: il est ok dans l'absolu MAIS les résultats eux sont cappés à 10.000
+            # TODO: le self dans links
+
+            if "query" not in request.args:
+                return JSONAPIResponseFactory.make_errors_response(
+                    {"status": 403, "title": "Missing 'query' parameter"}, status=403
+                )
+
+            url_prefix = request.host_url[:-1] + self.url_prefix
+
+            # PARAMETERS
+            index = request.args.get("index", "")
+            query = request.args["query"]
+
+            # if request has pagination parameters
+            # add links to the top-level object
+            if 'page[number]' in request.args or 'page[size]' in request.args:
+                num_page = int(request.args.get('page[number]', 1))
+                page_size = min(
+                    current_app.config["SEARCH_RESULT_PER_PAGE"],
+                    int(request.args.get('page[size]', current_app.config["SEARCH_RESULT_PER_PAGE"]))
+                )
+            else:
+                num_page = 1
+                page_size = int(current_app.config["SEARCH_RESULT_PER_PAGE"])
+
+            # Search, retrieve and paginate objs
+            res, count = self.search(index=index, query=query)
+            print(query, count)
+
+            # if request has sorting parameter
+            if "sort" in request.args:
+                sort_criteriae = {}
+                sort_order = asc
+                for criteria in request.args["sort"].split(','):
+                    # prefixing with minus means a DESC order
+                    if criteria.startswith('-'):
+                        sort_order = desc
+                        criteria = criteria[1:]
+                    # try to add criteria
+                    c = criteria.split(".")
+                    if len(c) == 2:
+                        m = self.models.get(c[0])
+                        if m:
+                            if hasattr(m, c[1]):
+                                if c[0] not in sort_criteriae:
+                                    sort_criteriae[c[0]] = []
+                                sort_criteriae[c[0]].append(getattr(m, c[1]))
+
+                print("sort criteriae: ", request.args["sort"], sort_criteriae)
+                s = []
+                for criteria_table_name in sort_criteriae.keys():
+                    # reset the order clause
+                    if criteria_table_name in res.keys():
+                        res[criteria_table_name] = res[criteria_table_name].order_by(False)
+                        # then apply the user order criteriae
+                        for c in sort_criteriae[criteria_table_name]:
+                            res[criteria_table_name] = res[criteria_table_name].order_by(sort_order(c))
+
+            # paginate
+            for idx in res.keys():
+                res[idx] = res[idx].paginate(num_page, page_size, False).items
+
+            args = OrderedDict(request.args)
+            nb_pages = max(1, ceil(count / page_size))
+
+            links = {}
+            keep_pagination = "page[size]" in args or "page[number]" in args or count > page_size
+            if keep_pagination:
+                args["page[size]"] = page_size
+            links["self"] = JSONAPIRouteRegistrar.make_url(request.base_url, args)
+
+            if keep_pagination:
+                args["page[number]"] = 1
+                links["first"] = JSONAPIRouteRegistrar.make_url(request.base_url, args)
+                args["page[number]"] = nb_pages
+                links["last"] = JSONAPIRouteRegistrar.make_url(request.base_url, args)
+                if num_page > 1:
+                    n = max(1, num_page - 1)
+                    if n * page_size <= count:
+                        args["page[number]"] = max(1, num_page - 1)
+                        links["prev"] = JSONAPIRouteRegistrar.make_url(request.base_url, args)
+                if num_page < nb_pages:
+                    args["page[number]"] = min(nb_pages, num_page + 1)
+                    links["next"] = JSONAPIRouteRegistrar.make_url(request.base_url, args)
+
+            # should we retrieve relationships too ?
+            w_rel_links, w_rel_data = JSONAPIRouteRegistrar.get_relationships_mode(request.args)
+
+            # finally make the facades
+            facade_objs = []
+            for idx, r in res.items():
+                for obj in r:
+                    facade_class = obj.__jsonapi_search_facade__
+                    f_obj = facade_class(url_prefix, obj, with_relationships_links=w_rel_links, with_relationships_data=w_rel_data)
+                    facade_objs.append(f_obj)
+
+            # find out if related resources must be included too
+            included_resources = None
+            if "include" in request.args:
+                included_resources = []
+                for facade_obj in facade_objs:
+                    included_res, errors = JSONAPIRouteRegistrar.get_included_resources(
+                        request.args["include"].split(','),
+                        facade_obj
+                    )
+                    if errors:
+                        pass
+                        #return errors
+                    included_resources.extend(included_res)
+
+            return JSONAPIResponseFactory.make_data_response(
+                [f.resource for f in facade_objs],
+                links=links,
+                included_resources=included_resources,
+                # TODO: Scroll API: total-if-it-was-not-capped-by-elastic
+                meta={"total-count": count}
+            )
+        # register the rule
+        api_bp.add_url_rule(search_rule, endpoint=search_endpoint.__name__, view_func=search_endpoint)
 
     def register_get_routes(self, model, facade_class):
         """
@@ -176,22 +325,6 @@ class JSONAPIRouteRegistrar(object):
                     num_page = 1
                     page_size = facade_class.ITEMS_PER_PAGE
 
-                # if request has search parameter
-                # (search request arg, search fieldnames)
-                search_parameters = [(f, [field.strip() for field in f[len('search['):-1].split(",")])
-                                     for f in request.args.keys() if f.startswith('search[') and f.endswith(']')]
-                if len(search_parameters) > 0 or "search" in request.args:
-                    if "search" in request.args:
-                        expression = request.args["search"]
-                        search_fields = ["*"]
-                    else:
-                        search_request_param, search_fields = search_parameters[0]
-                        expression = request.args[search_request_param]
-
-                    print("search parameters: ", search_fields, expression)
-                    objs_query, count = model.search(expression, fields=search_fields, page=num_page,
-                                                     per_page=page_size)
-
                 # if request has filter parameter
                 filter_criteriae = []
                 filters = [(f, f[len('filter['):-1])  # (filter_param, filter_fieldname)
@@ -220,13 +353,8 @@ class JSONAPIRouteRegistrar(object):
                     # then apply the user order criteriae
                     objs_query = objs_query.order_by(sort_order(*sort_criteriae))
 
-                # apply the pagination after an eventual sort
-                if "search" in request.args:
-                    all_objs = objs_query.all()  # the search feature has already paginated the results for us
-                    # TODO : this is bad because it is dependent on the search system (eg. good for us that elasticsearch provides pagination)
-                else:
-                    pagination_obj = objs_query.paginate(num_page, page_size, False)
-                    all_objs = pagination_obj.items
+                pagination_obj = objs_query.paginate(num_page, page_size, False)
+                all_objs = pagination_obj.items
                 args = OrderedDict(request.args)
 
                 if count is None:
@@ -282,7 +410,7 @@ class JSONAPIRouteRegistrar(object):
             except (AttributeError, ValueError, OperationalError) as e:
                 print(e)
                 return JSONAPIResponseFactory.make_errors_response(
-                    {"status": 400, "details": str(e)}, status=400
+                    {"status": 400, "detail": str(e)}, status=400
                 )
 
         collection_endpoint.__name__ = "%s_%s" % (
@@ -378,7 +506,7 @@ class JSONAPIRouteRegistrar(object):
             else:
                 relationship = f_obj.relationships[rel_name]
                 data = relationship["resource_identifier_getter"]()
-                count = len(data)
+                count = len(data) if data else 0
                 links = relationship["links"]
                 paginated_links = {}
 
@@ -431,7 +559,7 @@ class JSONAPIRouteRegistrar(object):
 
                 except (AttributeError, ValueError, OperationalError) as e:
                     return JSONAPIResponseFactory.make_errors_response(
-                        {"status": 400, "details": str(e)}, status=400
+                        {"status": 400, "detail": str(e)}, status=400
                     )
 
         resource_relationship_endpoint.__name__ = "%s_%s_%s" % (
@@ -529,7 +657,7 @@ class JSONAPIRouteRegistrar(object):
 
                 except (AttributeError, ValueError, OperationalError) as e:
                     return JSONAPIResponseFactory.make_errors_response(
-                        {"status": 400, "details": str(e)}, status=400
+                        {"status": 400, "detail": str(e)}, status=400
                     )
 
         resource_endpoint.__name__ = "%s_%s_%s" % (
@@ -556,7 +684,7 @@ class JSONAPIRouteRegistrar(object):
                 request_data = json_loads(request.data)
             except json.decoder.JSONDecodeError as e:
                 return JSONAPIResponseFactory.make_errors_response(
-                    {"status": 403, "title": "The request body is malformed", "details" : str(e)}, status=403
+                    {"status": 403, "title": "The request body is malformed", "detail" : str(e)}, status=403
                 )
 
             if "data" not in request_data:
@@ -662,7 +790,7 @@ class JSONAPIRouteRegistrar(object):
                                                                      status=201,
                                                                      headers=headers)
                 else:
-                    return JSONAPIResponseFactory.make_errors_response(e)
+                    return JSONAPIResponseFactory.make_errors_response(e, status=e.get("status", 403))
 
         collection_endpoint.__name__ = "post_%s_%s" % (
             facade_class.TYPE_PLURAL.replace("-", "_"), collection_endpoint.__name__
@@ -687,7 +815,7 @@ class JSONAPIRouteRegistrar(object):
 
             except json.decoder.JSONDecodeError as e:
                 return JSONAPIResponseFactory.make_errors_response(
-                    {"status": 403, "title": "The request body is malformed", "details": str(e)}, status=403
+                    {"status": 403, "title": "The request body is malformed", "detail": str(e)}, status=403
                 )
 
             if "data" not in request_data:
@@ -733,7 +861,7 @@ class JSONAPIRouteRegistrar(object):
                                                                      status=200,
                                                                      headers=headers)
                 else:
-                    return JSONAPIResponseFactory.make_errors_response(e)
+                    return JSONAPIResponseFactory.make_errors_response(e, status=e.get("status", 403))
 
         resource_relationship_endpoint.__name__ = "post_%s_%s_%s" % (
             facade_class.TYPE_PLURAL.replace("-", "_"), rel_name.replace("-", "_"),
@@ -765,7 +893,7 @@ class JSONAPIRouteRegistrar(object):
                 request_data = json_loads(request.data)
             except json.decoder.JSONDecodeError as e:
                 return JSONAPIResponseFactory.make_errors_response(
-                    {"status": 403, "title": "The request body is malformed", "details": str(e)}, status=403
+                    {"status": 403, "title": "The request body is malformed", "detail": str(e)}, status=403
                 )
 
             if "data" not in request_data:
@@ -872,7 +1000,7 @@ class JSONAPIRouteRegistrar(object):
                                                                      status=200,
                                                                      headers=headers)
                 else:
-                    return JSONAPIResponseFactory.make_errors_response(e)
+                    return JSONAPIResponseFactory.make_errors_response(e, status=e.get("status", 403))
 
         single_obj_endpoint.__name__ = "post_%s_%s" % (
             facade_class.TYPE_PLURAL.replace("-", "_"), single_obj_endpoint.__name__
@@ -897,7 +1025,7 @@ class JSONAPIRouteRegistrar(object):
 
             except json.decoder.JSONDecodeError as e:
                 return JSONAPIResponseFactory.make_errors_response(
-                    {"status": 403, "title": "The request body is malformed", "details" : str(e)}, status=403
+                    {"status": 403, "title": "The request body is malformed", "detail" : str(e)}, status=403
                 )
 
             if "data" not in request_data:
@@ -946,7 +1074,7 @@ class JSONAPIRouteRegistrar(object):
                                                                      status=200,
                                                                      headers=headers)
                 else:
-                    return JSONAPIResponseFactory.make_errors_response(e)
+                    return JSONAPIResponseFactory.make_errors_response(e, status=e.get("status", 403))
 
         resource_relationship_endpoint.__name__ = "patch_%s_%s_%s" % (
             facade_class.TYPE_PLURAL.replace("-", "_"), rel_name.replace("-", "_"),

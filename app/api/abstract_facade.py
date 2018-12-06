@@ -1,5 +1,4 @@
 from app import db
-from app.models import SearchableMixin
 
 
 class JSONAPIAbstractFacade(object):
@@ -10,13 +9,14 @@ class JSONAPIAbstractFacade(object):
     TYPE = "ABSTRACT-TYPE"
     TYPE_PLURAL = "ABSTRACT-TYPE-PLURAL"
 
-    ITEMS_PER_PAGE = 10000 #TODO: au delà il faut passer par l'api scroll d'elastic search
+    ITEMS_PER_PAGE = 1000 #TODO: au delà il faut passer par l'api scroll d'elastic search
 
     def __init__(self, url_prefix, obj, with_relationships_links=True, with_relationships_data=True):
         self.obj = obj
         self.url_prefix = url_prefix
         self.with_relationships_data = with_relationships_data
         self.with_relationships_links = with_relationships_links
+
         self.self_link = "{url_prefix}/{type_plural}/{id}".format(
             url_prefix=self.url_prefix, type_plural=self.TYPE_PLURAL, id=self.id
         )
@@ -41,12 +41,16 @@ class JSONAPIAbstractFacade(object):
     def id(self):
         raise NotImplementedError
 
+    def bind_facade(self):
+        raise NotImplementedError
+
     @property
     def resource(self):
         raise NotImplementedError
 
     @property
     def search_fields(self):
+        from app.models import SearchableMixin
         if isinstance(self.obj, SearchableMixin):
             return self.obj.__searchable__
         else:
@@ -80,13 +84,13 @@ class JSONAPIAbstractFacade(object):
             attributes[att.replace("-", "_")] = attributes.pop(att)
 
         attributes["id"] = obj_id
-        print("  setting attributes", attributes)
+        print("  setting attr", attributes)
         resource = model(**attributes)
 
         # set related resources
         for rel_name, rel_data in related_resources.items():
             rel_name = rel_name.replace("-", "_")
-            print("  setting", rel_name, rel_data)
+            print("  setting rel", rel_name, rel_data)
             if hasattr(resource, rel_name):
                 try:
                     setattr(resource, rel_name, rel_data)
@@ -129,7 +133,7 @@ class JSONAPIAbstractFacade(object):
         # update attributes
         for att, att_value in attributes.items():
             att_name = att.replace("-", "_")
-            print("  setting", att, att_value)
+            print("  setting attr", att, att_value)
             if hasattr(obj, att_name):
                 setattr(obj, att_name, att_value)
             else:
@@ -138,8 +142,9 @@ class JSONAPIAbstractFacade(object):
         # update related resources
         for rel_name, rel_data in related_resources.items():
             rel_name = rel_name.replace("-", "_")
-            print("  setting", rel_name, rel_data)
+            print("  setting rel", rel_name, rel_data)
             if hasattr(obj, rel_name):
+                print(getattr(obj, rel_name))
                 # append (POST) or replace (PATCH) replace related resources ?
                 if not append:
                     try:

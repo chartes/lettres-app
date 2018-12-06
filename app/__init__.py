@@ -52,7 +52,6 @@ def create_app(config_name="dev"):
         # It is important to load the .env file before parsing the config file
         load_dotenv('%s.env' % config_name, verbose=True)
         from config import config
-        pprint.pprint(config[config_name].DB_DROP_AND_CREATE_ALL)
         app.config.from_object(config[config_name])
 
     app.wsgi_app = PrefixMiddleware(app.wsgi_app, prefix=app.config["APP_URL_PREFIX"])

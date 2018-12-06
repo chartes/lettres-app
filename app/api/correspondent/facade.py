@@ -26,6 +26,13 @@ class CorrespondentFacade(JSONAPIAbstractFacade):
             errors = []
         return e, kwargs, errors
 
+    @staticmethod
+    def update_resource(obj, obj_type, attributes, related_resources, append=False):
+        # rename the relationship
+        if "roles-within-documents" in related_resources:
+            related_resources["correspondents_having_roles"] = related_resources.pop("roles-within-documents")
+        return JSONAPIAbstractFacade.update_resource(obj, obj_type, attributes, related_resources, append)
+
     def get_document_resource_identifiers(self):
         from app.api.document.facade import DocumentFacade
         return [] if self.obj.correspondents_having_roles is None else [
