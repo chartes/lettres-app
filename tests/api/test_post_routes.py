@@ -91,7 +91,7 @@ class TestPostRoutes(TestBaseServer):
             "data": {
                 "type": "image",
                 "attributes": {
-                    "img-url": "new-url",
+                    "canvas-idx": 1,
                     "manifest-url": "http://burgess.biz/"
                 },
                 "relationships": {

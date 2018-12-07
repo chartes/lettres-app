@@ -1,5 +1,6 @@
 import logging
 from faker import Faker
+from faker.generator import random
 from sqlalchemy.exc import IntegrityError
 
 
@@ -131,7 +132,7 @@ def create_fake_documents(db, nb_docs=1000, nb_correspondents=None, fake=None):
             # add fake Images
             nb_images = 10
             for i in range(0, nb_images):
-                img = Image(img_url=fake.uri(), manifest_url=fake.uri(), document_id=doc.id)
+                img = Image(canvas_idx=random.randint(0, 100), manifest_url=fake.uri(), document_id=doc.id)
                 db.session.add(img)
 
             # add fake Notes

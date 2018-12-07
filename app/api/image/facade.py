@@ -31,7 +31,7 @@ class ImageFacade(JSONAPIAbstractFacade):
         resource = {
             **self.resource_identifier,
             "attributes": {
-                "img-url": self.obj.img_url,
+                "canvas-idx": self.obj.canvas_idx,
                 "manifest-url": self.obj.manifest_url,
             },
             "meta": self.meta,

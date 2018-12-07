@@ -262,7 +262,7 @@ curl -X POST \
     "data": {
         "type": "image",
         "attributes": {
-            "img-url": "new-url",
+            "canvas-idx": 10,
             "manifest-url": "http://burgess.biz/"
         }
     }
@@ -289,7 +289,7 @@ Réponse ```200 OK```
         "type": "image",
         "id": 1,
         "attributes": {
-            "img-url": "http://www.walsh.net/author/",
+            "canvas-idx": 4,
             "manifest-url": "http://gonzalez.com/main/homepage.html"
         },
         "meta": {},
@@ -330,7 +330,7 @@ curl -X POST \
     "data": {
         "type": "image",
         "attributes": {
-            "img-url": "new-url",
+            "canvas-idx": 4,
             "manifest-url": "http://burgess.biz/"
         },
         "relationships": {

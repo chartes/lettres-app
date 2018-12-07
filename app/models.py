@@ -150,7 +150,7 @@ class Image(SearchableMixin, db.Model):
     __tablename__ = "image"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    img_url = db.Column(db.String(45), nullable=False)
+    canvas_idx = db.Column(db.Integer, nullable=False)
     manifest_url = db.Column(db.String(200))
     document_id = db.Column(db.Integer, db.ForeignKey('document.id', ondelete='CASCADE'), index=True)
 
