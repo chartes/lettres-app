@@ -10,21 +10,21 @@ cette fonctionnalité via les paramètres ```page[size]=25``` et ```page[number]
 
 **Création** d'un document avec les champs suivants :
 
-| Champ| Type | Obligatoire|
-|------|------|------------|
-|id | Integer |Non |
-|title | String | **Oui** |
-|witness-label | String | Non |
-|classification-mark | String | Non |
-|argument | Text | Non |
-|creation | Date | Non |
-|creation-label | String| Non |
-|location-date-label | String | Non |
-|location-date-ref | String | Non |
-|transcription | Text | Non |
-|date-insert | Date  | Non |
-|date-update | Date | Non |
-|is-published | Boolean | Non |
+| Champ| Type | Obligatoire| Description
+|------|------|------------| ---------|
+|id | Integer |Non | |
+|title | String | **Oui** | texte riche |
+|witness-label | String | Non |  texte riche |
+|classification-mark | String | Non | texte riche |
+|argument | Text | Non |  texte riche |
+|creation | Date | Non | |
+|creation-label | String| Non |  texte riche |
+|location-date-label | String | Non |  texte riche |
+|location-date-ref | String | Non | |
+|transcription | Text | Non |  texte riche |
+|date-insert | Date  | Non | |
+|date-update | Date | Non | |
+|is-published | Boolean | Non | | |
 
 Ainsi que les relations suivantes :
 
