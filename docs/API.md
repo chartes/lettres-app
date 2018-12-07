@@ -38,7 +38,7 @@ curl -X GET \
   -H 'cache-control: no-cache'
 ```
 
-**Création** d'un document avec les champs suivants :
+**Création** d'un document :
 
 | Champ| Type | Obligatoire| Description
 |------|------|------------| ---------|
@@ -75,6 +75,7 @@ Ainsi que les relations suivantes :
 
 **Exemple de création :**
 
+**NB :** les ressources liées (images, owner, institution) existent au préalable.
 ```json
 curl -X POST \
   http://localhost:5004/lettres/api/1.0/documents \
