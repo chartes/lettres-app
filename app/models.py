@@ -102,7 +102,6 @@ class Document(SearchableMixin, db.Model):
     creation_label = db.Column(db.String)
     location_date_label = db.Column(db.String)
     location_date_ref = db.Column(db.String)
-    # prev_document_id = db.Column(db.Integer, db.ForeignKey('document.id'), index=True)
     prev_document_id = db.Column(db.Integer, db.ForeignKey('document.id'), index=True)
     transcription = db.Column(db.Text)
     date_insert = db.Column(db.String)

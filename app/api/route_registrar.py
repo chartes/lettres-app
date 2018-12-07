@@ -912,6 +912,10 @@ class JSONAPIRouteRegistrar(object):
                     return JSONAPIResponseFactory.make_errors_response(
                         {"status": 403, "title": "Missing 'id' attribute"}, status=403
                     )
+                if  request_data["data"].get("id") != id:
+                    return JSONAPIResponseFactory.make_errors_response(
+                        {"status": 403, "title": "'id' attribute value mismatches the ID URL"}, status=403
+                    )
 
                 if request_data["data"]["type"] != facade_class.TYPE:
                     return JSONAPIResponseFactory.make_errors_response(
