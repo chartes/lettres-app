@@ -29,7 +29,7 @@ cette fonctionnalité via les paramètres ```page[size]=25``` et ```page[number]
 Ainsi que les relations suivantes :
 
 | Relation  | Type | Arité | Obligatoire| Méthodes| Description |
-|------|------|-------|------------|---------|
+|------|------|-------|------------|---------|---------|
 |images | image | liste | Non |  GET,POST,PATCH | |
 |notes | note | liste | Non | GET,POST,PATCH | |
 |languages | language | liste | Non | GET,POST,PATCH | |
