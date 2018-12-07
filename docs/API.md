@@ -6,9 +6,9 @@ L'API Lettres implémente en grande partie la spécification [**json:api 1.0**](
 Les collections de ressources sont nativement paginées et il est possible de contrôler
 cette fonctionnalité via les paramètres ```page[size]=25``` et ```page[number]=2```
 
-# Document
+## Document
 
-**Récupération** d'un document
+### **Récupération** d'un document
 
 Il y a trois possibilités qui différent en terme de performance et de quantité d'information à propos des relations entre le document et ses ressources liées (images, langages, propriétaire, etc).
 
@@ -38,7 +38,7 @@ curl -X GET \
   -H 'cache-control: no-cache'
 ```
 
-**Création** d'un document :
+### **Création** d'un document
 
 | Champ| Type | Obligatoire| Description
 |------|------|------------| ---------|
@@ -247,7 +247,7 @@ curl -X POST \
 - Une requête faisant référence à une ressource non existante aura comme réponse ```404 NOT FOUND```
 
 
-# Manipulation des relations et modification des resources
+## Manipulation des relations et modification des resources
 
 Il y a deux manières de procéder pour ajouter une ressource à un document.
 
