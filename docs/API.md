@@ -8,6 +8,36 @@ cette fonctionnalité via les paramètres ```page[size]=25``` et ```page[number]
 
 # Document
 
+**Récupération** d'un document
+
+Il y a trois possibilités qui différent en terme de performance et de quantité d'information à propos des relations entre le document et ses ressources liées (images, langages, propriétaire, etc).
+
+Avec toutes les informations (liens des relations + ```id``` des ressources liées) :
+```json
+curl -X GET \
+  http://localhost:5004/lettres/api/1.0/documents/3 \
+  -H 'Accept: application/vnd.api+json' \
+  -H 'Content-Type: application/vnd.api+json' \
+  -H 'cache-control: no-cache'
+```
+
+Avec uniquement les liens des relations (mais pas les ```id``` des ressources liées) :
+```json
+curl -X GET \
+  'http://localhost:5004/lettres/api/1.0/documents/3?with-relationships=links' \
+  -H 'Accept: application/vnd.api+json' \
+  -H 'Content-Type: application/vnd.api+json' \
+  -H 'cache-control: no-cache'
+```
+Sans les relations :
+```json
+curl -X GET \
+  'http://localhost:5004/lettres/api/1.0/documents/3?without-relationships' \
+  -H 'Accept: application/vnd.api+json' \
+  -H 'Content-Type: application/vnd.api+json' \
+  -H 'cache-control: no-cache'
+```
+
 **Création** d'un document avec les champs suivants :
 
 | Champ| Type | Obligatoire| Description
