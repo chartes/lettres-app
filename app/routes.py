@@ -13,6 +13,17 @@ def documentation():
     return render_template("docs/docs.html")
 
 
+
+@app_bp.route("/documents")
+def documents():
+    return render_template("docs/docs.html")
+
+@app_bp.route("/documents/<id>")
+def document(id):
+
+    return render_template("documents/document_edit.html", id=id)
+
+
 @app_bp.route("/recreate-database")
 def recreate_database():
     if current_app.config["DEBUG"] and current_app.config["ENV"] != "production" and current_app.config["GENERATE_FAKE_DATA"]:

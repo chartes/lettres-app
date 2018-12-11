@@ -7,3 +7,10 @@ venv
 *.mwb
 tests/data/lettres-test.sqlite
 /app/client/node_modules/
+
+# Frontend directories and files
+
+node_modules/
+npm-debug.log*
+*.js.map
+report.html

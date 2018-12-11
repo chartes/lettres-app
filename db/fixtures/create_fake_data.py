@@ -60,11 +60,11 @@ def create_fake_documents(db, nb_docs=1000, nb_correspondents=None, fake=None):
     whitelists = Whitelist.query.all()
 
     # add some languages
-    db.session.add(Language(code="FRO"))
-    db.session.add(Language(code="ENG"))
-    db.session.add(Language(code="OCC"))
-    db.session.add(Language(code="CZC"))
-    db.session.add(Language(code="ITA"))
+    db.session.add(Language(code="FRO", label="Ancien français"))
+    db.session.add(Language(code="ENG", label="Anglais"))
+    db.session.add(Language(code="OCC", label="Occitant"))
+    db.session.add(Language(code="CZC", label="Tchèque"))
+    db.session.add(Language(code="ITA", label="Italien"))
     db.session.commit()
     languages = Language.query.all()
 
