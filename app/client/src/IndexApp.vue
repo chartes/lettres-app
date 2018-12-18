@@ -1,6 +1,6 @@
 <template>
     <div id="app">
-        <documentIndex></documentIndex>
+        <documentIndex page_id="1"></documentIndex>
     </div>
 </template>
 
