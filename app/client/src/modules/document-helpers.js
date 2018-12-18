@@ -15,7 +15,7 @@ const getCorrespondents = function (included) {
           correspondentId: inc.relationships.correspondent.data.id,
         }
       }
-    })
+    });
     return Object.values(hasRoleById).map(hasRole => { return {
         ...hasRole, correspondent: correspondentsById[hasRole.correspondentId], role: rolesById[hasRole.roleId]
     }})
@@ -27,8 +27,7 @@ const getCorrespondents = function (included) {
   },
 
   getLanguages = function (included) {
-    let langs = included.filter(item => item.type === 'language').map(lang => { return { id: lang.id, ...lang.attributes }})
-    return langs
+    return  included.filter(item => item.type === 'language').map(lang => { return { id: lang.id, ...lang.attributes }});
   },
 
   getTradition = function (included) {
@@ -36,9 +35,9 @@ const getCorrespondents = function (included) {
   },
 
   getSimpleRelation = function (propName, included) {
-    let found = included.find(item => item.type === propName)
+    let found = included.find(item => item.type === propName);
     return { id: found.id, ...found.attributes}
-  }
+  };
 
 
 

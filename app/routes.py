@@ -13,14 +13,13 @@ def documentation():
     return render_template("docs/docs.html")
 
 
-
 @app_bp.route("/documents")
 def documents():
-    return render_template("docs/docs.html")
+    return render_template("docs/document_index.html")
+
 
 @app_bp.route("/documents/<id>")
 def document(id):
-
     return render_template("documents/document_edit.html", id=id)
 
 

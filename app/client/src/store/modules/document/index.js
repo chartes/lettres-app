@@ -18,7 +18,7 @@ const state = {
 const mutations = {
 
   UPDATE_DOCUMENT (state, {data, included}) {
-    console.log('UPDATE_DOCUMENT', data, included)
+    console.log('UPDATE_DOCUMENT', data, included);
     state.document = { ...data.attributes, id: data.id};
     state.correspondents = getCorrespondents(included);
     state.institution = getInstitution(included);
@@ -38,37 +38,37 @@ const actions = {
 
   fetch ({ commit }, id) {
 
-    commit('LOADING_STATUS', true)
-
+    commit('LOADING_STATUS', true);
+    console.warn(`fetching doc '${id}'`);
     let incs = ['correspondents', 'roles', 'correspondents-having-roles', 'notes', 'institution', 'tradition', 'languages']
 
     return http.get(`documents/${id}?include=${incs.join(',')}`).then( response => {
 
-      console.log('doc', response.data)
-      commit('UPDATE_DOCUMENT', response.data)
+      console.log('doc', response.data);
+      commit('UPDATE_DOCUMENT', response.data);
       commit('LOADING_STATUS', false)
 
     })
   },
   save ({ commit, rootGetters }, data) {
-
     //const auth = rootGetters['user/authHeader'];
 
     //return http.put(`/documents`, { data: data }, auth)
     return http.put(`/documents`, { data: data })
       .then(response => {
-        commit('UPDATE_DOCUMENT', response.data.data)
+        commit('UPDATE_DOCUMENT', response.data.data);
         resolve(response.data)
       })
       .catch(error => {
-        console.error("error", error)
+        console.error("error", error);
         reject(error)
       })
   },
-  fetchAll ({ commit }, id) {
+  fetchAll ({ commit }) {
+    console.warn(`fetching all docs`);
     return http.get(`/documents`)
       .then( (response) => {
-      commit('UPDATE_DOCUMENT', response.data.data)
+      commit('UPDATE_ALL', response.data.data)
     })
   }
 

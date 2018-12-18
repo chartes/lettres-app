@@ -1,8 +1,9 @@
 <template>
-  <div class="document__notice section">
+  <section class="document__notice section">
 
-
-    <h1 class="title">{{ document.title }}</h1>
+    <header class="title">
+      <h1 class="title">{{ document.title }}</h1>
+    </header>
 
     <div class="document__attributes columns is-multiline">
       <div class="column is-one-third">
@@ -52,7 +53,7 @@
 
     </div>
 
-  </div>
+  </section>
 </template>
 
 <script>

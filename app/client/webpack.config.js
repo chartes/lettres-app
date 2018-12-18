@@ -6,11 +6,14 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
   mode: 'development',
-  entry: './src/main.js',
+  entry: {
+    document: './src/document.js',
+    documentIndex: './src/documentIndex.js'
+  },
   output: {
     path: path.resolve(__dirname, '../static/js'),
     publicPath: '/lettres/static/js/',
-    filename: 'build.js'
+    filename: '[name].build.js'
   },
   module: {
     rules: [

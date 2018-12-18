@@ -1,19 +1,19 @@
 <template>
   <div class="document">
-    <div v-if="document" class="document__content">
+    <article v-if="document" class="document__content">
       <div class="columns">
         <div class="column">
 
           <document-notice/>
           <document-correspondents/>
-          <document-traditions/>
+          <document-transcription/>
 
         </div>
         <div class="column  is-one-fifth">
           Second column
         </div>
       </div>
-    </div>
+    </article>
     <loading-indicator :active="documentLoading" :full-page="true"/>
   </div>
 </template>
@@ -23,12 +23,12 @@
   import LoadingIndicator from './ui/LoadingIndicator';
   import DocumentNotice from './document/DocumentNotice';
   import DocumentCorrespondents from './document/DocumentCorrespondents';
-  import DocumentTraditions from './document/DocumentTraditions';
+  import DocumentTranscription from './document/DocumentTranscription';
 
   export default {
 
     name: 'Document',
-    components: {DocumentTraditions, DocumentCorrespondents, DocumentNotice, LoadingIndicator},
+    components: {DocumentCorrespondents, DocumentNotice, DocumentTranscription, LoadingIndicator},
     props: ['doc_id'],
     created () {
       this.$store.dispatch('document/fetch', this.doc_id)
