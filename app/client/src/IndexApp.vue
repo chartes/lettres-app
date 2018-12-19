@@ -1,7 +1,5 @@
 <template>
-    <div id="app">
-        <documentIndex page_id="1"></documentIndex>
-    </div>
+  <documentIndex page_id="1" page_size="20"></documentIndex>
 </template>
 
 <script>
@@ -13,4 +11,5 @@
 </script>
 
 <style>
+
 </style>

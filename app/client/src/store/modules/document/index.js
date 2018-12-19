@@ -13,7 +13,7 @@ const state = {
   images: false,
 
   documents: [],
-  documentPreviewCards: {},
+  documentsPreview: {},
   links: [],
   totalCount: 0,
 };
@@ -29,19 +29,23 @@ const mutations = {
     state.languages = getLanguages(included);
   },
   UPDATE_DOCUMENT_PREVIEW (state, {data, included}) {
-    console.log('UPDATE_DOCUMENT_PREVIEW', data);
+    console.log('UPDATE_DOCUMENT_PREVIEW');
     const newPreviewCard = {
       id: data.id,
-        title: data.attributes.title
+      attributes: data.attributes,
+      correspondents: getCorrespondents(included),
+      institution: getInstitution(included),
+      tradition: getTradition(included),
+      languages: getLanguages(included)
     };
 
-    state.documentPreviewCards[data.id] = {
-      ...state.documentPreviewCards[data.id],
+    state.documentsPreview[data.id] = {
+      ...state.documentsPreview[data.id],
       ...newPreviewCard
     };
   },
   UPDATE_ALL (state, payload) {
-    console.log('UPDATE_ALL', payload);
+    console.log('UPDATE_ALL');
     state.documents = payload.data;
     state.links = payload.links;
     state.totalCount = payload.meta["total-count"];
@@ -58,11 +62,8 @@ const actions = {
 
     commit('LOADING_STATUS', true);
     console.log(`fetching doc '${id}'`);
-    let incs = ['correspondents', 'roles', 'correspondents-having-roles', 'notes', 'institution', 'tradition', 'languages']
-
+    let incs = ['correspondents', 'roles', 'correspondents-having-roles', 'notes', 'institution', 'tradition', 'languages'];
     return http.get(`documents/${id}?include=${incs.join(',')}`).then( response => {
-
-      console.log('doc', response.data);
       commit('UPDATE_DOCUMENT', response.data);
       commit('LOADING_STATUS', false)
 
@@ -84,17 +85,15 @@ const actions = {
   fetchPreview ({ commit }, id) {
     commit('LOADING_STATUS', true);
     console.log(`fetching doc preview '${id}'`);
-    let incs = ['correspondents', 'correspondents-having-roles', 'institution', 'tradition', 'languages'];
+    let incs = ['correspondents', 'roles', 'correspondents-having-roles', 'institution', 'tradition', 'languages'];
 
     return http.get(`documents/${id}?include=${incs.join(',')}`).then( response => {
-      console.log('doc', response.data);
       commit('UPDATE_DOCUMENT_PREVIEW', response.data);
       commit('LOADING_STATUS', false)
     })
   },
-  fetchAll ({ commit }, pageId) {
-    console.log(`fetching all docs`);
-    return http.get(`/documents?page[size]=5&page[number]=${pageId}`)
+  fetchAll ({ commit }, {pageId, pageSize}) {
+    return http.get(`/documents?page[size]=${pageSize}&page[number]=${pageId}`)
       .then( (response) => {
       commit('UPDATE_ALL', response.data);
     })

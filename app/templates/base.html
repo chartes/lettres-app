@@ -12,6 +12,7 @@
     {% endblock %}
 
     <link href="https://fonts.googleapis.com/css?family=Bitter" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Oxygen" rel="stylesheet">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css">
     <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
@@ -22,38 +23,21 @@
 
 {% block hero %}
     <section class="hero">
-        <div class="hero-head has-background-white">
-            {% block navbar %}
-                <nav id="main-navbar" class="navbar" role="navigation" aria-label="main navigation">
-                    <div class="navbar-brand">
-                        <a class="navbar-item" href="{{ url_for('app_bp.index') }}">
-                            <img src="{{ url_for('app_bp.static', filename='images/logo-ecole-nationale-des-chartes-header.png') }}"
-                                 alt="École Nationale des Chartes - PSL" width="130" height="30p">
-                        </a>
-
-                        <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
-                          <span aria-hidden="true"></span>
-                          <span aria-hidden="true"></span>
-                          <span aria-hidden="true"></span>
-                        </a>
-                    </div>
-                    <div class="navbar-menu  is-active">
-                        <a class="navbar-item breadcrumb-index" href="{{ url_for('app_bp.index') }}">
-                            <div class="title website-title">Lettres</div>
-                        </a>
-                        {% block breadcrumb %} {% endblock %}
-                    </div>
-
-                    <div class="navbar-end">
-                         <a class="navbar-item link" href="{{ url_for('app_bp.documentation') }}">
-                            <span><i class="fas fa-book"></i></span>
-                            <span class="is-size-5" style="margin-left: 12px; margin-right: 12px;">Documentation</span>
-                        </a>
-                    </div>
+        <div class="hero-head">
+            <section id="search-container">
+             <div class="container">
+               <h1 class="title is-size-1">Correspondances</h1>
+               <input id="search-box" class="input is-rounded" type="text" placeholder="Catherine de Medicis">
+             </div>
+            </section>
+             <div id="navbar" >
+                <nav class="navbar-menu container">
+                     <a class="navbar-item is-active">Collections</a>
+                     <a class="navbar-item">Documentation</a>
+                     <a class="navbar-item">À propos</a>
                 </nav>
-            {% endblock %}
+             </div>
         </div>
-
     </section>
 {% endblock %}
 
@@ -79,8 +63,69 @@
     {% block app_content %}{% endblock %}
 {% endblock %}
 
+{% block footer %}
+<footer class="footer">
+  <div class="content has-text-centered">
+        <aside>
+            <a  href="{{ url_for('app_bp.index') }}">
+                 <img src="{{ url_for('app_bp.static', filename='images/logo-ecole-nationale-des-chartes-header.png') }}"
+                      alt="École Nationale des Chartes - PSL">
+            </a>
+        </aside>
+         <p>
+
+         </p>
+    </div>
+  </div>
+</footer>
+{% endblock %}
+
 {% block scripts %}
 {% endblock %}
 
 </body>
+
+<style type="text/css">
+  .hero .title {
+    font: 90%/140% 'Oxygen', sans-serif;
+    color: white;
+  }
+  .navbar-item {
+    color: white;
+    padding: 0px 40px 0px 40px;
+    height: 60px;
+
+  }
+  .navbar-item.is-active {
+    color: #348899 !important;
+    background: whitesmoke !important;
+  }
+
+  #navbar {
+    background: #343642;
+
+    text-align: center;
+    font: 1.2em 'Oxygen', sans-serif;
+  }
+  .navbar-item img {
+    max-height: 60px;
+  }
+  #navbar nav {
+        margin: auto;
+        width: 100%;
+  }
+  #search-container {
+    height: 320px;
+    background: #962D3E;
+  }
+  #search-container .container {
+    width: 50%;
+    padding: 80px 80px;
+    text-align: center;
+  }
+  #search-box {
+    width: 550px;
+  }
+
+</style>
 </html>

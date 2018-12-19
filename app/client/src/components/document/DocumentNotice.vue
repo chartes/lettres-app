@@ -9,7 +9,7 @@
 
     <div class="document__argument">
 
-      <h3 class="document__argument--title subtitle">Argument</h3>
+      <h2 class="document__argument--title subtitle">Argument</h2>
       <div class="document__argument--content">
         {{ document.argument }}
       </div>
@@ -39,5 +39,7 @@
 </script>
 
 <style scoped>
-
+  h1.title {
+    font: 90%/140% 'Oxygen', sans-serif;
+  }
 </style>

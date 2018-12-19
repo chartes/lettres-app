@@ -68,7 +68,6 @@ def create_fake_documents(db, nb_docs=1000, nb_correspondents=None, fake=None):
     db.session.commit()
     languages = Language.query.all()
 
-
     # add fake correspondent roles
     for i in range(5, 20):
         db.session.add(CorrespondentRole(label=fake.word()))
@@ -115,7 +114,7 @@ def create_fake_documents(db, nb_docs=1000, nb_correspondents=None, fake=None):
                 witness_label=fake.sentence(nb_words=5),
                 classification_mark=fake.sentence(nb_words=10),
                 transcription=fake.text(max_nb_chars=random.randint(100, 7500)),
-                argument=fake.text(),
+                argument=fake.text(max_nb_chars=random.randint(250, 500)),
                 creation=fake.sentence(nb_words=1),
                 creation_label=fake.sentence(nb_words=1),
                 location_date_label=fake.sentence(nb_words=1),

@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import App from './IndexApp.vue';
 
-import store from './store'
+import store from './store';
 
 new Vue({
   el: '#app',

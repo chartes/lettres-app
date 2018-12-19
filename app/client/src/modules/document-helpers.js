@@ -1,8 +1,8 @@
 const getCorrespondents = function (included) {
 
-    const hasRoleById = {}
-    const rolesById = {}
-    const correspondentsById = {}
+    const hasRoleById = {};
+    const rolesById = {};
+    const correspondentsById = {};
     included.forEach(inc => {
       if (inc.type === 'correspondent') {
         correspondentsById[inc.id] = {...inc.attributes}
