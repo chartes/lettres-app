@@ -1,8 +1,8 @@
 <template>
-  <section class="document__transcription section">
+  <section v-if="document.transcription.length > 0" class="document__transcription section">
     <br/>
     <header class="title">
-      <h3 class="document__transcription--title subtitle">Transcription</h3>
+      <h2 class="document__transcription--title subtitle">Transcription</h2>
     </header>
     <div class="document__transcription--content">
         {{ document.transcription }}

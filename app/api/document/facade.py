@@ -1,4 +1,5 @@
 from app.api.abstract_facade import JSONAPIAbstractFacade
+from app.api.collection.facade import CollectionFacade
 from app.models import Document
 
 
@@ -154,6 +155,7 @@ class DocumentFacade(JSONAPIAbstractFacade):
         test_decorator = lambda *args, **kwargs : decorator_function_with_arguments(*args, **kwargs)
 
         for rel_name, (rel_facade, to_many) in {
+            "collections": (CollectionFacade, True),
             "images": (ImageFacade, True),
             "notes": (NoteFacade, True),
             "languages": (LanguageFacade, True),

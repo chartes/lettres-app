@@ -1,5 +1,5 @@
 import http from '../../../modules/http-common';
-import {getCorrespondents, getInstitution, getLanguages, getTradition} from '../../../modules/document-helpers';
+import {getCorrespondents, getInstitution, getLanguages, getTradition, getCollections} from '../../../modules/document-helpers';
 
 const state = {
 
@@ -9,6 +9,7 @@ const state = {
   institution: false,
   tradition: false,
   languages: false,
+  collections: [],
   notes: false,
   images: false,
 
@@ -24,6 +25,7 @@ const mutations = {
     console.log('UPDATE_DOCUMENT', data, included);
     state.document = { ...data.attributes, id: data.id};
     state.correspondents = getCorrespondents(included);
+    state.collections = getCollections(included);
     state.institution = getInstitution(included);
     state.tradition = getTradition(included);
     state.languages = getLanguages(included);
@@ -36,7 +38,8 @@ const mutations = {
       correspondents: getCorrespondents(included),
       institution: getInstitution(included),
       tradition: getTradition(included),
-      languages: getLanguages(included)
+      languages: getLanguages(included),
+      collections: getCollections(included)
     };
 
     state.documentsPreview[data.id] = {
@@ -59,14 +62,12 @@ const mutations = {
 const actions = {
 
   fetch ({ commit }, id) {
-
     commit('LOADING_STATUS', true);
     console.log(`fetching doc '${id}'`);
-    let incs = ['correspondents', 'roles', 'correspondents-having-roles', 'notes', 'institution', 'tradition', 'languages'];
+    let incs = ['collections', 'correspondents', 'roles', 'correspondents-having-roles', 'notes', 'institution', 'tradition', 'languages'];
     return http.get(`documents/${id}?include=${incs.join(',')}`).then( response => {
       commit('UPDATE_DOCUMENT', response.data);
       commit('LOADING_STATUS', false)
-
     })
   },
   save ({ commit, rootGetters }, data) {
@@ -85,7 +86,7 @@ const actions = {
   fetchPreview ({ commit }, id) {
     commit('LOADING_STATUS', true);
     console.log(`fetching doc preview '${id}'`);
-    let incs = ['correspondents', 'roles', 'correspondents-having-roles', 'institution', 'tradition', 'languages'];
+    let incs = ['collections', 'correspondents', 'roles', 'correspondents-having-roles', 'institution', 'tradition', 'languages'];
 
     return http.get(`documents/${id}?include=${incs.join(',')}`).then( response => {
       commit('UPDATE_DOCUMENT_PREVIEW', response.data);

@@ -3,6 +3,8 @@ import sqlalchemy
 from faker import Faker
 from sqlalchemy.exc import IntegrityError
 
+from app.models import Collection
+
 
 def create_fake_users(db, nb_users=50, fake=None):
     from app.models import User
@@ -68,6 +70,12 @@ def create_fake_documents(db, nb_docs=1000, nb_correspondents=None, fake=None):
     db.session.commit()
     languages = Language.query.all()
 
+    # add fake collections
+    for i in range(1, 10):
+        db.session.add(Collection(title=fake.sentence(), description=fake.text()))
+    db.session.commit()
+    collections = Collection.query.all()
+
     # add fake correspondent roles
     for i in range(5, 20):
         db.session.add(CorrespondentRole(label=fake.word()))
@@ -128,6 +136,7 @@ def create_fake_documents(db, nb_docs=1000, nb_correspondents=None, fake=None):
             doc.owner_id = random.choice(users).id
             doc.whitelist_id = random.choice(whitelists).id
             doc.languages = random.choices(languages)
+            doc.collections =random.choices(collections, k=random.randint(0, 3))
 
             db.session.add(doc)
             db.session.commit()

@@ -1,5 +1,5 @@
 <template>
-  <section class="document__correspondents section">
+  <section v-if="correspondents.length > 0" class="document__correspondents section">
     <header>
       <h3 class="subtitle">Correspondants</h3>
     </header>

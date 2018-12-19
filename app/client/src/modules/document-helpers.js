@@ -30,6 +30,10 @@ const getCorrespondents = function (included) {
     return  included.filter(item => item.type === 'language').map(lang => { return { id: lang.id, ...lang.attributes }});
   },
 
+  getCollections = function (included) {
+    return  included.filter(item => item.type === 'collection').map(collection => { return { id: collection.id, ...collection.attributes }});
+  },
+
   getTradition = function (included) {
     return getSimpleRelation('tradition', included)
   },
@@ -48,7 +52,7 @@ export  {
   getInstitution,
   getTradition,
   getLanguages,
-
+  getCollections
 }
 
 /*

@@ -1,5 +1,6 @@
 <template>
   <div class="document__attributes columns is-multiline">
+
       <div class="column is-one-third">
         <p><label>witness-label :</label></p>
         <p>{{ document['witness-label'] }}</p>
@@ -32,9 +33,9 @@
         <p><label>Tradition :</label></p>
         <p v-if="!!tradition">{{ tradition.label }}</p>
       </div>
-      <div class="column is-one-third">
+      <div v-if="!!languages" class="column is-one-third">
         <p><label>Langues :</label></p>
-        <p v-if="!!languages">{{ languagesConcat }}</p>
+        <p >{{ languagesConcat }}</p>
       </div>
     </div>
 </template>
