@@ -9,6 +9,13 @@ association_document_has_language = db.Table('document_has_language',
                                                        primary_key=True)
                                              )
 
+association_document_has_collection = db.Table('document_has_collection',
+                                             db.Column('document_id', db.Integer, db.ForeignKey('document.id'),
+                                                       primary_key=True),
+                                             db.Column('collection_id', db.Integer, db.ForeignKey('collection.id'),
+                                                       primary_key=True)
+                                             )
+
 association_whitelist_has_user = db.Table('whitelist_has_user',
                                           db.Column('whitelist_id', db.Integer, db.ForeignKey('whitelist.id'),
                                                     primary_key=True),
@@ -83,6 +90,22 @@ db.event.listen(db.session, 'before_commit', SearchableMixin.before_commit)
 db.event.listen(db.session, 'after_commit', SearchableMixin.after_commit)
 
 
+class Collection(SearchableMixin, db.Model):
+    """ Une collection: un regroupement de lettres.
+
+    """
+
+    __tablename__ = 'collection'
+    __table_args__ = (
+        db.UniqueConstraint('title',  name='_collection_title_uc'),
+    )
+    __searchable__ = ['title']
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    title = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.String(400))
+
+
 class Document(SearchableMixin, db.Model):
     """Un document transcrit – ici, une lettre.
 
@@ -117,6 +140,10 @@ class Document(SearchableMixin, db.Model):
 
     languages = db.relationship("Language",
                                 secondary=association_document_has_language,
+                                backref=db.backref('documents', ))
+
+    collections = db.relationship("Collection",
+                                secondary=association_document_has_collection,
                                 backref=db.backref('documents', ))
 
     # relation unaire (liste ? ordonnée ?)
