@@ -6,6 +6,7 @@
       </aside>
       <section class="column">
         <div class="documents__index ">
+          <pagination :current="currentPage" :end="nbPages" :size="page_size" :action="goToPage"/>
           <ul id="preview-cards" >
             <li v-for="doc in documents" :key="doc.id">
               <document-preview-card :doc_id="doc.id"></document-preview-card>
@@ -14,21 +15,28 @@
         </div>
       </section>
     </section>
-
   </div>
 </template>
 
 <script>
   import { mapState } from 'vuex'
   import DocumentPreviewCard from './DocumentPreviewCard';
+  import Pagination from './ui/Pagination';
+
+  function getUrlParameter(url, paramName) {
+    paramName = paramName.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+    var regex = new RegExp('[\\?&]' + paramName + '=([^&#]*)');
+    var results = regex.exec(url);
+    return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+  }
 
   export default {
 
     name: 'DocumentIndex',
-    components: {DocumentPreviewCard},
+    components: {DocumentPreviewCard, Pagination},
     props: ["page_id", "page_size"],
     created () {
-      this.$store.dispatch('document/fetchAll', {pageId: this.page_id, pageSize: this.page_size});
+      this.goToPage(1);
       /*this.$store.dispatch('user/setAuthToken', this.auth_token).then(() => {
           this.$store.dispatch('user/getCurrentUser').then(() => {
             return this.$store.dispatch('document/fetch', this.doc_id)
@@ -37,7 +45,16 @@
        */
     },
     computed: {
-      ...mapState('document', ['documents'])
+      ...mapState('document', ['documents', 'links']),
+      nbPages() {
+          return parseInt(this.links.last ? getUrlParameter(this.links.last, "page%5Bnumber%5D") : 1);
+      }
+    },
+    methods: {
+        goToPage(num){
+            this.currentPage = num;
+            this.$store.dispatch('document/fetchAll', {pageId: num, pageSize: this.page_size});
+        }
     }
   }
 </script>

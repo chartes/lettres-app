@@ -4,7 +4,7 @@
     <header class="title">
       <h2 class="document__transcription--title subtitle">Transcription</h2>
     </header>
-    <div class="document__transcription--content">
+    <div class="document__transcription--content" v-html="HTMLContent">
         {{ document.transcription }}
     </div>
   </section>
@@ -17,6 +17,9 @@
   export default {
     name: 'DocumentTranscription',
     components: {DocumentAttributes},
+    created() {
+      this.HTMLContent = this.document.transcription;
+    },
     computed: {
       ...mapState('document', ['document'])
     }

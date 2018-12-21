@@ -2,7 +2,8 @@
   <section class="document__notice section">
 
     <header class="title">
-      <h1 class="title">{{ document.title }}</h1>
+      <span class="tag doc-tag">Document {{document.id}}</span>
+      <span><h1 class="title" v-html="titleContent"></h1></span>
     </header>
 
     <document-attributes></document-attributes>
@@ -41,6 +42,9 @@
     },
     computed: {
       ...mapState('document', ['document', 'collections'])
+    },
+    created() {
+        this.titleContent = this.document.title;
     }
   }
 </script>
