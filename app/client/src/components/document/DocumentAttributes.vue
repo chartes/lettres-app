@@ -27,15 +27,18 @@
       </div>
       <div class="column is-one-third">
         <p><label>Institution :</label></p>
-        <p><a :href="institution.name" target="_blank" v-if="!!institution">{{ institution.name }}</a></p>
+        <p v-if="!!institution.id"><a :href="institution.name" target="_blank">{{ institution.name }}</a></p>
+        <p v-else>Inconnue</p>
       </div>
       <div class="column is-one-third">
         <p><label>Tradition :</label></p>
-        <p v-if="!!tradition">{{ tradition.label }}</p>
+        <p v-if="!!tradition.id">{{ tradition.label }}</p>
+        <p v-else>Inconnue</p>
       </div>
-      <div v-if="!!languages" class="column is-one-third">
+      <div class="column is-one-third">
         <p><label>Langues :</label></p>
-        <p >{{ languagesConcat }}</p>
+        <p v-if="languages.length > 0" >{{ languagesConcat }}</p>
+        <p v-else>Inconnues</p>
       </div>
     </div>
 </template>

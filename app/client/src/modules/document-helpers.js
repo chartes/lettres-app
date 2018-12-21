@@ -40,7 +40,7 @@ const getCorrespondents = function (included) {
 
   getSimpleRelation = function (propName, included) {
     let found = included.find(item => item.type === propName);
-    return { id: found.id, ...found.attributes}
+    return found ? { id: found.id, ...found.attributes} : {id: null}
   };
 
 
