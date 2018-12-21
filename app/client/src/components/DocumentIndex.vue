@@ -6,7 +6,7 @@
       </aside>
       <section class="column">
         <div class="documents__index ">
-          <!-- <pagination :current="currentPage" :end="nbPages" :size="page_size" :action="goToPage"/> -->
+          <pagination :current="currentPage" :end="nbPages" :size="page_size" :action="goToPage"/>
           <ul id="preview-cards" >
             <li v-for="doc in documents" :key="doc.id">
               <document-preview-card :doc_id="doc.id"></document-preview-card>
@@ -47,7 +47,7 @@
     computed: {
       ...mapState('document', ['documents', 'links']),
       nbPages() {
-          return this.links.last ? getUrlParameter(this.links.last, "page%5Bnumber%5D") : 1;
+          return parseInt(this.links.last ? getUrlParameter(this.links.last, "page%5Bnumber%5D") : 1);
       }
     },
     methods: {
