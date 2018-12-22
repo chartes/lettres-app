@@ -1,5 +1,5 @@
 import http from '../../../modules/http-common';
-import {getCorrespondents, getInstitution, getLanguages, getTradition, getCollections} from '../../../modules/document-helpers';
+import {getCorrespondents, getInstitution, getLanguages, getNotes, getTradition, getCollections} from '../../../modules/document-helpers';
 
 const state = {
 
@@ -29,6 +29,7 @@ const mutations = {
     state.institution = getInstitution(included);
     state.tradition = getTradition(included);
     state.languages = getLanguages(included);
+    state.notes = getNotes(included);
   },
   UPDATE_DOCUMENT_PREVIEW (state, {data, included}) {
     console.log('UPDATE_DOCUMENT_PREVIEW');
@@ -39,7 +40,7 @@ const mutations = {
       institution: getInstitution(included),
       tradition: getTradition(included),
       languages: getLanguages(included),
-      collections: getCollections(included)
+      collections: getCollections(included),
     };
 
     state.documentsPreview[data.id] = {

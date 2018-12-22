@@ -17,7 +17,7 @@
       </div>
     </div>
 
-    <div class="document__argument">
+    <div v-if="!!document.argument" class="document__argument">
       <h2 class="document__argument--title subtitle">Argument</h2>
       <div class="document__argument--content">
         {{ document.argument }}

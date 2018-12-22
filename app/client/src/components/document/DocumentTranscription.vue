@@ -4,9 +4,13 @@
     <header class="title">
       <h2 class="document__transcription--title subtitle">Transcription</h2>
     </header>
-    <div class="document__transcription--content" v-html="HTMLContent">
-        {{ document.transcription }}
+
+    <div class="document__transcription--content" v-html="transcriptionContent">
     </div>
+    <ol v-if="notesContent.length > 0" class="document__notes--content notes">
+       <li  v-for="(note, index) in notesContent" v-html="note.content" :id="index">
+       </li>
+    </ol>
   </section>
 </template>
 
@@ -18,14 +22,25 @@
     name: 'DocumentTranscription',
     components: {DocumentAttributes},
     created() {
-      this.HTMLContent = this.document.transcription;
+      this.transcriptionContent = this.document.transcription;
+      this.notesContent = this.notes;
     },
     computed: {
-      ...mapState('document', ['document'])
+      ...mapState('document', ['document', 'notes'])
     }
   }
 </script>
 
 <style scoped>
-
+  .notes {
+    margin-top: 40px;
+    margin-bottom: 40px;
+    padding-top: 20px;
+    border-top: solid 1px darkgrey;
+    color: grey;
+  }
+  .section {
+    padding-top: 24px;
+    padding-bottom: 24px;
+  }
 </style>
