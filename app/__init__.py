@@ -110,21 +110,4 @@ def create_app(config_name="dev"):
     app.register_blueprint(app_bp)
     app.register_blueprint(api_bp)
 
-    if app.config["DB_DROP_AND_CREATE_ALL"] and app.config["ENV"] != "production":
-        print("Recreating database...")
-        with app.app_context():
-            db.drop_all()
-            db.create_all()
-
-            if app.config["GENERATE_FAKE_DATA"]:
-                # === load some fake data
-                from faker import Faker
-                fake = Faker()
-                fake.seed(12345)
-                from db.fixtures.create_fake_data import create_fake_documents, create_fake_users
-                print("Generating fake data...", end=" ", flush=True)
-                create_fake_users(db, nb_users=5, fake=fake)
-                create_fake_documents(db, nb_docs=20, nb_correspondents=10, fake=fake)
-                print("done !")
-
     return app

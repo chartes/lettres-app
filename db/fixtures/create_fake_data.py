@@ -14,9 +14,9 @@ def create_fake_users(db, nb_users=50, fake=None):
     if fake is None:
         fake = Faker()
 
-    wl1 = Whitelist(label="Whitelist1")
-    admin = UserRole(label="admin")
-    contributor = UserRole(label="contributor")
+    wl1 = Whitelist(label=fake.word())
+    admin = UserRole(label=fake.word())
+    contributor = UserRole(label=fake.word())
 
     db.session.add(wl1)
     db.session.add(admin)

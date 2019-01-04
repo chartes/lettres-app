@@ -262,6 +262,10 @@ class User(SearchableMixin, db.Model):
 
     role_id = db.Column(db.Integer, db.ForeignKey('user_role.id'), nullable=False, index=True)
 
+    @staticmethod
+    def add_default_users():
+        pass
+
 
 class UserRole(SearchableMixin, db.Model):
     """ Rôle des utilisateurs (administrateur ou contributeur) """
@@ -274,6 +278,10 @@ class UserRole(SearchableMixin, db.Model):
     # relationships
     users = db.relationship(User, backref="role")
 
+    @staticmethod
+    def add_default_roles():
+        db.session.add(UserRole(label="admin", description="Administrator"))
+        db.session.add(UserRole(label="contributor", description="Contributor"))
 
 class UserInvitation(db.Model):
     __tablename__ = 'user_invitation'
