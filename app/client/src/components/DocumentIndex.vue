@@ -1,18 +1,17 @@
 <template>
   <div>
-    <section id="main" class="columns">
-      <aside class="column is-2">
-        <h2 class="title is-size-3">Collections</h2>
+    <section class="documents-index columns">
+      <aside class="documents-index__collections column is-2">
+        <h2 class="documents-index__collections__title title is-size-3">Collections</h2>
       </aside>
       <section class="column">
-        <div class="documents__index ">
           <pagination :current="currentPage" :end="nbPages" :size="page_size" :action="goToPage"/>
           <ul id="preview-cards" >
             <li v-for="doc in documents" :key="doc.id">
               <document-preview-card :doc_id="doc.id"></document-preview-card>
             </li>
           </ul>
-        </div>
+          <pagination :current="currentPage" :end="nbPages" :size="page_size" :action="goToPage"/>
       </section>
     </section>
   </div>
@@ -60,16 +59,15 @@
 </script>
 
 <style scoped>
-  #main {
+  .documents-index {
     padding-top: 40px;
     background: #FFFFFF;
   }
 
-  h2.title {
-    font: 90%/140% 'Oxygen', sans-serif;
+  .documents-index__collections {
+      margin-left: 14px;
   }
-
-  aside {
-    margin-left: 14px;
+  .documents-index__collections__title {
+    font: 90%/140% 'Oxygen', sans-serif;
   }
 </style>

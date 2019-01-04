@@ -1,7 +1,7 @@
 <template>
   <section v-if="correspondents.length > 0" class="document__correspondents section">
     <header>
-      <h3 class="subtitle">Correspondants</h3>
+      <h2 class="subtitle">Correspondants</h2>
     </header>
     <ul>
       <li v-for="c in correspondents" :key="c.correspondent.id">
@@ -24,5 +24,11 @@
 </script>
 
 <style scoped>
-
+  h2 {
+    margin-top: 20px;
+  }
+  .section {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
 </style>

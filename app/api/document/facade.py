@@ -1,5 +1,4 @@
 from app.api.abstract_facade import JSONAPIAbstractFacade
-from app.api.collection.facade import CollectionFacade
 from app.models import Document
 
 
@@ -137,6 +136,7 @@ class DocumentFacade(JSONAPIAbstractFacade):
         from app.api.tradition.facade import TraditionFacade
         from app.api.user.facade import UserFacade
         from app.api.whitelist.facade import WhitelistFacade
+        from app.api.collection.facade import CollectionFacade
 
         # decorator for test purposes
         def decorator_function_with_arguments(arg1, arg2, arg3):

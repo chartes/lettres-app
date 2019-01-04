@@ -2,7 +2,7 @@ from app.api.collection.facade import CollectionFacade
 from app.models import Collection
 
 
-def register_Collection_role_api_urls(app):
+def register_collection_role_api_urls(app):
     registrar = app.api_url_registrar
 
     registrar.register_get_routes(Collection, CollectionFacade)

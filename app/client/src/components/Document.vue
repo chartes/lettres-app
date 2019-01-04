@@ -9,7 +9,7 @@
           <document-transcription/>
 
         </div>
-        <div class="column  is-one-fifth">
+        <div class="column is-one-fifth">
           Second column
         </div>
       </div>

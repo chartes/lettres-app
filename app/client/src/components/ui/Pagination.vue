@@ -1,13 +1,12 @@
 <template>
-    <div class="buttons are-normal">
-        <span v-if="curr > 1" class="button" @click="action(1)">1</span>
-        <span v-if="curr > 1"  class="dotdot">...</span>
-        <span v-if="prev > 1" class="button" @click="action(prev)">{{prev}}</span>
-        <span v-if="curr <= end" class="button current-page" @click="action(curr)">{{curr}}</span>
-        <span v-if="next > 1 && next < end" class="button" @click="action(next)">{{next}}</span>
-        <span v-if="end > 1 && next < end" class="dotdot">...</span>
-
-        <span v-if="end > 1 && curr < end" class="button" @click="action(end)">{{end}}</span>
+    <div class="pagination buttons are-normal">
+        <span v-if="curr > 1" class="pagination__button button" @click="action(1)">1</span>
+        <span v-if="curr > 2"  class="pagination__dot-dot">...</span>
+        <span v-if="prev > 1" class="pagination__button button" @click="action(prev)">{{prev}}</span>
+        <span v-if="curr <= end" class="pagination__button button pagination__button--current" @click="action(curr)">{{curr}}</span>
+        <span v-if="next > 1 && next < end" class="pagination__button button" @click="action(next)">{{next}}</span>
+        <span v-if="end > 1 && next+1 < end" class="pagination__dot-dot">...</span>
+        <span v-if="end > 1 && curr < end" class="pagination__button button" @click="action(end)">{{end}}</span>
     </div>
 </template>
 
@@ -37,19 +36,26 @@
 </script>
 
 <style scoped>
-    span {
+    .pagination + span {
         color: #962D3E;
         background: white;
     }
-    .button:hover {
+    .pagination {
+       justify-content: center;
+    }
+    .pagination__button {
+        min-width: 40px;
+    }
+    .pagination__button:hover {
         background: #962D3E;
         color: white;
     }
-    .dotdot {
+    .pagination__dot-dot {
         margin-left: 6px;
         margin-right: 12px;
+        color: #962D3E;
     }
-    .current-page {
+    .pagination__button--current {
         background: #962D3E;
         color: white;
     }

@@ -11,11 +11,11 @@ def register_document_api_urls(app):
     registrar.register_delete_routes(Document, DocumentFacade)
 
     for rel in ('images', 'notes', 'languages', 'institution', 'tradition',
-                'correspondents-having-roles', 'roles', 'correspondents',
+                'correspondents-having-roles', 'roles', 'correspondents', 'collections',
                 'owner', 'whitelist', 'prev-document', 'next-document'):
         registrar.register_relationship_get_route(DocumentFacade, rel)
 
-    for rel in ('images', 'notes', 'languages', 'institution', 'tradition',
+    for rel in ('images', 'notes', 'languages', 'institution', 'tradition', 'collections',
                 'correspondents-having-roles',  # 'roles', 'correspondents',
                 'owner', 'whitelist', 'next-document'):  # , 'prev-document':
         registrar.register_relationship_post_route(DocumentFacade, rel)

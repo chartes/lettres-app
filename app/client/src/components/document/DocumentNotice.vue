@@ -9,7 +9,9 @@
     <document-attributes></document-attributes>
     <!-- v-if="document.collections && document.collections.length > 0" -->
     <div class="document__collections" v-if="collections.length > 0">
-      <h2 class="document__collections--title subtitle">Collections</h2>
+      <header>
+        <h2 class="document__collections--title subtitle">Collections</h2>
+      </header>
       <div class="document__collections--content">
         <ul v-for="collection in collections">
           <li><a href="#">{{collection.title}}</a></li>
@@ -18,8 +20,10 @@
     </div>
 
     <div v-if="!!document.argument" class="document__argument">
-      <h2 class="document__argument--title subtitle">Argument</h2>
-      <div class="document__argument--content">
+      <header>
+        <h2 class="document__argument--title subtitle">Argument</h2>
+      </header>
+        <div class="document__argument--content">
         {{ document.argument }}
       </div>
     </div>

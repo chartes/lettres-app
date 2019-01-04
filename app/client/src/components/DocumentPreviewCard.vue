@@ -1,20 +1,18 @@
 <template>
-  <section class="document__preview-card">
-    <article v-if="documentPreview">
-
+    <article class="document-preview-card" v-if="documentPreview">
       <header class="title">
         <a :href="`${baseURL}/documents/${documentPreview.id}`">
-          <span class="tag doc-tag">Document {{documentPreview.id}}</span>
-          <span><h1 v-html="titleContent"></h1></span>
+          <span class="tag document-preview-card__doc-tag">Document {{documentPreview.id}}</span>
+          <span><h1 class="document-preview-card__title" v-html="titleContent"></h1></span>
         </a>
       </header>
 
       <div class="content">
          <div class="columns">
            <div class="column is-three-quarters">
-             <p class="previewContent" v-html="previewContent"></p>
+             <p class="document-preview-card__content" v-html="previewContent"></p>
            </div>
-           <div class="column correspondents">
+           <div class="column document-preview-card__correspondents">
              <ul>
                <li class="" v-for="obj in documentPreview.correspondents">
                  <a href="">{{getCorrespondentFullname(obj)}}</a>
@@ -24,10 +22,8 @@
            </div>
          </div>
       </div>
-
-    </article>
     <loading-indicator :active="documentLoading" :full-page="true"/>
-  </section>
+    </article>
 </template>
 
 <script>
@@ -76,71 +72,67 @@
 </script>
 
 <style scoped>
-  .correspondents ul {
+  .document-preview-card__correspondents ul {
     list-style: none;
   }
 
-  article {
-   margin-bottom: 1.5em;
+  .document-preview-card {
+    margin-bottom: 1.5em;
+    margin-top: 1.5em;
   }
 
-  h1{
+  .document-preview-card__title{
     color: #AEAEAE;
   }
 
-  h1:hover{
+  .document-preview-card__title:hover{
     color: #1BBC9B;
   }
 
-  .doc-tag {
+  .document-preview-card__doc-tag {
     float: left;
     margin-right: 20px;
   }
 
-
-  section {
-    margin-bottom: 40px;
+    /* styles for '...' */
+  .document-preview-card__content {
+    /* hide text if it more than N lines  */
+    overflow: hidden;
+    /* for set '...' in absolute position */
+    position: relative;
+    /* use this value to count block height */
+    line-height: 1.2em;
+    /* max-height = line-height (1.2) * lines max number (3) */
+    max-height: 3.6em;
+    /* fix problem when last visible word doesn't adjoin right side  */
+    text-align: justify;
+    /* place for '...' */
+    margin-right: -1em;
+    padding-right: 1em;
   }
-
-  /* styles for '...' */
-.previewContent {
-  /* hide text if it more than N lines  */
-  overflow: hidden;
-  /* for set '...' in absolute position */
-  position: relative;
-  /* use this value to count block height */
-  line-height: 1.2em;
-  /* max-height = line-height (1.2) * lines max number (3) */
-  max-height: 3.6em;
-  /* fix problem when last visible word doesn't adjoin right side  */
-  text-align: justify;
-  /* place for '...' */
-  margin-right: -1em;
-  padding-right: 1em;
-}
-/* create the ... */
-.previewContent:before {
-  /* points in the end */
-  content: '...';
-  /* absolute position */
-  position: absolute;
-  /* set position to right bottom corner of block */
-  right: 0;
-  bottom: 0;
-}
-/* hide ... if we have text, which is less than or equal to max lines */
-.previewContent:after {
-  /* points in the end */
-  content: '';
-  /* absolute position */
-  position: absolute;
-  /* set position to right bottom corner of text */
-  right: 0;
-  /* set width and height */
-  width: 1em;
-  height: 1em;
-  margin-top: 0.2em;
-  /* bg color = bg color under block */
-  background: white;
-}
+  /* create the ... */
+  .document-preview-card__content:before {
+    /* points in the end */
+    content: '...';
+    /* absolute position */
+    position: absolute;
+    /* set position to right bottom corner of block */
+    right: 0;
+    bottom: 0;
+  }
+  /* hide ... if we have text, which is less than or equal to max lines */
+  .document-preview-card__content:after {
+    /* points in the end */
+    content: '';
+    /* absolute position */
+    position: absolute;
+    /* set position to right bottom corner of text */
+    right: 0;
+    /* set width and height */
+    width: 1em;
+    height: 1em;
+    margin-top: 0.2em;
+    /* bg color = bg color under block */
+    background: white;
+  }
 </style>
