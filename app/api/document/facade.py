@@ -2,6 +2,25 @@ from app.api.abstract_facade import JSONAPIAbstractFacade
 from app.models import Document
 
 
+## decorator for test purposes
+#def decorator_function_with_arguments(arg1, arg2, arg3):
+#    def wrap(f):
+#        print("Wrapping", f)
+#
+#        def wrapped_f(*args, **kwargs):
+#            print("Inside wrapped_f()")
+#            print(arg1, arg2, arg3)
+#            res = f(*args, **kwargs)
+#            return res
+#
+#        return wrapped_f
+#
+#    return wrap
+#
+#test_decorator = lambda *args, **kwargs: decorator_function_with_arguments(*args, **kwargs)
+#
+
+
 class DocumentFacade(JSONAPIAbstractFacade):
     """
 
@@ -138,22 +157,6 @@ class DocumentFacade(JSONAPIAbstractFacade):
         from app.api.whitelist.facade import WhitelistFacade
         from app.api.collection.facade import CollectionFacade
 
-        # decorator for test purposes
-        def decorator_function_with_arguments(arg1, arg2, arg3):
-            def wrap(f):
-                print("Wrapping", f)
-
-                def wrapped_f(*args, **kwargs):
-                    print("Inside wrapped_f()")
-                    print(arg1, arg2, arg3)
-                    res = f(*args, **kwargs)
-                    return res
-
-                return wrapped_f
-
-            return wrap
-        test_decorator = lambda *args, **kwargs : decorator_function_with_arguments(*args, **kwargs)
-
         for rel_name, (rel_facade, to_many) in {
             "collections": (CollectionFacade, True),
             "images": (ImageFacade, True),
@@ -173,3 +176,20 @@ class DocumentFacade(JSONAPIAbstractFacade):
                 "resource_identifier_getter": self.get_related_resource_identifiers(rel_facade, u_rel_name, to_many),
                 "resource_getter": self.get_related_resources(rel_facade, u_rel_name, to_many),
             }
+
+    @property
+    def indexed_data(self):
+        return {
+            "id": self.resource["id"],
+            "type": self.resource["type"],
+
+            "title": self.resource["attributes"]["title"],
+            "argument": self.resource["attributes"]["argument"],
+            "transcription": self.resource["attributes"]["transcription"],
+
+            "manifest-url": None if len(self.obj.images) == 0 else self.obj.images[0].manifest_url,
+            "languages": None if len(self.obj.languages) == 0 else ";".join([l.code for l in self.obj.languages]),
+            "collections": None if len(self.obj.collections) == 0 else ";".join([c.title for c in self.obj.collections]),
+            "institution": self.obj.institution,
+            "tradition": self.obj.tradition,
+        }

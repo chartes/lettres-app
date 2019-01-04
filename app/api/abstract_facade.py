@@ -1,3 +1,5 @@
+from flask import current_app
+
 from app import db
 
 
@@ -57,6 +59,18 @@ class JSONAPIAbstractFacade(object):
             return []
 
     @property
+    def indexed_data(self):
+        return None
+
+    @classmethod
+    def get_index_name(cls):
+        return "{prefix}__{env}__{index_name}".format(
+            prefix=current_app.config.get("INDEX_PREFIX", ""),
+            env=current_app.config.get("ENV", "dev"),
+            index_name=cls.TYPE
+        )
+
+    @property
     def meta(self):
         return {}
 
@@ -67,6 +81,15 @@ class JSONAPIAbstractFacade(object):
     @staticmethod
     def get_resource_facade(*args, **kwargs):
         raise NotImplementedError
+
+    @staticmethod
+    def get_facade(url_prefix, obj, facade_type="default", **kwargs):
+        from app.api.facade_manager import JSONAPIFacadeManager
+        facade_class = JSONAPIFacadeManager.get_facade_class(obj, facade_type=facade_type)
+        e = facade_class(url_prefix, obj, **kwargs)
+        kwargs = {}
+        errors = []
+        return e, kwargs, errors
 
     @staticmethod
     def post_resource(model, obj_id, attributes, related_resources):
@@ -263,3 +286,9 @@ class JSONAPIAbstractFacade(object):
                 }
                 for rel_name, rel in self.relationships.items()
             }
+
+    def reindex(self):
+        if hasattr(current_app, 'elasticsearch') and self.indexed_data is not None:
+            index_name = self.get_index_name()
+            print("indexing[%s]: " % index_name, self.obj.id)
+            current_app.elasticsearch.index(index=index_name, doc_type=index_name, id=self.obj.id, body=self.indexed_data)

@@ -28,6 +28,8 @@ class Config(object):
     GENERATE_FAKE_DATA = parse_var_env('GENERATE_FAKE_DATA') or False
 
     ELASTICSEARCH_URL = parse_var_env('ELASTICSEARCH_URL')
+    INDEX_PREFIX = parse_var_env('INDEX_PREFIX')
+    SEARCH_RESULT_PER_PAGE =  parse_var_env('SEARCH_RESULT_PER_PAGE')
 
     ASSETS_DEBUG = parse_var_env('ASSETS_DEBUG') or False
     SCSS_STATIC_DIR = os.path.join(basedir, "app ", "static", "css")

@@ -5,7 +5,6 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
 
-from werkzeug.contrib.profiler import ProfilerMiddleware
 from dotenv import load_dotenv
 
 from app.api.response_factory import JSONAPIResponseFactory
@@ -59,7 +58,7 @@ def create_app(config_name="dev"):
 
     db.init_app(app)
     config[config_name].init_app(app)
-    #app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) if app.config['ELASTICSEARCH_URL'] else None
+    app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) if app.config['ELASTICSEARCH_URL'] else None
 
     # =====================================
     # Import models & app routes
@@ -106,6 +105,9 @@ def create_app(config_name="dev"):
         register_user_role_api_urls(app)
         register_whitelist_api_urls(app)
         register_collection_role_api_urls(app)
+
+        # generate search endpoint
+        app.api_url_registrar.register_search_route()
 
     app.register_blueprint(app_bp)
     app.register_blueprint(api_bp)

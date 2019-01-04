@@ -153,17 +153,20 @@ class JSONAPIRouteRegistrar(object):
         results, total = query_index(index=index, query=query, page=num_page, per_page=page_size)
         if total == 0:
             return {}, 0
-
+        #TODO: retravailler cette partie  ES --> Facades
         res_dict = {}
-        for _idx, res in results.items():
-            ids = [r["id"] for r in res]
-            when = []
-            for i, obj in enumerate(ids):
-                when.append((obj, i))
+        for res in results:
+            if res.type not in res_dict:
+                res_dict[res.type] = []
+            res_dict[res.type].append(res.id)
 
-            m = self.models[_idx]
-            objs = db.session.query(m).filter(m.id.in_(ids)).order_by(db.case(when, value=m.id))
-            res_dict[_idx] = objs
+        pprint.pprint(res_dict)
+        for res_type, res_ids in res_dict.items():
+            when = []
+            for i, id in enumerate(res_ids):
+                when.append((id, i))
+            m = self.models[res_type]
+            res_dict[res_type] = db.session.query(m).filter(m.id.in_(res_ids)).order_by(db.case(when, value=m.id))
 
         return res_dict, total
 

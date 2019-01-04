@@ -2,7 +2,7 @@ from flask import current_app
 
 
 def add_to_index(index, model):
-    if hasattr(current_app, 'elastisearch'):
+    if hasattr(current_app, 'elasticsearch'):
         payload = {}
         for field in model.__searchable__:
             payload[field] = getattr(model, field)
@@ -11,17 +11,17 @@ def add_to_index(index, model):
 
 
 def remove_from_index(index, model):
-    if hasattr(current_app, 'elastisearch'):
+    if hasattr(current_app, 'elasticsearch'):
         current_app.elasticsearch.delete(index=index, doc_type=index, id=model.id)
 
 
 def query_index(index, query, fields=None, page=None, per_page=None):
-    if hasattr(current_app, 'elastisearch'):
+    if hasattr(current_app, 'elasticsearch'):
         body = {
             'query': {
                 'query_string': {
                     'query': query,
-                    'fields': ['*'] if fields is None or len(fields) == 0 else fields
+                    #'fields': ['collections'] if fields is None or len(fields) == 0 else fields
                 }
             },
         }
@@ -40,11 +40,10 @@ def query_index(index, query, fields=None, page=None, per_page=None):
 
         try:
             search = current_app.elasticsearch.search(index=index, doc_type=index, body=body)
-
             from collections import namedtuple
-            Result = namedtuple("Result", "id index score")
+            Result = namedtuple("Result", "index id type score")
 
-            results = [Result(str(hit['_id']), str(hit['_index']), str(hit['_score']))
+            results = [Result(str(hit['_index']),  str(hit['_id']), str(hit['_source']['type']), str(hit['_score']))
                        for hit in search['hits']['hits']]
 
             print(search)

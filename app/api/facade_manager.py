@@ -17,8 +17,6 @@ from app.models import Collection, Correspondent, CorrespondentHasRole, Correspo
 
 class JSONAPIFacadeManager(object):
 
-    FACADE_TYPES = ("default", "search")
-
     FACADES = {
         Collection.__name__: {
             "default": CollectionFacade,
@@ -75,7 +73,7 @@ class JSONAPIFacadeManager(object):
     }
 
     @staticmethod
-    def get_facade_class(obj, facade_type):
+    def get_facade_class(obj, facade_type="default"):
         try:
             return JSONAPIFacadeManager.FACADES[obj.__class__.__name__][facade_type]
         except KeyError as e:

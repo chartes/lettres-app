@@ -1,7 +1,8 @@
 import click
 
 from app import create_app, db
-from app.models import UserRole, User
+from app.api.document.facade import DocumentFacade
+from app.models import UserRole, User, Document
 
 app = None
 
@@ -66,13 +67,20 @@ def make_cli():
 
             click.echo("Loaded fixtures to the database")
 
-    @click.command("reindex")
+    @click.command("db-reindex")
     def db_reindex():
         """
         Rebuild the elasticsearch indexes from the current database
         """
-        raise NotImplementedError()
-        pass
+        with app.app_context():
+            documents = Document.query.all()
+            index_name = DocumentFacade.get_index_name()
+            print("Reindexing... %s" % index_name, end="")
+            app.elasticsearch.indices.delete(index=index_name, ignore=[400, 404])  # remove all records
+            for doc in documents:
+                f_obj, kwargs, errors = DocumentFacade.get_facade("", doc)
+                f_obj.reindex()
+            print("completed!")
 
     @click.command("run")
     def run():
