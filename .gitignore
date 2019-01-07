@@ -13,4 +13,4 @@ tests/data/lettres-test.sqlite
 node_modules/
 npm-debug.log*
 *.js.map
-report.html
+report.htmltests/data/lettres.test.sqlite
