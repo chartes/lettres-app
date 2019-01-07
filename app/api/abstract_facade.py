@@ -51,14 +51,6 @@ class JSONAPIAbstractFacade(object):
         raise NotImplementedError
 
     @property
-    def search_fields(self):
-        from app.models import SearchableMixin
-        if isinstance(self.obj, SearchableMixin):
-            return self.obj.__searchable__
-        else:
-            return []
-
-    @property
     def indexed_data(self):
         return None
 
@@ -66,7 +58,7 @@ class JSONAPIAbstractFacade(object):
     def get_index_name(cls):
         return "{prefix}__{env}__{index_name}".format(
             prefix=current_app.config.get("INDEX_PREFIX", ""),
-            env=current_app.config.get("ENV", "dev"),
+            env=current_app.config.get("ENV"),
             index_name=cls.TYPE
         )
 
@@ -101,7 +93,7 @@ class JSONAPIAbstractFacade(object):
         :param related_resources:
         :return:
         """
-        print("CREATING RESOURCE:", obj_id, attributes, related_resources)
+        print("POSTING RESOURCE:", obj_id, attributes, related_resources)
 
         for att in attributes.keys():
             attributes[att.replace("-", "_")] = attributes.pop(att)
@@ -127,8 +119,10 @@ class JSONAPIAbstractFacade(object):
         errors = None
         resource = None
         try:
+            print("CREATING RESOURCE:", model, obj_id, attributes, related_resources)
             resource = JSONAPIAbstractFacade.post_resource(model, obj_id, attributes, related_resources)
             db.session.add(resource)
+            db.session.flush()
             db.session.commit()
         except Exception as e:
             print(e)
@@ -138,6 +132,7 @@ class JSONAPIAbstractFacade(object):
                 "detail": str(e)
             }
             db.session.rollback()
+        print(errors)
         return resource, errors
 
     # noinspection PyArgumentList
@@ -288,7 +283,9 @@ class JSONAPIAbstractFacade(object):
             }
 
     def reindex(self):
+
         if hasattr(current_app, 'elasticsearch') and self.indexed_data is not None:
             index_name = self.get_index_name()
             print("indexing[%s]: " % index_name, self.obj.id)
-            current_app.elasticsearch.index(index=index_name, doc_type=index_name, id=self.obj.id, body=self.indexed_data)
+            current_app.elasticsearch.index(index=index_name, doc_type=index_name,
+                                            id=self.obj.id, body=self.indexed_data)

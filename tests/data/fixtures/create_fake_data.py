@@ -38,7 +38,7 @@ def create_fake_users(db, nb_users=50, fake=None):
             u1.role = roles[1]
             u1.whitelists = whitelists
             db.session.add(u1)
-        db.session.commit()
+            db.session.commit()
     except IntegrityError as e:
         db.session.rollback()
 
@@ -71,11 +71,10 @@ def create_fake_documents(db, nb_docs=1000, nb_correspondents=None, fake=None):
     db.session.commit()
     languages = Language.query.all()
 
-
     # add fake correspondent roles
     for i in range(5, 20):
         db.session.add(CorrespondentRole(label=fake.word()))
-    db.session.commit()
+        db.session.flush()
     roles = CorrespondentRole.query.all()
 
     # add fake correspondents
@@ -89,7 +88,7 @@ def create_fake_documents(db, nb_docs=1000, nb_correspondents=None, fake=None):
             key=fake.name(),
             ref=fake.uri()
         ))
-    db.session.commit()
+        db.session.flush()
     correspondents = Correspondent.query.all()
 
     # add fake Institutions
@@ -98,7 +97,7 @@ def create_fake_documents(db, nb_docs=1000, nb_correspondents=None, fake=None):
         ins = Institution(name=fake.sentence(nb_words=3), ref=fake.uri())
         db.session.add(ins)
         institutions.append(ins)
-    db.session.commit()
+        db.session.flush()
 
     # add fake Traditions
     traditions = []
@@ -106,12 +105,11 @@ def create_fake_documents(db, nb_docs=1000, nb_correspondents=None, fake=None):
         trad = Tradition(label=fake.word(), description=fake.sentence())
         db.session.add(trad)
         traditions.append(trad)
-    db.session.commit()
+        db.session.flush()
 
     # add fake documents
     last_progress = -1
     for n_doc in range(0, nb_docs):
-
         try:
             doc = Document(
                 title=fake.sentence(),
@@ -127,19 +125,21 @@ def create_fake_documents(db, nb_docs=1000, nb_correspondents=None, fake=None):
             doc.languages = [languages[0], languages[1]]
 
             db.session.add(doc)
-            db.session.commit()
+            db.session.flush()
 
             # add fake Images
             nb_images = 10
             for i in range(0, nb_images):
                 img = Image(canvas_idx=random.randint(0, 100), manifest_url=fake.uri(), document_id=doc.id)
                 db.session.add(img)
+                db.session.flush()
 
             # add fake Notes
             nb_notes = 50
             for i in range(0, nb_notes):
                 n = Note(label=fake.sentence(), content=fake.paragraph(), document_id=doc.id)
                 db.session.add(n)
+                db.session.flush()
 
             # add fake correspondent to the doc
             from app.models import CorrespondentHasRole
@@ -160,7 +160,7 @@ def create_fake_documents(db, nb_docs=1000, nb_correspondents=None, fake=None):
                 )
                 db.session.add(chr)
                 c_h_roles.append(chr)
-            db.session.commit()
+                db.session.flush()
             doc.correspondents_have_roles = c_h_roles
 
             docs = Document.query.filter(Document.id != doc.id).all()
@@ -169,13 +169,15 @@ def create_fake_documents(db, nb_docs=1000, nb_correspondents=None, fake=None):
                     doc.next_document = docs[doc.id - 1]
 
             db.session.add(doc)
+            db.session.commit()
 
         except IntegrityError as e:
             db.session.rollback()
+            print("Warning:", e)
 
         progress = int(n_doc / nb_docs * 100)
         if progress % 10 == 0 and last_progress != progress:
             print("%s..." % progress, end="", flush=True)
             last_progress = progress
-    db.session.commit()
 
+        db.session.commit()

@@ -180,7 +180,7 @@ class TestPostRoutes(TestBaseServer):
             }
         })
         self.assertEqual('201 CREATED', status)
-
+    
     def test_post_tradition(self):
         r, status, resource = self.api_post("traditions", data={
             "data": {
@@ -217,7 +217,7 @@ class TestPostRoutes(TestBaseServer):
             }
         })
         self.assertEqual('201 CREATED', status)
-
+    
     def test_post_language(self):
         r, status, resource = self.api_post("languages", data={
             "data": {
@@ -254,7 +254,7 @@ class TestPostRoutes(TestBaseServer):
             }
         })
         self.assertEqual('201 CREATED', status)
-
+    
     def test_post_note(self):
         r, status, resource = self.api_post("notes", data={
             "data": {
@@ -286,7 +286,7 @@ class TestPostRoutes(TestBaseServer):
             }
         })
         self.assertEqual('403 FORBIDDEN', status)
-
+    
     def test_post_whitelist(self):
         r, status, resource = self.api_post("whitelists", data={
             "data": {
@@ -347,7 +347,7 @@ class TestPostRoutes(TestBaseServer):
             }
         })
         self.assertEqual('201 CREATED', status)
-
+    
     def test_post_correspondent_role(self):
         r, status, resource = self.api_post("correspondent-roles", data={
             "data": {
@@ -359,7 +359,7 @@ class TestPostRoutes(TestBaseServer):
             }
         })
         self.assertEqual('201 CREATED', status)
-
+    
     def test_post_correspondent(self):
         r, status, resource = self.api_post("correspondents", data={
             "data": {

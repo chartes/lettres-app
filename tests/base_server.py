@@ -1,11 +1,13 @@
 import os
 import sys
 import json
+import pprint
+from flask import current_app
 from flask_testing import TestCase
 from json import JSONDecodeError
 from os.path import join
 from app import create_app, db
-
+from app.api.document.facade import DocumentFacade
 
 if sys.version_info < (3, 6):
     json_loads = lambda s: json_loads(s.decode("utf-8")) if isinstance(s, bytes) else json.loads(s)
@@ -32,7 +34,7 @@ class TestBaseServer(TestCase):
 
     def tearDown(self):
         db.session.remove()
-        db.drop_all()
+        #db.drop_all()
 
     @staticmethod
     def clear_data():
@@ -40,6 +42,15 @@ class TestBaseServer(TestCase):
         for table in reversed(meta.sorted_tables):
             db.session.execute(table.delete())
         db.session.commit()
+        if hasattr(current_app, "elasticsearch"):
+            current_app.elasticsearch.indices.delete(
+                index=DocumentFacade.get_index_name(),
+                ignore=[400, 404]
+            )  # delete the index
+            current_app.elasticsearch.indices.create(
+                index=DocumentFacade.get_index_name(),
+                ignore=[400, 404]
+            )  # create the index
 
     def load_sql_fixtures(self, fixtures):
         with self.app.app_context(), db.engine.connect() as connection:

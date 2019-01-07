@@ -1,6 +1,6 @@
 from app import db
 
-from app.search import add_to_index, remove_from_index, query_index
+from app.search import SearchableMixin
 
 association_document_has_language = db.Table('document_has_language',
                                              db.Column('document_id', db.Integer, db.ForeignKey('document.id'),
@@ -23,73 +23,6 @@ association_whitelist_has_user = db.Table('whitelist_has_user',
                                           )
 
 
-class SearchableMixin(object):
-    __searchable__ = []
-
-    @classmethod
-    def search(cls, expression, fields=None, page=None, per_page=None, index=None):
-
-        # by default, search on the model table
-        # custom index allow to use multiple indexes: index="table1,table2,table3..."
-        if index is None:
-            index = cls.__tablename__
-
-        # perform the query
-        print(page, per_page)
-        results, total = query_index(index=index, query=expression,
-                                     fields=fields, page=page, per_page=per_page)
-        print(expression, results, total)
-        if total == 0:
-            return cls.query.filter_by(id=0), 0
-        when = []
-        # TODO recuperer les indexes et faire les bonnes requetes/jointures
-        ids = [r.id for r in results]
-
-        if len(ids) == 0:
-            return cls.query.filter_by(id=0), 0
-
-        for i in range(len(ids)):
-            when.append((ids[i], i))
-
-        # print("test")
-        # print("when:", when)
-        # for idx in index.split(","):
-        #    obj = db.session.query(MODELS_HASH_TABLE[idx]).filter()
-        #    print(idx, obj)
-        return cls.query.filter(cls.id.in_(ids)).order_by(
-            db.case(when, value=cls.id)), total
-
-    @classmethod
-    def before_commit(cls, session):
-        session._changes = {
-            'add': list(session.new),
-            'update': list(session.dirty),
-            'delete': list(session.deleted)
-        }
-
-    @classmethod
-    def after_commit(cls, session):
-        for obj in session._changes['add']:
-            if isinstance(obj, SearchableMixin):
-                add_to_index(obj.__tablename__, obj)
-        for obj in session._changes['update']:
-            if isinstance(obj, SearchableMixin):
-                add_to_index(obj.__tablename__, obj)
-        for obj in session._changes['delete']:
-            if isinstance(obj, SearchableMixin):
-                remove_from_index(obj.__tablename__, obj)
-        session._changes = None
-
-    @classmethod
-    def reindex(cls):
-        for obj in cls.query:
-            add_to_index(cls.__tablename__, obj)
-
-
-db.event.listen(db.session, 'before_commit', SearchableMixin.before_commit)
-db.event.listen(db.session, 'after_commit', SearchableMixin.after_commit)
-
-
 class Collection(SearchableMixin, db.Model):
     """ Une collection: un regroupement de lettres.
 
@@ -99,7 +32,6 @@ class Collection(SearchableMixin, db.Model):
     __table_args__ = (
         db.UniqueConstraint('title',  name='_collection_title_uc'),
     )
-    __searchable__ = ['title']
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String(200), nullable=False)
@@ -112,7 +44,6 @@ class Document(SearchableMixin, db.Model):
     """
 
     __tablename__ = 'document'
-    __searchable__ = ['title']
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String(200), nullable=False)

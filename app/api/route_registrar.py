@@ -153,7 +153,7 @@ class JSONAPIRouteRegistrar(object):
         results, total = query_index(index=index, query=query, page=num_page, per_page=page_size)
         if total == 0:
             return {}, 0
-        #TODO: retravailler cette partie  ES --> Facades
+
         res_dict = {}
         for res in results:
             if res.type not in res_dict:
@@ -175,7 +175,6 @@ class JSONAPIRouteRegistrar(object):
         search_rule = '/api/{api_version}/search'.format(api_version=self.api_version)
 
         def search_endpoint():
-            # TODO: attention pour le total-count: il est ok dans l'absolu MAIS les résultats eux sont cappés à 10.000
             start_time = time.time()
 
             if "query" not in request.args:
@@ -458,7 +457,7 @@ class JSONAPIRouteRegistrar(object):
                     [obj.resource for obj in facade_objs],
                     links=links,
                     included_resources=included_resources,
-                    meta={"search-fields": getattr(model, "__searchable__", []), "total-count": count}
+                    meta={"total-count": count}
                 )
 
             except (AttributeError, ValueError, OperationalError) as e:
@@ -839,7 +838,7 @@ class JSONAPIRouteRegistrar(object):
                         headers = {"Location": f_obj.resource["links"]["self"]}
                     else:
                         headers = {}
-                    meta = {"search-fields": getattr(model, "__searchable__", []), "total-count": 1}
+                    meta = {"total-count": 1}
                     return JSONAPIResponseFactory.make_data_response(f_obj.resource, None, None, meta=meta,
                                                                      status=201,
                                                                      headers=headers)
@@ -910,7 +909,7 @@ class JSONAPIRouteRegistrar(object):
                         headers = {"Location": f_obj.resource["links"]["self"]}
                     else:
                         headers = {}
-                    meta = {"search-fields": getattr(model, "__searchable__", []), "total-count": 1}
+                    meta = {"total-count": 1}
                     return JSONAPIResponseFactory.make_data_response(f_obj.resource, None, None, meta=meta,
                                                                      status=200,
                                                                      headers=headers)
@@ -1049,7 +1048,7 @@ class JSONAPIRouteRegistrar(object):
                         headers = {"Location": f_obj.resource["links"]["self"]}
                     else:
                         headers = {}
-                    meta = {"search-fields": getattr(model, "__searchable__", []), "total-count": 1}
+                    meta = {"total-count": 1}
                     return JSONAPIResponseFactory.make_data_response(f_obj.resource, None, None, meta=meta,
                                                                      status=200,
                                                                      headers=headers)
@@ -1123,7 +1122,7 @@ class JSONAPIRouteRegistrar(object):
                         headers = {"Location": f_obj.resource["links"]["self"]}
                     else:
                         headers = {}
-                    meta = {"search-fields": getattr(model, "__searchable__", []), "total-count": 1}
+                    meta = {"total-count": 1}
                     return JSONAPIResponseFactory.make_data_response(f_obj.resource, None, None, meta=meta,
                                                                      status=200,
                                                                      headers=headers)

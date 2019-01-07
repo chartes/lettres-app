@@ -1,5 +1,7 @@
 import pprint
+import unittest
 
+from app.models import Document
 from tests.base_server import TestBaseServer
 from app import db
 
@@ -10,6 +12,8 @@ class TestGetRoutes(TestBaseServer):
         from ..data.fixtures.dataset001 import load_fixtures as load_dataset001
         with self.app.app_context():
             load_dataset001(db)
+
+        pprint.pprint(Document.query.all())
 
     def test_documents(self):
         r, status, resource = self.api_get("documents")

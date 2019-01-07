@@ -1,5 +1,4 @@
 from faker import Faker
-
 from .create_fake_data import create_fake_users, create_fake_documents
 
 
