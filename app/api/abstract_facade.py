@@ -110,7 +110,10 @@ class JSONAPIAbstractFacade(object):
                 try:
                     setattr(resource, rel_name, rel_data)
                 except Exception:
-                    setattr(resource, rel_name, rel_data[0])
+                    if len(rel_data) == 0:
+                        setattr(resource, rel_name, None)
+                    else:
+                        setattr(resource, rel_name, rel_data[0])
 
         return resource
 
@@ -185,6 +188,7 @@ class JSONAPIAbstractFacade(object):
         try:
             resource = JSONAPIAbstractFacade.patch_resource(obj, obj_type, attributes, related_resources, append)
             db.session.add(resource)
+            db.session.flush()
             db.session.commit()
         except Exception as e:
             print(e)
@@ -203,6 +207,7 @@ class JSONAPIAbstractFacade(object):
         try:
             print("DELETING RESOURCE:", obj)
             db.session.delete(obj)
+            db.session.flush()
             db.session.commit()
         except Exception as e:
             errors = {

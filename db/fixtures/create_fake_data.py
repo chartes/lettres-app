@@ -136,7 +136,7 @@ def create_fake_documents(db, nb_docs=1000, nb_correspondents=None, fake=None):
             doc.owner_id = random.choice(users).id
             doc.whitelist_id = random.choice(whitelists).id
             doc.languages = random.choices(languages)
-            doc.collections =random.choices(collections, k=random.randint(0, 3))
+            doc.collections = random.choices(collections, k=random.randint(0, 3))
 
             db.session.add(doc)
             db.session.commit()

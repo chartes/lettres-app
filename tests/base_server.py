@@ -43,6 +43,7 @@ class TestBaseServer(TestCase):
             db.session.execute(table.delete())
         db.session.commit()
         if hasattr(current_app, "elasticsearch"):
+            print("DELETE AND CREATE SEARCH INDEXES")
             current_app.elasticsearch.indices.delete(
                 index=DocumentFacade.get_index_name(),
                 ignore=[400, 404]
