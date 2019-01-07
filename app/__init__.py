@@ -59,7 +59,9 @@ def create_app(config_name="dev"):
     db.init_app(app)
     config[config_name].init_app(app)
     app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) if app.config['ELASTICSEARCH_URL'] else None
-
+    from app.search import SearchableMixin
+    db.event.listen(db.session, 'before_commit', SearchableMixin.before_commit)
+    db.event.listen(db.session, 'after_commit', SearchableMixin.after_commit)
     # =====================================
     # Import models & app routes
     # =====================================
@@ -111,5 +113,7 @@ def create_app(config_name="dev"):
 
     app.register_blueprint(app_bp)
     app.register_blueprint(api_bp)
+
+
 
     return app

@@ -1,3 +1,4 @@
+from app import db
 from app.api.abstract_facade import JSONAPIAbstractFacade
 from app.models import Document
 
@@ -177,19 +178,21 @@ class DocumentFacade(JSONAPIAbstractFacade):
                 "resource_getter": self.get_related_resources(rel_facade, u_rel_name, to_many),
             }
 
-    @property
-    def indexed_data(self):
+    def get_indexed_data(self):
+        _res = self.resource
         return {
-            "id": self.resource["id"],
-            "type": self.resource["type"],
-
-            "title": self.resource["attributes"]["title"],
-            "argument": self.resource["attributes"]["argument"],
-            "transcription": self.resource["attributes"]["transcription"],
+            "id": _res["id"],
+            "type": _res["type"],
+            
+            "title": _res["attributes"]["title"],
+            "argument": _res["attributes"]["argument"],
+            "transcription": _res["attributes"]["transcription"],
 
             "manifest-url": None if len(self.obj.images) == 0 else self.obj.images[0].manifest_url,
-            "languages": None if len(self.obj.languages) == 0 else ";".join([l.code for l in self.obj.languages]),
-            "collections": None if len(self.obj.collections) == 0 else ";".join([c.title for c in self.obj.collections]),
-            "institution": self.obj.institution,
-            "tradition": self.obj.tradition,
+            "languages": None if len(self.obj.languages) == 0 else ";;;".join([l.code for l in self.obj.languages]),
+            "collections": None if len(self.obj.collections) == 0 else ";;;".join(
+                [c.title for c in self.obj.collections]
+            ),
+            "institution": None if not self.obj.institution else self.obj.institution.name,
+            "tradition": None if not self.obj.tradition else self.obj.tradition.label,
         }

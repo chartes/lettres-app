@@ -15,9 +15,9 @@ def create_fake_users(db, nb_users=50, fake=None):
 
     logging.getLogger('faker.factory').setLevel(logging.ERROR)
 
-    wl1 = Whitelist(label="Whitelist1")
-    admin = UserRole(label="admin")
-    contributor = UserRole(label="contributor")
+    wl1 = Whitelist(label=fake.word())
+    admin = UserRole(label=fake.word())
+    contributor = UserRole(label=fake.word())
 
     db.session.add(wl1)
     db.session.add(admin)
@@ -26,22 +26,20 @@ def create_fake_users(db, nb_users=50, fake=None):
 
     roles = [admin, contributor]
     whitelists = [wl1]
-    try:
-        for i in range(0, nb_users):
-            u1 = User(
-                username=fake.user_name(),
-                password=fake.user_name(),
-                email=fake.free_email(),
-                active=1,
-                first_name=fake.first_name(),
-                last_name=fake.last_name()
-            )
-            u1.role = roles[1]
-            u1.whitelists = whitelists
-            db.session.add(u1)
-            db.session.commit()
-    except IntegrityError as e:
-        db.session.rollback()
+
+    for i in range(0, nb_users):
+        u1 = User(
+            username=fake.user_name(),
+            password=fake.user_name(),
+            email=fake.free_email(),
+            active=1,
+            first_name=fake.first_name(),
+            last_name=fake.last_name()
+        )
+        u1.role = roles[1]
+        u1.whitelists = whitelists
+        db.session.add(u1)
+        db.session.commit()
 
 
 def create_fake_documents(db, nb_docs=1000, nb_correspondents=None, fake=None):

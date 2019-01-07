@@ -4,7 +4,6 @@ import unittest
 from tests.base_server import TestBaseServer
 from app import db
 
-
 class TestPostRoutes(TestBaseServer):
 
     def load_fixtures(self):
@@ -17,16 +16,32 @@ class TestPostRoutes(TestBaseServer):
             "data": {
                 "type": "document",
                 "attributes": {
-                    "title": "New Doc"
+                    "title": "New Doc",
+                    "transcription": "Lorem Ipsum"
                 },
                 "relationships": {
                     "images": {
                         "data": [
                             {"id": 1, "type": "image"},
+                            {"id": 2, "type": "image"},
+                        ]
+                    },
+                    "languages": {
+                        "data": [
+                            {"id": 1, "type": "language"},
+                        ]
+                    },
+                    "collections": {
+                        "data": [
+                            {"id": 1, "type": "collection"},
+                            {"id": 2, "type": "collection"},
                         ]
                     },
                     "institution": {
                         "data": {"id": 3, "type": "institution"}
+                    },
+                    "tradition": {
+                        "data": {"id": 1, "type": "tradition"}
                     },
                     "owner": {
                         "data": {"id": 2, "type": "user"}
@@ -64,7 +79,7 @@ class TestPostRoutes(TestBaseServer):
             }
         })
         self.assertEqual('409 CONFLICT', status)
-
+        
         # NO OWNER
         r, status, resource = self.api_post("documents", data={
             "data": {
@@ -143,7 +158,7 @@ class TestPostRoutes(TestBaseServer):
             }
         })
         self.assertEqual('404 NOT FOUND', status)
-
+    
     def test_post_institution(self):
         r, status, resource = self.api_post("institutions", data={
             "data": {
@@ -216,6 +231,7 @@ class TestPostRoutes(TestBaseServer):
                 }
             }
         })
+        print("RES", resource)
         self.assertEqual('201 CREATED', status)
     
     def test_post_language(self):
@@ -387,10 +403,10 @@ class TestPostRoutes(TestBaseServer):
                         ]
                     },
                     "institution": {
-                        "data": {"id": 3, "type": "institution"}
+                        "data": {"id": 1, "type": "institution"}
                     },
                     "owner": {
-                        "data": {"id": 2, "type": "user"}
+                        "data": {"id": 1, "type": "user"}
                     }
                 }
             }
@@ -461,4 +477,3 @@ class TestPostRoutes(TestBaseServer):
 
         r, status, resource = self.api_get("correspondents/9/documents")
         self.assertEqual(2, len(resource["data"]))
-

@@ -50,8 +50,7 @@ class JSONAPIAbstractFacade(object):
     def resource(self):
         raise NotImplementedError
 
-    @property
-    def indexed_data(self):
+    def get_indexed_data(self):
         return None
 
     @classmethod
@@ -93,28 +92,26 @@ class JSONAPIAbstractFacade(object):
         :param related_resources:
         :return:
         """
-        print("POSTING RESOURCE:", obj_id, attributes, related_resources)
-
+        #print("POSTING RESOURCE:", obj_id, attributes, related_resources)
         for att in attributes.keys():
             attributes[att.replace("-", "_")] = attributes.pop(att)
 
         attributes["id"] = obj_id
-        print("  setting attr", attributes)
+        #print("  setting attr", attributes)
         resource = model(**attributes)
 
         # set related resources
         for rel_name, rel_data in related_resources.items():
             rel_name = rel_name.replace("-", "_")
-            print("  setting rel", rel_name, rel_data)
+            #print("  setting rel", rel_name, rel_data)
             if hasattr(resource, rel_name):
                 try:
                     setattr(resource, rel_name, rel_data)
-                except Exception:
+                except Exception as e:
                     if len(rel_data) == 0:
                         setattr(resource, rel_name, None)
                     else:
                         setattr(resource, rel_name, rel_data[0])
-
         return resource
 
     @staticmethod
@@ -122,10 +119,9 @@ class JSONAPIAbstractFacade(object):
         errors = None
         resource = None
         try:
-            print("CREATING RESOURCE:", model, obj_id, attributes, related_resources)
+            #print("CREATING RESOURCE:", model, obj_id, attributes, related_resources)
             resource = JSONAPIAbstractFacade.post_resource(model, obj_id, attributes, related_resources)
             db.session.add(resource)
-            db.session.flush()
             db.session.commit()
         except Exception as e:
             print(e)
@@ -135,7 +131,7 @@ class JSONAPIAbstractFacade(object):
                 "detail": str(e)
             }
             db.session.rollback()
-        print(errors)
+
         return resource, errors
 
     # noinspection PyArgumentList
@@ -150,11 +146,11 @@ class JSONAPIAbstractFacade(object):
         :param related_resources:
         :return:
         """
-        print("UPDATING RESOURCE:", obj, obj_type, attributes, related_resources)
+        #print("UPDATING RESOURCE:", obj, obj_type, attributes, related_resources)
         # update attributes
         for att, att_value in attributes.items():
             att_name = att.replace("-", "_")
-            print("  setting attr", att, att_value)
+            #print("  setting attr", att, att_value)
             if hasattr(obj, att_name):
                 setattr(obj, att_name, att_value)
             else:
@@ -163,9 +159,9 @@ class JSONAPIAbstractFacade(object):
         # update related resources
         for rel_name, rel_data in related_resources.items():
             rel_name = rel_name.replace("-", "_")
-            print("  setting rel", rel_name, rel_data)
+            #print("  setting rel", rel_name, rel_data)
             if hasattr(obj, rel_name):
-                print(getattr(obj, rel_name))
+                #print(getattr(obj, rel_name))
                 # append (POST) or replace (PATCH) replace related resources ?
                 if not append:
                     try:
@@ -188,7 +184,6 @@ class JSONAPIAbstractFacade(object):
         try:
             resource = JSONAPIAbstractFacade.patch_resource(obj, obj_type, attributes, related_resources, append)
             db.session.add(resource)
-            db.session.flush()
             db.session.commit()
         except Exception as e:
             print(e)
@@ -205,9 +200,8 @@ class JSONAPIAbstractFacade(object):
     def delete_resource(obj):
         errors = None
         try:
-            print("DELETING RESOURCE:", obj)
+            #print("DELETING RESOURCE:", obj)
             db.session.delete(obj)
-            db.session.flush()
             db.session.commit()
         except Exception as e:
             errors = {
@@ -288,9 +282,8 @@ class JSONAPIAbstractFacade(object):
             }
 
     def reindex(self):
-
-        if hasattr(current_app, 'elasticsearch') and self.indexed_data is not None:
+        payload = self.get_indexed_data()
+        if hasattr(current_app, 'elasticsearch') and payload is not None:
             index_name = self.get_index_name()
             print("indexing[%s]: " % index_name, self.obj.id)
-            current_app.elasticsearch.index(index=index_name, doc_type=index_name,
-                                            id=self.obj.id, body=self.indexed_data)
+            current_app.elasticsearch.index(index=index_name, doc_type=index_name, id=self.obj.id, body=payload)

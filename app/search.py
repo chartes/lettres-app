@@ -1,3 +1,4 @@
+import pprint
 from flask import current_app
 
 from app import db
@@ -72,50 +73,69 @@ class SearchableMixin(object):
 
     @classmethod
     def before_commit(cls, session):
-        session._changes = {
-            'add': list(session.new),
-            'update': list(session.dirty),
-            'delete': list(session.deleted)
-        }
+        #session._changes = {
+        #    'add': list(session.new),
+        #    'update': list(session.dirty),
+        #    'delete': list(session.deleted)
+        #}
+        from app.api.facade_manager import JSONAPIFacadeManager
+        session._changes = {"add": {}, "remove": {}}
 
+        # get id and payload info for each new or dirty object :
+        for new_obj in list(session.new) + list(session.dirty):
+            if isinstance(new_obj, SearchableMixin):
+                facade = JSONAPIFacadeManager.get_facade_class(new_obj)
+                f_obj, kwargs, errors = facade.get_facade("", new_obj)
+                index_name = f_obj.get_index_name()
+                # register the change to the index
+                if index_name:
+                    if index_name not in session._changes["add"]:
+                        session._changes["add"][index_name] = []
+                    data_to_index = f_obj.get_indexed_data()
+                    if data_to_index:
+                        session._changes["add"][index_name].append({"src_obj": new_obj, "payload": data_to_index})
+
+        for new_obj in list(session.deleted):
+            if isinstance(new_obj, SearchableMixin):
+                facade = JSONAPIFacadeManager.get_facade_class(new_obj)
+                f_obj, kwargs, errors = facade.get_facade("", new_obj)
+                index_name = f_obj.get_index_name()
+                # register the change to the index
+                if index_name:
+                    if index_name not in session._changes["remove"]:
+                        session._changes["remove"][index_name] = []
+                    session._changes["remove"][index_name].append({"src_obj": new_obj})
     @classmethod
     def after_commit(cls, session):
-        for obj in session._changes['add']:
-            if isinstance(obj, SearchableMixin):
-                cls.add_to_index(obj)
-        for obj in session._changes['update']:
-            if isinstance(obj, SearchableMixin):
-                cls.add_to_index(obj)
-        for obj in session._changes['delete']:
-            if isinstance(obj, SearchableMixin):
-                cls.remove_from_index(obj)
+        for index in session._changes['add'].keys():
+            for p in session._changes['add'][index]:
+                p["payload"]["id"] = p["src_obj"].id
+                #pprint.pprint(p)
+                cls.add_to_index(index, p["src_obj"].id, p["payload"])
+
+        for index in session._changes['remove'].keys():
+            for p in session._changes['remove'][index]:
+                cls.remove_from_index(index, p["src_obj"].id)
         session._changes = None
 
     @classmethod
-    def add_to_index(cls, obj):
-        if hasattr(current_app, 'elasticsearch'):
-            from app.api.facade_manager import JSONAPIFacadeManager
-            facade = JSONAPIFacadeManager.get_facade_class(obj)
-            f_obj, kwargs, errors = facade.get_facade("", obj)
-            data_to_index = f_obj.indexed_data
-            #if data_to_index:
-            #    index_name = f_obj.get_index_name()
-            #    current_app.elasticsearch.index(index=index_name, doc_type=index_name, id=obj.id,
-            #                                    body=data_to_index)
+    def add_to_index(cls, index, id, payload):
+        current_app.elasticsearch.index(index=index, doc_type=index, id=id, body=payload)
 
     @classmethod
-    def remove_from_index(cls, obj):
-        if hasattr(current_app, 'elasticsearch'):
-            from app.api.facade_manager import JSONAPIFacadeManager
-            facade = JSONAPIFacadeManager.get_facade_class(obj)
-            index_name = facade.get_index_name()
-            current_app.elasticsearch.delete(index=index_name, doc_type=index_name, id=obj.id)
+    def remove_from_index(cls, index, id):
+        current_app.elasticsearch.delete(index=index, doc_type=index, id=id)
 
     @classmethod
     def reindex(cls):
-        for obj in cls.query:
-            cls.add_to_index(obj)
+        if hasattr(current_app, 'elasticsearch'):
+            from app.api.facade_manager import JSONAPIFacadeManager
+            for obj in cls.query:
+                facade = JSONAPIFacadeManager.get_facade_class(obj)
+                f_obj, kwargs, errors = facade.get_facade("", obj)
+                data_to_index = f_obj.get_indexed_data()
+                if data_to_index:
+                    index_name = f_obj.get_index_name()
+                    print("+ indexing", obj)
+                    cls.add_to_index(index_name, obj.id, data_to_index)
 
-
-db.event.listen(db.session, 'before_commit', SearchableMixin.before_commit)
-db.event.listen(db.session, 'after_commit', SearchableMixin.after_commit)

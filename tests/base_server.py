@@ -16,6 +16,17 @@ else:
 
 _app = create_app("test")
 
+with _app.app_context():
+    if hasattr(current_app, "elasticsearch"):
+        print("DELETE AND CREATE SEARCH INDEXES")
+        _app.elasticsearch.indices.delete(
+            index=DocumentFacade.get_index_name(),
+            ignore=[400, 404]
+        )  # delete the index
+        _app.elasticsearch.indices.create(
+            index=DocumentFacade.get_index_name(),
+            ignore=[400, 404]
+        )  # create the index
 
 class TestBaseServer(TestCase):
 
@@ -30,6 +41,7 @@ class TestBaseServer(TestCase):
             self.client = _app.test_client(allow_subdomain_redirects=True)
             self.db = db
             self.url_prefix = _app.config["API_URL_PREFIX"]
+
         return _app
 
     def tearDown(self):
@@ -42,16 +54,7 @@ class TestBaseServer(TestCase):
         for table in reversed(meta.sorted_tables):
             db.session.execute(table.delete())
         db.session.commit()
-        if hasattr(current_app, "elasticsearch"):
-            print("DELETE AND CREATE SEARCH INDEXES")
-            current_app.elasticsearch.indices.delete(
-                index=DocumentFacade.get_index_name(),
-                ignore=[400, 404]
-            )  # delete the index
-            current_app.elasticsearch.indices.create(
-                index=DocumentFacade.get_index_name(),
-                ignore=[400, 404]
-            )  # create the index
+
 
     def load_sql_fixtures(self, fixtures):
         with self.app.app_context(), db.engine.connect() as connection:
