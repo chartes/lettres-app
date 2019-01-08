@@ -50,8 +50,20 @@ class JSONAPIAbstractFacade(object):
     def resource(self):
         raise NotImplementedError
 
-    def get_indexed_data(self):
-        return None
+    def get_indexed_data(self, remove=False):
+        return {"add": [], "remove": []}
+
+    @staticmethod
+    def get_payload(obj):
+        print("GETTING PAYLOAD", obj)
+        from app.api.facade_manager import JSONAPIFacadeManager
+        facade = JSONAPIFacadeManager.get_facade_class(obj)
+        f_obj, kwargs, errors = facade.get_facade("",  obj)
+        d = f_obj.get_indexed_data()
+        print("d", d)
+        p = d["add"][0]
+        print("p", p)
+        return p["payload"]
 
     @classmethod
     def get_index_name(cls):
@@ -200,7 +212,7 @@ class JSONAPIAbstractFacade(object):
     def delete_resource(obj):
         errors = None
         try:
-            #print("DELETING RESOURCE:", obj)
+            print("DELETING RESOURCE:", obj)
             db.session.delete(obj)
             db.session.commit()
         except Exception as e:
@@ -280,10 +292,3 @@ class JSONAPIAbstractFacade(object):
                 }
                 for rel_name, rel in self.relationships.items()
             }
-
-    def reindex(self):
-        payload = self.get_indexed_data()
-        if hasattr(current_app, 'elasticsearch') and payload is not None:
-            index_name = self.get_index_name()
-            print("indexing[%s]: " % index_name, self.obj.id)
-            current_app.elasticsearch.index(index=index_name, doc_type=index_name, id=self.obj.id, body=payload)

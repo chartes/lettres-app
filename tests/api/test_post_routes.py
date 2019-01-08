@@ -4,6 +4,7 @@ import unittest
 from tests.base_server import TestBaseServer
 from app import db
 
+@unittest.skip
 class TestPostRoutes(TestBaseServer):
 
     def load_fixtures(self):
@@ -231,7 +232,6 @@ class TestPostRoutes(TestBaseServer):
                 }
             }
         })
-        print("RES", resource)
         self.assertEqual('201 CREATED', status)
     
     def test_post_language(self):

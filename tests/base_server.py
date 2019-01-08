@@ -201,3 +201,9 @@ class TestBaseServer(TestCase):
             self.check_last(resource)
             self.check_prev(resource)
             self.check_next(resource)
+
+    def search(self, index, query):
+        search_url = "search?index={0}&query={1}".format(index, query)
+        r, status, resource = self.api_get(search_url)
+        self.assert200(r)
+        return resource

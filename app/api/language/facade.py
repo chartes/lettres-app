@@ -1,3 +1,5 @@
+import pprint
+
 from app import db
 from app.api.abstract_facade import JSONAPIAbstractFacade
 from app.models import Language
@@ -57,4 +59,28 @@ class LanguageFacade(JSONAPIAbstractFacade):
                 "resource_identifier_getter": self.get_related_resource_identifiers(DocumentFacade, "documents", to_many=True),
                 "resource_getter": self.get_related_resources(DocumentFacade, "documents", to_many=True),
             },
+        }
+
+    def get_indexed_data(self, remove=False):
+        """
+        What to reindex of remove from the index
+        :param remove:
+        :return:
+        """
+        print("GET INDEXED DATA", self, remove)
+        to_be_reindexed = []
+        if remove:
+            from app.api.document.facade import DocumentFacade
+            print("GETTING DOC INDEX NAME")
+            doc_index_name = DocumentFacade.get_index_name()
+            print("GETTING DOCS TO BE REINDEXED")
+            to_be_reindexed  = [
+                {"id": doc.id, "index": doc_index_name, "payload": JSONAPIAbstractFacade.get_payload(doc)}
+                for doc in self.obj.documents
+            ]
+        print("DOCS TO BE REINDEXED")
+        print(to_be_reindexed)
+        return {
+            "add": [], #TODO: utiliser to_be_reindexed
+            "remove": []
         }

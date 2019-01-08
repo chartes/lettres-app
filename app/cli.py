@@ -73,13 +73,12 @@ def make_cli():
         Rebuild the elasticsearch indexes from the current database
         """
         with app.app_context():
-            documents = Document.query.all()
             index_name = DocumentFacade.get_index_name()
             print("Reindexing... %s" % index_name, end="")
             app.elasticsearch.indices.delete(index=index_name, ignore=[400, 404])  # remove all records
-            for doc in documents:
-                f_obj, kwargs, errors = DocumentFacade.get_facade("", doc)
-                f_obj.reindex()
+            for doc in Document.query.all():
+                print("Indexing", doc)
+                doc.update_index()
             print("completed!")
 
     @click.command("run")
