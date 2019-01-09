@@ -71,36 +71,35 @@ class SearchableMixin(object):
         return cls.query.filter(cls.id.in_(ids)).order_by(
             db.case(when, value=cls.id)), total
 
+    @staticmethod
+    def add_to_index(index, id, payload):
+        print("ADD_TO_INDEX", index, id, payload)
+        from flask import current_app
+        current_app.elasticsearch.index(index=index, doc_type=index, id=id, body=payload)
 
-from sqlalchemy import event, inspect
+    @staticmethod
+    def remove_from_index(index, id):
+        print("REMOVE_FROM_INDEX", index, id)
+        from flask import current_app
+        current_app.elasticsearch.delete(index=index, doc_type=index, id=id)
 
-class ModelChangeEvent(object):
-    def __init__(self, session, *callbacks):
-        self.model_changes = {}
-        self.callbacks = callbacks
-        self.register_events(session)
+    @staticmethod
+    def reindex_resources(changes):
+        from flask import current_app
+        from app.api.facade_manager import JSONAPIFacadeManager
 
-    def record_ops(self, session, flush_context=None, instances=None):
-        for targets, operation in ((session.new, 'insert'), (session.dirty, 'update'), (session.deleted, 'delete')):
-            for target in targets:
-                state = inspect(target)
-                key = state.identity_key if state.has_identity else id(target)
-                self.model_changes[key] = (target, operation)
+        db.session = db.create_scoped_session()
+        current_app.mce.register_events(db.session)
 
-    def after_commit(self, session):
-        if self.model_changes:
-            changes = list(self.model_changes.values())
-
-            for callback in self.callbacks:
-                callback(changes=changes)
-
-            self.model_changes.clear()
-
-    def after_rollback(self, session):
-        self.model_changes.clear()
-
-    def register_events(self, session):
-        event.listen(session, 'before_flush', self.record_ops)
-        event.listen(session, 'before_commit', self.record_ops)
-        event.listen(session, 'after_commit', self.after_commit)
-        event.listen(session, 'after_rollback', self.after_rollback)
+        print("CHANGES after commit:", changes)
+        for target, op in changes:
+            facade = JSONAPIFacadeManager.get_facade_class(target)
+            f_obj, kwargs, errors = facade.get_resource_facade("", id=target.id)
+            if op in ('insert', 'update'):
+                for data in f_obj.get_data_to_index_when_added():
+                    print(target, data)
+                    SearchableMixin.add_to_index(**data)
+            if op == 'delete':
+                for data in f_obj.get_data_to_index_when_removed():
+                    print(target, data)
+                    SearchableMixin.remove_from_index(**data)

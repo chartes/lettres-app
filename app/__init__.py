@@ -2,7 +2,7 @@ import pprint
 from elasticsearch import Elasticsearch
 from flask import Flask, Blueprint
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import event
+from sqlalchemy import event, inspect
 from sqlalchemy.engine import Engine
 
 from dotenv import load_dotenv
@@ -26,7 +26,6 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
 
 
 class PrefixMiddleware(object):
-
     def __init__(self, app, prefix=''):
         self.app = app
         self.prefix = prefix
@@ -37,6 +36,38 @@ class PrefixMiddleware(object):
             environ['PATH_INFO'] = environ['PATH_INFO'][len(self.prefix):]
             environ['SCRIPT_NAME'] = self.prefix
             return self.app(environ, start_response)
+
+
+class ModelChangeEvent(object):
+    def __init__(self, session, *callbacks):
+        self.model_changes = {}
+        self.callbacks = callbacks
+        self.register_events(session)
+
+    def record_ops(self, session, flush_context=None, instances=None):
+        for targets, operation in ((session.new, 'insert'), (session.dirty, 'update'), (session.deleted, 'delete')):
+            for target in targets:
+                state = inspect(target)
+                key = state.identity_key if state.has_identity else id(target)
+                self.model_changes[key] = (target, operation)
+
+    def after_commit(self, session):
+        if self.model_changes:
+            changes = list(self.model_changes.values())
+
+            for callback in self.callbacks:
+                callback(changes=changes)
+
+            self.model_changes.clear()
+
+    def after_rollback(self, session):
+        self.model_changes.clear()
+
+    def register_events(self, session):
+        event.listen(session, 'before_flush', self.record_ops)
+        event.listen(session, 'before_commit', self.record_ops)
+        event.listen(session, 'after_commit', self.after_commit)
+        event.listen(session, 'after_rollback', self.after_rollback)
 
 
 def create_app(config_name="dev"):
@@ -60,38 +91,9 @@ def create_app(config_name="dev"):
     config[config_name].init_app(app)
     app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) if app.config['ELASTICSEARCH_URL'] else None
 
-    def add_to_index(index, id, payload):
-        print("ADD_TO_INDEX", index, id, payload)
-        from flask import current_app
-        current_app.elasticsearch.index(index=index, doc_type=index, id=id, body=payload)
-
-    def remove_from_index(index, id):
-        print("REMOVE_FROM_INDEX", index, id)
-        from flask import current_app
-        current_app.elasticsearch.delete(index=index, doc_type=index, id=id)
-
-    def reindex_resources(changes):
-        from flask import current_app
-        from app.api.facade_manager import JSONAPIFacadeManager
-
-        db.session = db.create_scoped_session()
-        current_app.mce.register_events(db.session)
-
-        print("CHANGES after commit:", changes)
-        for target, op in changes:
-            facade = JSONAPIFacadeManager.get_facade_class(target)
-            f_obj, kwargs, errors = facade.get_resource_facade("", id=target.id)
-            if op in ('insert', 'update'):
-                for data in f_obj.get_data_to_index_when_added():
-                    print(target, data)
-                    add_to_index(**data)
-            if op == 'delete':
-                for data in f_obj.get_data_to_index_when_removed():
-                    print(target, data)
-                    remove_from_index(**data)
-
-    from app.search import ModelChangeEvent
-    app.mce = ModelChangeEvent(db.session, reindex_resources)
+    # Hook elasticsearch to the session
+    from app.search import SearchableMixin
+    app.mce = ModelChangeEvent(db.session, SearchableMixin.reindex_resources)
 
     # =====================================
     # Import models & app routes
@@ -144,7 +146,5 @@ def create_app(config_name="dev"):
 
     app.register_blueprint(app_bp)
     app.register_blueprint(api_bp)
-
-
 
     return app
