@@ -91,10 +91,12 @@ class SearchableMixin(object):
         print("CHANGES after commit:", changes)
         for target, op in changes:
             facade = JSONAPIFacadeManager.get_facade_class(target)
-
-            if op in ('insert', 'update'):
-                f_obj, kwargs, errors = facade.get_resource_facade("", id=target.id)
-            else:
-                f_obj = facade("", target)
-
-            f_obj.reindex(op)
+            print(target, op)
+            try:
+                if op in ('insert', 'update'):
+                    f_obj, kwargs, errors = facade.get_resource_facade("", id=target.id)
+                else:
+                    f_obj = facade("", target)
+                f_obj.reindex(op)
+            except Exception as e:
+                print("Error while indexing %s:" % target, e)

@@ -65,8 +65,8 @@ class Document(SearchableMixin, db.Model):
     whitelist_id = db.Column(db.Integer, db.ForeignKey('whitelist.id'), index=True)
 
     # relationships
-    images = db.relationship("Image", backref="document")
-    notes = db.relationship("Note", backref="document")
+    images = db.relationship("Image", backref="document", cascade="all, delete-orphan")
+    notes = db.relationship("Note", backref="document", cascade="all, delete-orphan")
     owner = db.relationship("User", backref="owned_documents")
 
     languages = db.relationship("Language",
@@ -168,7 +168,7 @@ class CorrespondentHasRole(SearchableMixin, db.Model):
     correspondent_role_id = db.Column(db.Integer, db.ForeignKey('correspondent_role.id', ondelete='CASCADE'), nullable=False)
 
     correspondent = db.relationship("Correspondent", backref=db.backref("correspondents_having_roles"), single_parent=True)
-    document = db.relationship("Document", backref=db.backref("correspondents_having_roles"), single_parent=True)
+    document = db.relationship("Document", backref=db.backref("correspondents_having_roles", cascade="all, delete-orphan"), single_parent=True)
     correspondent_role = db.relationship("CorrespondentRole", backref=db.backref("correspondents_having_roles"), single_parent=True)
 
 
