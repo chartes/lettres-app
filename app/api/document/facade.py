@@ -179,14 +179,7 @@ class DocumentFacade(JSONAPIAbstractFacade):
             }
 
     def get_data_to_index_when_added(self):
-        """
-        What to add or remove from the index
-        :param remove:
-        :return:
-        """
-        print("GET INDEXED DATA", self)
         _res = self.resource
-
         payload = {
             "id": _res["id"],
             "type": _res["type"],

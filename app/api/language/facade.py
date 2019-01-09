@@ -73,6 +73,5 @@ class LanguageFacade(JSONAPIAbstractFacade):
         return to_be_reindexed
 
     def get_data_to_index_when_added(self):
-        print("GET INDEXED DATA", self)
         to_be_reindexed = self.get_relationship_data_to_index(rel_name="documents")
         return to_be_reindexed

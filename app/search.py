@@ -73,19 +73,16 @@ class SearchableMixin(object):
 
     @staticmethod
     def add_to_index(index, id, payload):
-        print("ADD_TO_INDEX", index, id, payload)
-        from flask import current_app
+        print("ADD_TO_INDEX", index, id)
         current_app.elasticsearch.index(index=index, doc_type=index, id=id, body=payload)
 
     @staticmethod
     def remove_from_index(index, id):
         print("REMOVE_FROM_INDEX", index, id)
-        from flask import current_app
         current_app.elasticsearch.delete(index=index, doc_type=index, id=id)
 
     @staticmethod
     def reindex_resources(changes):
-        from flask import current_app
         from app.api.facade_manager import JSONAPIFacadeManager
 
         db.session = db.create_scoped_session()
@@ -95,10 +92,12 @@ class SearchableMixin(object):
         for target, op in changes:
             facade = JSONAPIFacadeManager.get_facade_class(target)
             f_obj, kwargs, errors = facade.get_resource_facade("", id=target.id)
+
             if op in ('insert', 'update'):
                 for data in f_obj.get_data_to_index_when_added():
                     print(target, data)
                     SearchableMixin.add_to_index(**data)
+
             if op == 'delete':
                 for data in f_obj.get_data_to_index_when_removed():
                     print(target, data)
