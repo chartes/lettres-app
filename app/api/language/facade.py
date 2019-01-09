@@ -61,17 +61,9 @@ class LanguageFacade(JSONAPIAbstractFacade):
             },
         }
 
-    def get_relationship_data_to_index(self, rel_name):
-        from app.api.facade_manager import JSONAPIFacadeManager
-        to_be_reindexed = []
-        for doc in getattr(self.obj, rel_name):
-            facade = JSONAPIFacadeManager.get_facade_class(doc)
-            f_obj, kwargs, errors = facade.get_resource_facade("", id=doc.id)
-            to_be_reindexed.extend(
-                f_obj.get_data_to_index_when_added()
-            )
-        return to_be_reindexed
-
     def get_data_to_index_when_added(self):
-        to_be_reindexed = self.get_relationship_data_to_index(rel_name="documents")
-        return to_be_reindexed
+        return self.get_relationship_data_to_index(rel_name="documents")
+
+    def remove_from_index(self):
+        # do not remove resource but reindex documents
+        self.add_to_index()

@@ -50,12 +50,6 @@ class JSONAPIAbstractFacade(object):
     def resource(self):
         raise NotImplementedError
 
-    def get_data_to_index_when_added(self):
-        return []
-
-    def get_data_to_index_when_removed(self):
-        return []
-
     @classmethod
     def get_index_name(cls):
         return "{prefix}__{env}__{index_name}".format(
@@ -205,6 +199,8 @@ class JSONAPIAbstractFacade(object):
     def delete_resource(obj):
         errors = None
         try:
+            if obj is None:
+                raise ValueError("Resource does not exist")
             print("DELETING RESOURCE:", obj)
             db.session.delete(obj)
             db.session.commit()
@@ -286,3 +282,36 @@ class JSONAPIAbstractFacade(object):
                 }
                 for rel_name, rel in self.relationships.items()
             }
+
+    def get_data_to_index_when_added(self):
+        return []
+
+    def get_data_to_index_when_removed(self):
+        return []
+
+    def get_relationship_data_to_index(self, rel_name):
+        from app.api.facade_manager import JSONAPIFacadeManager
+        to_be_reindexed = []
+        for doc in getattr(self.obj, rel_name):
+            facade = JSONAPIFacadeManager.get_facade_class(doc)
+            f_obj, kwargs, errors = facade.get_resource_facade("", id=doc.id)
+            to_be_reindexed.extend(
+                f_obj.get_data_to_index_when_added()
+            )
+        return to_be_reindexed
+
+    def add_to_index(self):
+        from app.search import SearchableMixin
+        for data in self.get_data_to_index_when_added():
+            SearchableMixin.add_to_index(index=data["index"], id=data["id"], payload=data["payload"])
+
+    def remove_from_index(self):
+        from app.search import SearchableMixin
+        for data in self.get_data_to_index_when_added():
+            SearchableMixin.remove_from_index(index=data["index"], id=data["id"])
+
+    def reindex(self, op):
+        if op in ("insert", "update"):
+            self.add_to_index()
+        else:
+            self.remove_from_index()
