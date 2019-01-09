@@ -178,18 +178,16 @@ class DocumentFacade(JSONAPIAbstractFacade):
                 "resource_getter": self.get_related_resources(rel_facade, u_rel_name, to_many),
             }
 
-    def get_indexed_data(self, remove=False):
+    def get_data_to_index_when_added(self):
         """
-        What to reindex of remove from the indexe
+        What to add or remove from the index
         :param remove:
         :return:
         """
         print("GET INDEXED DATA", self)
-        print("RESOURCE:")
         _res = self.resource
-        print(_res)
-        print("RESOURCE END")
-        data = {
+
+        payload = {
             "id": _res["id"],
             "type": _res["type"],
             
@@ -203,10 +201,7 @@ class DocumentFacade(JSONAPIAbstractFacade):
             "institution": None if not self.obj.institution else self.obj.institution.name,
             "tradition": None if not self.obj.tradition else self.obj.tradition.label,
         }
-        print("INDEX: ")
-        index = self.get_index_name()
-        print(index)
-        return {
-           "add": [{"id": _res["id"], "index": index, "payload": data}],
-           "remove": []
-        }
+        return [{"id": _res["id"], "index": self.get_index_name(), "payload": payload}]
+
+    def get_data_to_index_when_removed(self):
+        return [{"id": self.obj.id, "index": self.get_index_name()}]

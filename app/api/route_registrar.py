@@ -1111,6 +1111,10 @@ class JSONAPIRouteRegistrar(object):
                 # ==============================
                 model = self.models[facade_class.TYPE]
                 obj = model.query.filter(model.id == id).first()
+                if obj is None:
+                    return JSONAPIResponseFactory.make_errors_response(
+                        {"status": 404, "title": "Resource %s does not exist" % id}, status=404
+                    )
                 resource, e = facade_class.update_resource(obj, facade_class.TYPE, {}, related_resources, append=False)
                 if e is None:
                     url_prefix = request.host_url[:-1] + self.url_prefix

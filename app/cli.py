@@ -78,7 +78,7 @@ def make_cli():
             app.elasticsearch.indices.delete(index=index_name, ignore=[400, 404])  # remove all records
             for doc in Document.query.all():
                 print("Indexing", doc)
-                doc.update_index()
+                doc.update_index(doc)
             print("completed!")
 
     @click.command("run")

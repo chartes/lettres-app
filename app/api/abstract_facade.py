@@ -50,20 +50,11 @@ class JSONAPIAbstractFacade(object):
     def resource(self):
         raise NotImplementedError
 
-    def get_indexed_data(self, remove=False):
-        return {"add": [], "remove": []}
+    def get_data_to_index_when_added(self):
+        return []
 
-    @staticmethod
-    def get_payload(obj):
-        print("GETTING PAYLOAD", obj)
-        from app.api.facade_manager import JSONAPIFacadeManager
-        facade = JSONAPIFacadeManager.get_facade_class(obj)
-        f_obj, kwargs, errors = facade.get_facade("",  obj)
-        d = f_obj.get_indexed_data()
-        print("d", d)
-        p = d["add"][0]
-        print("p", p)
-        return p["payload"]
+    def get_data_to_index_when_removed(self):
+        return []
 
     @classmethod
     def get_index_name(cls):
@@ -194,13 +185,15 @@ class JSONAPIAbstractFacade(object):
         errors = None
         resource = None
         try:
+            if obj is None:
+                raise Exception("Object is None")
             resource = JSONAPIAbstractFacade.patch_resource(obj, obj_type, attributes, related_resources, append)
             db.session.add(resource)
             db.session.commit()
         except Exception as e:
             print(e)
             errors = {
-                "status": 403,
+                "status": 404 if obj is None else 403,
                 "title": "Error updating resource '%s' with data: %s" % (
                     obj_type, str([id, attributes, related_resources, append])),
                 "detail": str(e)
@@ -217,8 +210,9 @@ class JSONAPIAbstractFacade(object):
             db.session.commit()
         except Exception as e:
             errors = {
-                "status": 404,
-                "title": "This resource does not exist"
+                "status": 404 if obj is None else 403,
+                "title": "Cannot delete the resource",
+                "detail": str(e)
             }
             db.session.rollback()
         return errors

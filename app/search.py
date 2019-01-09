@@ -71,69 +71,36 @@ class SearchableMixin(object):
         return cls.query.filter(cls.id.in_(ids)).order_by(
             db.case(when, value=cls.id)), total
 
-    @classmethod
-    def before_commit(cls, session):
-        #session._changes = {
-        #    'add': list(session.new),
-        #    'update': list(session.dirty),
-        #    'delete': list(session.deleted)
-        #}
-        from app.api.facade_manager import JSONAPIFacadeManager
-        session._changes = {"add": {}, "remove": {}}
 
-        # get id and payload info for each new or dirty object :
-        for new_obj in list(session.new) + list(session.dirty):
-            if isinstance(new_obj, SearchableMixin):
-                facade = JSONAPIFacadeManager.get_facade_class(new_obj)
-                f_obj, kwargs, errors = facade.get_facade("", new_obj)
-                index_name = f_obj.get_index_name()
-                # register the change to the index
-                if index_name:
-                    if index_name not in session._changes["add"]:
-                        session._changes["add"][index_name] = []
-                    session._changes["add"][index_name].append(f_obj)
+from sqlalchemy import event, inspect
 
-        for obj in list(session.deleted):
-            if isinstance(obj, SearchableMixin):
-                facade = JSONAPIFacadeManager.get_facade_class(obj)
-                f_obj, kwargs, errors = facade.get_facade("", obj)
-                index_name = f_obj.get_index_name()
-                # register the change to the index
-                if index_name:
-                    if index_name not in session._changes["remove"]:
-                        session._changes["remove"][index_name] = []
-                    session._changes["remove"][index_name].append(f_obj)
+class ModelChangeEvent(object):
+    def __init__(self, session, *callbacks):
+        self.model_changes = {}
+        self.callbacks = callbacks
+        self.register_events(session)
 
-    @classmethod
-    def after_commit(cls, session):
-        for index in session._changes['add'].keys():
-            for f in session._changes['add'][index]:
-                f.obj.update_index()
+    def record_ops(self, session, flush_context=None, instances=None):
+        for targets, operation in ((session.new, 'insert'), (session.dirty, 'update'), (session.deleted, 'delete')):
+            for target in targets:
+                state = inspect(target)
+                key = state.identity_key if state.has_identity else id(target)
+                self.model_changes[key] = (target, operation)
 
-        for index in session._changes['remove'].keys():
-            for f in session._changes['remove'][index]:
-                f.obj.update_index(remove=True)
-                pass
-        session._changes = None
+    def after_commit(self, session):
+        if self.model_changes:
+            changes = list(self.model_changes.values())
 
-    @classmethod
-    def add_to_index(cls, index, id, payload):
-        #current_app.elasticsearch.index(index=index, doc_type=index, id=id, body=payload)
-        pass
+            for callback in self.callbacks:
+                callback(changes=changes)
 
-    @classmethod
-    def remove_from_index(cls, index, id):
-        #current_app.elasticsearch.delete(index=index, doc_type=index, id=id)
-        pass
+            self.model_changes.clear()
 
-    def update_index(self, remove=False):
-        if hasattr(current_app, 'elasticsearch'):
-            from app.api.facade_manager import JSONAPIFacadeManager
-            facade = JSONAPIFacadeManager.get_facade_class(self)
-            f_obj, kwargs, errors = facade.get_facade("", self)
-            # index the payload(s)
-            p = f_obj.get_indexed_data(remove)
-            for d in p["add"]:
-                self.add_to_index(d["index"], d["id"], d["payload"])
-            for d in p["remove"]:
-                self.remove_from_index(d["index"], d["id"])
+    def after_rollback(self, session):
+        self.model_changes.clear()
+
+    def register_events(self, session):
+        event.listen(session, 'before_flush', self.record_ops)
+        event.listen(session, 'before_commit', self.record_ops)
+        event.listen(session, 'after_commit', self.after_commit)
+        event.listen(session, 'after_rollback', self.after_rollback)

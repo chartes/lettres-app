@@ -61,26 +61,18 @@ class LanguageFacade(JSONAPIAbstractFacade):
             },
         }
 
-    def get_indexed_data(self, remove=False):
-        """
-        What to reindex of remove from the index
-        :param remove:
-        :return:
-        """
-        print("GET INDEXED DATA", self, remove)
+    def get_relationship_data_to_index(self, rel_name):
+        from app.api.facade_manager import JSONAPIFacadeManager
         to_be_reindexed = []
-        if remove:
-            from app.api.document.facade import DocumentFacade
-            print("GETTING DOC INDEX NAME")
-            doc_index_name = DocumentFacade.get_index_name()
-            print("GETTING DOCS TO BE REINDEXED")
-            to_be_reindexed  = [
-                {"id": doc.id, "index": doc_index_name, "payload": JSONAPIAbstractFacade.get_payload(doc)}
-                for doc in self.obj.documents
-            ]
-        print("DOCS TO BE REINDEXED")
-        print(to_be_reindexed)
-        return {
-            "add": [], #TODO: utiliser to_be_reindexed
-            "remove": []
-        }
+        for doc in getattr(self.obj, rel_name):
+            facade = JSONAPIFacadeManager.get_facade_class(doc)
+            f_obj, kwargs, errors = facade.get_resource_facade("", id=doc.id)
+            to_be_reindexed.extend(
+                f_obj.get_data_to_index_when_added()
+            )
+        return to_be_reindexed
+
+    def get_data_to_index_when_added(self):
+        print("GET INDEXED DATA", self)
+        to_be_reindexed = self.get_relationship_data_to_index(rel_name="documents")
+        return to_be_reindexed
