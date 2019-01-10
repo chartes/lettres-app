@@ -302,14 +302,14 @@ class JSONAPIAbstractFacade(object):
         return to_be_reindexed
 
     def add_to_index(self):
-        from app.search import SearchableMixin
+        from app.search import SearchIndexManager
         for data in self.get_data_to_index_when_added():
-            SearchableMixin.add_to_index(index=data["index"], id=data["id"], payload=data["payload"])
+            SearchIndexManager.add_to_index(index=data["index"], id=data["id"], payload=data["payload"])
 
     def remove_from_index(self):
-        from app.search import SearchableMixin
+        from app.search import SearchIndexManager
         for data in self.get_data_to_index_when_removed():
-            SearchableMixin.remove_from_index(index=data["index"], id=data["id"])
+            SearchIndexManager.remove_from_index(index=data["index"], id=data["id"])
 
     def reindex(self, op):
         if op in ("insert", "update"):

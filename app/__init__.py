@@ -94,8 +94,8 @@ def create_app(config_name="dev"):
     app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) if app.config['ELASTICSEARCH_URL'] else None
 
     # Hook elasticsearch to the session
-    from app.search import SearchableMixin
-    app.mce = ModelChangeEvent(app, db.session, SearchableMixin.reindex_resources)
+    from app.search import SearchIndexManager
+    app.mce = ModelChangeEvent(app, db.session, SearchIndexManager.reindex_resources)
 
     # =====================================
     # Import models & app routes

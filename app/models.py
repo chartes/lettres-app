@@ -1,7 +1,5 @@
 from app import db
 
-from app.search import SearchableMixin
-
 association_document_has_language = db.Table('document_has_language',
                                              db.Column('document_id', db.Integer, db.ForeignKey('document.id'),
                                                        primary_key=True),
@@ -23,7 +21,7 @@ association_whitelist_has_user = db.Table('whitelist_has_user',
                                           )
 
 
-class Collection(SearchableMixin, db.Model):
+class Collection(db.Model):
     """ Une collection: un regroupement de lettres.
 
     """
@@ -38,7 +36,7 @@ class Collection(SearchableMixin, db.Model):
     description = db.Column(db.String(400))
 
 
-class Document(SearchableMixin, db.Model):
+class Document(db.Model):
     """Un document transcrit – ici, une lettre.
 
     """
@@ -81,7 +79,7 @@ class Document(SearchableMixin, db.Model):
     next_document = db.relationship("Document", backref=db.backref('prev_document', remote_side=id), uselist=False)
 
 
-class Note(SearchableMixin, db.Model):
+class Note(db.Model):
     """ Note (appel point) de transcription non typée ; contenu riche """
     __tablename__ = 'note'
 
@@ -91,7 +89,7 @@ class Note(SearchableMixin, db.Model):
     document_id = db.Column(db.Integer, db.ForeignKey('document.id', ondelete='CASCADE'), nullable=False, index=True)
 
 
-class Institution(SearchableMixin, db.Model):
+class Institution(db.Model):
     """ Institution de conservation du témoin édité """
     __tablename__ = "institution"
 
@@ -103,7 +101,7 @@ class Institution(SearchableMixin, db.Model):
     documents = db.relationship("Document", backref="institution")
 
 
-class Image(SearchableMixin, db.Model):
+class Image(db.Model):
     """ Liens aux images du témoin """
     __tablename__ = "image"
 
@@ -113,7 +111,7 @@ class Image(SearchableMixin, db.Model):
     document_id = db.Column(db.Integer, db.ForeignKey('document.id', ondelete='CASCADE'), index=True)
 
 
-class Language(SearchableMixin, db.Model):
+class Language(db.Model):
     """ Langue(s) de la lettre transcrite """
     __tablename__ = 'language'
     __table_args__ = (
@@ -124,7 +122,7 @@ class Language(SearchableMixin, db.Model):
     label = db.Column(db.String(45))
 
 
-class Tradition(SearchableMixin, db.Model):
+class Tradition(db.Model):
     """ Mode de tradition du témoin transcrit (original, copie, etc.) """
     __tablename__ = "tradition"
 
@@ -136,7 +134,7 @@ class Tradition(SearchableMixin, db.Model):
     documents = db.relationship("Document", backref="tradition")
 
 
-class Correspondent(SearchableMixin, db.Model):
+class Correspondent(db.Model):
     """ Correspondants d’une lettre (expéditeur(s) et destinataire(s)) """
     __tablename__ = 'correspondent'
 
@@ -147,7 +145,7 @@ class Correspondent(SearchableMixin, db.Model):
     ref = db.Column(db.String)
 
 
-class CorrespondentRole(SearchableMixin, db.Model):
+class CorrespondentRole(db.Model):
     """ Rôle des correspondants (expéditeur, destinataire) """
     __tablename__ = 'correspondent_role'
 
@@ -156,7 +154,7 @@ class CorrespondentRole(SearchableMixin, db.Model):
     description = db.Column(db.String(100))
 
 
-class CorrespondentHasRole(SearchableMixin, db.Model):
+class CorrespondentHasRole(db.Model):
     __tablename__ = 'correspondent_has_role'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     __table_args__ = (
@@ -172,7 +170,7 @@ class CorrespondentHasRole(SearchableMixin, db.Model):
     correspondent_role = db.relationship("CorrespondentRole", backref=db.backref("correspondents_having_roles"), single_parent=True)
 
 
-class User(SearchableMixin, db.Model):
+class User(db.Model):
     """ Utilisateur """
     __tablename__ = 'user'
 
@@ -198,7 +196,7 @@ class User(SearchableMixin, db.Model):
         pass
 
 
-class UserRole(SearchableMixin, db.Model):
+class UserRole(db.Model):
     """ Rôle des utilisateurs (administrateur ou contributeur) """
     __tablename__ = 'user_role'
 
@@ -225,7 +223,7 @@ class UserInvitation(db.Model):
     invited_by_user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
 
 
-class Whitelist(SearchableMixin, db.Model):
+class Whitelist(db.Model):
     """ Liste d’utilisateur(s) """
     __tablename__ = 'whitelist'
 

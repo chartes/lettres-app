@@ -16,7 +16,7 @@ from sqlalchemy.orm import Query
 
 from app import JSONAPIResponseFactory, api_bp, db
 from app.api.facade_manager import JSONAPIFacadeManager
-from app.search import query_index
+from app.search import SearchIndexManager
 
 if sys.version_info < (3, 6):
     json_loads = lambda s: json_loads(s.decode("utf-8")) if isinstance(s, bytes) else json.loads(s)
@@ -150,7 +150,7 @@ class JSONAPIRouteRegistrar(object):
 
     def search(self, index, query, num_page, page_size):
         # query the search engine
-        results, total = query_index(index=index, query=query, page=num_page, per_page=page_size)
+        results, total = SearchIndexManager.query_index(index=index, query=query, page=num_page, per_page=page_size)
         if total == 0:
             return {}, 0
 
@@ -160,7 +160,6 @@ class JSONAPIRouteRegistrar(object):
                 res_dict[res.type] = []
             res_dict[res.type].append(res.id)
 
-        pprint.pprint(res_dict)
         for res_type, res_ids in res_dict.items():
             when = []
             for i, id in enumerate(res_ids):
