@@ -4,7 +4,7 @@
       <aside class="documents-index__collections column is-2">
         <h2 class="documents-index__collections__title title is-size-3">Collections</h2>
       </aside>
-      <section class="column">
+      <section class="column documents-index__preview-column">
           <pagination :current="currentPage" :end="nbPages" :size="page_size" :action="goToPage"/>
           <ul id="preview-cards" >
             <li v-for="doc in documents" :key="doc.id">
@@ -69,5 +69,8 @@
   }
   .documents-index__collections__title {
     font: 90%/140% 'Oxygen', sans-serif;
+  }
+  .documents-index__preview-column {
+      padding-bottom: 80px;
   }
 </style>

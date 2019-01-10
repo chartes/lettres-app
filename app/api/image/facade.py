@@ -48,11 +48,11 @@ class ImageFacade(JSONAPIAbstractFacade):
         """Make a JSONAPI resource object describing what is an image
         """
 
-        from app.api.document.facade import DocumentFacade
+        from app.api.witness.facade import WitnessFacade
         self.relationships = {
-            "document": {
-                "links": self._get_links(rel_name="document"),
-                "resource_identifier_getter": self.get_related_resource_identifiers(DocumentFacade, "document"),
-                "resource_getter": self.get_related_resources(DocumentFacade, "document"),
+            "witness": {
+                "links": self._get_links(rel_name="witness"),
+                "resource_identifier_getter": self.get_related_resource_identifiers(WitnessFacade, "witness"),
+                "resource_getter": self.get_related_resources(WitnessFacade, "witness"),
             },
         }

@@ -8,7 +8,6 @@ import institutions from './modules/institutions'
 import languages from './modules/languages'
 import notes from './modules/notes'
 import noteTypes from './modules/noteTypes'
-import traditions from './modules/traditions'
 import user from './modules/user'
 
 Vue.use(Vuex);

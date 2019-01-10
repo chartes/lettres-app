@@ -1,3 +1,5 @@
+from sqlalchemy import Enum
+
 from app import db
 
 association_document_has_language = db.Table('document_has_language',
@@ -45,10 +47,6 @@ class Document(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String(200), nullable=False)
-    witness_label = db.Column(db.String(200))
-    institution_id = db.Column(db.Integer, db.ForeignKey('institution.id'), index=True)
-    classification_mark = db.Column(db.String(100))
-    tradition_id = db.Column(db.Integer, db.ForeignKey('tradition.id'), index=True)
     argument = db.Column(db.Text)
     creation = db.Column(db.String)
     creation_label = db.Column(db.String)
@@ -63,8 +61,9 @@ class Document(db.Model):
     whitelist_id = db.Column(db.Integer, db.ForeignKey('whitelist.id'), index=True)
 
     # relationships
-    images = db.relationship("Image", backref="document", cascade="all, delete-orphan")
     notes = db.relationship("Note", backref="document", cascade="all, delete-orphan")
+    witnesses = db.relationship("Witness", backref="document", cascade="all, delete-orphan")
+
     owner = db.relationship("User", backref="owned_documents")
 
     languages = db.relationship("Language",
@@ -89,8 +88,26 @@ class Note(db.Model):
     document_id = db.Column(db.Integer, db.ForeignKey('document.id', ondelete='CASCADE'), nullable=False, index=True)
 
 
+TRADITION_VALUES = ('original', 'copie', 'édition')
+WITNESS_STATUS_VALUES = ('base', 'autre')
+
+
+class Witness(db.Model):
+    """ Témoin """
+    __tablename__ = "witness"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    document_id = db.Column(db.Integer, db.ForeignKey('document.id', ondelete='CASCADE'), nullable=False, index=True)
+
+    content = db.Column(db.String, nullable=False, index=True)
+    tradition = db.Column('tradition', Enum(*TRADITION_VALUES), index=True)
+    status = db.Column('status', Enum(*WITNESS_STATUS_VALUES), index=True)
+    institution_id = db.Column(db.Integer, db.ForeignKey('institution.id'))
+    classification_mark = db.Column(db.String(100))
+
+
 class Institution(db.Model):
-    """ Institution de conservation du témoin édité """
+    """ Institution de conservation """
     __tablename__ = "institution"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -98,7 +115,7 @@ class Institution(db.Model):
     ref = db.Column(db.String(200))
 
     # relationships
-    documents = db.relationship("Document", backref="institution")
+    witnesses = db.relationship("Witness", backref="institution")
 
 
 class Image(db.Model):
@@ -106,9 +123,12 @@ class Image(db.Model):
     __tablename__ = "image"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    witness_id = db.Column(db.Integer, db.ForeignKey('witness.id', ondelete='CASCADE'), index=True)
+
     canvas_idx = db.Column(db.Integer, nullable=False)
     manifest_url = db.Column(db.String(200))
-    document_id = db.Column(db.Integer, db.ForeignKey('document.id', ondelete='CASCADE'), index=True)
+
+    witness = db.relationship("Witness", backref="images")
 
 
 class Language(db.Model):
@@ -120,18 +140,6 @@ class Language(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     code = db.Column(db.String(3), nullable=False)
     label = db.Column(db.String(45))
-
-
-class Tradition(db.Model):
-    """ Mode de tradition du témoin transcrit (original, copie, etc.) """
-    __tablename__ = "tradition"
-
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    label = db.Column(db.String(45), nullable=False)
-    description = db.Column(db.String(200))
-
-    # relationships
-    documents = db.relationship("Document", backref="tradition")
 
 
 class Correspondent(db.Model):
@@ -211,6 +219,7 @@ class UserRole(db.Model):
     def add_default_roles():
         db.session.add(UserRole(label="admin", description="Administrator"))
         db.session.add(UserRole(label="contributor", description="Contributor"))
+
 
 class UserInvitation(db.Model):
     __tablename__ = 'user_invitation'

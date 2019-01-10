@@ -7,12 +7,12 @@ from app.api.image.facade import ImageFacade
 from app.api.institution.facade import InstitutionFacade
 from app.api.language.facade import LanguageFacade
 from app.api.note.facade import NoteFacade
-from app.api.tradition.facade import TraditionFacade
 from app.api.user.facade import UserFacade
 from app.api.user_role.facade import UserRoleFacade
 from app.api.whitelist.facade import WhitelistFacade
+from app.api.witness.facade import WitnessFacade
 from app.models import Collection, Correspondent, CorrespondentHasRole, CorrespondentRole, Document, Image, Institution, \
-    Language, Note, Tradition, User, UserRole, Whitelist
+    Language, Note, User, UserRole, Whitelist, Witness
 
 
 class JSONAPIFacadeManager(object):
@@ -54,10 +54,6 @@ class JSONAPIFacadeManager(object):
             "default": NoteFacade,
             "search": NoteFacade,
         },
-        Tradition.__name__: {
-            "default": TraditionFacade,
-            "search": TraditionFacade,
-        },
         User.__name__: {
             "default": UserFacade,
             "search": UserFacade,
@@ -69,6 +65,10 @@ class JSONAPIFacadeManager(object):
         Whitelist.__name__: {
             "default": WhitelistFacade,
             "search": WhitelistFacade,
+        },
+        Witness.__name__: {
+            "default": WitnessFacade,
+            "search": WitnessFacade,
         },
     }
 

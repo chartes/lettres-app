@@ -72,7 +72,7 @@ def make_cli():
         """
         Rebuild the elasticsearch indexes from the current database
         """
-        from app.search import SearchableMixin
+        from app.search import SearchIndexManager
         with app.app_context():
             index_name = DocumentFacade.get_index_name()
             print("Reindexing", index_name)
@@ -80,7 +80,7 @@ def make_cli():
             for doc in Document.query.all():
                 f_obj = DocumentFacade("", doc)
                 for data in f_obj.get_data_to_index_when_added():
-                    SearchableMixin.add_to_index(index=index_name, id=doc.id, payload=data)
+                    SearchIndexManager.add_to_index(index=index_name, id=doc.id, payload=data)
             print("completed!")
 
     @click.command("run")

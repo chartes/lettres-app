@@ -32,7 +32,9 @@ class SearchIndexManager(object):
 
             try:
                 search = current_app.elasticsearch.search(index=index, doc_type=index, body=body)
-                #search = current_app.elasticsearch.helpers.scan(index=index, doc_type=index, body=body)
+
+                #from elasticsearch import Elasticsearch
+                #scan = Elasticsearch.helpers.scan(client=current_app.elasticsearch, index=index, doc_type=index, body=body)
 
                 from collections import namedtuple
                 Result = namedtuple("Result", "index id type score")

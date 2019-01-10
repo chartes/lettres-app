@@ -1,17 +1,15 @@
 import http from '../../../modules/http-common';
-import {getCorrespondents, getInstitution, getLanguages, getNotes, getTradition, getCollections} from '../../../modules/document-helpers';
+import {getCorrespondents, getLanguages, getWitnesses, getNotes, getCollections} from '../../../modules/document-helpers';
 
 const state = {
 
   documentLoading: true,
   document: false,
   correspondents: [],
-  institution: false,
-  tradition: false,
+  witnesses: false,
   languages: false,
   collections: [],
   notes: false,
-  images: false,
 
   documents: [],
   documentsPreview: {},
@@ -26,9 +24,8 @@ const mutations = {
     state.document = { ...data.attributes, id: data.id};
     state.correspondents = getCorrespondents(included);
     state.collections = getCollections(included);
-    state.institution = getInstitution(included);
-    state.tradition = getTradition(included);
     state.languages = getLanguages(included);
+    state.witnesses = getWitnesses(included);
     state.notes = getNotes(included);
   },
   UPDATE_DOCUMENT_PREVIEW (state, {data, included}) {
@@ -37,8 +34,6 @@ const mutations = {
       id: data.id,
       attributes: data.attributes,
       correspondents: getCorrespondents(included),
-      institution: getInstitution(included),
-      tradition: getTradition(included),
       languages: getLanguages(included),
       collections: getCollections(included),
     };
@@ -65,7 +60,7 @@ const actions = {
   fetch ({ commit }, id) {
     commit('LOADING_STATUS', true);
     console.log(`fetching doc '${id}'`);
-    let incs = ['collections', 'correspondents', 'roles', 'correspondents-having-roles', 'notes', 'institution', 'tradition', 'languages'];
+    let incs = ['collections', 'correspondents', 'roles', 'correspondents-having-roles', 'notes', 'witnesses', 'languages'];
     return http.get(`documents/${id}?include=${incs.join(',')}`).then( response => {
       commit('UPDATE_DOCUMENT', response.data);
       commit('LOADING_STATUS', false)
@@ -87,7 +82,7 @@ const actions = {
   fetchPreview ({ commit }, id) {
     commit('LOADING_STATUS', true);
     console.log(`fetching doc preview '${id}'`);
-    let incs = ['collections', 'correspondents', 'roles', 'correspondents-having-roles', 'institution', 'tradition', 'languages'];
+    let incs = ['collections', 'correspondents', 'roles', 'correspondents-having-roles', 'witnesses', 'languages'];
 
     return http.get(`documents/${id}?include=${incs.join(',')}`).then( response => {
       commit('UPDATE_DOCUMENT_PREVIEW', response.data);
@@ -105,10 +100,6 @@ const actions = {
 
 const getters = {
 
-  manifestURL: state => {
-    const manifest_url = `/lettres/api/1.0/documents/${state.document.id}/manifest`;
-    return state.document && state.document.images &&  state.document.images.length > 0 ? manifest_url : null
-  }
 
 };
 

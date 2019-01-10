@@ -7,6 +7,9 @@
     </header>
 
     <document-attributes></document-attributes>
+
+    <!-- TODO: placer les composants document-witness ici -->
+
     <!-- v-if="document.collections && document.collections.length > 0" -->
     <div class="document__collections" v-if="collections.length > 0">
       <header>

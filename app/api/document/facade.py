@@ -102,8 +102,6 @@ class DocumentFacade(JSONAPIAbstractFacade):
             **self.resource_identifier,
             "attributes": {
                 "title": self.obj.title,
-                "witness-label": self.obj.witness_label,
-                "classification-mark": self.obj.classification_mark,
                 "argument": self.obj.argument,
                 "creation": self.obj.creation,
                 "creation-label": self.obj.creation_label,
@@ -149,22 +147,18 @@ class DocumentFacade(JSONAPIAbstractFacade):
         # ===================================
         # Add simple relationships
         # ===================================
-        from app.api.image.facade import ImageFacade
         from app.api.note.facade import NoteFacade
         from app.api.language.facade import LanguageFacade
-        from app.api.institution.facade import InstitutionFacade
-        from app.api.tradition.facade import TraditionFacade
+        from app.api.witness.facade import WitnessFacade
         from app.api.user.facade import UserFacade
         from app.api.whitelist.facade import WhitelistFacade
         from app.api.collection.facade import CollectionFacade
 
         for rel_name, (rel_facade, to_many) in {
             "collections": (CollectionFacade, True),
-            "images": (ImageFacade, True),
             "notes": (NoteFacade, True),
             "languages": (LanguageFacade, True),
-            "institution": (InstitutionFacade, False),
-            "tradition": (TraditionFacade, False),
+            "witnesses": (WitnessFacade, True),
             "owner": (UserFacade, False),
             "whitelist": (WhitelistFacade, False),
             "prev-document": (DocumentFacade, False),
@@ -188,11 +182,8 @@ class DocumentFacade(JSONAPIAbstractFacade):
             "argument": _res["attributes"]["argument"],
             "transcription": _res["attributes"]["transcription"],
 
-            "manifest-url": None if len(self.obj.images) == 0 else self.obj.images[0].manifest_url,
             "languages": None if len(self.obj.languages) == 0 else [l.code for l in self.obj.languages],
             "collections": None if len(self.obj.collections) == 0 else [c.title for c in self.obj.collections],
-            "institution": None if not self.obj.institution else self.obj.institution.name,
-            "tradition": None if not self.obj.tradition else self.obj.tradition.label,
         }
         return [{"id": _res["id"], "index": self.get_index_name(), "payload": payload}]
 
