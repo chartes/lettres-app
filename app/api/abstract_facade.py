@@ -304,12 +304,11 @@ class JSONAPIAbstractFacade(object):
     def add_to_index(self):
         from app.search import SearchableMixin
         for data in self.get_data_to_index_when_added():
-            pprint.pprint(data["payload"])
             SearchableMixin.add_to_index(index=data["index"], id=data["id"], payload=data["payload"])
 
     def remove_from_index(self):
         from app.search import SearchableMixin
-        for data in self.get_data_to_index_when_added():
+        for data in self.get_data_to_index_when_removed():
             SearchableMixin.remove_from_index(index=data["index"], id=data["id"])
 
     def reindex(self, op):

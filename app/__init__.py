@@ -39,9 +39,11 @@ class PrefixMiddleware(object):
 
 
 class ModelChangeEvent(object):
-    def __init__(self, session, *callbacks):
+    def __init__(self, app, session, *callbacks):
+        self.app = app
         self.model_changes = {}
         self.callbacks = callbacks
+        self.session = session
         self.register_events(session)
 
     def record_ops(self, session, flush_context=None, instances=None):
@@ -49,7 +51,7 @@ class ModelChangeEvent(object):
             for target in targets:
                 state = inspect(target)
                 key = state.identity_key if state.has_identity else id(target)
-                self.model_changes[key] = (target, operation)
+                self.model_changes[key] = (target.id, target, operation)
 
     def after_commit(self, session):
         if self.model_changes:
@@ -93,7 +95,7 @@ def create_app(config_name="dev"):
 
     # Hook elasticsearch to the session
     from app.search import SearchableMixin
-    app.mce = ModelChangeEvent(db.session, SearchableMixin.reindex_resources)
+    app.mce = ModelChangeEvent(app, db.session, SearchableMixin.reindex_resources)
 
     # =====================================
     # Import models & app routes

@@ -85,18 +85,20 @@ class SearchableMixin(object):
     def reindex_resources(changes):
         from app.api.facade_manager import JSONAPIFacadeManager
 
-        db.session = db.create_scoped_session()
-        current_app.mce.register_events(db.session)
+        #db.session =
+        current_app.mce.register_events(db.create_scoped_session())
 
-        print("CHANGES after commit:", changes)
-        for target, op in changes:
+        #print("REINDEXING")
+        for target_id, target, op in changes:
             facade = JSONAPIFacadeManager.get_facade_class(target)
-            print(target, op)
             try:
                 if op in ('insert', 'update'):
                     f_obj, kwargs, errors = facade.get_resource_facade("", id=target.id)
                 else:
+                    target.id = target_id
                     f_obj = facade("", target)
+                print("call to reindex for", target_id, target, op)
                 f_obj.reindex(op)
             except Exception as e:
-                print("Error while indexing %s:" % target, e)
+                #print("Error while indexing %s:" % target, e)
+                pass
