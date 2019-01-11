@@ -88,7 +88,7 @@ class Note(db.Model):
     document_id = db.Column(db.Integer, db.ForeignKey('document.id', ondelete='CASCADE'), nullable=False, index=True)
 
 
-TRADITION_VALUES = ('original', 'copie', 'édition')
+TRADITION_VALUES = ('autographe', 'original', 'minute', 'copie', 'édition')
 WITNESS_STATUS_VALUES = ('base', 'autre')
 
 
