@@ -201,7 +201,7 @@ class User(db.Model):
 
     @staticmethod
     def add_default_users():
-        pass
+        db.session.add(User(username="admin", email="admin.lettres@chartes.psl.eu", role_id=1))
 
 
 class UserRole(db.Model):
