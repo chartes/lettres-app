@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import sqlite3
 from lxml import etree
+from lxml.etree import tostring
 import io
 import re
 
@@ -40,6 +41,11 @@ def insert_ref_data(db, cursor):
     except sqlite3.IntegrityError as e:
         print(e)
 
+    try:
+        cursor.execute("INSERT INTO language (id, code, label) VALUES (1, 'fro', 'Ancien français')")
+    except sqlite3.IntegrityError as e:
+        print(e)
+
     db.commit()
 
 
@@ -47,15 +53,23 @@ def insert_letter(db, cursor, xml_file):
     """ insertion des lettres depuis le XML """
 
     # FAKE DATA, pour insertion test
-    owner_id = 2
+    owner_id = 1
     language_id = 1 # frm
     collection_id = 1 # Lettres de Catherine de Medicis
     correspondant_id = 1 # Catherine de Médicis
     correspondant_role_id = 1  # expéditeur
 
-
     file = '../../../lettres/src/'+xml_file
     tree = etree.parse(file)
+
+    # la référence du volume (on considère que cette réf est un temoin de type édition,
+    # qu’on insérera juste avant les témoins
+    bibl = tostring(tree.xpath('/TEI/teiHeader/fileDesc/sourceDesc/bibl')[0], encoding='unicode')
+    bibl = re.sub('<(/?)title>', '<\\1cite>', bibl)
+    bibl = re.sub('<ref target="([^"]+)">', '<a href="\\1">', bibl)
+    bibl = bibl.replace('</ref>', '</a>')
+    bibl = bibl[6:-14]
+
     for div in tree.xpath('/TEI/text/body/div'):
         letter = {}
 
@@ -64,12 +78,20 @@ def insert_letter(db, cursor, xml_file):
         letter['title'] = normalize_punctuation(tei2html(div.xpath('head')[0]))
         letter['title'] = letter['title'].rstrip('.')
 
-        letter['witness_label'] = tei2html(div.xpath('listWit/witness')[0])
-        # suppression des sauts de ligne + normalisation de la ponctuation
-        letter['witness_label'] = normalize_punctuation(letter['witness_label'].replace('\n', ' '))
-        # moche, corriger les erreurs de segmentation dans la source, jetable
-        letter['witness_label'] = letter['witness_label'].replace(', </cite>', '</cite>, ')
+        # première page avant le début de la lettre, si le saut de page ne précède pas le tout début de celle-ci
+        # on teste si la div commence par un pb
+        first_el_name = div.xpath('name(*[1])')
+        first_pb = div.xpath('pb[1]')[0] if (first_el_name == 'pb') else div.xpath('./preceding::pb[1]')[0]
+        first_page_num = first_pb.get('n')
+        first_page_url = first_pb.get('facs')
+        first_page_url = first_page_url.split('/full')[0]
+        first_page_url = first_page_url.replace('/iiif', '')
+        letter['num_start_page'] = '<a href="'+first_page_url+'">p. '+first_page_num+'</a>'
+        # référence biblio de l’édition, considérée comme un témoin de base, de type édition
+        witness_ed = bibl[:-1]+', '+letter['num_start_page']+'.'
 
+        # la liste des nœuds witness
+        letter['witnesses'] = div.xpath('listWit/witness')
         letter['creation'] = div.xpath('dateline/date')[0].get('when')
         letter['creation_label'] = normalize_punctuation(tei2html(div.xpath('dateline/date')[0]))
         letter['creation_label'] = letter['creation_label'].rstrip('.')
@@ -77,21 +99,18 @@ def insert_letter(db, cursor, xml_file):
         letter['transcription'] = get_transcription_node(div.xpath('.')[0])
         letter['transcription'] = tei2html(letter['transcription'])
         letter['transcription'] = format_html(letter['transcription'])
-        #print(letter['transcription'])
 
         # INSERTIONS
         try:
             cursor.execute(
                 "INSERT INTO document ("
                 "title,"
-                "witness_label,"
                 "creation,"
                 "creation_label,"
                 "transcription,"
                 "owner_id)"
-                "VALUES (?, ?, ?, ?, ?, ?)",
+                "VALUES (?, ?, ?, ?, ?)",
                 (letter['title'],
-                 letter['witness_label'],
                  letter['creation'],
                  letter['creation_label'],
                  letter['transcription'],
@@ -101,6 +120,23 @@ def insert_letter(db, cursor, xml_file):
 
         # Id de la dernière lettre insérée
         document_id = cursor.lastrowid
+
+
+        try:
+            cursor.execute("INSERT INTO witness (document_id, content, tradition, status) "
+                           "VALUES (?, ?, ?, ?)",
+                           (document_id, witness_ed, 'édition', 'base'))
+        except sqlite3.IntegrityError as e:
+            print(e, "lettre %s" % (letter['id']))
+
+        for witness in letter['witnesses']:
+            witness = tei2html(witness)
+            witness = normalize_punctuation(witness.replace('\n', ' '))
+            witness = witness.replace(', </cite>', '</cite>, ')
+            try:
+                cursor.execute("INSERT INTO witness (document_id, content) VALUES (?, ?)", (document_id, witness))
+            except sqlite3.IntegrityError as e:
+                print(e, "lettre %s" % (letter['id']))
 
         try:
             cursor.execute("INSERT INTO document_has_language (document_id, language_id) VALUES (?, ?)",
@@ -135,9 +171,20 @@ def insert_letter(db, cursor, xml_file):
             except sqlite3.IntegrityError as e:
                 print(e, "lettre %s" % (letter['id']))
 
+            # réécriture des liens aux notes
             note_id = str(cursor.lastrowid)
             try:
                 cursor.execute('UPDATE document SET transcription = replace(transcription, ?, ?) WHERE id = ?',
+                               (note_xml_id, note_id, document_id))
+            except sqlite3.IntegrityError as e:
+                print(e, "lettre %s" % (letter['id']))
+            try:
+                cursor.execute('UPDATE document SET title = replace(title, ?, ?) WHERE id = ?',
+                               (note_xml_id, note_id, document_id))
+            except sqlite3.IntegrityError as e:
+                print(e, "lettre %s" % (letter['id']))
+            try:
+                cursor.execute('UPDATE witness SET content = replace(content, ?, ?) WHERE document_id = ?',
                                (note_xml_id, note_id, document_id))
             except sqlite3.IntegrityError as e:
                 print(e, "lettre %s" % (letter['id']))
@@ -229,6 +276,8 @@ def normalize_punctuation(string):
     string = re.sub('([?;:!])', ' \\1 ', string)
     # restauration de l’espace normale après la ponctuation simple
     string = re.sub('([.,)])', '\\1 ', string)
+    # très moche : problème de la ponctuation dans les listes abréviées
+    string = string.replace('. ,', '.,')
     # suppression des espaces multiples (espaces simples, insécables et tab)
     string = re.sub('[  \t]{2,}', ' ', string)
     # ceinture bretelles, on trime
