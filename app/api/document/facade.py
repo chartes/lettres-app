@@ -96,6 +96,22 @@ class DocumentFacade(JSONAPIAbstractFacade):
             for c in self.obj.correspondents_having_roles
         ]
 
+    def get_images_resource_identifiers(self):
+        from app.api.image.facade import ImageFacade
+        return [] if self.obj.witnesses is None else [
+            ImageFacade.make_resource_identifier(img.id, ImageFacade.TYPE)
+            for w in self.obj.witnesses
+            for img in w.images
+        ]
+
+    def get_images_resources(self):
+        from app.api.image.facade import ImageFacade
+        return [] if self.obj.witnesses is None else [
+            ImageFacade(self.url_prefix, img, self.with_relationships_links, self.with_relationships_data).resource
+            for w in self.obj.witnesses
+            for img in w.images
+        ]
+
     @property
     def resource(self):
         resource = {
@@ -142,6 +158,12 @@ class DocumentFacade(JSONAPIAbstractFacade):
                 "resource_identifier_getter": self.get_correspondent_resource_identifiers,
                 "resource_getter": self.get_correspondent_resources
             },
+
+            #"images": {
+            #    "links": self._get_links(rel_name="images"),
+            #    "resource_identifier_getter": self.get_images_resource_identifiers,
+            #    "resource_getter": self.get_images_resources
+            #},
         }
 
         # ===================================
@@ -181,11 +203,12 @@ class DocumentFacade(JSONAPIAbstractFacade):
             "title": _res["attributes"]["title"],
             "argument": _res["attributes"]["argument"],
             "transcription": _res["attributes"]["transcription"],
-
-            "languages": None if len(self.obj.languages) == 0 else [l.code for l in self.obj.languages],
-            "collections": None if len(self.obj.collections) == 0 else [c.title for c in self.obj.collections],
+            "witnesses": [{"id": w.id, "content": w.content} for w in self.obj.witnesses],
+            "languages": [{"id": l.id, "code": l.code} for l in self.obj.languages],
+            "collections": [{"id": c.id, "title": c.title} for c in self.obj.collections],
         }
         return [{"id": _res["id"], "index": self.get_index_name(), "payload": payload}]
 
     def get_data_to_index_when_removed(self):
+        print("GOING TO BE REMOVED FROM INDEX:", [{"id": self.obj.id, "index": self.get_index_name()}])
         return [{"id": self.obj.id, "index": self.get_index_name()}]

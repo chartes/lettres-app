@@ -293,7 +293,17 @@ class JSONAPIAbstractFacade(object):
     def get_relationship_data_to_index(self, rel_name):
         from app.api.facade_manager import JSONAPIFacadeManager
         to_be_reindexed = []
-        for doc in getattr(self.obj, rel_name):
+        db.session.refresh(self.obj)
+        d = getattr(self.obj, rel_name)
+
+        rel_data = []
+        if d is not None:
+            if not isinstance(d, list):
+                rel_data = [d]
+            else:
+                rel_data = d
+
+        for doc in rel_data:
             facade = JSONAPIFacadeManager.get_facade_class(doc)
             f_obj, kwargs, errors = facade.get_resource_facade("", id=doc.id)
             to_be_reindexed.extend(

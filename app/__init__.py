@@ -56,7 +56,6 @@ class ModelChangeEvent(object):
     def after_commit(self, session):
         if self.model_changes:
             changes = list(self.model_changes.values())
-
             for callback in self.callbacks:
                 callback(changes=changes)
 
@@ -95,7 +94,7 @@ def create_app(config_name="dev"):
 
     # Hook elasticsearch to the session
     from app.search import SearchIndexManager
-    app.mce = ModelChangeEvent(app, db.session, SearchIndexManager.reindex_resources)
+    #app.mce = ModelChangeEvent(app, db.session, SearchIndexManager.reindex_resources)
 
     # =====================================
     # Import models & app routes

@@ -58,3 +58,14 @@ class CollectionFacade(JSONAPIAbstractFacade):
                 "resource_getter": self.get_related_resources(DocumentFacade, "documents", to_many=True),
             },
         }
+
+    def get_data_to_index_when_added(self):
+        return self.get_relationship_data_to_index(rel_name="documents")
+
+    def remove_from_index(self):
+        # do not remove entries from the index but reindex the docs without the resource
+        from app.search import SearchIndexManager
+        for data in self.get_data_to_index_when_added():
+            my_id = self.id
+            data["payload"]["collections"] = [l for l in data["payload"]["collections"] if l["id"] != my_id]
+            SearchIndexManager.add_to_index(index=data["index"], id=data["id"], payload=data["payload"])

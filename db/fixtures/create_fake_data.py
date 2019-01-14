@@ -3,7 +3,7 @@ import sqlalchemy
 from faker import Faker
 from sqlalchemy.exc import IntegrityError
 
-from app.models import Collection
+from app.models import Collection, TRADITION_VALUES, WITNESS_STATUS_VALUES
 
 
 def create_fake_users(db, nb_users=50, fake=None):
@@ -46,7 +46,7 @@ def create_fake_users(db, nb_users=50, fake=None):
 def create_fake_documents(db, nb_docs=1000, nb_correspondents=None, fake=None):
     from app.models import Document
     from app.models import Institution
-    from app.models import Tradition
+    from app.models import Witness
     from app.models import User
     from app.models import Whitelist
     from app.models import Image
@@ -104,14 +104,6 @@ def create_fake_documents(db, nb_docs=1000, nb_correspondents=None, fake=None):
         institutions.append(ins)
     db.session.commit()
 
-    # add fake Traditions
-    traditions = []
-    for i in range(0, 20):
-        trad = Tradition(label=fake.word(), description=fake.sentence())
-        db.session.add(trad)
-        traditions.append(trad)
-    db.session.commit()
-
     # add fake documents
     last_progress = -1
     for n_doc in range(0, nb_docs):
@@ -119,8 +111,6 @@ def create_fake_documents(db, nb_docs=1000, nb_correspondents=None, fake=None):
         try:
             doc = Document(
                 title=fake.sentence(),
-                witness_label=fake.sentence(nb_words=5),
-                classification_mark=fake.sentence(nb_words=10),
                 transcription=fake.text(max_nb_chars=random.randint(100, 7500)),
                 argument=fake.text(max_nb_chars=random.randint(250, 500)),
                 creation=fake.sentence(nb_words=1),
@@ -131,8 +121,6 @@ def create_fake_documents(db, nb_docs=1000, nb_correspondents=None, fake=None):
                 date_update="2018/01/02",
                 is_published=True
             )
-            doc.institution = random.choice(institutions)
-            doc.tradition = random.choice(traditions)
             doc.owner_id = random.choice(users).id
             doc.whitelist_id = random.choice(whitelists).id
             doc.languages = random.choices(languages)
@@ -141,11 +129,26 @@ def create_fake_documents(db, nb_docs=1000, nb_correspondents=None, fake=None):
             db.session.add(doc)
             db.session.commit()
 
+            # add fake witnesses
+            witnesses = []
+            for i in range(0, random.randint(1, 5)):
+                wit = Witness(
+                    document_id=doc.id,
+                    content=fake.sentence(),
+                    tradition=random.choice(TRADITION_VALUES),
+                    status=random.choice(WITNESS_STATUS_VALUES),
+                    institution_id=random.choice(institutions).id,
+                    classification_mark=fake.sentence()
+                )
+                db.session.add(wit)
+                witnesses.append(wit)
+            db.session.commit()
+
             # add fake Images
-            nb_images = random.randint(1, 10)
-            for i in range(0, nb_images):
-                img = Image(canvas_idx=random.randint(1, 100), manifest_url=fake.uri(), document_id=doc.id)
-                db.session.add(img)
+            for w in range(0, len(witnesses)):
+                for i in range(0, random.randint(0, 5)):
+                    img = Image(canvas_idx=random.randint(1, 100), manifest_url=fake.uri(), witness_id=witnesses[w].id)
+                    db.session.add(img)
 
             # add fake Notes
             for i in range(0, random.randint(0, 30)):

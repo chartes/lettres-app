@@ -1,8 +1,10 @@
 import pprint
 import unittest
 
+from app.models import TRADITION_VALUES, WITNESS_STATUS_VALUES
 from tests.base_server import TestBaseServer
 from app import db
+
 
 @unittest.skip
 class TestPostRoutes(TestBaseServer):
@@ -21,10 +23,9 @@ class TestPostRoutes(TestBaseServer):
                     "transcription": "Lorem Ipsum"
                 },
                 "relationships": {
-                    "images": {
+                    "witnesses": {
                         "data": [
-                            {"id": 1, "type": "image"},
-                            {"id": 2, "type": "image"},
+                            {"id": 1, "type": "witness"},
                         ]
                     },
                     "languages": {
@@ -37,12 +38,6 @@ class TestPostRoutes(TestBaseServer):
                             {"id": 1, "type": "collection"},
                             {"id": 2, "type": "collection"},
                         ]
-                    },
-                    "institution": {
-                        "data": {"id": 3, "type": "institution"}
-                    },
-                    "tradition": {
-                        "data": {"id": 1, "type": "tradition"}
                     },
                     "owner": {
                         "data": {"id": 2, "type": "user"}
@@ -65,9 +60,9 @@ class TestPostRoutes(TestBaseServer):
                     "title": "New Doc"
                 },
                 "relationships": {
-                    "images": {
+                    "witnesses": {
                         "data": [
-                            {"id": 1, "type": "image"},
+                            {"id": 1, "type": "witness"},
                         ]
                     },
                     "institution": {
@@ -89,9 +84,9 @@ class TestPostRoutes(TestBaseServer):
                     "title": "New Doc"
                 },
                 "relationships": {
-                    "images": {
+                    "witnesses": {
                         "data": [
-                            {"id": 1, "type": "image"},
+                            {"id": 1, "type": "witness"},
                         ]
                     },
                     "institution": {
@@ -111,10 +106,10 @@ class TestPostRoutes(TestBaseServer):
                     "manifest-url": "http://burgess.biz/"
                 },
                 "relationships": {
-                    "document": {
+                    "witness": {
                         "data": {
                             "id": 1,
-                            "type": "document"
+                            "type": "witness"
                         }
                     }
                 }
@@ -122,7 +117,7 @@ class TestPostRoutes(TestBaseServer):
         })
         self.assertEqual('201 CREATED', status)
 
-        # WITHOUT IMG-URL
+        # WITHOUT CANVAS-IDX
         r, status, resource = self.api_post("images", data={
             "data": {
                 "type": "image",
@@ -130,10 +125,10 @@ class TestPostRoutes(TestBaseServer):
                     "manifest-url": "http://burgess.biz/"
                 },
                 "relationships": {
-                    "document": {
+                    "witness": {
                         "data": {
                             "id": 1,
-                            "type": "document"
+                            "type": "witness"
                         }
                     }
                 }
@@ -141,7 +136,7 @@ class TestPostRoutes(TestBaseServer):
         })
         self.assertEqual('403 FORBIDDEN', status)
 
-        # DOCUMENT NOT FOUND
+        # WITNESS NOT FOUND
         r, status, resource = self.api_post("images", data={
             "data": {
                 "type": "image",
@@ -149,17 +144,17 @@ class TestPostRoutes(TestBaseServer):
                     "manifest-url": "http://burgess.biz/"
                 },
                 "relationships": {
-                    "document": {
+                    "witness": {
                         "data": {
                             "id": 9999,
-                            "type": "document"
+                            "type": "witness"
                         }
                     }
                 }
             }
         })
         self.assertEqual('404 NOT FOUND', status)
-    
+
     def test_post_institution(self):
         r, status, resource = self.api_post("institutions", data={
             "data": {
@@ -171,7 +166,7 @@ class TestPostRoutes(TestBaseServer):
         })
         self.assertEqual('201 CREATED', status)
 
-        # WITH DOCUMENT
+        # WITH WITNESS
         r, status, resource = self.api_post("institutions", data={
             "data": {
                 "type": "institution",
@@ -180,60 +175,23 @@ class TestPostRoutes(TestBaseServer):
                     "ref": "DEF"
                 },
                 "relationships": {
-                    "documents": {
+                    "witnesses": {
                         "data": [
                             {
                                 "id": 1,
-                                "type": "document"
+                                "type": "witness"
                             },
                             {
                                 "id": 2,
-                                "type": "document"
+                                "type": "witness"
                             }
                         ]
                     }
                 }
-            }
-        })
-        self.assertEqual('201 CREATED', status)
-    
-    def test_post_tradition(self):
-        r, status, resource = self.api_post("traditions", data={
-            "data": {
-                "type": "tradition",
-                "attributes": {
-                    "label": "ABC"
-                },
             }
         })
         self.assertEqual('201 CREATED', status)
 
-        # WITH DOCUMENT
-        r, status, resource = self.api_post("traditions", data={
-            "data": {
-                "type": "tradition",
-                "attributes": {
-                    "label": "ABC",
-                    "description": "DEF"
-                },
-                "relationships": {
-                    "documents": {
-                        "data": [
-                            {
-                                "id": 1,
-                                "type": "document"
-                            },
-                            {
-                                "id": 2,
-                                "type": "document"
-                            }
-                        ]
-                    }
-                }
-            }
-        })
-        self.assertEqual('201 CREATED', status)
-    
     def test_post_language(self):
         r, status, resource = self.api_post("languages", data={
             "data": {
@@ -293,16 +251,58 @@ class TestPostRoutes(TestBaseServer):
         self.assertEqual('201 CREATED', status)
 
         # WITHOUT DOCUMENT
-        r, status, resource = self.api_post("languages", data={
+        r, status, resource = self.api_post("notes", data={
             "data": {
-                "type": "language",
+                "type": "note",
                 "attributes": {
                     "content": "NOTE CONTENT",
                 }
             }
         })
         self.assertEqual('403 FORBIDDEN', status)
-    
+
+    def test_post_witness(self):
+        r, status, resource = self.api_post("witnesses", data={
+            "data": {
+                "type": "witness",
+                "attributes": {
+                    "content": "NOTE CONTENT",
+                    "classification-mark": "CLASS MARK",
+                    "tradition": TRADITION_VALUES[0],
+                    "status": WITNESS_STATUS_VALUES[0]
+                },
+                "relationships": {
+                    "document": {
+                        "data":
+                            {
+                                "id": 1,
+                                "type": "document"
+                            }
+                    },
+                    "institution": {
+                        "data":
+                            {
+                                "id": 2,
+                                "type": "institution"
+                            }
+                    },
+                    "images": {
+                        "data": [
+                            {
+                                "id": 1,
+                                "type": "image"
+                            },
+                            {
+                                "id": 2,
+                                "type": "image"
+                            },
+                        ]
+                    }
+                }
+            }
+        })
+        self.assertEqual('201 CREATED', status)
+
     def test_post_whitelist(self):
         r, status, resource = self.api_post("whitelists", data={
             "data": {
@@ -397,9 +397,9 @@ class TestPostRoutes(TestBaseServer):
                     "title": "New Doc"
                 },
                 "relationships": {
-                    "images": {
+                    "witnesses": {
                         "data": [
-                            {"id": 1, "type": "image"},
+                            {"id": 1, "type": "witness"},
                         ]
                     },
                     "institution": {

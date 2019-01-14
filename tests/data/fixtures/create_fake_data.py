@@ -2,7 +2,7 @@ import logging
 from faker import Faker
 from faker.generator import random
 from sqlalchemy.exc import IntegrityError
-from app.models import Collection
+from app.models import Collection, WITNESS_STATUS_VALUES, TRADITION_VALUES
 
 
 def create_fake_users(db, nb_users=50, fake=None):
@@ -13,7 +13,7 @@ def create_fake_users(db, nb_users=50, fake=None):
     if fake is None:
         fake = Faker()
 
-    logging.getLogger('faker.factory').setLevel(logging.ERROR)
+    #logging.getLogger('faker.factory').setLevel(logging.ERROR)
 
     wl1 = Whitelist(label=fake.word())
     admin = UserRole(label=fake.word())
@@ -45,7 +45,6 @@ def create_fake_users(db, nb_users=50, fake=None):
 def create_fake_documents(db, nb_docs=1000, nb_correspondents=None, fake=None):
     from app.models import Document
     from app.models import Institution
-    from app.models import Tradition
     from app.models import User
     from app.models import Whitelist
     from app.models import Image
@@ -53,6 +52,7 @@ def create_fake_documents(db, nb_docs=1000, nb_correspondents=None, fake=None):
     from app.models import Language
     from app.models import CorrespondentRole
     from app.models import Correspondent
+    from app.models import Witness
 
     if fake is None:
         fake = Faker()
@@ -104,41 +104,41 @@ def create_fake_documents(db, nb_docs=1000, nb_correspondents=None, fake=None):
         institutions.append(ins)
         db.session.flush()
 
-    # add fake Traditions
-    traditions = []
-    for i in range(0, 20):
-        trad = Tradition(label=fake.word(), description=fake.sentence())
-        db.session.add(trad)
-        traditions.append(trad)
-        db.session.flush()
-
     # add fake documents
     last_progress = -1
     for n_doc in range(0, nb_docs):
         try:
             doc = Document(
                 title=fake.sentence(),
-                witness_label=fake.sentence(nb_words=5),
-                classification_mark=fake.sentence(nb_words=10),
                 transcription=fake.text(max_nb_chars=1000),
                 argument=fake.text()
             )
-            doc.institution = institutions[0]
-            doc.tradition = traditions[0]
             doc.owner_id = users[0].id
             doc.whitelist_id = whitelists[0].id
             doc.languages = [languages[0], languages[1]]
-            doc.collections = random.choices(collections, k=random.randint(0, 3))
-
+            doc.collections = collections
             db.session.add(doc)
             db.session.flush()
+            # add fake witnesses
+            witnesses = []
+            for i in range(0, 3):
+                wit = Witness(
+                    document_id=doc.id,
+                    content=fake.sentence(),
+                    tradition=random.choice(TRADITION_VALUES),
+                    status=random.choice(WITNESS_STATUS_VALUES),
+                    institution_id=random.choice(institutions).id,
+                    classification_mark=fake.sentence()
+                )
+                db.session.add(wit)
+                witnesses.append(wit)
+                db.session.flush()
 
             # add fake Images
-            nb_images = 10
-            for i in range(0, nb_images):
-                img = Image(canvas_idx=random.randint(0, 100), manifest_url=fake.uri(), document_id=doc.id)
-                db.session.add(img)
-                db.session.flush()
+            for w in range(0, len(witnesses)):
+                for i in range(0, 5):
+                    img = Image(canvas_idx=random.randint(1, 100), manifest_url=fake.uri(), witness_id=witnesses[w].id)
+                    db.session.add(img)
 
             # add fake Notes
             nb_notes = 50

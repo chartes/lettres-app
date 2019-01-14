@@ -832,6 +832,10 @@ class JSONAPIRouteRegistrar(object):
 
                     f_obj = facade_class(url_prefix, resource, with_relationships_links=True,
                                          with_relationships_data=True)
+
+                    # reindex
+                    f_obj.reindex("insert")
+
                     # RESPOND 201 CREATED
                     if "links" in f_obj.resource and "self" in f_obj.resource["links"]:
                         headers = {"Location": f_obj.resource["links"]["self"]}
@@ -903,6 +907,10 @@ class JSONAPIRouteRegistrar(object):
 
                     f_obj = facade_class(url_prefix, resource, with_relationships_links=True,
                                          with_relationships_data=True)
+
+                    # reindex
+                    f_obj.reindex("insert")
+
                     # RESPOND 200
                     if "links" in f_obj.resource and "self" in f_obj.resource["links"]:
                         headers = {"Location": f_obj.resource["links"]["self"]}
@@ -1042,6 +1050,10 @@ class JSONAPIRouteRegistrar(object):
 
                     f_obj = facade_class(url_prefix, resource, with_relationships_links=True,
                                          with_relationships_data=True)
+
+                    # reindex
+                    f_obj.reindex("update")
+
                     # RESPOND 200
                     if "links" in f_obj.resource and "self" in f_obj.resource["links"]:
                         headers = {"Location": f_obj.resource["links"]["self"]}
@@ -1120,6 +1132,10 @@ class JSONAPIRouteRegistrar(object):
 
                     f_obj = facade_class(url_prefix, resource, with_relationships_links=True,
                                          with_relationships_data=True)
+
+                    # reindex
+                    f_obj.reindex("update")
+
                     # RESPOND 200
                     if "links" in f_obj.resource and "self" in f_obj.resource["links"]:
                         headers = {"Location": f_obj.resource["links"]["self"]}
@@ -1160,8 +1176,8 @@ class JSONAPIRouteRegistrar(object):
         def single_obj_endpoint(id):
             rdi = facade_class.make_resource_identifier(id, facade_class.TYPE)
             obj, errors = self.get_obj_from_resource_identifier(rdi)
-
-            if errors is not None:
+            print(obj, errors)
+            if errors is not None or obj is None:
                 return JSONAPIResponseFactory.make_errors_response({
                     "status": 404,
                     "title": "This resource does not exist"},
@@ -1171,6 +1187,10 @@ class JSONAPIRouteRegistrar(object):
             #======================
             # Delete the resource
             # =====================
+            f_obj = facade_class("", obj)
+            # reindex
+            f_obj.reindex("delete")
+
             errors = facade_class.delete_resource(obj)
             if errors is not None:
                 return JSONAPIResponseFactory.make_errors_response(errors, status=404)

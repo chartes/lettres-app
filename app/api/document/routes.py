@@ -10,7 +10,7 @@ def register_document_api_urls(app):
     registrar.register_patch_routes(Document, DocumentFacade)
     registrar.register_delete_routes(Document, DocumentFacade)
 
-    for rel in ('notes', 'languages', 'witnesses',
+    for rel in ('notes', 'languages', 'witnesses', 'images',
                 'correspondents-having-roles', 'roles', 'correspondents', 'collections',
                 'owner', 'whitelist', 'prev-document', 'next-document'):
         registrar.register_relationship_get_route(DocumentFacade, rel)

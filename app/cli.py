@@ -1,6 +1,6 @@
 import click
 
-from app import create_app, db
+from app import create_app
 from app.api.document.facade import DocumentFacade
 from app.models import UserRole, User, Document
 
@@ -25,6 +25,7 @@ def make_cli():
         """ Creates a local database
         """
         with app.app_context():
+            from app import db
             db.create_all()
 
             UserRole.add_default_roles()
@@ -39,6 +40,7 @@ def make_cli():
         production.
         """
         with app.app_context():
+            from app import db
             db.drop_all()
             db.create_all()
 
@@ -53,6 +55,8 @@ def make_cli():
         """ Loads demo/tests data to the database
         """
         with app.app_context():
+            from app import db
+
             db.drop_all()
             db.create_all()
 
@@ -62,7 +66,7 @@ def make_cli():
             from db.fixtures.create_fake_data import create_fake_documents, create_fake_users
             print("Generating fake data...", end=" ", flush=True)
             create_fake_users(db, nb_users=5, fake=fake)
-            create_fake_documents(db, nb_docs=100, nb_correspondents=20, fake=fake)
+            create_fake_documents(db, nb_docs=10, nb_correspondents=20, fake=fake)
             print("done !")
 
             click.echo("Loaded fixtures to the database")

@@ -65,5 +65,9 @@ class LanguageFacade(JSONAPIAbstractFacade):
         return self.get_relationship_data_to_index(rel_name="documents")
 
     def remove_from_index(self):
-        # do not remove resource but reindex documents
-        self.add_to_index()
+        # do not remove entries from the index but reindex the docs without the resource
+        from app.search import SearchIndexManager
+        for data in self.get_data_to_index_when_added():
+            my_id = self.id
+            data["payload"]["languages"] = [l for l in data["payload"]["languages"] if l["id"] != my_id]
+            SearchIndexManager.add_to_index(index=data["index"], id=data["id"], payload=data["payload"])
