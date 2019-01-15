@@ -129,14 +129,21 @@ def insert_letter(db, cursor, xml_file):
         except sqlite3.IntegrityError as e:
             print(e, "lettre %s" % (letter['id']))
 
-        for witness in letter['witnesses']:
+        for i, witness in enumerate(letter['witnesses']):
             witness = tei2html(witness)
             witness = normalize_punctuation(witness.replace('\n', ' '))
             witness = witness.replace(', </cite>', '</cite>, ')
-            try:
-                cursor.execute("INSERT INTO witness (document_id, content) VALUES (?, ?)", (document_id, witness))
-            except sqlite3.IntegrityError as e:
-                print(e, "lettre %s" % (letter['id']))
+            if i == 0:
+                try:
+                    cursor.execute("INSERT INTO witness (document_id, content, status) VALUES (?, ?, ?)",
+                                   (document_id, witness, 'base'))
+                except sqlite3.IntegrityError as e:
+                    print(e, "lettre %s" % (letter['id']))
+            else:
+                try:
+                    cursor.execute("INSERT INTO witness (document_id, content) VALUES (?, ?)", (document_id, witness))
+                except sqlite3.IntegrityError as e:
+                    print(e, "lettre %s" % (letter['id']))
 
         try:
             cursor.execute("INSERT INTO document_has_language (document_id, language_id) VALUES (?, ?)",
@@ -230,14 +237,14 @@ def tei2html(tei_node):
                 <xsl:text> </xsl:text>
             </xsl:template>
             <xsl:template match="pb">
-                <xsl:text>&lt;a href="</xsl:text>
+                <xsl:text>&lt;a class="pb" href="</xsl:text>
                 <xsl:value-of select="@facs"/>
                 <xsl:text>">[p. </xsl:text>
                 <xsl:value-of select="@n"/>
                 <xsl:text>]&lt;/a> </xsl:text>
             </xsl:template>
             <xsl:template match="ref[@type='note']">
-                <xsl:text>&lt;a href="</xsl:text>
+                <xsl:text>&lt;a class="note" href="</xsl:text>
                 <xsl:value-of select="@target"/>
                 <xsl:text>">[note]&lt;/a></xsl:text>
             </xsl:template>
