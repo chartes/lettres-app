@@ -122,7 +122,7 @@ class DocumentFacade(JSONAPIAbstractFacade):
                 "creation": self.obj.creation,
                 "creation-not-after": self.obj.creation_not_after,
                 "creation-label": self.obj.creation_label,
-                "location-date-from-label": self.obj.location_date_from_ref,
+                "location-date-from-ref": self.obj.location_date_from_ref,
                 "location-date-to-ref": self.obj.location_date_to_ref,
                 "transcription": self.obj.transcription,
                 "date-insert": self.obj.date_insert,
