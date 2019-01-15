@@ -100,9 +100,12 @@ def insert_letter(db, cursor, xml_file):
 
         # la liste des nœuds witness
         letter['witnesses'] = div.xpath('listWit/witness')
-        letter['creation'] = div.xpath('dateline/date')[0].get('when')
         letter['creation_label'] = normalize_punctuation(tei2html(div.xpath('dateline/date')[0]))
         letter['creation_label'] = letter['creation_label'].rstrip('.')
+        letter['creation'] = div.xpath('dateline/date')[0].get('when')
+        if letter['creation'] is None:
+            letter['creation'] = div.xpath('dateline/date')[0].get('notBefore')
+        letter['creation_not_after'] = div.xpath('dateline/date')[0].get('notAfter')
 
         letter['transcription'] = get_transcription_node(div.xpath('.')[0])
         letter['transcription'] = tei2html(letter['transcription'])
@@ -115,12 +118,14 @@ def insert_letter(db, cursor, xml_file):
                 "INSERT INTO document ("
                 "title,"
                 "creation,"
+                "creation_not_after,"
                 "creation_label,"
                 "transcription,"
                 "owner_id)"
-                "VALUES (?, ?, ?, ?, ?)",
+                "VALUES (?, ?, ?, ?, ?, ?)",
                 (letter['title'],
                  letter['creation'],
+                 letter['creation_not_after'],
                  letter['creation_label'],
                  letter['transcription'],
                  owner_id))
@@ -141,10 +146,11 @@ def insert_letter(db, cursor, xml_file):
         witness_id = cursor.lastrowid
 
         # on renseigne les URL des images de ce témoin de base
-        for image_url in images_iiif_url:
+        for i, image_url in enumerate(images_iiif_url):
+            i += 1
             try:
-                cursor.execute("INSERT INTO image (witness_id, canvas_id) VALUES (?,?)",
-                               (witness_id, image_url))
+                cursor.execute("INSERT INTO image (witness_id, canvas_id, order_num) VALUES (?, ?, ?)",
+                               (witness_id, image_url, i))
             except sqlite3.IntegrityError as e:
                 print(e)
 
