@@ -4,6 +4,7 @@ from lxml import etree
 from lxml.etree import tostring
 import io
 import re
+from more_itertools import unique_everseen
 
 # Contrôler avant chargement (dans la src XML) la normalisation des witness : on autorise quoi ? cite, sup, ?
 # Contrôler avant chargement (dans la src XML) l’enrichissement typo des creation_label
@@ -83,12 +84,19 @@ def insert_letter(db, cursor, xml_file):
         first_el_name = div.xpath('name(*[1])')
         first_pb = div.xpath('pb[1]')[0] if (first_el_name == 'pb') else div.xpath('./preceding::pb[1]')[0]
         first_page_num = first_pb.get('n')
-        first_page_url = first_pb.get('facs')
+        first_page_iiif_url = first_page_url = first_pb.get('facs')
         first_page_url = first_page_url.split('/full')[0]
         first_page_url = first_page_url.replace('/iiif', '')
         letter['num_start_page'] = '<a href="'+first_page_url+'">p. '+first_page_num+'</a>'
         # référence biblio de l’édition, considérée comme un témoin de base, de type édition
         witness_ed = bibl[:-1]+', '+letter['num_start_page']+'.'
+
+        # la liste des images
+        images_iiif_url = []
+        images_iiif_url.append(first_page_iiif_url)
+        images_iiif_url.extend(div.xpath('.//pb/@facs'))
+        # https://stackoverflow.com/questions/480214/how-do-you-remove-duplicates-from-a-list-whilst-preserving-order
+        images_iiif_url = list(unique_everseen(images_iiif_url))
 
         # la liste des nœuds witness
         letter['witnesses'] = div.xpath('listWit/witness')
@@ -99,6 +107,7 @@ def insert_letter(db, cursor, xml_file):
         letter['transcription'] = get_transcription_node(div.xpath('.')[0])
         letter['transcription'] = tei2html(letter['transcription'])
         letter['transcription'] = format_html(letter['transcription'])
+
 
         # INSERTIONS
         try:
@@ -122,17 +131,29 @@ def insert_letter(db, cursor, xml_file):
         document_id = cursor.lastrowid
 
 
+        # édition DIHF source considérée comme témoin de base
         try:
             cursor.execute("INSERT INTO witness (document_id, content, tradition, status) "
                            "VALUES (?, ?, ?, ?)",
                            (document_id, witness_ed, 'édition', 'base'))
         except sqlite3.IntegrityError as e:
             print(e, "lettre %s" % (letter['id']))
+        witness_id = cursor.lastrowid
 
+        # on renseigne les URL des images de ce témoin de base
+        for image_url in images_iiif_url:
+            try:
+                cursor.execute("INSERT INTO image (witness_id, canvas_id) VALUES (?,?)",
+                               (witness_id, image_url))
+            except sqlite3.IntegrityError as e:
+                print(e)
+
+        # les témoins énumérés dans l’édition imprimée
         for i, witness in enumerate(letter['witnesses']):
             witness = tei2html(witness)
             witness = normalize_punctuation(witness.replace('\n', ' '))
             witness = witness.replace(', </cite>', '</cite>, ')
+            # on considère que le premier est le témoin de base
             if i == 0:
                 try:
                     cursor.execute("INSERT INTO witness (document_id, content, status) VALUES (?, ?, ?)",
@@ -141,7 +162,8 @@ def insert_letter(db, cursor, xml_file):
                     print(e, "lettre %s" % (letter['id']))
             else:
                 try:
-                    cursor.execute("INSERT INTO witness (document_id, content) VALUES (?, ?)", (document_id, witness))
+                    cursor.execute("INSERT INTO witness (document_id, content, status) VALUES (?, ?, ?)",
+                                   (document_id, witness, 'autre'))
                 except sqlite3.IntegrityError as e:
                     print(e, "lettre %s" % (letter['id']))
 
@@ -187,6 +209,11 @@ def insert_letter(db, cursor, xml_file):
                 print(e, "lettre %s" % (letter['id']))
             try:
                 cursor.execute('UPDATE document SET title = replace(title, ?, ?) WHERE id = ?',
+                               (note_xml_id, note_id, document_id))
+            except sqlite3.IntegrityError as e:
+                print(e, "lettre %s" % (letter['id']))
+            try:
+                cursor.execute('UPDATE document SET creation_label = replace(creation_label, ?, ?) WHERE id = ?',
                                (note_xml_id, note_id, document_id))
             except sqlite3.IntegrityError as e:
                 print(e, "lettre %s" % (letter['id']))

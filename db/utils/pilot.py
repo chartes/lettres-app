@@ -2,7 +2,7 @@ import sqlite3
 import xml2db
 
 
-db_path = '../lettres-dev.sqlite'
+db_path = '../lettres.dev.sqlite'
 xml_file_name = '6227983.xml'
 xml_files = ['6227983.xml', '6227926.xml', '6227988.xml', '6227994.xml', '6227997.xml', '6228018.xml', '6228047.xml', '6228061.xml']
 
