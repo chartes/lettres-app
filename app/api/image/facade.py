@@ -32,7 +32,7 @@ class ImageFacade(JSONAPIAbstractFacade):
             **self.resource_identifier,
             "attributes": {
                 "canvas-id": self.obj.canvas_id,
-                "index": self.obj.index,
+                "order-num": self.obj.order_num,
             },
             "meta": self.meta,
             "links": {

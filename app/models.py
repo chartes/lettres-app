@@ -130,7 +130,7 @@ class Image(db.Model):
     witness_id = db.Column(db.Integer, db.ForeignKey('witness.id', ondelete='CASCADE'), index=True)
 
     canvas_id = db.Column(db.String, nullable=False)
-    index = db.Column(db.Integer, default=1)
+    order_num = db.Column(db.Integer, server_default=1)
 
     witness = db.relationship("Witness", backref="images")
 
