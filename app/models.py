@@ -1,3 +1,4 @@
+from flask_user import UserMixin
 from sqlalchemy import Enum
 
 from app import db
@@ -130,7 +131,7 @@ class Image(db.Model):
     witness_id = db.Column(db.Integer, db.ForeignKey('witness.id', ondelete='CASCADE'), index=True)
 
     canvas_id = db.Column(db.String, nullable=False)
-    order_num = db.Column(db.Integer, server_default=1)
+    order_num = db.Column(db.Integer, server_default='1')
 
     witness = db.relationship("Witness", backref="images")
 
@@ -182,7 +183,7 @@ class CorrespondentHasRole(db.Model):
     correspondent_role = db.relationship("CorrespondentRole", backref=db.backref("correspondents_having_roles"), single_parent=True)
 
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     """ Utilisateur """
     __tablename__ = 'user'
 

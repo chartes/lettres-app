@@ -2,6 +2,7 @@ import pprint
 from elasticsearch import Elasticsearch
 from flask import Flask, Blueprint
 from flask_sqlalchemy import SQLAlchemy
+from flask_user import UserManager
 from sqlalchemy import event, inspect
 from sqlalchemy.engine import Engine
 
@@ -93,8 +94,11 @@ def create_app(config_name="dev"):
     app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) if app.config['ELASTICSEARCH_URL'] else None
 
     # Hook elasticsearch to the session
-    from app.search import SearchIndexManager
+    #from app.search import SearchIndexManager
     #app.mce = ModelChangeEvent(app, db.session, SearchIndexManager.reindex_resources)
+
+    from app.models import User
+    app.user_manager = UserManager(app, db, User)
 
     # =====================================
     # Import models & app routes

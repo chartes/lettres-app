@@ -40,6 +40,18 @@ class Config(object):
     API_VERSION = parse_var_env('API_VERSION')
     API_URL_PREFIX = parse_var_env('API_URL_PREFIX')
 
+    # Flask-User settings
+    USER_APP_NAME = "Lettres"      # Shown in and email templates and page footers
+    USER_ENABLE_EMAIL = True       # Disable email authentication
+    USER_ENABLE_USERNAME = True    # Enable username authentication
+    USER_REQUIRE_RETYPE_PASSWORD = False    # Simplify register form
+    USER_EMAIL_SENDER_EMAIL = "admin.lettres@chartes.psl.eu"
+    # Place the Login form and the Register form on one page:
+    # Only works for Flask-User v0.4.9 and up
+    USER_LOGIN_TEMPLATE = 'flask_user/login_or_register.html'
+    USER_REGISTER_TEMPLATE = 'flask_user/login_or_register.html'
+
+
     @staticmethod
     def init_app(app):
         pass
