@@ -120,9 +120,10 @@ class DocumentFacade(JSONAPIAbstractFacade):
                 "title": self.obj.title,
                 "argument": self.obj.argument,
                 "creation": self.obj.creation,
+                "creation-not-after": self.obj.creation_not_after,
                 "creation-label": self.obj.creation_label,
-                "location-date-label": self.obj.location_date_label,
-                "location-date-ref": self.obj.location_date_ref,
+                "location-date-from-label": self.obj.location_date_from_ref,
+                "location-date-to-ref": self.obj.location_date_to_ref,
                 "transcription": self.obj.transcription,
                 "date-insert": self.obj.date_insert,
                 "date-update": self.obj.date_update,
@@ -199,10 +200,14 @@ class DocumentFacade(JSONAPIAbstractFacade):
         payload = {
             "id": _res["id"],
             "type": _res["type"],
-            
+
+            "creation_label": _res["attributes"]["creation-label"],
+            "location-date-from-ref": _res["attributes"]["location-date-from-ref"],
+            "location-date-to-ref": _res["attributes"]["location-date-to-ref"],
             "title": _res["attributes"]["title"],
             "argument": _res["attributes"]["argument"],
             "transcription": _res["attributes"]["transcription"],
+
             "witnesses": [{"id": w.id, "content": w.content} for w in self.obj.witnesses],
             "languages": [{"id": l.id, "code": l.code} for l in self.obj.languages],
             "collections": [{"id": c.id, "title": c.title} for c in self.obj.collections],

@@ -31,7 +31,6 @@ class NoteFacade(JSONAPIAbstractFacade):
         resource = {
             **self.resource_identifier,
             "attributes": {
-                "label": self.obj.label,
                 "content": self.obj.content,
             },
             "meta": self.meta,

@@ -56,6 +56,11 @@ class WhitelistFacade(JSONAPIAbstractFacade):
                 "resource_identifier_getter": self.get_related_resource_identifiers(UserFacade, "users", to_many=True),
                 "resource_getter": self.get_related_resources(UserFacade, "users", to_many=True)
             },
+            "owner": {
+                "links": self._get_links(rel_name="owner"),
+                "resource_identifier_getter": self.get_related_resource_identifiers(UserFacade, "owner"),
+                "resource_getter": self.get_related_resources(UserFacade, "owner")
+            },
             "documents": {
                 "links": self._get_links(rel_name="documents"),
                 "resource_identifier_getter": self.get_related_resource_identifiers(DocumentFacade, "documents", to_many=True),

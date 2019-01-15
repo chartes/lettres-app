@@ -26,19 +26,19 @@ class UserRoleFacade(JSONAPIAbstractFacade):
             errors = []
         return e, kwargs, errors
 
-    def get_user_resource_identifiers(self):
-        from app.api.user.facade import UserFacade
-        return [] if self.obj.users is None else [
-            UserFacade.make_resource_identifier(c.id, UserFacade.TYPE)
-            for c in self.obj.users
-        ]
-
-    def get_users_resources(self):
-        from app.api.user.facade import UserFacade
-        return [] if self.obj.users is None else [
-            UserFacade(self.url_prefix, c, self.with_relationships_links, self.with_relationships_data).resource
-            for c in self.obj.users
-        ]
+    #def get_user_resource_identifiers(self):
+    #    from app.api.user.facade import UserFacade
+    #    return [] if self.obj.users is None else [
+    #        UserFacade.make_resource_identifier(c.id, UserFacade.TYPE)
+    #        for c in self.obj.users
+    #    ]
+    #
+    #def get_users_resources(self):
+    #    from app.api.user.facade import UserFacade
+    #    return [] if self.obj.users is None else [
+    #        UserFacade(self.url_prefix, c, self.with_relationships_links, self.with_relationships_data).resource
+    #        for c in self.obj.users
+    #    ]
 
     @staticmethod
     def create_resource(model, obj_id, attributes, related_resources):
@@ -51,7 +51,7 @@ class UserRoleFacade(JSONAPIAbstractFacade):
         resource = {
             **self.resource_identifier,
             "attributes": {
-                "label": self.obj.label,
+                "name": self.obj.name,
                 "description": self.obj.description,
             },
             "meta": self.meta,
@@ -71,9 +71,4 @@ class UserRoleFacade(JSONAPIAbstractFacade):
         """
 
         self.relationships = {
-            "users": {
-                "links": self._get_links(rel_name="users"),
-                "resource_identifier_getter": self.get_user_resource_identifiers,
-                "resource_getter": self.get_users_resources
-            }
         }

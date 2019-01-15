@@ -48,10 +48,15 @@ class Document(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String(200), nullable=False)
     argument = db.Column(db.Text)
+
     creation = db.Column(db.String)
+    creation_not_after = db.Column(db.String)
+
     creation_label = db.Column(db.String)
-    location_date_label = db.Column(db.String)
-    location_date_ref = db.Column(db.String)
+
+    location_date_from_ref = db.Column(db.String)
+    location_date_to_ref = db.Column(db.String)
+
     prev_document_id = db.Column(db.Integer, db.ForeignKey('document.id'), index=True)
     transcription = db.Column(db.Text)
     date_insert = db.Column(db.String)
@@ -84,7 +89,6 @@ class Note(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     content = db.Column(db.String, nullable=False)
-    label = db.Column(db.String(45))
     document_id = db.Column(db.Integer, db.ForeignKey('document.id', ondelete='CASCADE'), nullable=False, index=True)
 
 
@@ -125,8 +129,8 @@ class Image(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     witness_id = db.Column(db.Integer, db.ForeignKey('witness.id', ondelete='CASCADE'), index=True)
 
-    canvas_idx = db.Column(db.Integer, nullable=False)
-    manifest_url = db.Column(db.String(200))
+    canvas_id = db.Column(db.String, nullable=False)
+    index = db.Column(db.Integer, default=1)
 
     witness = db.relationship("Witness", backref="images")
 
@@ -197,28 +201,33 @@ class User(db.Model):
     first_name = db.Column('firstname', db.String(), nullable=False, server_default='')
     last_name = db.Column('lastname', db.String(), nullable=False, server_default='')
 
-    role_id = db.Column(db.Integer, db.ForeignKey('user_role.id'), nullable=False, index=True)
+    roles = db.relationship('UserRole', secondary='user_has_role')
 
     @staticmethod
     def add_default_users():
-        db.session.add(User(username="admin", email="admin.lettres@chartes.psl.eu", role_id=1))
+        admin = UserRole.query.filter(UserRole.name == "admin").first()
+        db.session.add(User(username="admin", email="admin.lettres@chartes.psl.eu", roles=[admin]))
 
 
 class UserRole(db.Model):
     """ Rôle des utilisateurs (administrateur ou contributeur) """
     __tablename__ = 'user_role'
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    label = db.Column(db.String(45), nullable=False)
+    id = db.Column(db.Integer(), primary_key=True, autoincrement=True)
+    name = db.Column(db.String(50), unique=True)
     description = db.Column(db.String(200))
-
-    # relationships
-    users = db.relationship(User, backref="role")
 
     @staticmethod
     def add_default_roles():
-        db.session.add(UserRole(label="admin", description="Administrator"))
-        db.session.add(UserRole(label="contributor", description="Contributor"))
+        db.session.add(UserRole(name="admin", description="Administrator"))
+        db.session.add(UserRole(name="contributor", description="Contributor"))
+
+
+class UserHasRole(db.Model):
+    __tablename__ = 'user_has_role'
+    id = db.Column(db.Integer(), primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer(), db.ForeignKey('user.id', ondelete='CASCADE'))
+    role_id = db.Column(db.Integer(), db.ForeignKey('user_role.id', ondelete='CASCADE'))
 
 
 class UserInvitation(db.Model):
@@ -237,10 +246,12 @@ class Whitelist(db.Model):
     __tablename__ = 'whitelist'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
     label = db.Column(db.String(45))
 
     # relationships
     documents = db.relationship(Document, backref="whitelist")
+    owner = db.relationship(User, foreign_keys=[owner_id])
     users = db.relationship(User,
                             secondary=association_whitelist_has_user,
                             backref=db.backref('whitelists', ))
