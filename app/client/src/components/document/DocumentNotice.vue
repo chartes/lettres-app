@@ -9,8 +9,17 @@
     <document-attributes></document-attributes>
 
     <!-- TODO: placer les composants document-witness ici -->
+    <div class="document__witnesses" v-if="witnesses.length > 0">
+      <header>
+        <h2 class="document__witnesses--title subtitle">Témoins</h2>
+      </header>
+      <div class="document__witnesses--content">
+        <ul v-for="witness in witnesses">
+          <li><span v-html="witness.content"></span></li>
+        </ul>
+      </div>
+    </div>
 
-    <!-- v-if="document.collections && document.collections.length > 0" -->
     <div class="document__collections" v-if="collections.length > 0">
       <header>
         <h2 class="document__collections--title subtitle">Collections</h2>
@@ -48,7 +57,7 @@
       }
     },
     computed: {
-      ...mapState('document', ['document', 'collections'])
+      ...mapState('document', ['document', 'collections', 'witnesses'])
     },
     created() {
         this.titleContent = this.document.title;
