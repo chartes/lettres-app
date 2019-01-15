@@ -5,19 +5,23 @@
         <p v-if="!!document['creation']" >{{ document['creation'] }}</p>
         <p v-else class="unknown">Inconnue</p>
       </div>
+      <div v-if="!!document['creation-not-after']" class="column is-one-third">
+        <p><label>Avant :</label></p>
+        <p >{{ document['creation-not-after'] }}</p>
+      </div>
       <div class="column is-one-third">
         <p><label>creation-label :</label></p>
         <p v-if="!!document['creation-label']" v-html="document['creation-label']"></p>
         <p v-else class="unknown">Inconnue</p>
       </div>
       <div class="column is-one-third">
-        <p><label>location-date-label :</label></p>
-        <p v-if="!!document['location-date-label']" v-html="document['location-date-label']"></p>
+        <p><label>Date de lieu de (émission) :</label></p>
+        <p v-if="!!document['location-date-from-ref']" v-html="document['location-date-from-ref']"></p>
         <p v-else class="unknown">Inconnue</p>
       </div>
       <div class="column is-one-third">
-        <p><label>location-date-ref :</label></p>
-        <p v-if="!!document['location-date-ref']" v-html="document['location-date-ref']"></p>
+        <p><label>Date de lieu de (réception) :</label></p>
+        <p v-if="!!document['location-date-to-ref']" v-html="document['location-date-to-ref']"></p>
         <p v-else class="unknown">Inconnue</p>
       </div>
       <div class="column is-one-third">
