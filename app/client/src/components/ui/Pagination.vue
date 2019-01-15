@@ -25,7 +25,6 @@
       }
     },
     created() {
-        console.warn(this.current);
     },
     computed: {
         prev: function() { return (this.current > 1 ) ? this.current - 1 : 1},
