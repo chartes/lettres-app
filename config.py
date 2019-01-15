@@ -41,16 +41,33 @@ class Config(object):
     API_URL_PREFIX = parse_var_env('API_URL_PREFIX')
 
     # Flask-User settings
-    USER_APP_NAME = "Lettres"      # Shown in and email templates and page footers
+    USER_APP_NAME = parse_var_env("USER_APP_NAME") or "Lettres"     # Shown in and email templates and page footers
     USER_ENABLE_EMAIL = True       # Disable email authentication
     USER_ENABLE_USERNAME = True    # Enable username authentication
     USER_REQUIRE_RETYPE_PASSWORD = False    # Simplify register form
-    USER_EMAIL_SENDER_EMAIL = "admin.lettres@chartes.psl.eu"
     # Place the Login form and the Register form on one page:
-    # Only works for Flask-User v0.4.9 and up
-    USER_LOGIN_TEMPLATE = 'flask_user/login_or_register.html'
-    USER_REGISTER_TEMPLATE = 'flask_user/login_or_register.html'
+    #USER_LOGIN_TEMPLATE = 'flask_user/login_or_register.html'
+    #USER_REGISTER_TEMPLATE = 'flask_user/login_or_register.html'
 
+    USER_ENABLE_REGISTER = parse_var_env('USER_ENABLE_REGISTER')
+    USER_ENABLE_REMEMBER_ME = False
+    #USER_ENABLE_INVITE_USER = True
+    #USER_REQUIRE_INVITATION = True
+    USER_AUTO_LOGIN_AFTER_CONFIRM = True
+    USER_AFTER_LOGOUT_ENDPOINT = 'app_bp.index'
+    USER_AFTER_INVITE_ENDPOINT = 'app_bp.after_invite'
+    USER_AFTER_REGISTER_ENDPOINT = 'app_bp.index'
+
+    # Flask-Mail settings
+    MAIL_USERNAME = parse_var_env('MAIL_USERNAME')
+    MAIL_PASSWORD = parse_var_env('MAIL_PASSWORD')
+    USER_EMAIL_SENDER_NAME = parse_var_env('USER_EMAIL_SENDER_NAME')
+    USER_EMAIL_SENDER_EMAIL = parse_var_env('USER_EMAIL_SENDER_EMAIL')
+    MAIL_SERVER = parse_var_env('MAIL_SERVER')
+    MAIL_PORT = int(parse_var_env('MAIL_PORT'))
+    MAIL_USE_SSL = int(parse_var_env('MAIL_USE_SSL'))
+    MAIL_USE_TLS = int(parse_var_env('MAIL_USE_SSL'))
+    MAIL_DEBUG = parse_var_env('MAIL_DEBUG')
 
     @staticmethod
     def init_app(app):

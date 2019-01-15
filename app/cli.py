@@ -1,10 +1,20 @@
 import click
+import sqlalchemy
 
 from app import create_app
 from app.api.document.facade import DocumentFacade
 from app.models import UserRole, User, Document
 
 app = None
+
+
+def add_default_users(db):
+    try:
+        UserRole.add_default_roles()
+        User.add_default_users()
+    except sqlalchemy.exc.IntegrityError as e:
+        db.session.rollback()
+        print(e)
 
 
 def make_cli():
@@ -28,8 +38,7 @@ def make_cli():
             from app import db
             db.create_all()
 
-            UserRole.add_default_roles()
-            User.add_default_users()
+            add_default_users(db)
 
             db.session.commit()
             click.echo("Created the database")
@@ -44,8 +53,7 @@ def make_cli():
             db.drop_all()
             db.create_all()
 
-            UserRole.add_default_roles()
-            User.add_default_users()
+            add_default_users(db)
 
             db.session.commit()
             click.echo("Dropped then recreated the database")

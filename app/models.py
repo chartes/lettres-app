@@ -1,3 +1,4 @@
+import datetime
 from flask_user import UserMixin
 from sqlalchemy import Enum
 
@@ -207,8 +208,20 @@ class User(db.Model, UserMixin):
     @staticmethod
     def add_default_users():
         admin = UserRole.query.filter(UserRole.name == "admin").first()
-        db.session.add(User(username="admin", email="admin.lettres@chartes.psl.eu", roles=[admin]))
+        contributor = UserRole.query.filter(UserRole.name == "contributor").first()
+        db.session.add(User(username="admin",
+                            password="$2b$12$vr07DMg9s4LOe..GS5pZJeerXqsa.bvBQCkiHZq0cWXoHNhnKZznO", # Lettres2019!
+                            email="admin.lettres@chartes.psl.eu",
+                            active=True,
+                            email_confirmed_at=datetime.datetime.now(),
+                            roles=[admin, contributor]))
 
+        db.session.add(User(username="contributor",
+                            password="$2b$12$vr07DMg9s4LOe..GS5pZJeerXqsa.bvBQCkiHZq0cWXoHNhnKZznO", # Lettres2019!
+                            email="contributor.lettres@chartes.psl.eu",
+                            active=True,
+                            email_confirmed_at=datetime.datetime.now(),
+                            roles=[contributor]))
 
 class UserRole(db.Model):
     """ Rôle des utilisateurs (administrateur ou contributeur) """
