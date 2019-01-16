@@ -9,7 +9,10 @@ from math import ceil
 from collections import OrderedDict
 
 from flask import request, current_app
+from flask_login import current_user
 from flask_sqlalchemy import BaseQuery
+from flask_user.decorators import _is_logged_in_with_confirmed_email
+from functools import wraps
 from sqlalchemy import func, desc, asc, column, union
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Query
@@ -310,7 +313,7 @@ class JSONAPIRouteRegistrar(object):
         # register the rule
         api_bp.add_url_rule(search_rule, endpoint=search_endpoint.__name__, view_func=search_endpoint)
 
-    def register_get_routes(self, model, facade_class):
+    def register_get_routes(self, model, facade_class, decorators=()):
         """
 
         :param model:
@@ -465,6 +468,10 @@ class JSONAPIRouteRegistrar(object):
                     {"status": 400, "detail": str(e)}, status=400
                 )
 
+        # APPLY decorators if any
+        for dec in decorators:
+            collection_endpoint = dec(collection_endpoint)
+
         collection_endpoint.__name__ = "%s_%s" % (
             facade_class.TYPE_PLURAL.replace("-", "_"), collection_endpoint.__name__)
         # register the rule
@@ -527,7 +534,7 @@ class JSONAPIRouteRegistrar(object):
         # register the rule
         api_bp.add_url_rule(single_obj_rule, endpoint=single_obj_endpoint.__name__, view_func=single_obj_endpoint)
 
-    def register_relationship_get_route(self, facade_class, rel_name):
+    def register_relationship_get_route(self, facade_class, rel_name, decorators=()):
         """
         Supported request parameters :
             - Related resource inclusion :
@@ -613,6 +620,10 @@ class JSONAPIRouteRegistrar(object):
                     return JSONAPIResponseFactory.make_errors_response(
                         {"status": 400, "detail": str(e)}, status=400
                     )
+
+        # APPLY decorators if any
+        for dec in decorators:
+            resource_relationship_endpoint = dec(resource_relationship_endpoint)
 
         resource_relationship_endpoint.__name__ = "%s_%s_%s" % (
             facade_class.TYPE_PLURAL.replace("-", "_"), rel_name.replace("-", "_"),
@@ -718,7 +729,7 @@ class JSONAPIRouteRegistrar(object):
         # register the rule
         api_bp.add_url_rule(rule, endpoint=resource_endpoint.__name__, view_func=resource_endpoint)
 
-    def register_post_routes(self, model, facade_class):
+    def register_post_routes(self, model, facade_class, decorators=()):
         """
 
         :param model:
@@ -848,6 +859,10 @@ class JSONAPIRouteRegistrar(object):
                 else:
                     return JSONAPIResponseFactory.make_errors_response(e, status=e.get("status", 403))
 
+        # APPLY decorators if any
+        for dec in decorators:
+            collection_endpoint = dec(collection_endpoint)
+
         collection_endpoint.__name__ = "post_%s_%s" % (
             facade_class.TYPE_PLURAL.replace("-", "_"), collection_endpoint.__name__
         )
@@ -855,7 +870,7 @@ class JSONAPIRouteRegistrar(object):
         api_bp.add_url_rule(collection_obj_rule, endpoint=collection_endpoint.__name__, view_func=collection_endpoint,
                             methods=["POST"])
 
-    def register_relationship_post_route(self, facade_class, rel_name):
+    def register_relationship_post_route(self, facade_class, rel_name, decorators=()):
 
         # ===============================
         # Relationships route
@@ -923,6 +938,10 @@ class JSONAPIRouteRegistrar(object):
                 else:
                     return JSONAPIResponseFactory.make_errors_response(e, status=e.get("status", 403))
 
+        # APPLY decorators if any
+        for dec in decorators:
+            resource_relationship_endpoint = dec(resource_relationship_endpoint)
+
         resource_relationship_endpoint.__name__ = "post_%s_%s_%s" % (
             facade_class.TYPE_PLURAL.replace("-", "_"), rel_name.replace("-", "_"),
             resource_relationship_endpoint.__name__
@@ -935,7 +954,7 @@ class JSONAPIRouteRegistrar(object):
             methods=["POST"]
         )
 
-    def register_patch_routes(self, model, facade_class):
+    def register_patch_routes(self, model, facade_class, decorators=()):
         """
 
         :param model:
@@ -1066,6 +1085,10 @@ class JSONAPIRouteRegistrar(object):
                 else:
                     return JSONAPIResponseFactory.make_errors_response(e, status=e.get("status", 403))
 
+        # APPLY decorators if any
+        for dec in decorators:
+            single_obj_endpoint = dec(single_obj_endpoint)
+
         single_obj_endpoint.__name__ = "post_%s_%s" % (
             facade_class.TYPE_PLURAL.replace("-", "_"), single_obj_endpoint.__name__
         )
@@ -1073,7 +1096,7 @@ class JSONAPIRouteRegistrar(object):
         api_bp.add_url_rule(single_obj_rule, endpoint=single_obj_endpoint.__name__, view_func=single_obj_endpoint,
                             methods=["PATCH"])
 
-    def register_relationship_patch_route(self, facade_class, rel_name):
+    def register_relationship_patch_route(self, facade_class, rel_name, decorators=()):
 
         # ===============================
         # Relationships route
@@ -1148,6 +1171,10 @@ class JSONAPIRouteRegistrar(object):
                 else:
                     return JSONAPIResponseFactory.make_errors_response(e, status=e.get("status", 403))
 
+        # APPLY decorators if any
+        for dec in decorators:
+            resource_relationship_endpoint = dec(resource_relationship_endpoint)
+
         resource_relationship_endpoint.__name__ = "patch_%s_%s_%s" % (
             facade_class.TYPE_PLURAL.replace("-", "_"), rel_name.replace("-", "_"),
             resource_relationship_endpoint.__name__
@@ -1160,7 +1187,7 @@ class JSONAPIRouteRegistrar(object):
             methods=["PATCH"]
         )
 
-    def register_delete_routes(self, model, facade_class):
+    def register_delete_routes(self, model, facade_class, decorators=()):
         """
 
         :param model:
@@ -1196,6 +1223,10 @@ class JSONAPIRouteRegistrar(object):
                 return JSONAPIResponseFactory.make_errors_response(errors, status=404)
 
             return JSONAPIResponseFactory.make_data_response(None, None, None, None, status=204)
+
+        # APPLY decorators if any
+        for dec in decorators:
+            single_obj_endpoint = dec(single_obj_endpoint)
 
         single_obj_endpoint.__name__ = "delete_%s_%s" % (
             facade_class.TYPE_PLURAL.replace("-", "_"), single_obj_endpoint.__name__

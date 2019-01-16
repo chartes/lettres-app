@@ -132,7 +132,6 @@ class JSONAPIAbstractFacade(object):
 
         return resource, errors
 
-    # noinspection PyArgumentList
     @staticmethod
     def patch_resource(obj, obj_type, attributes, related_resources, append):
         """

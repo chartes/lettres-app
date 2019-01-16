@@ -209,19 +209,27 @@ class User(db.Model, UserMixin):
     def add_default_users():
         admin = UserRole.query.filter(UserRole.name == "admin").first()
         contributor = UserRole.query.filter(UserRole.name == "contributor").first()
+        password = "pbkdf2:sha256:50000$RyjGxAYv$02c62c497306be557eb4080a432c466453f297eb9dbfb62dc0160fe376f22689" # Lettres2019!
         db.session.add(User(username="admin",
-                            password="$2b$12$vr07DMg9s4LOe..GS5pZJeerXqsa.bvBQCkiHZq0cWXoHNhnKZznO", # Lettres2019!
+                            password=password,
                             email="admin.lettres@chartes.psl.eu",
                             active=True,
                             email_confirmed_at=datetime.datetime.now(),
                             roles=[admin, contributor]))
 
         db.session.add(User(username="contributor",
-                            password="$2b$12$vr07DMg9s4LOe..GS5pZJeerXqsa.bvBQCkiHZq0cWXoHNhnKZznO", # Lettres2019!
+                            password=password,
                             email="contributor.lettres@chartes.psl.eu",
                             active=True,
                             email_confirmed_at=datetime.datetime.now(),
                             roles=[contributor]))
+
+    def to_json(self):
+        return {
+            "username": self.username,
+            "roles": [r.name for r in self.roles]
+        }
+
 
 class UserRole(db.Model):
     """ Rôle des utilisateurs (administrateur ou contributeur) """

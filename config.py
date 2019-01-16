@@ -50,9 +50,9 @@ class Config(object):
     #USER_REGISTER_TEMPLATE = 'flask_user/login_or_register.html'
 
     USER_ENABLE_REGISTER = parse_var_env('USER_ENABLE_REGISTER')
-    USER_ENABLE_REMEMBER_ME = False
-    #USER_ENABLE_INVITE_USER = True
-    #USER_REQUIRE_INVITATION = True
+    USER_ENABLE_REMEMBER_ME = parse_var_env('USER_ENABLE_REMEMBER_ME')
+    USER_ENABLE_INVITE_USER = parse_var_env('USER_ENABLE_INVITE_USER')
+    USER_REQUIRE_INVITATION = parse_var_env('USER_REQUIRE_INVITATION')
     USER_AUTO_LOGIN_AFTER_CONFIRM = True
     USER_AFTER_LOGOUT_ENDPOINT = 'app_bp.index'
     USER_AFTER_INVITE_ENDPOINT = 'app_bp.after_invite'
@@ -68,6 +68,10 @@ class Config(object):
     MAIL_USE_SSL = int(parse_var_env('MAIL_USE_SSL'))
     MAIL_USE_TLS = int(parse_var_env('MAIL_USE_SSL'))
     MAIL_DEBUG = parse_var_env('MAIL_DEBUG')
+
+    JWT_SECRET_KEY = parse_var_env('JWT_SECRET_KEY')
+    JWT_TOKEN_LOCATION = ['cookies', 'headers']
+    JWT_ACCESS_COOKIE_PATH = parse_var_env('JWT_ACCESS_COOKIE_PATH')
 
     @staticmethod
     def init_app(app):

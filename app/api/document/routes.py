@@ -1,3 +1,4 @@
+from app.api.decorators import api_require_roles
 from app.api.document.facade import DocumentFacade
 from app.models import Document
 
@@ -5,7 +6,7 @@ from app.models import Document
 def register_document_api_urls(app):
     registrar = app.api_url_registrar
 
-    registrar.register_get_routes(Document, DocumentFacade)
+    registrar.register_get_routes(Document, DocumentFacade, ) # [api_require_roles("admin")]
     registrar.register_post_routes(Document, DocumentFacade)
     registrar.register_patch_routes(Document, DocumentFacade)
     registrar.register_delete_routes(Document, DocumentFacade)
