@@ -44,8 +44,8 @@ class JSONAPIAbstractFacade(object):
     def id(self):
         raise NotImplementedError
 
-    def bind_facade(self):
-        raise NotImplementedError
+    #def bind_facade(self):
+    #   raise NotImplementedError
 
     @property
     def resource(self):
@@ -213,7 +213,7 @@ class JSONAPIAbstractFacade(object):
             db.session.rollback()
         return errors
 
-    def get_related_resource_identifiers(self, facade_class, rel_field, to_many=False, decorators=()):
+    def get_related_resource_identifiers(self, facade_class, rel_field, to_many=False):
         def func():
             field = getattr(self.obj, rel_field)
             if to_many:
@@ -224,13 +224,9 @@ class JSONAPIAbstractFacade(object):
             else:
                 return None if field is None else facade_class.make_resource_identifier(field.id, facade_class.TYPE)
 
-        # APPLY decorators if any
-        for dec in decorators:
-            func = dec(func)
-
         return func
 
-    def get_related_resources(self, facade_class,  rel_field, to_many=False, decorators=()):
+    def get_related_resources(self, facade_class,  rel_field, to_many=False):
         def func():
             field = getattr(self.obj, rel_field)
             if to_many:
@@ -248,10 +244,6 @@ class JSONAPIAbstractFacade(object):
                 else:
                     return facade_class(self.url_prefix, field,
                                         self.with_relationships_links, self.with_relationships_data).resource
-
-        # APPLY decorators if any
-        for dec in decorators:
-            func = dec(func)
 
         return func
 
@@ -283,10 +275,10 @@ class JSONAPIAbstractFacade(object):
                 for rel_name, rel in self.relationships.items()
             }
 
-    def get_data_to_index_when_added(self):
+    def get_data_to_index_when_added(self, propagate):
         return []
 
-    def get_data_to_index_when_removed(self):
+    def get_data_to_index_when_removed(self, propagate):
         return []
 
     def get_relationship_data_to_index(self, rel_name):
@@ -310,18 +302,24 @@ class JSONAPIAbstractFacade(object):
             )
         return to_be_reindexed
 
-    def add_to_index(self):
+    def add_to_index(self, propagate=False):
         from app.search import SearchIndexManager
-        for data in self.get_data_to_index_when_added():
+        for data in self.get_data_to_index_when_added(propagate):
             SearchIndexManager.add_to_index(index=data["index"], id=data["id"], payload=data["payload"])
 
-    def remove_from_index(self):
+    def remove_from_index(self, propagate=False):
         from app.search import SearchIndexManager
-        for data in self.get_data_to_index_when_removed():
+        for data in self.get_data_to_index_when_removed(propagate):
             SearchIndexManager.remove_from_index(index=data["index"], id=data["id"])
 
-    def reindex(self, op):
+    def reindex(self, op, propagate=False):
+        """
+
+        :param op:
+        :param propagate:  if True then reindex related indexes too
+        :return:
+        """
         if op in ("insert", "update"):
-            self.add_to_index()
+            self.add_to_index(propagate)
         else:
-            self.remove_from_index()
+            self.remove_from_index(propagate)

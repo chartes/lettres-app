@@ -2,8 +2,11 @@ import click
 import sqlalchemy
 
 from app import create_app
+from app.api.collection.facade import CollectionFacade
 from app.api.document.facade import DocumentFacade
-from app.models import UserRole, User, Document
+from app.api.language.facade import LanguageFacade
+from app.api.witness.facade import WitnessFacade
+from app.models import UserRole, User, Document, Collection, Language, Witness
 
 app = None
 
@@ -80,20 +83,37 @@ def make_cli():
             click.echo("Loaded fixtures to the database")
 
     @click.command("db-reindex")
-    def db_reindex():
+    @click.option('--indexes', default="all")
+    def db_reindex(indexes):
         """
         Rebuild the elasticsearch indexes from the current database
         """
-        from app.search import SearchIndexManager
-        with app.app_context():
-            index_name = DocumentFacade.get_index_name()
-            print("Reindexing", index_name)
-            app.elasticsearch.indices.delete(index=index_name, ignore=[400, 404])  # remove all records
-            for doc in Document.query.all():
-                f_obj = DocumentFacade("", doc)
-                for data in f_obj.get_data_to_index_when_added():
-                    SearchIndexManager.add_to_index(index=index_name, id=doc.id, payload=data)
-            print("completed!")
+        indexes_info = {
+            "collections": {"facade": CollectionFacade, "model": Collection},
+            "languages": {"facade": LanguageFacade, "model": Language},
+            "witnesses": {"facade": WitnessFacade, "model": Witness},
+            "documents": {"facade": DocumentFacade, "model": Document},
+        }
+
+        def reindex_from_info(name, info):
+            with app.app_context():
+                print("Reindexing %s... " % name, end="", flush=True)
+
+                index_name = info["facade"].get_index_name()
+                app.elasticsearch.indices.delete(index=index_name, ignore=[400, 404])  # remove all records
+                for obj in info["model"].query.all():
+                    f_obj = info["facade"]("", obj)
+                    f_obj.reindex("insert", propagate=False)
+                print("ok")
+
+        if indexes == "all": # reindex every index configured above
+            indexes = ",".join(indexes_info.keys())
+
+        for name in indexes.split(","):
+            if name in indexes_info:
+                reindex_from_info(name, indexes_info[name])
+            else:
+                print("Warning: index %s does not exist or is not declared in the cli" % name)
 
     @click.command("run")
     def run():

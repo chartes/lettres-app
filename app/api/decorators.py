@@ -27,7 +27,6 @@ def api_require_roles(*required_roles):
                 if required_role not in ret["current_roles"]:
                     print("Sorry, you are not '" + required_role + "'")
                     return error_401
-
             res = view_function(*args, **kwargs)
             return res
         return wrapped_f

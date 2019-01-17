@@ -61,13 +61,29 @@ class LanguageFacade(JSONAPIAbstractFacade):
             },
         }
 
-    def get_data_to_index_when_added(self):
-        return self.get_relationship_data_to_index(rel_name="documents")
+    def get_data_to_index_when_added(self, propagate):
+        _res = self.resource
+        payload = {
+            "id": _res["id"],
+            "type": _res["type"],
 
-    def remove_from_index(self):
-        # do not remove entries from the index but reindex the docs without the resource
+            "code": _res["attributes"]["code"],
+            "label": _res["attributes"]["label"],
+        }
+        languages_data = [{"id": _res["id"], "index": self.get_index_name(), "payload": payload}]
+        if not propagate:
+            return languages_data
+        else:
+            return languages_data + self.get_relationship_data_to_index(rel_name="documents")
+
+    def remove_from_index(self, propagate):
         from app.search import SearchIndexManager
-        for data in self.get_data_to_index_when_added():
-            my_id = self.id
-            data["payload"]["languages"] = [l for l in data["payload"]["languages"] if l["id"] != my_id]
-            SearchIndexManager.add_to_index(index=data["index"], id=data["id"], payload=data["payload"])
+
+        SearchIndexManager.remove_from_index(index=self.get_index_name(), id=self.id)
+
+        if propagate:
+            # reindex the docs without the resource
+            for data in self.get_data_to_index_when_added():
+                if data["payload"]["id"] != self.id and data["payload"]["type"] != self.TYPE:
+                    data["payload"]["languages"] = [l for l in data["payload"]["languages"] if l.get("id") != self.id]
+                    SearchIndexManager.add_to_index(index=data["index"], id=data["id"], payload=data["payload"])

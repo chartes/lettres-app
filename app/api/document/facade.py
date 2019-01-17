@@ -195,7 +195,7 @@ class DocumentFacade(JSONAPIAbstractFacade):
                 "resource_getter": self.get_related_resources(rel_facade, u_rel_name, to_many),
             }
 
-    def get_data_to_index_when_added(self):
+    def get_data_to_index_when_added(self, propagate):
         _res = self.resource
         payload = {
             "id": _res["id"],
@@ -214,6 +214,6 @@ class DocumentFacade(JSONAPIAbstractFacade):
         }
         return [{"id": _res["id"], "index": self.get_index_name(), "payload": payload}]
 
-    def get_data_to_index_when_removed(self):
+    def get_data_to_index_when_removed(self, propagate):
         print("GOING TO BE REMOVED FROM INDEX:", [{"id": self.obj.id, "index": self.get_index_name()}])
         return [{"id": self.obj.id, "index": self.get_index_name()}]

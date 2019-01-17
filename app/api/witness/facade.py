@@ -32,6 +32,7 @@ class WitnessFacade(JSONAPIAbstractFacade):
             "attributes": {
                 "content": self.obj.content,
                 "tradition": self.obj.tradition,
+                "classification-mark": self.obj.classification_mark,
                 "status": self.obj.status,
             },
             "meta": self.meta,
@@ -73,13 +74,29 @@ class WitnessFacade(JSONAPIAbstractFacade):
             },
         }
 
-    def get_data_to_index_when_added(self):
-        return self.get_relationship_data_to_index(rel_name="document")
+    def get_data_to_index_when_added(self, propagate):
+        _res = self.resource
+        payload = {
+            "id": _res["id"],
+            "type": _res["type"],
 
-    def remove_from_index(self):
-        # do not remove entries from the index but reindex the docs without the resource
+            "content": _res["attributes"]["content"],
+            "classification_mark": _res["attributes"]["classification-mark"],
+        }
+        witnesses_data = [{"id": _res["id"], "index": self.get_index_name(), "payload": payload}]
+        if not propagate:
+            return witnesses_data
+        else:
+            return witnesses_data + self.get_relationship_data_to_index(rel_name="document")
+
+    def remove_from_index(self, propagate):
         from app.search import SearchIndexManager
-        for data in self.get_data_to_index_when_added():
-            my_id = self.id
-            data["payload"]["witnesses"] = [l for l in data["payload"]["witnesses"] if l["id"] != my_id]
-            SearchIndexManager.add_to_index(index=data["index"], id=data["id"], payload=data["payload"])
+
+        SearchIndexManager.remove_from_index(index=self.get_index_name(), id=self.id)
+
+        if propagate:
+            # reindex the docs without the resource
+            for data in self.get_data_to_index_when_added():
+                if data["payload"]["id"] != self.id and data["payload"]["type"] != self.TYPE:
+                    data["payload"]["witnesses"] = [l for l in data["payload"]["witnesses"] if l.get("id") != self.id]
+                    SearchIndexManager.add_to_index(index=data["index"], id=data["id"], payload=data["payload"])
