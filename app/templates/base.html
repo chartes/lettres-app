@@ -39,7 +39,7 @@
                         {% if current_user.is_anonymous %}
                         <a class="navbar-item" href="{{url_for("user.login")}}"><i class="fas fa-sign-in-alt"></i></a>
                         {% else %}
-                        <a class="navbar-item" href=""><i class="fas fa-user-alt"></i><span>Mon Compte</span></a>
+                        <a class="navbar-item" href=""><i class="fas fa-user-alt"></i><span>Mon compte</span></a>
                         <a class="navbar-item" href="{{url_for("user.logout")}}"><i class="fas fa-sign-out-alt"></i></a>
                         {% endif %}
                     </div>
