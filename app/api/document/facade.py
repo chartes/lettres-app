@@ -211,6 +211,14 @@ class DocumentFacade(JSONAPIAbstractFacade):
             "witnesses": [{"id": w.id, "content": w.content} for w in self.obj.witnesses],
             "languages": [{"id": l.id, "code": l.code} for l in self.obj.languages],
             "collections": [{"id": c.id, "title": c.title} for c in self.obj.collections],
+            "correspondents": [
+                {
+                    "id": c_h_r.correspondent.id,
+                    "key": c_h_r.correspondent.key,
+                    "ref": c_h_r.correspondent.ref
+                }
+                for c_h_r in self.obj.correspondents_having_roles
+            ],
         }
         return [{"id": _res["id"], "index": self.get_index_name(), "payload": payload}]
 

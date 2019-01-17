@@ -3,10 +3,11 @@ import sqlalchemy
 
 from app import create_app
 from app.api.collection.facade import CollectionFacade
+from app.api.correspondent.facade import CorrespondentFacade
 from app.api.document.facade import DocumentFacade
 from app.api.language.facade import LanguageFacade
 from app.api.witness.facade import WitnessFacade
-from app.models import UserRole, User, Document, Collection, Language, Witness
+from app.models import UserRole, User, Document, Collection, Language, Witness, Correspondent
 
 app = None
 
@@ -92,6 +93,7 @@ def make_cli():
             "collections": {"facade": CollectionFacade, "model": Collection},
             "languages": {"facade": LanguageFacade, "model": Language},
             "witnesses": {"facade": WitnessFacade, "model": Witness},
+            "correspondents": {"facade": CorrespondentFacade, "model": Correspondent},
             "documents": {"facade": DocumentFacade, "model": Document},
         }
 
@@ -104,6 +106,7 @@ def make_cli():
                 for obj in info["model"].query.all():
                     f_obj = info["facade"]("", obj)
                     f_obj.reindex("insert", propagate=False)
+
                 print("ok")
 
         if indexes == "all": # reindex every index configured above

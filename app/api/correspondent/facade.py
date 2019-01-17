@@ -98,3 +98,31 @@ class CorrespondentFacade(JSONAPIAbstractFacade):
                 "resource_getter": self.get_document_resources
             },
         }
+
+    def get_data_to_index_when_added(self, propagate):
+        _res = self.resource
+        payload = {
+            "id": _res["id"],
+            "type": _res["type"],
+
+            "firstname": _res["attributes"]["firstname"],
+            "lastname": _res["attributes"]["lastname"],
+            "ref": _res["attributes"]["ref"],
+            "key": _res["attributes"]["key"],
+        }
+        correspondent_data = [{"id": _res["id"], "index": self.get_index_name(), "payload": payload}]
+        if not propagate:
+            return correspondent_data
+        else:
+            return correspondent_data + self.get_relationship_data_to_index(rel_name="documents")
+
+    def remove_from_index(self, propagate):
+        from app.search import SearchIndexManager
+        SearchIndexManager.remove_from_index(index=self.get_index_name(), id=self.id)
+
+        if propagate:
+            # reindex the docs without the resource
+            for data in self.get_data_to_index_when_added():
+                if data["payload"]["id"] != self.id and data["payload"]["type"] != self.TYPE:
+                    data["payload"]["correspondents"] = [l for l in data["payload"]["correspondents"] if l.get("id") != self.id]
+                    SearchIndexManager.add_to_index(index=data["index"], id=data["id"], payload=data["payload"])
