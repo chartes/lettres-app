@@ -31,10 +31,18 @@
              </div>
             </section>
              <div id="navbar" >
-                <nav class="navbar-menu container">
+                <nav class="navbar-menu">
                      <a class="navbar-item is-active" href="{{url_for("app_bp.index")}}">Collections</a>
                      <a class="navbar-item">Documentation</a>
                      <a class="navbar-item">À propos</a>
+                     <div class="navbar-end">
+                        {% if current_user.is_anonymous %}
+                        <a class="navbar-item" href="{{url_for("user.login")}}"><i class="fas fa-sign-in-alt"></i></a>
+                        {% else %}
+                        <a class="navbar-item" href=""><i class="fas fa-user-alt"></i><span>Mon Compte</span></a>
+                        <a class="navbar-item" href="{{url_for("user.logout")}}"><i class="fas fa-sign-out-alt"></i></a>
+                        {% endif %}
+                    </div>
                 </nav>
              </div>
         </div>
@@ -72,9 +80,6 @@
                       alt="École Nationale des Chartes - PSL">
             </a>
         </aside>
-         <p>
-
-         </p>
     </div>
   </div>
 </footer>
@@ -86,6 +91,10 @@
 </body>
 
 <style type="text/css">
+  nav span {
+    margin-left: 12px;
+  }
+
   .hero .title {
     font: 90%/140% 'Oxygen', sans-serif;
     color: white;

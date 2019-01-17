@@ -2,14 +2,11 @@
 
 
 {% block head_scripts %}
-      <link rel="stylesheet" href="{{url_for('app_bp.static', filename='css/liiiflet.css')}}"/>
 {% endblock head_scripts %}
 
 {% block content %}
-
     <section class="section edition-section">
-
-        <div id="app" data-document-id="{{ id }}" data-auth-token="{{ auth_token }}"></div>
+        <div id="app" data-document-id="{{ id }}"></div>
     </section>
 {% endblock content %}
 
