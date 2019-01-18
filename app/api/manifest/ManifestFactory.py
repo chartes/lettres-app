@@ -61,6 +61,8 @@ class ManifestFactory(object):
         # group images by manifest url
         grouped_images = {}
         for img in ordered_images:
+
+            # /!\ maybe tied to the manifest url naming scheme in Gallica
             url = img.canvas_id.rsplit("/", maxsplit=2)[0]
             orig_manifest_url = "{url}/manifest.json".format(url=url)
 

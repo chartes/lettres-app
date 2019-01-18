@@ -17,6 +17,8 @@ def get_manifest(api_version, witness_id):
         if witness.images and len(witness.images) > 0:
             try:
                 manifest = current_app.manifest_factory.make_manifest(request.url, witness)
+                if manifest["sequences"][0]["canvases"] == 0:
+                    raise Exception("Cannot fetch canvases")
             except Exception as e:
                 return JSONAPIResponseFactory.make_errors_response(
                     {
