@@ -125,6 +125,8 @@ class DocumentFacade(JSONAPIAbstractFacade):
                 "location-date-from-ref": self.obj.location_date_from_ref,
                 "location-date-to-ref": self.obj.location_date_to_ref,
                 "transcription": self.obj.transcription,
+                "collection-url": "{doc_url}/collection".format(doc_url=self.self_link)
+                                  if self.obj.witnesses and len(self.obj.witnesses) > 0 else None,
                 "date-insert": self.obj.date_insert,
                 "date-update": self.obj.date_update,
                 "is-published": self.obj.is_published,

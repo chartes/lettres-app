@@ -7,8 +7,8 @@ from app import api_bp
 from app.models import User
 
 
-@api_bp.route('/api/1.0/token/auth', methods=['POST'])
-def create_token():
+@api_bp.route('/api/<api_version>/token/auth', methods=['POST'])
+def create_token(api_version):
     username = request.json.get('username', None)
     password = request.json.get('password', None)
 
@@ -27,8 +27,8 @@ def create_token():
     return jsonify(ret), 200
 
 
-@api_bp.route('/api/1.0/token/refresh')
-def index():
+@api_bp.route('/api/<api_version>/token/refresh')
+def index(api_version):
     user = current_user
     if not user.is_anonymous:
         access_token = create_access_token(identity=user.to_json(), fresh=True)
@@ -41,3 +41,7 @@ def index():
         print("unset cookies")
 
     return resp, 200
+
+
+# register manifest generation api url
+from app.api.manifest.routes import *

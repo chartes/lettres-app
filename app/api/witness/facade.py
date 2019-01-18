@@ -1,4 +1,3 @@
-from app import db
 from app.api.abstract_facade import JSONAPIAbstractFacade
 from app.models import Witness
 
@@ -34,6 +33,8 @@ class WitnessFacade(JSONAPIAbstractFacade):
                 "tradition": self.obj.tradition,
                 "classification-mark": self.obj.classification_mark,
                 "status": self.obj.status,
+                "manifest-url": "{witness_url}/manifest".format(witness_url=self.self_link)
+                                if self.obj.images and len(self.obj.images) > 0 else None
             },
             "meta": self.meta,
             "links": {
@@ -50,7 +51,6 @@ class WitnessFacade(JSONAPIAbstractFacade):
         """Make a JSONAPI resource object describing what is a witness
         """
 
-        from app.api.image.facade import ImageFacade
         from app.api.institution.facade import InstitutionFacade
         from app.api.document.facade import DocumentFacade
 
@@ -66,12 +66,7 @@ class WitnessFacade(JSONAPIAbstractFacade):
                 "resource_identifier_getter": self.get_related_resource_identifiers(InstitutionFacade, "institution",
                                                                                     to_many=False),
                 "resource_getter": self.get_related_resources(InstitutionFacade, "institution", to_many=False),
-            },
-            "images": {
-                "links": self._get_links(rel_name="images"),
-                "resource_identifier_getter":  self.get_related_resource_identifiers(ImageFacade, "images", to_many=True),
-                "resource_getter":  self.get_related_resources(ImageFacade, "images", to_many=True),
-            },
+            }
         }
 
     def get_data_to_index_when_added(self, propagate):
