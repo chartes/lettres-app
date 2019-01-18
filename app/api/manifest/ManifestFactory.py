@@ -16,7 +16,7 @@ class ManifestFactory(object):
             self.collection_template = json.load(f)
 
     def make_collection(self, collection_url, doc):
-        collection = self.collection_template.copy()
+        collection = dict(self.collection_template)
 
         from app.api.witness.facade import WitnessFacade
 
@@ -25,31 +25,32 @@ class ManifestFactory(object):
 
         for witness in doc.witnesses:
             f_obj, errors, kwargs = WitnessFacade.get_facade(url_prefix, witness)
-            manifest_url = f_obj.resource["attributes"]["manifest-url"]
+            manifest_url = f_obj.get_iiif_manifest_url()
             if manifest_url is not None:
-                manifest_urls.append(manifest_url)
+                manifest_urls.append((manifest_url, witness))
 
         collection["@id"] = collection_url
-        collection["manifests"] = manifest_urls
-
-        #from app import db
-        #from app.models import Image
-        #for img in Image.query.all():
-        #    _cid = img.canvas_id.replace("/full/full/0/native.jpg", "")
-        #    url, name = _cid.rsplit("/", maxsplit=1)
-        #    img.canvas_id = "{url}/canvas/{name}".format(url=url, name=name)
-        #    db.session.add(img)
-        #db.session.commit()
+        for i, (url, witness) in enumerate(manifest_urls):
+            manifest = {
+                "@id": url,
+                "@type": "sc:Manifest",
+                "label": witness.content
+            }
+            collection["manifests"].append(manifest)
 
         return collection
 
     def make_manifest(self, manifest_url, witness):
-        manifest = self.manifest_template.copy()
+        manifest = dict(self.manifest_template)
 
         # ==== manifest @id
         manifest["@id"] = manifest_url
         # ==== manifest related
         manifest["related"] = manifest_url.split("/witnesses")[0] + "/documents/%s" % witness.document_id
+        manifest["related"] = manifest["related"].replace("iiif/", "")
+
+        # === manifest label
+        manifest["label"] = witness.content
 
         # ==== sequence @id
         seq = manifest_url.replace("/manifest", "/sequence/normal")

@@ -112,6 +112,14 @@ class DocumentFacade(JSONAPIAbstractFacade):
             for img in w.images
         ]
 
+    def get_iiif_collection_url(self):
+        if self.obj.witnesses and len(self.obj.witnesses) > 0:
+            url = "{doc_url}/collection/default".format(doc_url=self.self_link)
+            _s = url.rindex(self.TYPE)
+            return "{0}iiif/{1}".format(url[0:_s], url[_s:])
+        else:
+            return None
+
     @property
     def resource(self):
         resource = {
@@ -125,8 +133,7 @@ class DocumentFacade(JSONAPIAbstractFacade):
                 "location-date-from-ref": self.obj.location_date_from_ref,
                 "location-date-to-ref": self.obj.location_date_to_ref,
                 "transcription": self.obj.transcription,
-                "collection-url": "{doc_url}/collection".format(doc_url=self.self_link)
-                                  if self.obj.witnesses and len(self.obj.witnesses) > 0 else None,
+                "collection-url": self.get_iiif_collection_url(),
                 "date-insert": self.obj.date_insert,
                 "date-update": self.obj.date_update,
                 "is-published": self.obj.is_published,

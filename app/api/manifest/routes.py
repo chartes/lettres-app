@@ -10,7 +10,7 @@ HEADERS = {"Access-Control-Allow-Origin": "*",
            "Access-Control-Allow-Methods": ["GET"]}
 
 
-@api_bp.route("/api/<api_version>/witnesses/<witness_id>/manifest")
+@api_bp.route("/api/<api_version>/iiif/witnesses/<witness_id>/manifest")
 def get_manifest(api_version, witness_id):
     witness = Witness.query.filter(Witness.id == witness_id).first()
     if witness:
@@ -45,7 +45,7 @@ def get_manifest(api_version, witness_id):
         )
 
 
-@api_bp.route("/api/<api_version>/documents/<doc_id>/collection")
+@api_bp.route("/api/<api_version>/iiif/documents/<doc_id>/collection/default")
 def get_collection(api_version, doc_id):
     document = Document.query.filter(Document.id == doc_id).first()
     if document:

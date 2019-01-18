@@ -24,6 +24,14 @@ class WitnessFacade(JSONAPIAbstractFacade):
             errors = []
         return e, kwargs, errors
 
+    def get_iiif_manifest_url(self):
+        if self.obj.images and len(self.obj.images) > 0:
+            url = "{witness_url}/manifest".format(witness_url=self.self_link)
+            _s = url.rindex(self.TYPE)
+            return "{0}iiif/{1}".format(url[0:_s], url[_s:])
+        else:
+            return None
+
     @property
     def resource(self):
         resource = {
@@ -33,8 +41,7 @@ class WitnessFacade(JSONAPIAbstractFacade):
                 "tradition": self.obj.tradition,
                 "classification-mark": self.obj.classification_mark,
                 "status": self.obj.status,
-                "manifest-url": "{witness_url}/manifest".format(witness_url=self.self_link)
-                                if self.obj.images and len(self.obj.images) > 0 else None
+                "manifest-url": self.get_iiif_manifest_url()
             },
             "meta": self.meta,
             "links": {
