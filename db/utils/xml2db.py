@@ -148,9 +148,11 @@ def insert_letter(db, cursor, xml_file):
         # on renseigne les URL des images de ce témoin de base
         for i, image_url in enumerate(images_iiif_url):
             i += 1
+            image_url_part = image_url.split('/')
+            canvas_id = '/'.join(image_url_part[:7]) + '/canvas/' + image_url_part[7]
             try:
                 cursor.execute("INSERT INTO image (witness_id, canvas_id, order_num) VALUES (?, ?, ?)",
-                               (witness_id, image_url, i))
+                               (witness_id, canvas_id, i))
             except sqlite3.IntegrityError as e:
                 print(e)
 
