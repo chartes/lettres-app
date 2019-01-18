@@ -26,10 +26,11 @@ class ManifestFactory(object):
         for witness in doc.witnesses:
             f_obj, errors, kwargs = WitnessFacade.get_facade(url_prefix, witness)
             manifest_url = f_obj.get_iiif_manifest_url()
-            if manifest_url is not None:
+            if manifest_url is not None and (manifest_url, witness) not in manifest_urls:
                 manifest_urls.append((manifest_url, witness))
 
         collection["@id"] = collection_url
+        collection["manifests"] = []
         for i, (url, witness) in enumerate(manifest_urls):
             manifest = {
                 "@id": url,
