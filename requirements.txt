@@ -1,7 +1,9 @@
 asn1crypto==0.24.0
 bcrypt==3.1.5
 blinker==1.4
+certifi==2018.11.29
 cffi==1.11.5
+chardet==3.0.4
 Click==7.0
 cryptography==2.4.2
 dnspython==1.15.0
@@ -9,6 +11,7 @@ elasticsearch==6.3.1
 eventlet==0.24.1
 Faker==1.0.0
 Flask==1.0.2
+Flask-JWT-Extended==3.15.0
 Flask-Login==0.4.1
 Flask-Mail==0.9.1
 Flask-SQLAlchemy==2.3.2
@@ -23,8 +26,10 @@ MarkupSafe==1.1.0
 monotonic==1.5
 passlib==1.7.1
 pycparser==2.19
+PyJWT==1.7.1
 python-dateutil==2.7.5
 python-dotenv==0.9.1
+requests==2.21.0
 six==1.11.0
 SQLAlchemy==1.2.14
 SQLAlchemy-Utils==0.33.8
