@@ -2,6 +2,7 @@ import pprint
 from elasticsearch import Elasticsearch
 from flask import Flask, Blueprint, url_for
 from flask.json import jsonify
+from flask_cors import CORS
 from flask_jwt_extended import JWTManager, set_access_cookies, create_access_token
 from flask_sqlalchemy import SQLAlchemy
 from flask_user import UserManager
@@ -96,7 +97,10 @@ def create_app(config_name="dev"):
 
     db.init_app(app)
     config[config_name].init_app(app)
+
     app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) if app.config['ELASTICSEARCH_URL'] else None
+
+    CORS(app, resources={r"*": {"origins": "*"}})
 
     from app.models import User
     from app.models import UserInvitation
