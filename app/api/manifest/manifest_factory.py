@@ -110,18 +110,18 @@ class ManifestFactory(object):
                 oldest_cached_url = l[0][1]
                 cls.CACHED_MANIFESTS.pop(oldest_cached_url)
                 #print("popped", oldest_cached_url)
-            print("caching", manifest_url)
+            #print("caching", manifest_url)
             cls.CACHED_MANIFESTS[manifest_url] = (manifest, datetime.datetime.now())
             #print("nb cache entries:", len(cls.CACHED_MANIFESTS.keys()))
             return manifest
         else:
             manifest, dt = cls.CACHED_MANIFESTS[manifest_url]
-            print("get from cache")
+            #print("get from cache")
             # refresh the cache entry
             duration = datetime.datetime.now() - dt
             if duration.total_seconds() > cls.CACHE_DURATION:
                 cls.CACHED_MANIFESTS.pop(manifest_url)
-                print("refresh cache entry")
+                #print("refresh cache entry")
                 return cls._get_from_cache(manifest_url)
             else:
                 # extending cache duration

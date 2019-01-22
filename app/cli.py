@@ -85,7 +85,8 @@ def make_cli():
 
     @click.command("db-reindex")
     @click.option('--indexes', default="all")
-    def db_reindex(indexes):
+    @click.option('--host', required=True)
+    def db_reindex(indexes, host):
         """
         Rebuild the elasticsearch indexes from the current database
         """
@@ -98,13 +99,15 @@ def make_cli():
         }
 
         def reindex_from_info(name, info):
+
             with app.app_context():
+                prefix = "{host}{api_prefix}".format(host=host, api_prefix=app.config["API_URL_PREFIX"])
                 print("Reindexing %s... " % name, end="", flush=True)
 
                 index_name = info["facade"].get_index_name()
                 app.elasticsearch.indices.delete(index=index_name, ignore=[400, 404])  # remove all records
                 for obj in info["model"].query.all():
-                    f_obj = info["facade"]("", obj)
+                    f_obj = info["facade"](prefix, obj)
                     f_obj.reindex("insert", propagate=False)
 
                 print("ok")
