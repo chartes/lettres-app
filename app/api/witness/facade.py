@@ -25,7 +25,7 @@ class WitnessFacade(JSONAPIAbstractFacade):
         return e, kwargs, errors
 
     def get_iiif_manifest_url(self):
-        if self.obj.images and len(self.obj.images) > 0:
+        if self.obj.images:
             url = "{witness_url}/manifest".format(witness_url=self.self_link)
             _s = url.rindex(self.TYPE)
             return "{0}iiif/{1}".format(url[0:_s], url[_s:])

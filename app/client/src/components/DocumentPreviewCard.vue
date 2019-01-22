@@ -1,29 +1,37 @@
 <template>
-    <article class="document-preview-card" v-if="documentPreview">
-      <header class="title">
-        <a :href="`${baseURL}/documents/${documentPreview.id}`">
-          <span class="tag document-preview-card__doc-tag">Document {{documentPreview.id}}</span>
-          <span><h1 class="document-preview-card__title" v-html="titleContent"></h1></span>
-        </a>
-      </header>
+    <div class="document-preview-card"  v-if="documentPreview">
+        <aside class="document-preview-card__thumbnail">
+            <a :href="`${baseURL}/documents/${documentPreview.id}`">
+                <img v-if='documentPreview.attributes["iiif-thumbnail-url"]'
+                     :src='documentPreview.attributes["iiif-thumbnail-url"]'/>
+           </a>
+        </aside>
+        <article>
+          <header class="title">
+            <a :href="`${baseURL}/documents/${documentPreview.id}`">
+              <span class="tag document-preview-card__doc-tag">Document {{documentPreview.id}}</span>
+              <span><h1 class="document-preview-card__title" v-html="titleContent"></h1></span>
+            </a>
+          </header>
 
-      <div class="content">
-         <div class="columns">
-           <div class="column is-three-quarters">
-             <p class="document-preview-card__content" v-html="previewContent"></p>
-           </div>
-           <div class="column document-preview-card__correspondents">
-             <ul>
-               <li class="" v-for="obj in documentPreview.correspondents">
-                 <a href="">{{getCorrespondentFullname(obj)}}</a>
-                 <span class="tag is-light is-rounded">{{obj.role.label}}</span>
-               </li>
-             </ul>
-           </div>
-         </div>
-      </div>
-    <loading-indicator :active="documentLoading" :full-page="true"/>
-    </article>
+          <div class="content">
+             <div class="columns">
+               <div class="column is-three-quarters">
+                 <p class="document-preview-card__content" v-html="previewContent"></p>
+               </div>
+               <div class="column document-preview-card__correspondents">
+                 <ul>
+                   <li class="" v-for="obj in documentPreview.correspondents">
+                     <a href="">{{getCorrespondentFullname(obj)}}</a>
+                     <span class="tag is-light is-rounded">{{obj.role.label}}</span>
+                   </li>
+                 </ul>
+               </div>
+             </div>
+          </div>
+        <loading-indicator :active="documentLoading" :full-page="true"/>
+        </article>
+    </div>
 </template>
 
 <script>
@@ -53,12 +61,6 @@
           this.titleContent = this.documentPreview.attributes.title;
           this.previewContent = this.documentPreview.attributes.argument ? this.documentPreview.attributes.argument : this.documentPreview.attributes.transcription;
       })
-      /*this.$store.dispatch('user/setAuthToken', this.auth_token).then(() => {
-          this.$store.dispatch('user/getCurrentUser').then(() => {
-            return this.$store.dispatch('document/fetch', this.doc_id)
-          });
-      });
-       */
     },
     computed: {
         ...mapState('document', ['documentsPreview', 'documentLoading']),
@@ -77,12 +79,18 @@
   }
 
   .document-preview-card {
-    margin-bottom: 1.5em;
-    margin-top: 1.5em;
+    margin-bottom: 6em;
+    margin-top: 2em;
+  }
+  .document-preview-card__thumbnail {
+    float: left;
+    margin-right: 40px;
+    height: 150px;
   }
 
   .document-preview-card__title{
     color: #AEAEAE;
+    font-size: large;
   }
 
   .document-preview-card__title:hover{

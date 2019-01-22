@@ -67,8 +67,6 @@ const actions = {
     })
   },
   save ({ commit, rootGetters }, data) {
-    //const auth = rootGetters['user/authHeader'];
-    //return http.put(`/documents`, { data: data }, auth)
     return http.put(`/documents`, { data: data })
       .then(response => {
         commit('UPDATE_DOCUMENT', response.data.data);
@@ -82,9 +80,9 @@ const actions = {
   fetchPreview ({ commit }, id) {
     commit('LOADING_STATUS', true);
     console.log(`fetching doc preview '${id}'`);
-    let incs = ['collections', 'correspondents', 'roles', 'correspondents-having-roles', 'witnesses', 'languages'];
+    let incs = ['collections', 'correspondents', 'correspondents-having-roles', 'roles', 'witnesses', 'languages'];
 
-    return http.get(`documents/${id}?include=${incs.join(',')}`).then( response => {
+    return http.get(`documents/${id}?include=${incs.join(',')}&without-relationships`).then( response => {
       commit('UPDATE_DOCUMENT_PREVIEW', response.data);
       commit('LOADING_STATUS', false)
     })
@@ -109,6 +107,6 @@ const documentModule = {
   mutations,
   actions,
   getters
-}
+};
 
 export default documentModule;

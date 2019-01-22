@@ -1,3 +1,5 @@
+from flask import current_app
+
 from app import db
 from app.api.abstract_facade import JSONAPIAbstractFacade
 from app.models import Document
@@ -61,8 +63,7 @@ class DocumentFacade(JSONAPIAbstractFacade):
     def get_correspondents_having_roles_resources(self):
         from app.api.correspondent_has_role.facade import CorrespondentHasRoleFacade
         return [] if self.obj.correspondents_having_roles is None else [
-            CorrespondentHasRoleFacade(self.url_prefix, c, self.with_relationships_links,
-                                       self.with_relationships_data).resource
+            CorrespondentHasRoleFacade(self.url_prefix, c, True, True).resource
             for c in self.obj.correspondents_having_roles
         ]
 
@@ -96,29 +97,25 @@ class DocumentFacade(JSONAPIAbstractFacade):
             for c in self.obj.correspondents_having_roles
         ]
 
-    def get_images_resource_identifiers(self):
-        from app.api.image.facade import ImageFacade
-        return [] if self.obj.witnesses is None else [
-            ImageFacade.make_resource_identifier(img.id, ImageFacade.TYPE)
-            for w in self.obj.witnesses
-            for img in w.images
-        ]
-
-    def get_images_resources(self):
-        from app.api.image.facade import ImageFacade
-        return [] if self.obj.witnesses is None else [
-            ImageFacade(self.url_prefix, img, self.with_relationships_links, self.with_relationships_data).resource
-            for w in self.obj.witnesses
-            for img in w.images
-        ]
-
     def get_iiif_collection_url(self):
-        if self.obj.witnesses and len(self.obj.witnesses) > 0:
+        if self.obj.witnesses:
             url = "{doc_url}/collection/default".format(doc_url=self.self_link)
             _s = url.rindex(self.TYPE)
             return "{0}iiif/{1}".format(url[0:_s], url[_s:])
         else:
             return None
+
+    def get_iiif_thumbnail(self):
+        for w in self.obj.witnesses:
+            canvas_ids = [img.canvas_id for img in w.images]
+            if canvas_ids:
+                from app.api.witness.facade import WitnessFacade
+                f_obj, errors, kwargs = WitnessFacade.get_facade(self.url_prefix, w)
+                canvases = current_app.manifest_factory.fetch_canvas(f_obj.get_iiif_manifest_url(), canvas_ids)
+                for c in canvases:
+                    if "thumbnail" in c:
+                        return c["thumbnail"]["@id"]
+        return None
 
     @property
     def resource(self):
@@ -133,10 +130,11 @@ class DocumentFacade(JSONAPIAbstractFacade):
                 "location-date-from-ref": self.obj.location_date_from_ref,
                 "location-date-to-ref": self.obj.location_date_to_ref,
                 "transcription": self.obj.transcription,
-                "collection-url": self.get_iiif_collection_url(),
                 "date-insert": self.obj.date_insert,
                 "date-update": self.obj.date_update,
                 "is-published": self.obj.is_published,
+                "iiif-collection-url": self.get_iiif_collection_url(),
+                "iiif-thumbnail-url": self.get_iiif_thumbnail()
             },
             "meta": self.meta,
             "links": {
@@ -168,12 +166,6 @@ class DocumentFacade(JSONAPIAbstractFacade):
                 "resource_identifier_getter": self.get_correspondent_resource_identifiers,
                 "resource_getter": self.get_correspondent_resources
             },
-
-            #"images": {
-            #    "links": self._get_links(rel_name="images"),
-            #    "resource_identifier_getter": self.get_images_resource_identifiers,
-            #    "resource_getter": self.get_images_resources
-            #},
         }
 
         # ===================================

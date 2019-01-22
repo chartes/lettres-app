@@ -67,6 +67,11 @@ class JSONAPIRouteRegistrar(object):
     def get_included_resources(asked_relationships, facade_obj):
             errors = []
             included_resources = OrderedDict({})
+
+            w_data, w_links = facade_obj.with_relationships_data, facade_obj.with_relationships_links
+            facade_obj.with_relationships_data = False
+            facade_obj.with_relationships_links = False
+
             relationships = facade_obj.relationships
             # iter over the relationships to be included
             for inclusion in asked_relationships:
@@ -85,6 +90,10 @@ class JSONAPIRouteRegistrar(object):
                             included_resources[unique_key] = related_resources
                 except KeyError as e:
                     errors.append({"status": 403, "title": "Cannot include the relationship %s" % str(e)})
+
+            facade_obj.with_relationships_data = w_data
+            facade_obj.with_relationships_links = w_links
+
             return list(included_resources.values()), None
 
 
@@ -334,10 +343,6 @@ class JSONAPIRouteRegistrar(object):
         def collection_endpoint():
             """
             Support the following parameters:
-            - Search syntax:
-              search[fieldname1,fieldname2]=expression
-              or
-              search=expression
             - Filtering syntax :
               filter[field_name]=searched_value
               filter[!field_name] means IS NOT NULL

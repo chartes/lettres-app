@@ -1,19 +1,19 @@
 <template>
   <div class="document">
+
     <article v-if="document" class="document__content">
       <div class="columns">
         <div class="column">
-
           <document-notice/>
           <document-correspondents/>
           <document-transcription/>
-
         </div>
         <div class="column is-one-fifth">
           Second column
         </div>
       </div>
     </article>
+
     <loading-indicator :active="documentLoading" :full-page="true"/>
   </div>
 </template>
@@ -32,12 +32,6 @@
     props: ['doc_id'],
     created () {
       this.$store.dispatch('document/fetch', this.doc_id)
-      /*this.$store.dispatch('user/setAuthToken', this.auth_token).then(() => {
-          this.$store.dispatch('user/getCurrentUser').then(() => {
-            return this.$store.dispatch('document/fetch', this.doc_id)
-          });
-      });
-       */
     },
     computed: {
       ...mapState('document', ['document', 'documentLoading'])

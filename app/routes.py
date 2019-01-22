@@ -6,6 +6,7 @@ from app import app_bp
 
 
 @app_bp.route("/")
+@app_bp.route("/documents")
 def index():
     resp = make_response(render_template("documents/document_index.html"))
 

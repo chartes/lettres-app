@@ -2,17 +2,26 @@
   <div>
     <section class="documents-index columns">
       <aside class="documents-index__collections column is-2">
-        <h2 class="documents-index__collections__title title is-size-3">Collections</h2>
+        <h2 class="documents-index__collections__title title is-size-3"></h2>
       </aside>
-      <section class="column documents-index__preview-column">
-          <pagination :current="currentPage" :end="nbPages" :size="page_size" :action="goToPage"/>
-          <ul id="preview-cards" >
-            <li v-for="doc in documents" :key="doc.id">
-              <document-preview-card :doc_id="doc.id"></document-preview-card>
-            </li>
-          </ul>
-          <pagination :current="currentPage" :end="nbPages" :size="page_size" :action="goToPage"/>
+
+      <section class="column documents-index__main-column">
+
+        <section class="documents-index__search-container">
+            <h1 class="title is-size-5">Rechercher</h1>
+            <input id="search-box" class="input documents-index__search-box" type="text" placeholder="Catherine de Medicis">
+         </section>
+
+        <pagination :current="currentPage" :end="nbPages" :size="page_size" :action="goToPage"/>
+        <ul id="preview-cards" >
+          <li v-for="doc in documents" :key="doc.id">
+            <document-preview-card :doc_id="doc.id"></document-preview-card>
+          </li>
+        </ul>
+        <pagination :current="currentPage" :end="nbPages" :size="page_size" :action="goToPage"/>
+
       </section>
+
     </section>
   </div>
 </template>
@@ -36,12 +45,6 @@
     props: ["page_id", "page_size"],
     created () {
       this.goToPage(1);
-      /*this.$store.dispatch('user/setAuthToken', this.auth_token).then(() => {
-          this.$store.dispatch('user/getCurrentUser').then(() => {
-            return this.$store.dispatch('document/fetch', this.doc_id)
-          });
-      });
-       */
     },
     computed: {
       ...mapState('document', ['documents', 'links']),
@@ -70,7 +73,14 @@
   .documents-index__collections__title {
     font: 90%/140% 'Oxygen', sans-serif;
   }
-  .documents-index__preview-column {
+  .documents-index__main-column {
       padding-bottom: 80px;
+  }
+  .documents-index__search-box {
+      width: 500px;
+  }
+  .documents-index__search-container {
+      margin-top: 10px;
+      padding-bottom: 40px;
   }
 </style>

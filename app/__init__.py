@@ -12,7 +12,6 @@ from sqlalchemy.engine import Engine
 from dotenv import load_dotenv
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from app.api.manifest.ManifestFactory import ManifestFactory
 from app.api.response_factory import JSONAPIResponseFactory
 
 
@@ -159,6 +158,7 @@ def create_app(config_name="dev"):
     def user_identity_lookup(user):
         return user["username"]
 
+    from app.api.manifest.manifest_factory import ManifestFactory
     app.manifest_factory = ManifestFactory()
 
     # =====================================
