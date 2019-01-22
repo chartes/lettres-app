@@ -60,7 +60,7 @@ const actions = {
   fetch ({ commit }, id) {
     commit('LOADING_STATUS', true);
     console.log(`fetching doc '${id}'`);
-    let incs = ['collections', 'correspondents', 'roles', 'correspondents-having-roles', 'notes', 'witnesses', 'languages'];
+    const incs = ['collections', 'correspondents', 'roles', 'correspondents-having-roles', 'notes', 'witnesses', 'languages'];
     return http.get(`documents/${id}?include=${incs.join(',')}`).then( response => {
       commit('UPDATE_DOCUMENT', response.data);
       commit('LOADING_STATUS', false)
@@ -80,7 +80,7 @@ const actions = {
   fetchPreview ({ commit }, id) {
     commit('LOADING_STATUS', true);
     console.log(`fetching doc preview '${id}'`);
-    let incs = ['collections', 'correspondents', 'correspondents-having-roles', 'roles', 'witnesses', 'languages'];
+    const incs = ['collections', 'correspondents', 'correspondents-having-roles', 'roles', 'witnesses', 'languages'];
 
     return http.get(`documents/${id}?include=${incs.join(',')}&without-relationships`).then( response => {
       commit('UPDATE_DOCUMENT_PREVIEW', response.data);
@@ -88,9 +88,24 @@ const actions = {
     })
   },
   fetchAll ({ commit }, {pageId, pageSize}) {
+    commit('LOADING_STATUS', true);
     return http.get(`/documents?page[size]=${pageSize}&page[number]=${pageId}`)
       .then( (response) => {
       commit('UPDATE_ALL', response.data);
+      commit('LOADING_STATUS', false);
+    })
+  },
+  fetchSearch ({ commit }, {pageId, pageSize, query}) {
+    commit('LOADING_STATUS', true);
+
+    console.warn("performing searches using the DEV index");
+    const index = 'lettres__development__document';
+    const incs = ['collections', 'correspondents', 'correspondents-having-roles', 'roles', 'witnesses', 'languages'];
+
+    return http.get(`/search?query=${query}&index=${index}&include=${incs.join(',')}&without-relationships&page[size]=${pageSize}&page[number]=${pageId}`)
+      .then( (response) => {
+      commit('UPDATE_ALL', response.data);
+      commit('LOADING_STATUS', false);
     })
   }
 

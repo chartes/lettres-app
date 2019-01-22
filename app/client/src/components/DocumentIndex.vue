@@ -7,10 +7,7 @@
 
       <section class="column documents-index__main-column">
 
-        <section class="documents-index__search-container">
-            <h1 class="title is-size-5">Rechercher</h1>
-            <input id="search-box" class="input documents-index__search-box" type="text" placeholder="Catherine de Medicis">
-         </section>
+        <search-box :action="performSearch" :loading="documentLoading"/>
 
         <pagination :current="currentPage" :end="nbPages" :size="page_size" :action="goToPage"/>
         <ul id="preview-cards" >
@@ -30,6 +27,7 @@
   import { mapState } from 'vuex'
   import DocumentPreviewCard from './DocumentPreviewCard';
   import Pagination from './ui/Pagination';
+  import SearchBox from './ui/SearchBox';
 
   function getUrlParameter(url, paramName) {
     paramName = paramName.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
@@ -41,21 +39,37 @@
   export default {
 
     name: 'DocumentIndex',
-    components: {DocumentPreviewCard, Pagination},
+    components: {DocumentPreviewCard, Pagination, SearchBox},
     props: ["page_id", "page_size"],
     created () {
       this.goToPage(1);
     },
+    data: function() {
+      return {
+
+      }
+    },
     computed: {
-      ...mapState('document', ['documents', 'links']),
+      ...mapState('document', ['documents', 'links', 'documentLoading']),
       nbPages() {
-          return parseInt(this.links.last ? getUrlParameter(this.links.last, "page%5Bnumber%5D") : 1);
+        return parseInt(this.links.last ? getUrlParameter(this.links.last, "page%5Bnumber%5D") : 1);
       }
     },
     methods: {
         goToPage(num){
-            this.currentPage = num;
+          this.currentPage = num;
+          if (document.getElementById("search-box") && document.getElementById("search-box").value) {
+            this.performSearch(this.currentPage);
+          } else {
             this.$store.dispatch('document/fetchAll', {pageId: num, pageSize: this.page_size});
+          }
+        },
+        performSearch(numPage = 1){
+          const term = document.getElementById("search-box").value;
+          if (term.length > 2) {
+            this.$store.dispatch('document/fetchSearch', {pageId: numPage, pageSize: this.page_size, query: term});
+            this.currentPage = numPage;
+          }
         }
     }
   }
@@ -76,11 +90,5 @@
   .documents-index__main-column {
       padding-bottom: 80px;
   }
-  .documents-index__search-box {
-      width: 500px;
-  }
-  .documents-index__search-container {
-      margin-top: 10px;
-      padding-bottom: 40px;
-  }
+
 </style>

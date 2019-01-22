@@ -29,7 +29,6 @@
                </div>
              </div>
           </div>
-        <loading-indicator :active="documentLoading" :full-page="true"/>
         </article>
     </div>
 </template>

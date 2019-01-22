@@ -111,7 +111,7 @@ class DocumentFacade(JSONAPIAbstractFacade):
             if canvas_ids:
                 from app.api.witness.facade import WitnessFacade
                 f_obj, errors, kwargs = WitnessFacade.get_facade(self.url_prefix, w)
-                canvases = current_app.manifest_factory.fetch_canvas(f_obj.get_iiif_manifest_url(), canvas_ids)
+                canvases = current_app.manifest_factory.fetch_canvas(f_obj.get_iiif_manifest_url(), canvas_ids, cache=True)
                 for c in canvases:
                     if "thumbnail" in c:
                         return c["thumbnail"]["@id"]

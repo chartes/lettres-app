@@ -163,6 +163,7 @@ class JSONAPIRouteRegistrar(object):
     def search(self, index, query, num_page, page_size):
         # query the search engine
         results, total = SearchIndexManager.query_index(index=index, query=query, page=num_page, per_page=page_size)
+
         if total == 0:
             return {}, 0
 
@@ -217,7 +218,14 @@ class JSONAPIRouteRegistrar(object):
                 page_size = int(current_app.config["SEARCH_RESULT_PER_PAGE"])
 
             # Search, retrieve, filter, sort and paginate objs
-            res, count = self.search(index=index, query=query, num_page=num_page, page_size=page_size)
+            try:
+                res, count = self.search(index=index, query=query, num_page=num_page, page_size=page_size)
+            except Exception as e:
+                return JSONAPIResponseFactory.make_errors_response({
+                    "status": 403,
+                    "title": "Cannot perform search operations",
+                    "details": str(e)
+                }, status=403)
 
             links = {"self": JSONAPIRouteRegistrar.make_url(request.base_url, OrderedDict(request.args))}
 
@@ -227,7 +235,7 @@ class JSONAPIRouteRegistrar(object):
             else:
                 for idx in res.keys():
                     # FILTER
-                    #TODO: filter mus be done on the elastic side
+                    #TODO: filter must be done on the elastic side
                     res[idx] = JSONAPIRouteRegistrar.parse_filter_parameter(res[idx], self.models[idx])
 
                 # if request has sorting parameter

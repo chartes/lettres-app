@@ -47,8 +47,7 @@ class SearchIndexManager(object):
                 return results, search['hits']['total']
 
             except Exception as e:
-                print("query_index Exception:", e)
-                return [], 0
+                raise e
 
     @staticmethod
     def add_to_index(index, id, payload):
