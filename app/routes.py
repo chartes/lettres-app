@@ -1,4 +1,4 @@
-from flask import render_template, make_response
+from flask import render_template, make_response, request
 from flask_jwt_extended import set_access_cookies, create_access_token, unset_jwt_cookies
 from flask_login import current_user
 
@@ -24,7 +24,7 @@ def index():
 
 @app_bp.route("/documents/<id>")
 def document(id):
-    return render_template("documents/document_edit.html", id=id)
+    return render_template("documents/document_edit.html", id=id, base_url=request.host_url[0:-1])
 
 
 @app_bp.route("/documentation")
