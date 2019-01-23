@@ -2,6 +2,7 @@
 
 
 {% block head_scripts %}
+    <script type="text/javascript" id="embedUV" src="https://universalviewer.io/vendor/uv/lib/embed.js"></script>
 {% endblock head_scripts %}
 
 {% block content %}
@@ -20,6 +21,5 @@
 
 
 {% block scripts %}
-    <script src="{{url_for('app_bp.static', filename='js/document.build.js') }}"></script>
-    <script type="text/javascript" id="embedUV" src="http://universalviewer.io/uv/lib/embed.js"></script>
+    <script type="text/javascript" src="{{url_for('app_bp.static', filename='js/document.build.js') }}"></script>
 {% endblock %}
