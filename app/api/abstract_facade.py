@@ -323,3 +323,19 @@ class JSONAPIAbstractFacade(object):
             self.add_to_index(propagate)
         else:
             self.remove_from_index(propagate)
+
+
+class JSONAPIAbstractChangeloggedFacade(JSONAPIAbstractFacade):
+
+    def __init__(self, *args, **kwargs):
+        from app.api.changelog.facade import ChangelogFacade
+
+        super(JSONAPIAbstractChangeloggedFacade, self).__init__(*args, **kwargs)
+        self.relationships = {
+            "changes": {
+                "links": self._get_links(rel_name="changes"),
+                "resource_identifier_getter": self.get_related_resource_identifiers(ChangelogFacade, "changes",
+                                                                                    to_many=True),
+                "resource_getter": self.get_related_resources(ChangelogFacade, "changes", to_many=True),
+            },
+        }

@@ -1,9 +1,9 @@
 from app import db
-from app.api.abstract_facade import JSONAPIAbstractFacade
+from app.api.abstract_facade import JSONAPIAbstractChangeloggedFacade
 from app.models import Collection
 
 
-class CollectionFacade(JSONAPIAbstractFacade):
+class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
     """
 
     """
@@ -51,13 +51,14 @@ class CollectionFacade(JSONAPIAbstractFacade):
         """
 
         from app.api.document.facade import DocumentFacade
-        self.relationships = {
+
+        self.relationships.update({
             "documents": {
                 "links": self._get_links(rel_name="documents"),
                 "resource_identifier_getter": self.get_related_resource_identifiers(DocumentFacade, "documents", to_many=True),
                 "resource_getter": self.get_related_resources(DocumentFacade, "documents", to_many=True),
             },
-        }
+        })
 
     def get_data_to_index_when_added(self, propagate):
         _res = self.resource

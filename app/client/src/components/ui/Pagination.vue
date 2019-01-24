@@ -14,10 +14,10 @@
   export default {
     name: "pagination",
     props: {
-        start: {default: 1},
-        current: { required: true, default: 1},
-        end: { required: true },
-        action: { required: true}
+        start: {default: 1, type: Number},
+        current: { required: true, default: 1, type: Number},
+        end: { required: true, type: Number },
+        action: { required: true, type: Function}
     },
     data () {
       return {

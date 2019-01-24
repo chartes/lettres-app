@@ -1,9 +1,9 @@
 
-from app.api.abstract_facade import JSONAPIAbstractFacade
+from app.api.abstract_facade import JSONAPIAbstractChangeloggedFacade
 from app.models import Correspondent
 
 
-class CorrespondentFacade(JSONAPIAbstractFacade):
+class CorrespondentFacade(JSONAPIAbstractChangeloggedFacade):
     """
 
     """
@@ -86,7 +86,7 @@ class CorrespondentFacade(JSONAPIAbstractFacade):
         """Make a JSONAPI resource object describing what is a correspondent
         """
 
-        self.relationships = {
+        self.relationships.update({
             "roles-within-documents": {
                 "links": self._get_links(rel_name="roles-within-documents"),
                 "resource_identifier_getter": self.get_roles_resource_identifiers,
@@ -97,7 +97,7 @@ class CorrespondentFacade(JSONAPIAbstractFacade):
                 "resource_identifier_getter": self.get_document_resource_identifiers,
                 "resource_getter": self.get_document_resources
             },
-        }
+        })
 
     def get_data_to_index_when_added(self, propagate):
         _res = self.resource

@@ -26,6 +26,10 @@ const getCorrespondents = function (included) {
     return getSimpleRelation('institution', included)
   },
 
+  getWhitelist = function (included) {
+    return getSimpleRelation('whitelist', included)
+  },
+
   getLanguages = function (included) {
     return  included.filter(item => item.type === 'language').map(lang => { return { id: lang.id, ...lang.attributes }});
   },

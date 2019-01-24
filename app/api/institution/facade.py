@@ -50,10 +50,18 @@ class InstitutionFacade(JSONAPIAbstractFacade):
         """
 
         from app.api.witness.facade import WitnessFacade
+        from app.api.changelog.facade import ChangelogFacade
+
         self.relationships = {
             "witnesses": {
                 "links": self._get_links(rel_name="witnesses"),
                 "resource_identifier_getter":  self.get_related_resource_identifiers(WitnessFacade, "witnesses", to_many=True),
                 "resource_getter":  self.get_related_resources(WitnessFacade, "witnesses", to_many=True),
+            },
+            "changes": {
+                "links": self._get_links(rel_name="changes"),
+                "resource_identifier_getter": self.get_related_resource_identifiers(ChangelogFacade, "changes",
+                                                                                    to_many=True),
+                "resource_getter": self.get_related_resources(ChangelogFacade, "changes", to_many=True),
             },
         }

@@ -29,7 +29,10 @@
 
     name: 'Document',
     components: {DocumentCorrespondents, DocumentNotice, DocumentTranscription, LoadingIndicator},
-    props: ['doc_id'],
+    props: {
+      "doc_id" : {type: Number, required: true},
+      "user_id" : {type: Number}
+    },
     created () {
       this.$store.dispatch('document/fetch', this.doc_id)
     },

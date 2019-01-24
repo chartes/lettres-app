@@ -8,16 +8,16 @@ new Vue({
   store,
   data: {
     documentId: undefined,
-    authToken: undefined
+    userId: undefined,
   },
   beforeMount: function () {
     this.documentId = this.$el.dataset.documentId;
-    this.authToken = this.$el.dataset.authToken;
+    this.userId = this.$el.dataset.userId;
   },
   render (h) {
     return h(App, { props: {
         doc_id: this.documentId,
-        auth_token: this.authToken,
+        user_id: this.userId,
       }
     })
   }

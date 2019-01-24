@@ -188,8 +188,9 @@ def create_app(config_name="dev"):
     from app.api.note.routes import register_note_api_urls
     from app.api.user.routes import register_user_api_urls
     from app.api.user_role.routes import register_user_role_api_urls
-    from app.api.whitelist.routes import register_whitelist_api_urls
     from app.api.witness.routes import register_witness_api_urls
+    from app.api.lock.routes import register_lock_api_urls
+    from app.api.changelog.routes import register_changelog_api_urls
 
     with app.app_context():
         # generate routes for the API
@@ -203,7 +204,8 @@ def create_app(config_name="dev"):
         register_note_api_urls(app)
         register_user_api_urls(app)
         register_user_role_api_urls(app)
-        register_whitelist_api_urls(app)
+        register_lock_api_urls(app)
+        register_changelog_api_urls(app)
         register_collection_role_api_urls(app)
         register_witness_api_urls(app)
 

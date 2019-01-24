@@ -1,11 +1,11 @@
 <template>
-  <documentIndex page_id="1" page_size="15"></documentIndex>
+  <documentIndex :page_id="page_id" :page_size="page_size" :user_id="user_id"></documentIndex>
 </template>
 
 <script>
   import DocumentIndex from './components/DocumentIndex';
   export default {
-    props: ['auth_token'],
+    props: ["page_id", "page_size", "user_id"],
     components: {DocumentIndex}
   }
 </script>

@@ -568,7 +568,6 @@ class JSONAPIRouteRegistrar(object):
             api_version=self.api_version,
             type_plural=facade_class.TYPE_PLURAL, rel_name=rel_name
         )
-
         def resource_relationship_endpoint(id):
             url_prefix = request.host_url[:-1] + self.url_prefix
             f_obj, kwargs, errors = facade_class.get_resource_facade(url_prefix, id)

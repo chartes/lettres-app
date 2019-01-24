@@ -2,17 +2,17 @@ from app.api.collection.facade import CollectionFacade
 from app.api.correspondent.facade import CorrespondentFacade
 from app.api.correspondent_has_role.facade import CorrespondentHasRoleFacade
 from app.api.correspondent_role.facade import CorrespondentRoleFacade
-from app.api.document.facade import DocumentFacade
+from app.api.document.facade import DocumentFacade, DocumentSearchFacade
 from app.api.image.facade import ImageFacade
 from app.api.institution.facade import InstitutionFacade
 from app.api.language.facade import LanguageFacade
 from app.api.note.facade import NoteFacade
 from app.api.user.facade import UserFacade
 from app.api.user_role.facade import UserRoleFacade
-from app.api.whitelist.facade import WhitelistFacade
 from app.api.witness.facade import WitnessFacade
+from app.api.lock.facade import LockFacade
 from app.models import Collection, Correspondent, CorrespondentHasRole, CorrespondentRole, Document, Image, Institution, \
-    Language, Note, User, UserRole, Whitelist, Witness
+    Language, Note, User, UserRole, Witness, Lock
 
 
 class JSONAPIFacadeManager(object):
@@ -36,7 +36,7 @@ class JSONAPIFacadeManager(object):
         },
         Document.__name__: {
             "default": DocumentFacade,
-            "search": DocumentFacade,
+            "search": DocumentSearchFacade,
         },
         Image.__name__: {
             "default": ImageFacade,
@@ -62,13 +62,13 @@ class JSONAPIFacadeManager(object):
             "default": UserRoleFacade,
             "search": UserRoleFacade,
         },
-        Whitelist.__name__: {
-            "default": WhitelistFacade,
-            "search": WhitelistFacade,
-        },
         Witness.__name__: {
             "default": WitnessFacade,
             "search": WitnessFacade,
+        },
+        Lock.__name__: {
+            "default": LockFacade,
+            "search": LockFacade,
         },
     }
 

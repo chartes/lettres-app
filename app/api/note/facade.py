@@ -1,9 +1,9 @@
 from app import db
-from app.api.abstract_facade import JSONAPIAbstractFacade
+from app.api.abstract_facade import JSONAPIAbstractChangeloggedFacade
 from app.models import Note
 
 
-class NoteFacade(JSONAPIAbstractFacade):
+class NoteFacade(JSONAPIAbstractChangeloggedFacade):
     """
 
     """
@@ -50,10 +50,10 @@ class NoteFacade(JSONAPIAbstractFacade):
         """
 
         from app.api.document.facade import DocumentFacade
-        self.relationships = {
+        self.relationships.update({
             "document": {
                 "links": self._get_links(rel_name="document"),
                 "resource_identifier_getter": self.get_related_resource_identifiers(DocumentFacade, "document"),
                 "resource_getter": self.get_related_resources(DocumentFacade, "document"),
             },
-        }
+        })

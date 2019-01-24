@@ -77,16 +77,18 @@ const actions = {
         reject(error)
       })
   },
+
   fetchPreview ({ commit }, id) {
     commit('LOADING_STATUS', true);
     console.log(`fetching doc preview '${id}'`);
-    const incs = ['collections', 'correspondents', 'correspondents-having-roles', 'roles', 'witnesses', 'languages'];
+    const incs = ['collections', 'correspondents', 'correspondents-having-roles', 'roles', 'witnesses', 'languages', 'locks'];
 
     return http.get(`documents/${id}?include=${incs.join(',')}&without-relationships`).then( response => {
       commit('UPDATE_DOCUMENT_PREVIEW', response.data);
       commit('LOADING_STATUS', false)
     })
   },
+
   fetchAll ({ commit }, {pageId, pageSize}) {
     commit('LOADING_STATUS', true);
     return http.get(`/documents?page[size]=${pageSize}&page[number]=${pageId}`)

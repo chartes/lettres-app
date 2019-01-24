@@ -49,10 +49,18 @@ class ImageFacade(JSONAPIAbstractFacade):
         """
 
         from app.api.witness.facade import WitnessFacade
+        from app.api.changelog.facade import ChangelogFacade
+
         self.relationships = {
             "witness": {
                 "links": self._get_links(rel_name="witness"),
                 "resource_identifier_getter": self.get_related_resource_identifiers(WitnessFacade, "witness"),
                 "resource_getter": self.get_related_resources(WitnessFacade, "witness"),
+            },
+            "changes": {
+                "links": self._get_links(rel_name="changes"),
+                "resource_identifier_getter": self.get_related_resource_identifiers(ChangelogFacade, "changes",
+                                                                                    to_many=True),
+                "resource_getter": self.get_related_resources(ChangelogFacade, "changes", to_many=True),
             },
         }

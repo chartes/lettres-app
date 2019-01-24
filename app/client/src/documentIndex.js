@@ -8,16 +8,19 @@ new Vue({
   store,
   data: {
     pageId: undefined,
-    authToken: undefined
+    pageSize: undefined,
+    userId: undefined,
   },
   beforeMount: function () {
-    this.authToken = this.$el.dataset.pageId;
-    this.authToken = this.$el.dataset.authToken;
+    this.pageId = this.$el.dataset.pageId;
+    this.pageSize = this.$el.dataset.pageSize;
+    this.userId = this.$el.dataset.userId;
   },
   render (h) {
     return h(App, { props: {
-        auth_token: this.authToken,
         page_id: this.pageId,
+        page_size: this.pageSize,
+        user_id: this.userId
       }
     })
   }

@@ -8,7 +8,6 @@ def register_user_api_urls(app):
     registrar.register_get_routes(User, UserFacade)
 
     registrar.register_relationship_get_route(UserFacade, 'roles')
-    registrar.register_relationship_get_route(UserFacade, 'owned-documents')
 
     registrar.register_relationship_patch_route(UserFacade, 'roles')
     registrar.register_relationship_post_route(UserFacade, 'roles')

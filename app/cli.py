@@ -13,12 +13,9 @@ app = None
 
 
 def add_default_users(db):
-    try:
-        UserRole.add_default_roles()
-        User.add_default_users()
-    except sqlalchemy.exc.IntegrityError as e:
-        db.session.rollback()
-        print(e)
+    UserRole.add_default_roles()
+    db.session.flush()
+    User.add_default_users()
 
 
 def make_cli():

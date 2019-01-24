@@ -40,9 +40,13 @@
 
     name: 'DocumentIndex',
     components: {DocumentPreviewCard, Pagination, SearchBox},
-    props: ["page_id", "page_size"],
+    props: {
+      "page_id" : {required: true},
+      "page_size" : {required: true},
+      "user_id" : {}
+    },
     created () {
-      this.goToPage(1);
+      this.goToPage(parseInt(this.page_id));
     },
     data: function() {
       return {
