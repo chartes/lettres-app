@@ -213,6 +213,10 @@ class DocumentSearchFacade(DocumentFacade):
 
     @property
     def resource(self):
+        """
+        remove the thumbnail generation from the attributes
+        :return:
+        """
         resource = {
             **self.resource_identifier,
             "attributes": {

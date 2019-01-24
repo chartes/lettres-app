@@ -7,8 +7,8 @@ class ChangelogFacade(JSONAPIAbstractFacade):
     """
 
     """
-    TYPE = "changelog"
-    TYPE_PLURAL = "changelogs"
+    TYPE = "change"
+    TYPE_PLURAL = "changes"
 
     @property
     def id(self):
@@ -19,7 +19,7 @@ class ChangelogFacade(JSONAPIAbstractFacade):
         e = Changelog.query.filter(Changelog.id == id).first()
         if e is None:
             kwargs = {"status": 404}
-            errors = [{"status": 404, "title": "changelog %s does not exist" % id}]
+            errors = [{"status": 404, "title": "change %s does not exist" % id}]
         else:
             e = ChangelogFacade(url_prefix, e, **kwargs)
             kwargs = {}
@@ -50,7 +50,7 @@ class ChangelogFacade(JSONAPIAbstractFacade):
 
     def __init__(self, *args, **kwargs):
         super(ChangelogFacade, self).__init__(*args, **kwargs)
-        """Make a JSONAPI resource object describing what is a changelog
+        """Make a JSONAPI resource object describing what is a change in the changelog
         """
         self.relationships = {
 

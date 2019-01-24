@@ -136,4 +136,4 @@ class ManifestFactory(object):
             manifest = cls._fetch(manifest_url)
 
         return [canvas for canvas in manifest["sequences"][0]["canvases"]
-                if canvas["@id"] in canvas_ids]
+                if canvas["@id"] in canvas_ids if "sequences" in manifest]
