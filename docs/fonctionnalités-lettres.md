@@ -1,62 +1,82 @@
-# Fonctionnalités attendues
+# Fonctionnalités
 
-## Définition(s)
-Un *document* = une lettre, éventuellement sur plusieurs pages (avec plusieurs images associées à feuilleter).
+## Définitions
 
-## Visualisation d'un document
-Visualisation d'un document et de toutes les données associées (notamment les images, les notes de bas de page et les documents précédents/suivants)
+### Document
+Un *document* = une lettre, transcription de 1 à n images (à feuilleter).
+
+### Visualisation d'un document
+Visualisation d'un document et de toutes les données associées (notamment les témoins, les images, les notes de bas de page et les documents précédents/suivants)
 
 
-## Création d'un document
-* En fournissant uniquement les champs obligatoires (une transcription n’est pas requise au *CREATE*)
+### Création d'un document
+* En fournissant uniquement les champs obligatoires (title, witness ?, sender ?, creation ?)
 * En fournissant l'ensemble des données possibles pour un document
+
+TODO à revoir avec OP : quels sont les champs nécessaires à la création d’un nouveau document ? Autrement dit, quelles sont les métadonnées obligatoires pour son identification ?
 
 ### Modification d'un document
 * Modification des attributs (`title`, etc.)
 * Ajout/Modification/Suppression des relations (`witnesses`, `correpondents-having-roles`, etc.)
 
-### Contenu riche
+## Contenu riche
 
-Certains champs peuvent contenir du contenu semi-structuré (paragraphes, typo, appels de notes) :
+Certains champs peuvent contenir du contenu semi-structuré.
 
-|Champ|Description|
-|-----|-----------|
-|`Document["title"]`|Titre de la lettre|
-|`Document["argument"]`|Analyse (résumé) de la lettre|
-|`Document["transcription"]`|Transcription de la lettre|
-|`Document["creation-label"]`|Date de rédaction de la lettre|
-|`Witness["label"]`|Référence du témoin|
-|`Witness["classification_mark"]`|Cote du témoin édité|
-|`Note["content"]`|Des notes (commentaires)|
+### Types d’enrichissements
 
-#### Enrichissement attendus
-* italique, sous-ligné, gras, exposant
-* paragraphe
-* appel de notes (type point: `"…blah blah<ref target="#link_to_note/> blah blah…"`)
-* annotation sémantique : personnes et lieu (type segment: `"…écrit à <persName ref="uri_to_julien">Julien</persName> que…"`)
+|Classe|Enrichissement|HTML5|Exemple|
+|------|--------------|-----|-------|
+|structure|paragraphe|`p`|`<p>…</p>`|
+|structure|saut de page|`a`|`<a class="pb" href="https://gallica.bnf.fr/ark:/12148/bpt6k6227983s/f61">[p. 15]</a>`|
+|stucture|appel de note|`a`|`<a class="note" href="#76">[note]</a>`|
+|typographie|italique|`i`|`<i>…</i>`|
+|typographie|gras|`b`|`<b>…</b>`|
+|typographie|exposant|`sup`|`<sup>…</sup>`|
+|typographie|sous-ligné|`u`|`<u>…</u>`|
+|sémantique|suppression|`del`|`<del>…</del>`|
+|sémantique|personne|`a`|`<a class="persName" href="url">…</a>`|
+|sémantique|lieu|`a`|`<a class="placeName" href="url">…</a>`|
+
+
+### Éditeurs
+
+|Champ|Description|Classe(s)|
+|-----|-----------|------|
+|`Document["title"]`|Titre de la lettre||
+|`Document["argument"]`|Analyse (résumé) de la lettre||
+|`Document["transcription"]`|Transcription de la lettre||
+|`Document["creation-label"]`|Date de rédaction de la lettre||
+|`Witness["label"]`|Référence du témoin||
+|`Witness["classification_mark"]`|Cote du témoin édité||
+|`Note["content"]`|Des notes (commentaires)||
+
 
 ## Correspondants
 
 * Un correspondant a un et un seul rôle au sein d'un même document.
-* Un correspondant peut apparaître dans un ou plusieurs documents.
+* Un correspondant peut être associé à un ou plusieurs documents.
 
 Il doit être possible de modifier ces informations (changer le rôle d'un correspondant au sein d'un document, en ajouter, en modifier, en supprimer).
 
 ## Rôles utilisateur
-Les rôles possibles sont :
-* `admin` (administrateur)
-  * tous les droits concernant tous les documents (création, modification, suppression)
-  * modification des référentiels utilisés (langues, personnes, rôle des correspondants, institutions de conversation)
-  * vérouillage et dévérouillage de tous les documents sans condition
-  * invitation d'utilisateurs extérieurs à devenir contributeur ou administrateur
-* `contributor` (contributeur)
-  * lecture de tous les documents
-  * modification de tout document non vérouillé par autrui
-  * modification des référentiels utilisés (langues, personnes, rôle des correspondants, institutions de conversation)
-  * vérouillage d'un document non vérouillé par autrui
-  * dévérouillage d'un document dont on possède le vérrou
-* utilisateur non identifié :
-  * lecture seule de tous les documents
+
+### `admin` (administrateur)
+* tous les droits  (création, modification, suppression, (dé)publication) sur tous les documents
+* vérouillage et dévérouillage de tous les documents
+* tous les droits (création, modification, suppression) sur toutes les collections
+* tous les droits  (création, modification, suppression) sur tous les entités des référentiels (langues, personnes, rôle des correspondants, institutions de conversation)
+* invitation d'utilisateurs extérieurs à devenir contributeur ou administrateur
+
+### `contributor` (contributeur)
+* lecture de tous les documents
+* modification de tout document non vérouillé par autrui (dont (dé)publication et association à une ou plusieurs collections)
+* modification des référentiels utilisés (langues, personnes, rôle des correspondants, institutions de conversation)
+* vérouillage d'un document non vérouillé par autrui
+* dévérouillage d'un document dont on possède le vérrou
+
+### utilisateur non identifié
+  * lecture seule de tous les documents publiés
 
 ## Statut du document
 Le statut du document (`publié` ou `non publié`) conditionne uniquement l'accès en lecture de ce dernier aux visiteurs : un document au statut `non publié` ne sera pas visible pour un utilisateur non connecté.
@@ -70,6 +90,8 @@ Un contributeur peut :
 - voir quels sont les documents vérouillés, par qui et pourquoi (lorsque la raison a été indiquée)
 
 Un administrateur peut vérouiller et déverouiller tous les documents à n'importe quel moment.
+
+**Un document publié est dévérouillé**.
 
 ## Historique des changements
 
