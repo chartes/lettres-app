@@ -16,7 +16,7 @@ Visualisation d'un document et de toutes les données associées (notamment les 
 TODO à revoir avec OP : quels sont les champs nécessaires à la création d’un nouveau document ? Autrement dit, quelles sont les métadonnées obligatoires pour son identification ?
 
 ### Modification d'un document
-* Modification des attributs (`title`, etc.)
+* Modification des attributs (`title`, statut de publication, etc.)
 * Ajout/Modification/Suppression des relations (`witnesses`, `correpondents-having-roles`, etc.)
 
 ## Contenu riche
@@ -25,31 +25,33 @@ Certains champs peuvent contenir du contenu semi-structuré.
 
 ### Types d’enrichissements
 
-|Classe|Enrichissement|HTML5|Exemple|
+|Label|Enrichissement|HTML5|Exemple|
 |------|--------------|-----|-------|
-|structure|paragraphe|`p`|`<p>…</p>`|
-|structure|saut de page|`a`|`<a class="pb" href="https://gallica.bnf.fr/ark:/12148/bpt6k6227983s/f61">[p. 15]</a>`|
-|stucture|appel de note|`a`|`<a class="note" href="#76">[note]</a>`|
-|typographie|italique|`i`|`<i>…</i>`|
-|typographie|gras|`b`|`<b>…</b>`|
-|typographie|exposant|`sup`|`<sup>…</sup>`|
-|typographie|sous-ligné|`u`|`<u>…</u>`|
-|sémantique|suppression|`del`|`<del>…</del>`|
-|sémantique|personne|`a`|`<a class="persName" href="url">…</a>`|
-|sémantique|lieu|`a`|`<a class="placeName" href="url">…</a>`|
+|para|paragraphe|`p`|`<p>…</p>`|
+|page|saut de page|`a`|`<a class="pb" href="https://gallica.bnf.fr/ark:/12148/bpt6k6227983s/f61">[p. 15]</a>`|
+|note|appel de note|`a`|`<a class="note" href="#76">[note]</a>`|
+|ital|italique|`i`|`<i>…</i>`|
+|gras|gras|`b`|`<b>…</b>`|
+|exp|exposant|`sup`|`<sup>…</sup>`|
+|ligne|sous-ligné|`u`|`<u>…</u>`|
+|suppr|suppression|`del`|`<del>…</del>`|
+|personne|personne|`a`|`<a class="persName" href="url">…</a>`|
+|lieu|lieu|`a`|`<a class="placeName" href="url">…</a>`|
+|cite|cite|`cite/a`|`<cite><a href="https://gallica.bnf.fr/...">...</a></cite>`|
+|ancre|ancre|`a`|`<a href="..."></a>`|
 
 
 ### Éditeurs
 
-|Champ|Description|Classe(s)|
+|Champ|Description|HTML5|
 |-----|-----------|------|
-|`Document["title"]`|Titre de la lettre||
-|`Document["argument"]`|Analyse (résumé) de la lettre||
-|`Document["transcription"]`|Transcription de la lettre||
-|`Document["creation-label"]`|Date de rédaction de la lettre||
-|`Witness["label"]`|Référence du témoin||
-|`Witness["classification_mark"]`|Cote du témoin édité||
-|`Note["content"]`|Des notes (commentaires)||
+|`Document["title"]`|Titre de la lettre|ital,exp,note|
+|`Document["argument"]`|Analyse (résumé) de la lettre|para,note,ital,gras,exp,ligne,personne,lieu,ancre|
+|`Document["transcription"]`|Transcription de la lettre|tout|
+|`Document["creation-label"]`|Date de rédaction de la lettre|exp,note|
+|`Witness["label"]`|Référence du témoin|note,ital,exp,cite,ancre|
+|`Witness["classification_mark"]`|Cote du témoin édité|ital,exp,note|
+|`Note["content"]`|Des notes (commentaires)|para,ital,gras,exp,ligne,personne,lieu,ancre,suppr|
 
 
 ## Correspondants
@@ -65,7 +67,7 @@ Il doit être possible de modifier ces informations (changer le rôle d'un corre
 * tous les droits  (création, modification, suppression, (dé)publication) sur tous les documents
 * vérouillage et dévérouillage de tous les documents
 * tous les droits (création, modification, suppression) sur toutes les collections
-* tous les droits  (création, modification, suppression) sur tous les entités des référentiels (langues, personnes, rôle des correspondants, institutions de conversation)
+* tous les droits  (création, modification, suppression) sur toutes les entités des référentiels (langues, personnes, rôle des correspondants, institutions de conservation)
 * invitation d'utilisateurs extérieurs à devenir contributeur ou administrateur
 
 ### `contributor` (contributeur)
@@ -95,5 +97,6 @@ Un administrateur peut vérouiller et déverouiller tous les documents à n'impo
 
 ## Historique des changements
 
-Un utilisateur connecté peut voir l'historique des objets modifiés (qui a modifié quoi et à quelle date). Un champ "description" permet à l'utilisateur apportant les modifications de se justifier.
+Un utilisateur connecté peut voir l'historique des objets modifiés (qui a apporté des modifications et à quelle date). Un champ "description" permet à l'utilisateur apportant les modifications de se justifier.
 Les anciennes versions ne sont pas sauvegardées et donc ne seront pas disponibles à la consultation.
+Une page présentant toutes les modifications apportées par tous les utilisateurs sur tous les documents permettra un suivi simplifié.
