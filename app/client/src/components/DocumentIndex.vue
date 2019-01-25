@@ -6,7 +6,7 @@
       </aside>
 
       <section class="column documents-index__main-column">
-
+        <span v-if="current_user">{{current_user}}</span>
         <search-box :action="performSearch" :loading="documentLoading"/>
 
         <pagination :current="currentPage" :end="nbPages" :size="page_size" :action="goToPage"/>
@@ -42,10 +42,11 @@
     components: {DocumentPreviewCard, Pagination, SearchBox},
     props: {
       "page_id" : {required: true},
-      "page_size" : {required: true},
-      "user_id" : {}
+      "page_size" : {required: true}
     },
     created () {
+      this.$store.dispatch('user/fetchCurrent');
+
       this.goToPage(parseInt(this.page_id));
     },
     data: function() {
@@ -55,6 +56,7 @@
     },
     computed: {
       ...mapState('document', ['documents', 'links', 'documentLoading']),
+      ...mapState('user', ['current_user']),
       nbPages() {
         return parseInt(this.links.last ? getUrlParameter(this.links.last, "page%5Bnumber%5D") : 1);
       }

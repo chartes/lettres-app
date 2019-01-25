@@ -1,6 +1,6 @@
 
 from app.api.abstract_facade import JSONAPIAbstractFacade
-from app.models import User
+from app.models import User, datetime_to_str
 
 
 class UserFacade(JSONAPIAbstractFacade):
@@ -39,7 +39,7 @@ class UserFacade(JSONAPIAbstractFacade):
             "attributes": {
                 "username": self.obj.username,
                 "email": self.obj.email,
-                "confirmed-at": self.obj.email_confirmed_at,
+                "confirmed-at": datetime_to_str(self.obj.email_confirmed_at),
                 "is-active": self.obj.active,
                 "firstname": self.obj.first_name,
                 "lastname": self.obj.last_name

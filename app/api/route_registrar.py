@@ -542,6 +542,10 @@ class JSONAPIRouteRegistrar(object):
                     f_obj.resource, links=links, included_resources=included_resources, meta=None
                 )
 
+        # APPLY decorators if any
+        for dec in decorators:
+            single_obj_endpoint = dec(single_obj_endpoint)
+
         single_obj_endpoint.__name__ = "%s_%s" % (
             facade_class.TYPE_PLURAL.replace("-", "_"), single_obj_endpoint.__name__)
         # register the rule
@@ -734,6 +738,10 @@ class JSONAPIRouteRegistrar(object):
                     return JSONAPIResponseFactory.make_errors_response(
                         {"status": 400, "detail": str(e)}, status=400
                     )
+
+        # APPLY decorators if any
+        for dec in decorators:
+            resource_endpoint = dec(resource_endpoint)
 
         resource_endpoint.__name__ = "%s_%s_%s" % (
             facade_class.TYPE_PLURAL.replace("-", "_"), rel_name.replace("-", "_"), resource_endpoint.__name__

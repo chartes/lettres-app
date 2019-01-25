@@ -49,9 +49,15 @@ const getCorrespondents = function (included) {
   getSimpleRelation = function (propName, included) {
     let found = included.find(item => item.type === propName);
     return found ? { id: found.id, ...found.attributes} : {id: null}
+  },
+
+  /*
+    User store
+   */
+
+  getRoles = function (included) {
+    return  included.filter(item => item.type === 'user_role').map(role => { return { id: role.id, ...role.attributes }});
   };
-
-
 
 
 export  {
@@ -60,137 +66,6 @@ export  {
   getLanguages,
   getWitnesses,
   getNotes,
-  getCollections
+  getCollections,
+  getRoles
 }
-
-/*
-
-"relationships": {
-      "correspondents-having-roles": {
-        "links": {
-          "self": "http://0.0.0.0:5004/lettres/api/1.0/documents/9/relationships/correspondents-having-roles",
-          "related": "http://0.0.0.0:5004/lettres/api/1.0/documents/9/correspondents-having-roles"
-        },
-        "data": [
-          {
-            "id": 6,
-            "type": "correspondent-has-role"
-          },
-          {
-            "id": 7,
-            "type": "correspondent-has-role"
-          },
-          {
-            "id": 8,
-            "type": "correspondent-has-role"
-          }
-        ]
-      },
-    },
-
-    "included": [
-    {
-      "type": "correspondent",
-      "id": 2,
-      "attributes": {
-        "firstname": "Christopher",
-        "lastname": "Dominguez",
-        "key": "Matthew Blackwell",
-        "ref": "https://brady.info/tag/wp-content/privacy.html"
-      },
-      "meta": {},
-      "links": {
-        "self": "http://0.0.0.0:5004/lettres/api/1.0/correspondents/2"
-      },
-      "relationships": {
-        "roles-within-documents": {
-          "links": {
-            "self": "http://0.0.0.0:5004/lettres/api/1.0/correspondents/2/relationships/roles-within-documents",
-            "related": "http://0.0.0.0:5004/lettres/api/1.0/correspondents/2/roles-within-documents"
-          },
-          "data": [
-            {
-              "id": 1,
-              "type": "correspondent-has-role"
-            },
-            {
-              "id": 12,
-              "type": "correspondent-has-role"
-            }
-          ]
-        },
-        "documents": {
-          "links": {
-            "self": "http://0.0.0.0:5004/lettres/api/1.0/correspondents/2/relationships/documents",
-            "related": "http://0.0.0.0:5004/lettres/api/1.0/correspondents/2/documents"
-          },
-          "data": [
-            {
-              "id": 2,
-              "type": "document"
-            },
-            {
-              "id": 13,
-              "type": "document"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "type": "correspondent-role",
-      "id": 8,
-      "attributes": {
-        "id": 8,
-        "label": "democratic",
-        "description": null
-      },
-      "meta": {},
-      "links": {
-        "self": "http://0.0.0.0:5004/lettres/api/1.0/correspondent-roles/8"
-      },
-      "relationships": {}
-    },
-    {
-      "type": "correspondent-has-role",
-      "id": 1,
-      "attributes": {},
-      "meta": {},
-      "links": {
-        "self": "http://0.0.0.0:5004/lettres/api/1.0/correspondents-having-roles/1"
-      },
-      "relationships": {
-        "correspondent-role": {
-          "links": {
-            "self": "http://0.0.0.0:5004/lettres/api/1.0/correspondents-having-roles/1/relationships/correspondent-role",
-            "related": "http://0.0.0.0:5004/lettres/api/1.0/correspondents-having-roles/1/correspondent-role"
-          },
-          "data": {
-            "id": 8,
-            "type": "correspondent-role"
-          }
-        },
-        "document": {
-          "links": {
-            "self": "http://0.0.0.0:5004/lettres/api/1.0/correspondents-having-roles/1/relationships/document",
-            "related": "http://0.0.0.0:5004/lettres/api/1.0/correspondents-having-roles/1/document"
-          },
-          "data": {
-            "id": 2,
-            "type": "document"
-          }
-        },
-        "correspondent": {
-          "links": {
-            "self": "http://0.0.0.0:5004/lettres/api/1.0/correspondents-having-roles/1/relationships/correspondent",
-            "related": "http://0.0.0.0:5004/lettres/api/1.0/correspondents-having-roles/1/correspondent"
-          },
-          "data": {
-            "id": 2,
-            "type": "correspondent"
-          }
-        }
-      }
-    }
-  ]
- */

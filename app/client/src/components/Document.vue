@@ -30,14 +30,15 @@
     name: 'Document',
     components: {DocumentCorrespondents, DocumentNotice, DocumentTranscription, LoadingIndicator},
     props: {
-      "doc_id" : {type: Number, required: true},
-      "user_id" : {type: Number}
+      "doc_id" : {required: true}
     },
     created () {
+      this.$store.dispatch('user/fetchCurrent');
       this.$store.dispatch('document/fetch', this.doc_id)
     },
     computed: {
-      ...mapState('document', ['document', 'documentLoading'])
+      ...mapState('document', ['document', 'documentLoading']),
+      ...mapState('user', ['current_user'])
     }
   }
 </script>

@@ -43,6 +43,7 @@ class PrefixMiddleware(object):
             return self.app(environ, start_response)
 
 
+"""
 class ModelChangeEvent(object):
     def __init__(self, app, session, *callbacks):
         self.app = app
@@ -74,7 +75,7 @@ class ModelChangeEvent(object):
         event.listen(session, 'before_commit', self.record_ops)
         event.listen(session, 'after_commit', self.after_commit)
         event.listen(session, 'after_rollback', self.after_rollback)
-
+"""
 
 def create_app(config_name="dev"):
     """ Create the application """

@@ -1,4 +1,4 @@
-import http from '../../../modules/http-common';
+import {http} from '../../../modules/http-common';
 import {getCorrespondents, getLanguages, getWitnesses, getNotes, getCollections} from '../../../modules/document-helpers';
 
 const state = {
@@ -80,7 +80,7 @@ const actions = {
 
   fetchPreview ({ commit }, id) {
     commit('LOADING_STATUS', true);
-    console.log(`fetching doc preview '${id}'`);
+    //console.log(`fetching doc preview '${id}'`);
     const incs = ['collections', 'correspondents', 'correspondents-having-roles', 'roles', 'witnesses', 'languages', 'locks'];
 
     return http.get(`documents/${id}?include=${incs.join(',')}&without-relationships`).then( response => {
