@@ -31,6 +31,10 @@ const mutations = {
     state.witnesses = getWitnesses(included);
     state.notes = getNotes(included);
   },
+  UPDATE_DOCUMENT_DATA (state, data) {
+    console.log('UPDATE_DOCUMENT_DATA', data);
+    state.document = { ...data.attributes, id: data.id};
+  },
   UPDATE_DOCUMENT_PREVIEW (state, {data, included}) {
     console.log('UPDATE_DOCUMENT_PREVIEW');
     const newPreviewCard = {
@@ -79,16 +83,6 @@ const actions = {
       commit('LOADING_STATUS', false)
     })
   },
-  save ({ commit, rootGetters }, data) {
-    return http.put(`/documents`, { data: data })
-      .then(response => {
-        commit('UPDATE_DOCUMENT', response.data.data);
-      })
-      .catch(error => {
-        console.error("error", error);
-      })
-  },
-
   fetchPreview ({ commit }, id) {
     commit('LOADING_STATUS', true);
     //console.log(`fetching doc preview '${id}'`);
@@ -99,7 +93,6 @@ const actions = {
       commit('LOADING_STATUS', false)
     })
   },
-
   fetchAll ({ commit }, {pageId, pageSize}) {
     commit('LOADING_STATUS', true);
     return http.get(`/documents?page[size]=${pageSize}&page[number]=${pageId}`)
@@ -120,7 +113,26 @@ const actions = {
       commit('UPDATE_ALL', response.data);
       commit('LOADING_STATUS', false);
     })
-  }
+  },
+
+  save ({ commit, rootGetters }, data) {
+
+    console.log('document/save', data)
+    //const auth = rootGetters['user/authHeader'];
+    //return http.put(`/documents`, { data: data }, auth)
+    data.type = 'document'
+    return http.patch(`/documents/${data.id}`, { data })
+      .then(response => {
+        console.log('response', response)
+        commit('UPDATE_DOCUMENT_DATA', response.data.data);
+        resolve(response.data)
+      })
+      .catch(error => {
+        console.error("error", error);
+        reject(error)
+      })
+  },
+
 
 };
 
