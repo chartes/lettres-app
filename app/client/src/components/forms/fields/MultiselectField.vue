@@ -1,17 +1,17 @@
 <template>
     <div class="field field-multiselect">
-        <label class="label" v-html="label"></label>
+        <field-label :label="label"/>
         <div class="field selected-list  is-grouped is-grouped-multiline">
             <div class="control" v-for="item in items" :key="item[optionIdField]">
                 <div class="tags has-addons selected-item">
                     <span class="tag">{{item[optionLabelField]}}</span>
-                    <a class="tag is-delete" @click.prevent="deleteItem(item[optionIdField])"></a>
+                    <a v-if="editable" class="tag is-delete" @click.prevent="deleteItem(item[optionIdField])"></a>
                 </div>
             </div>
 
 
         </div>
-        <div class="multiselect-actions" v-if="optionsList.length > ids.length">
+        <div class="multiselect-actions" v-if="editable && optionsList.length > ids.length">
             <a class="icon is-large add-item" href="#" @click.prevent="displayList">
                 <span class="fa-stack ">
                 <i class="fas fa-circle fa-stack-2x"></i>
@@ -31,10 +31,15 @@
 <script>
 
   import ClickOutside from 'vue-click-outside';
+  import FieldLabel from './FieldLabel';
 
   export default {
-    name: "field-multiselect",
+    name: "multiselect-field",
+    components: {FieldLabel},
     props: {
+      editable: {
+        type: Boolean, default: false
+      },
       label: {
         type: String
       },
@@ -62,6 +67,7 @@
     },
     mounted () {
       this.updateAllItems();
+      console.log('multiselect-field', this.items, this.ids)
     },
     methods: {
       addItem (item) {

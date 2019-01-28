@@ -71,6 +71,8 @@ const actions = {
                 'correspondents-having-roles', 'notes',
                 'witnesses', 'languages'];
 
+    this.dispatch('languages/fetch')
+
     return http.get(`documents/${id}?include=${incs.join(',')}`).then( response => {
 
       if (rootState.user.current_user) {

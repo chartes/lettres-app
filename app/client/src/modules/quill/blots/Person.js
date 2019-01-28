@@ -14,12 +14,12 @@ class PersonBlot extends Inline {
 
   static create(data) {
     let node = super.create();
-    node.setAttribute('ref', data);
+    node.setAttribute('href', data);
     return node;
   }
 
   static formats(domNode) {
-    let ref = domNode.getAttribute('ref');
+    let ref = domNode.getAttribute('href');
     return ref || true;
   }
 
@@ -27,7 +27,7 @@ class PersonBlot extends Inline {
 
   format(name, data) {
     if (name === 'person' && data) {
-      this.domNode.setAttribute('ref', data);
+      this.domNode.setAttribute('href', data);
     } else {
       super.format(name, data);
     }
@@ -40,7 +40,8 @@ class PersonBlot extends Inline {
   }
 }
 PersonBlot.blotName = 'person';
-PersonBlot.tagName = 'persName';
+PersonBlot.tagName = 'a';
+PersonBlot.className = 'persName';
 
 export default PersonBlot;
 

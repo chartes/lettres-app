@@ -3,6 +3,10 @@ import App from './App.vue';
 
 import store from './store'
 
+const VueInputMask = require('vue-inputmask').default
+
+Vue.use(VueInputMask)
+
 new Vue({
   el: '#app',
   store,
