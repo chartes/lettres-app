@@ -110,6 +110,7 @@ class JSONAPIAbstractFacade(object):
                         setattr(resource, rel_name, None)
                     else:
                         setattr(resource, rel_name, rel_data[0])
+        print(resource.user)
         return resource
 
     @staticmethod

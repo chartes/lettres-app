@@ -71,6 +71,7 @@ class Config(object):
 
     JWT_SECRET_KEY = parse_var_env('JWT_SECRET_KEY')
     JWT_TOKEN_LOCATION = ['cookies', 'headers']
+    JWT_COOKIE_CSRF_PROTECT = True
     JWT_ACCESS_COOKIE_PATH = parse_var_env('JWT_ACCESS_COOKIE_PATH')
 
     @staticmethod

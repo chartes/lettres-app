@@ -223,9 +223,7 @@ class User(db.Model, UserMixin):
     last_name = db.Column('lastname', db.String(), nullable=False, server_default='')
 
     roles = db.relationship('UserRole', secondary=association_user_has_role)
-
     bookmarked_documents = db.relationship("Document", secondary=association_user_has_bookmark)
-    changes = db.relationship("Changelog", backref="user")
 
     @staticmethod
     def add_default_users():
@@ -308,6 +306,8 @@ class Lock(db.Model):
 
     description = db.Column(db.String, nullable=True)
 
+    user = db.relationship('User', backref=db.backref("locks", uselist=True), cascade="all, delete-orphan", single_parent=True)
+
 
 # ====================================
 # CHANGE LOG
@@ -331,3 +331,5 @@ class Changelog(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey(User.id))
     event_date = db.Column(DateTime(timezone=True), server_default=func.now())
     description = db.Column(db.String, nullable=True)
+
+    user = db.relationship('User', backref=db.backref("changes", uselist=True), cascade="all, delete-orphan", single_parent=True)

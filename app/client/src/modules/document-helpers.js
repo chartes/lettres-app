@@ -61,11 +61,15 @@ const getCorrespondents = function (included) {
 
 
 export  {
+  /* document */
   getCorrespondents,
   getInstitution,
   getLanguages,
   getWitnesses,
   getNotes,
   getCollections,
-  getRoles
+  getLocks,
+  getChanges,
+  /* user */
+  getRoles,
 }

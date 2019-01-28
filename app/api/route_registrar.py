@@ -28,8 +28,6 @@ else:
 
 
 # TODO: voir si le param api_version est encore utile (on peut peut-être juste utiliser url_prefix
-# TODO: voir si on peut virer les références à model dans ce fichier et passer par la facade
-# TODO: gérer PATCH,POST,DELETE
 # TODO: gérer les références transitives (qui passent par des relations)
 # TODO: gérer les sparse fields
 
@@ -126,7 +124,7 @@ class JSONAPIRouteRegistrar(object):
         filter_criteriae = []
         filters = [(f, f[len('filter['):-1])  # (filter_param, filter_fieldname)
                    for f in request.args.keys() if f.startswith('filter[') and f.endswith(']')]
-
+        print(filters)
         if len(filters) > 0:
             for filter_param, filter_fieldname in filters:
                 filter_fieldname = filter_fieldname.replace("-", "_")
@@ -671,7 +669,10 @@ class JSONAPIRouteRegistrar(object):
                   Omit the prev link if the current page is the first one, omit the next link if it is the last one
             """
             url_prefix = request.host_url[:-1] + self.url_prefix
-            f_obj, kwargs, errors = facade_class.get_resource_facade(url_prefix, id)
+            w_rel_links, w_rel_data = JSONAPIRouteRegistrar.get_relationships_mode(request.args)
+            f_obj, kwargs, errors = facade_class.get_resource_facade(url_prefix, id,
+                                                                     with_relationships_links=w_rel_links,
+                                                                     with_relationships_data=w_rel_data)
             if f_obj is None:
                 return JSONAPIResponseFactory.make_errors_response(errors, **kwargs)
             else:
@@ -688,6 +689,7 @@ class JSONAPIRouteRegistrar(object):
                 links = {
                     "self": request.url
                 }
+
                 try:
                     # if request has pagination parameters
                     # add links to the top-level object
@@ -808,7 +810,6 @@ class JSONAPIRouteRegistrar(object):
                 related_resources = {}
                 for rel_name, rel in relationships.items():
                     related_resources[rel_name] = []
-
                     if not rel or "data" not in rel:
                         return JSONAPIResponseFactory.make_errors_response(
                             {"status": 403,

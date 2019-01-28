@@ -12,6 +12,7 @@ const mutations = {
       state.current_user = null;
     } else {
       state.current_user = {
+        id: data.id,
         ...data.attributes,
         roles: getRoles(included)
       };
@@ -26,15 +27,15 @@ const actions = {
       .then(response => {
         if (response.data && response.data.user) {
           const user_api_url = response.data.user.replace(baseApiURL, '');
-          http.get(`${user_api_url}?include=roles&without-relationships`).then( response => {
+          return http.get(`${user_api_url}?include=roles&without-relationships`).then( response => {
             commit('UPDATE_USER', response.data);
           })
         } else {
           commit('UPDATE_USER', {data: null});
         }
       }).catch(error => {
+        console.warn(error);
         commit('UPDATE_USER', {data: null});
-        reject(error)
       });
   },
   /*

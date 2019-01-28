@@ -10,3 +10,4 @@ def register_lock_api_urls(app):
     registrar.register_patch_routes(Lock, LockFacade)
     registrar.register_delete_routes(Lock, LockFacade)
 
+    registrar.register_relationship_get_route(LockFacade, 'user')

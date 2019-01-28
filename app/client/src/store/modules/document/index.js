@@ -1,15 +1,18 @@
 import {http} from '../../../modules/http-common';
-import {getCorrespondents, getLanguages, getWitnesses, getNotes, getCollections} from '../../../modules/document-helpers';
+import {getCorrespondents, getLanguages, getWitnesses,
+        getNotes, getCollections, getLocks, getChanges,} from '../../../modules/document-helpers';
 
 const state = {
 
   documentLoading: true,
-  document: false,
+  document: null,
   correspondents: [],
-  witnesses: false,
-  languages: false,
+  witnesses: [],
+  languages: [],
   collections: [],
-  notes: false,
+  notes: [],
+
+  changes: [],
 
   documents: [],
   documentsPreview: {},
@@ -57,11 +60,21 @@ const mutations = {
 
 const actions = {
 
-  fetch ({ commit }, id) {
+  fetch ({ commit, rootState }, id) {
     commit('LOADING_STATUS', true);
     console.log(`fetching doc '${id}'`);
-    const incs = ['collections', 'correspondents', 'roles', 'correspondents-having-roles', 'notes', 'witnesses', 'languages'];
+    let incs = ['collections', 'correspondents', 'roles',
+                'correspondents-having-roles', 'notes',
+                'witnesses', 'languages'];
+
     return http.get(`documents/${id}?include=${incs.join(',')}`).then( response => {
+
+      if (rootState.user.current_user) {
+        this.dispatch('changelog/fetchObjectChanges',
+          { objectType: 'documents', objectId: id, userId: rootState.user.current_user.id}
+        );
+      }
+
       commit('UPDATE_DOCUMENT', response.data);
       commit('LOADING_STATUS', false)
     })
@@ -70,11 +83,9 @@ const actions = {
     return http.put(`/documents`, { data: data })
       .then(response => {
         commit('UPDATE_DOCUMENT', response.data.data);
-        resolve(response.data)
       })
       .catch(error => {
         console.error("error", error);
-        reject(error)
       })
   },
 

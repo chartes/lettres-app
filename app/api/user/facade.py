@@ -60,10 +60,26 @@ class UserFacade(JSONAPIAbstractFacade):
         """Make a JSONAPI resource object describing what is a user 
         """
         from app.api.user_role.facade import UserRoleFacade
+        from app.api.changelog.facade import ChangelogFacade
+        from app.api.lock.facade import LockFacade
+
         self.relationships = {
             "roles": {
                 "links": self._get_links(rel_name="roles"),
                 "resource_identifier_getter": self.get_related_resource_identifiers(UserRoleFacade, "roles", to_many=True),
                 "resource_getter": self.get_related_resources(UserRoleFacade, "roles", to_many=True),
+            },
+
+            "locks": {
+                "links": self._get_links(rel_name="locks"),
+                "resource_identifier_getter": self.get_related_resource_identifiers(LockFacade, "locks",
+                                                                                    to_many=True),
+                "resource_getter": self.get_related_resources(LockFacade, "locks", to_many=True),
+            },
+            "changes": {
+                "links": self._get_links(rel_name="roles"),
+                "resource_identifier_getter": self.get_related_resource_identifiers(ChangelogFacade, "changes",
+                                                                                    to_many=True),
+                "resource_getter": self.get_related_resources(ChangelogFacade, "changes", to_many=True),
             }
         }

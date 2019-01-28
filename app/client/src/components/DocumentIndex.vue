@@ -6,7 +6,6 @@
       </aside>
 
       <section class="column documents-index__main-column">
-        <span v-if="current_user">{{current_user}}</span>
         <search-box :action="performSearch" :loading="documentLoading"/>
 
         <pagination :current="currentPage" :end="nbPages" :size="page_size" :action="goToPage"/>
@@ -45,13 +44,13 @@
       "page_size" : {required: true}
     },
     created () {
-      this.$store.dispatch('user/fetchCurrent');
-
-      this.goToPage(parseInt(this.page_id));
+      this.$store.dispatch('user/fetchCurrent').then(response => {
+        this.goToPage(parseInt(this.page_id));
+      });
     },
     data: function() {
       return {
-
+        currentPage: 1
       }
     },
     computed: {

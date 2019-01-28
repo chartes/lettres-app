@@ -10,3 +10,4 @@ def register_changelog_api_urls(app):
     registrar.register_patch_routes(Changelog, ChangelogFacade)
     registrar.register_delete_routes(Changelog, ChangelogFacade)
 
+    registrar.register_relationship_get_route(ChangelogFacade, 'user')

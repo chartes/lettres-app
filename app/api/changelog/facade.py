@@ -52,6 +52,12 @@ class ChangelogFacade(JSONAPIAbstractFacade):
         super(ChangelogFacade, self).__init__(*args, **kwargs)
         """Make a JSONAPI resource object describing what is a change in the changelog
         """
-        self.relationships = {
+        from app.api.user.facade import UserFacade
 
+        self.relationships = {
+            "user": {
+                "links": self._get_links(rel_name="user"),
+                "resource_identifier_getter": self.get_related_resource_identifiers(UserFacade, "user"),
+                "resource_getter": self.get_related_resources(UserFacade, "user"),
+            }
         }
