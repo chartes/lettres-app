@@ -2,35 +2,30 @@
   <div class="field-text">
     <field-label :label="label"/>
 
-    <template v-if="editable">
-
-      <div class="field" v-if="editMode" ref="hover">
-
-        <div class="control">
-          <input ref="input" class="input" type="text" v-model="value"
-             @change="inputChanged"
-             @keyup.enter="exitEditMode(false)"
-             @keyup.esc="cancelInput"
-          />
-        </div>
-
+    <div class="field" v-if="editable && editMode" ref="hover">
+      <div class="control">
+        <input ref="input" class="input" type="text" v-model="value"
+           @change="inputChanged"
+           @keyup.enter="exitEditMode(false)"
+           @blur="exitEditMode(false)"
+           @keyup.esc="cancelInput"
+        />
       </div>
+    </div>
 
-      <div v-else  class="field" ref="hover"
-           @click="enterEditMode"
-           @mouseover="overField"
-           @mouseout="outField">
-        <div class="control">
-          <span class="input fake-input" v-html="value || notSet"/></span>
-          <icon-pen-edit />
-        </div>
+    <div v-else-if="editable && !editMode"  class="field" ref="hover"
+         @click="enterEditMode"
+         @mouseover="overField"
+         @mouseout="outField">
+      <div class="control">
+        <span class="input fake-input" v-html="value || notSet"/></span>
+        <icon-pen-edit />
       </div>
+    </div>
 
-    </template>
-
-    <template v-else>
-      <span :class="{ unknown: !value}" {{ value || notSet }}></span>
-    </template>
+    <div v-else>
+      <span :class="{ unknown: !value}">{{ value || notSet }}</span>
+    </div>
 
   </div>
 </template>
