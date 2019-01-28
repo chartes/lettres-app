@@ -16,3 +16,6 @@ def register_correspondent_api_urls(app):
     registrar.register_relationship_get_route(CorrespondentFacade, 'roles-within-documents')
     registrar.register_relationship_post_route(CorrespondentFacade, 'roles-within-documents')
     registrar.register_relationship_patch_route(CorrespondentFacade, 'roles-within-documents')
+
+    registrar.register_relationship_get_route(CorrespondentFacade, 'changes')
+    registrar.register_relationship_post_route(CorrespondentFacade, 'changes')

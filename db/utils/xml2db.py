@@ -4,6 +4,7 @@ from lxml import etree
 from lxml.etree import tostring
 import io
 import re
+from more_itertools import unique_everseen
 
 # Contrôler avant chargement (dans la src XML) la normalisation des witness : on autorise quoi ? cite, sup, ?
 # Contrôler avant chargement (dans la src XML) l’enrichissement typo des creation_label
@@ -83,22 +84,33 @@ def insert_letter(db, cursor, xml_file):
         first_el_name = div.xpath('name(*[1])')
         first_pb = div.xpath('pb[1]')[0] if (first_el_name == 'pb') else div.xpath('./preceding::pb[1]')[0]
         first_page_num = first_pb.get('n')
-        first_page_url = first_pb.get('facs')
+        first_page_iiif_url = first_page_url = first_pb.get('facs')
         first_page_url = first_page_url.split('/full')[0]
         first_page_url = first_page_url.replace('/iiif', '')
         letter['num_start_page'] = '<a href="'+first_page_url+'">p. '+first_page_num+'</a>'
         # référence biblio de l’édition, considérée comme un témoin de base, de type édition
         witness_ed = bibl[:-1]+', '+letter['num_start_page']+'.'
 
+        # la liste des images
+        images_iiif_url = []
+        images_iiif_url.append(first_page_iiif_url)
+        images_iiif_url.extend(div.xpath('.//pb/@facs'))
+        # https://stackoverflow.com/questions/480214/how-do-you-remove-duplicates-from-a-list-whilst-preserving-order
+        images_iiif_url = list(unique_everseen(images_iiif_url))
+
         # la liste des nœuds witness
         letter['witnesses'] = div.xpath('listWit/witness')
-        letter['creation'] = div.xpath('dateline/date')[0].get('when')
         letter['creation_label'] = normalize_punctuation(tei2html(div.xpath('dateline/date')[0]))
         letter['creation_label'] = letter['creation_label'].rstrip('.')
+        letter['creation'] = div.xpath('dateline/date')[0].get('when')
+        if letter['creation'] is None:
+            letter['creation'] = div.xpath('dateline/date')[0].get('notBefore')
+        letter['creation_not_after'] = div.xpath('dateline/date')[0].get('notAfter')
 
         letter['transcription'] = get_transcription_node(div.xpath('.')[0])
         letter['transcription'] = tei2html(letter['transcription'])
         letter['transcription'] = format_html(letter['transcription'])
+
 
         # INSERTIONS
         try:
@@ -106,12 +118,14 @@ def insert_letter(db, cursor, xml_file):
                 "INSERT INTO document ("
                 "title,"
                 "creation,"
+                "creation_not_after,"
                 "creation_label,"
                 "transcription,"
                 "owner_id)"
-                "VALUES (?, ?, ?, ?, ?)",
+                "VALUES (?, ?, ?, ?, ?, ?)",
                 (letter['title'],
                  letter['creation'],
+                 letter['creation_not_after'],
                  letter['creation_label'],
                  letter['transcription'],
                  owner_id))
@@ -122,21 +136,44 @@ def insert_letter(db, cursor, xml_file):
         document_id = cursor.lastrowid
 
 
+        # édition DIHF source considérée comme témoin de base
         try:
             cursor.execute("INSERT INTO witness (document_id, content, tradition, status) "
                            "VALUES (?, ?, ?, ?)",
                            (document_id, witness_ed, 'édition', 'base'))
         except sqlite3.IntegrityError as e:
             print(e, "lettre %s" % (letter['id']))
+        witness_id = cursor.lastrowid
 
-        for witness in letter['witnesses']:
+        # on renseigne les URL des images de ce témoin de base
+        for i, image_url in enumerate(images_iiif_url):
+            i += 1
+            image_url_part = image_url.split('/')
+            canvas_id = '/'.join(image_url_part[:7]) + '/canvas/' + image_url_part[7]
+            try:
+                cursor.execute("INSERT INTO image (witness_id, canvas_id, order_num) VALUES (?, ?, ?)",
+                               (witness_id, canvas_id, i))
+            except sqlite3.IntegrityError as e:
+                print(e)
+
+        # les témoins énumérés dans l’édition imprimée
+        for i, witness in enumerate(letter['witnesses']):
             witness = tei2html(witness)
             witness = normalize_punctuation(witness.replace('\n', ' '))
             witness = witness.replace(', </cite>', '</cite>, ')
-            try:
-                cursor.execute("INSERT INTO witness (document_id, content) VALUES (?, ?)", (document_id, witness))
-            except sqlite3.IntegrityError as e:
-                print(e, "lettre %s" % (letter['id']))
+            # on considère que le premier est le témoin de base
+            if i == 0:
+                try:
+                    cursor.execute("INSERT INTO witness (document_id, content, status) VALUES (?, ?, ?)",
+                                   (document_id, witness, 'base'))
+                except sqlite3.IntegrityError as e:
+                    print(e, "lettre %s" % (letter['id']))
+            else:
+                try:
+                    cursor.execute("INSERT INTO witness (document_id, content, status) VALUES (?, ?, ?)",
+                                   (document_id, witness, 'autre'))
+                except sqlite3.IntegrityError as e:
+                    print(e, "lettre %s" % (letter['id']))
 
         try:
             cursor.execute("INSERT INTO document_has_language (document_id, language_id) VALUES (?, ?)",
@@ -180,6 +217,11 @@ def insert_letter(db, cursor, xml_file):
                 print(e, "lettre %s" % (letter['id']))
             try:
                 cursor.execute('UPDATE document SET title = replace(title, ?, ?) WHERE id = ?',
+                               (note_xml_id, note_id, document_id))
+            except sqlite3.IntegrityError as e:
+                print(e, "lettre %s" % (letter['id']))
+            try:
+                cursor.execute('UPDATE document SET creation_label = replace(creation_label, ?, ?) WHERE id = ?',
                                (note_xml_id, note_id, document_id))
             except sqlite3.IntegrityError as e:
                 print(e, "lettre %s" % (letter['id']))
@@ -230,14 +272,14 @@ def tei2html(tei_node):
                 <xsl:text> </xsl:text>
             </xsl:template>
             <xsl:template match="pb">
-                <xsl:text>&lt;a href="</xsl:text>
+                <xsl:text>&lt;a class="pb" href="</xsl:text>
                 <xsl:value-of select="@facs"/>
                 <xsl:text>">[p. </xsl:text>
                 <xsl:value-of select="@n"/>
                 <xsl:text>]&lt;/a> </xsl:text>
             </xsl:template>
             <xsl:template match="ref[@type='note']">
-                <xsl:text>&lt;a href="</xsl:text>
+                <xsl:text>&lt;a class="note" href="</xsl:text>
                 <xsl:value-of select="@target"/>
                 <xsl:text>">[note]&lt;/a></xsl:text>
             </xsl:template>

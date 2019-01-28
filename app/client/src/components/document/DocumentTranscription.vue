@@ -8,7 +8,7 @@
     <div class="document__transcription--content" v-html="transcriptionContent">
     </div>
     <ol v-if="notesContent.length > 0" class="document__notes--content notes">
-       <li  v-for="(note, index) in notesContent" v-html="note.content" :id="index + 1">
+       <li  v-for="(note, index) in notesContent" v-html="note.content" :id="note.id">
        </li>
     </ol>
   </section>

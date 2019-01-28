@@ -1,9 +1,9 @@
 
-from app.api.abstract_facade import JSONAPIAbstractFacade
+from app.api.abstract_facade import JSONAPIAbstractChangeloggedFacade
 from app.models import CorrespondentHasRole
 
 
-class CorrespondentHasRoleFacade(JSONAPIAbstractFacade):
+class CorrespondentHasRoleFacade(JSONAPIAbstractChangeloggedFacade):
     """
 
     """
@@ -56,7 +56,7 @@ class CorrespondentHasRoleFacade(JSONAPIAbstractFacade):
         for rel_name, (rel_facade, to_many) in {
             "correspondent-role": (CorrespondentRoleFacade, False),
             "document": (DocumentFacade, False),
-            "correspondent": (CorrespondentFacade, False)
+            "correspondent": (CorrespondentFacade, False),
         }.items():
             u_rel_name = rel_name.replace("-", "_")
 

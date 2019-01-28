@@ -1,5 +1,5 @@
 <template>
-    <div class="pagination buttons are-normal">
+    <div class="pagination buttons are-normal" v-if="end > 1">
         <span v-if="curr > 1" class="pagination__button button" @click="action(1)">1</span>
         <span v-if="curr > 2"  class="pagination__dot-dot">...</span>
         <span v-if="prev > 1" class="pagination__button button" @click="action(prev)">{{prev}}</span>
@@ -14,10 +14,10 @@
   export default {
     name: "pagination",
     props: {
-        start: {default: 1},
-        current: { required: true, default: 1},
-        end: { required: true },
-        action: { required: true}
+        start: {default: 1, type: Number},
+        current: { required: true, default: 1, type: Number},
+        end: { required: true, type: Number },
+        action: { required: true, type: Function}
     },
     data () {
       return {

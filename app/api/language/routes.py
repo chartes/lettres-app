@@ -14,3 +14,5 @@ def register_language_role_api_urls(app):
     registrar.register_relationship_post_route(LanguageFacade, 'documents')
     registrar.register_relationship_patch_route(LanguageFacade, 'documents')
 
+    registrar.register_relationship_get_route(LanguageFacade, 'changes')
+    registrar.register_relationship_post_route(LanguageFacade, 'changes')

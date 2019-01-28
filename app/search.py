@@ -29,7 +29,6 @@ class SearchIndexManager(object):
                 body["from"] = 0 * per_page
                 body["size"] = per_page
                 # print("WARNING: /!\ for debug purposes the query size is limited to", body["size"])
-
             try:
                 search = current_app.elasticsearch.search(index=index, doc_type=index, body=body)
 
@@ -39,7 +38,7 @@ class SearchIndexManager(object):
                 from collections import namedtuple
                 Result = namedtuple("Result", "index id type score")
 
-                results = [Result(str(hit['_index']), str(hit['_id']), str(hit['_source']['payload']["type"]),
+                results = [Result(str(hit['_index']), str(hit['_id']), str(hit['_source']["type"]),
                                   str(hit['_score']))
                            for hit in search['hits']['hits']]
 
@@ -48,39 +47,39 @@ class SearchIndexManager(object):
                 return results, search['hits']['total']
 
             except Exception as e:
-                print("query_index Exception:", e)
-                return [], 0
+                raise e
 
     @staticmethod
     def add_to_index(index, id, payload):
-        print("ADD_TO_INDEX", index, id)
+        #print("ADD_TO_INDEX", index, id)
         current_app.elasticsearch.index(index=index, doc_type=index, id=id, body=payload)
 
     @staticmethod
     def remove_from_index(index, id):
-        print("REMOVE_FROM_INDEX", index, id)
+        #print("REMOVE_FROM_INDEX", index, id)
         current_app.elasticsearch.delete(index=index, doc_type=index, id=id)
 
-    @staticmethod
-    def reindex_resources(changes):
-        from app.api.facade_manager import JSONAPIFacadeManager
-
-        for target_id, target, op in changes:
-
-            facade = JSONAPIFacadeManager.get_facade_class(target)
-            try:
-                #print("try to reindex", target)
-                if op in ('insert', 'update'):
-                    target.id = target_id
-                    f_obj = facade("", target)
-
-                    #f_obj, kwargs, errors = facade.get_resource_facade("", id=target.id)
-                else:
-                    target.id = target_id
-                    f_obj = facade("", target)
-                #print("call to reindex for", target_id, target, op)
-
-                f_obj.reindex(op)
-            except Exception as e:
-                print("Error while indexing %s:" % target, e)
-                pass
+    #@staticmethod
+    #def reindex_resources(changes):
+    #    from app.api.facade_manager import JSONAPIFacadeManager
+    #
+    #    for target_id, target, op in changes:
+    #
+    #        facade = JSONAPIFacadeManager.get_facade_class(target)
+    #        try:
+    #            #print("try to reindex", target)
+    #            if op in ('insert', 'update'):
+    #                target.id = target_id
+    #                f_obj = facade("", target)
+    #
+    #                #f_obj, kwargs, errors = facade.get_resource_facade("", id=target.id)
+    #            else:
+    #                target.id = target_id
+    #                f_obj = facade("", target)
+    #            #print("call to reindex for", target_id, target, op)
+    #
+    #            f_obj.reindex(op)
+    #        except Exception as e:
+    #            print("Error while indexing %s:" % target, e)
+    #            pass
+    #

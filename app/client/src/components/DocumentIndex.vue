@@ -2,17 +2,23 @@
   <div>
     <section class="documents-index columns">
       <aside class="documents-index__collections column is-2">
-        <h2 class="documents-index__collections__title title is-size-3">Collections</h2>
+        <h2 class="documents-index__collections__title title is-size-3"></h2>
       </aside>
-      <section class="column documents-index__preview-column">
-          <pagination :current="currentPage" :end="nbPages" :size="page_size" :action="goToPage"/>
-          <ul id="preview-cards" >
-            <li v-for="doc in documents" :key="doc.id">
-              <document-preview-card :doc_id="doc.id"></document-preview-card>
-            </li>
-          </ul>
-          <pagination :current="currentPage" :end="nbPages" :size="page_size" :action="goToPage"/>
+
+      <section class="column documents-index__main-column">
+        <span v-if="current_user">{{current_user}}</span>
+        <search-box :action="performSearch" :loading="documentLoading"/>
+
+        <pagination :current="currentPage" :end="nbPages" :size="page_size" :action="goToPage"/>
+        <ul id="preview-cards" >
+          <li v-for="doc in documents" :key="doc.id">
+            <document-preview-card :doc_id="doc.id"></document-preview-card>
+          </li>
+        </ul>
+        <pagination :current="currentPage" :end="nbPages" :size="page_size" :action="goToPage"/>
+
       </section>
+
     </section>
   </div>
 </template>
@@ -21,6 +27,7 @@
   import { mapState } from 'vuex'
   import DocumentPreviewCard from './DocumentPreviewCard';
   import Pagination from './ui/Pagination';
+  import SearchBox from './ui/SearchBox';
 
   function getUrlParameter(url, paramName) {
     paramName = paramName.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
@@ -32,27 +39,43 @@
   export default {
 
     name: 'DocumentIndex',
-    components: {DocumentPreviewCard, Pagination},
-    props: ["page_id", "page_size"],
+    components: {DocumentPreviewCard, Pagination, SearchBox},
+    props: {
+      "page_id" : {required: true},
+      "page_size" : {required: true}
+    },
     created () {
-      this.goToPage(1);
-      /*this.$store.dispatch('user/setAuthToken', this.auth_token).then(() => {
-          this.$store.dispatch('user/getCurrentUser').then(() => {
-            return this.$store.dispatch('document/fetch', this.doc_id)
-          });
-      });
-       */
+      this.$store.dispatch('user/fetchCurrent');
+
+      this.goToPage(parseInt(this.page_id));
+    },
+    data: function() {
+      return {
+
+      }
     },
     computed: {
-      ...mapState('document', ['documents', 'links']),
+      ...mapState('document', ['documents', 'links', 'documentLoading']),
+      ...mapState('user', ['current_user']),
       nbPages() {
-          return parseInt(this.links.last ? getUrlParameter(this.links.last, "page%5Bnumber%5D") : 1);
+        return parseInt(this.links.last ? getUrlParameter(this.links.last, "page%5Bnumber%5D") : 1);
       }
     },
     methods: {
         goToPage(num){
-            this.currentPage = num;
+          this.currentPage = num;
+          if (document.getElementById("search-box") && document.getElementById("search-box").value) {
+            this.performSearch(this.currentPage);
+          } else {
             this.$store.dispatch('document/fetchAll', {pageId: num, pageSize: this.page_size});
+          }
+        },
+        performSearch(numPage = 1){
+          const term = document.getElementById("search-box").value;
+          if (term.length > 2) {
+            this.$store.dispatch('document/fetchSearch', {pageId: numPage, pageSize: this.page_size, query: term});
+            this.currentPage = numPage;
+          }
         }
     }
   }
@@ -70,7 +93,8 @@
   .documents-index__collections__title {
     font: 90%/140% 'Oxygen', sans-serif;
   }
-  .documents-index__preview-column {
+  .documents-index__main-column {
       padding-bottom: 80px;
   }
+
 </style>

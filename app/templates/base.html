@@ -22,19 +22,23 @@
 <body >
 
 {% block hero %}
+    <section class="red-hero">
+    </section>
     <section class="hero">
         <div class="hero-head">
-            <section id="search-container">
-             <div class="container">
-               <h1 class="title is-size-1">Correspondances</h1>
-               <input id="search-box" class="input is-rounded" type="text" placeholder="Catherine de Medicis">
-             </div>
-            </section>
              <div id="navbar" >
-                <nav class="navbar-menu container">
-                     <a class="navbar-item is-active" href="{{url_for("app_bp.index")}}">Collections</a>
+                <nav class="navbar-menu">
+                     <a class="navbar-item is-active" href="{{url_for("app_bp.index")}}">Documents</a>
                      <a class="navbar-item">Documentation</a>
                      <a class="navbar-item">À propos</a>
+                     <div class="navbar-end">
+                        {% if current_user.is_anonymous %}
+                        <a class="navbar-item" href="{{url_for("user.login")}}"><i class="fas fa-sign-in-alt"></i></a>
+                        {% else %}
+                        <a class="navbar-item" href=""><i class="fas fa-user-alt"></i><span>Mon compte</span></a>
+                        <a class="navbar-item" href="{{url_for("user.logout")}}"><i class="fas fa-sign-out-alt"></i></a>
+                        {% endif %}
+                    </div>
                 </nav>
              </div>
         </div>
@@ -72,9 +76,6 @@
                       alt="École Nationale des Chartes - PSL">
             </a>
         </aside>
-         <p>
-
-         </p>
     </div>
   </div>
 </footer>
@@ -86,6 +87,15 @@
 </body>
 
 <style type="text/css">
+  nav span {
+    margin-left: 12px;
+  }
+
+  .red-hero {
+    height: 100px;
+    background-color: #962D3E;
+  }
+
   .hero .title {
     font: 90%/140% 'Oxygen', sans-serif;
     color: white;
@@ -114,18 +124,5 @@
         margin: auto;
         width: 100%;
   }
-  #search-container {
-    height: 320px;
-    background: #962D3E;
-  }
-  #search-container .container {
-    width: 50%;
-    padding: 80px 80px;
-    text-align: center;
-  }
-  #search-box {
-    width: 550px;
-  }
-
 </style>
 </html>

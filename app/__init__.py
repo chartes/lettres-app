@@ -1,11 +1,16 @@
 import pprint
 from elasticsearch import Elasticsearch
-from flask import Flask, Blueprint
+from flask import Flask, Blueprint, url_for
+from flask.json import jsonify
+from flask_cors import CORS
+from flask_jwt_extended import JWTManager, set_access_cookies, create_access_token
 from flask_sqlalchemy import SQLAlchemy
+from flask_user import UserManager
 from sqlalchemy import event, inspect
 from sqlalchemy.engine import Engine
 
 from dotenv import load_dotenv
+from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.api.response_factory import JSONAPIResponseFactory
 
@@ -38,6 +43,7 @@ class PrefixMiddleware(object):
             return self.app(environ, start_response)
 
 
+"""
 class ModelChangeEvent(object):
     def __init__(self, app, session, *callbacks):
         self.app = app
@@ -69,7 +75,7 @@ class ModelChangeEvent(object):
         event.listen(session, 'before_commit', self.record_ops)
         event.listen(session, 'after_commit', self.after_commit)
         event.listen(session, 'after_rollback', self.after_rollback)
-
+"""
 
 def create_app(config_name="dev"):
     """ Create the application """
@@ -86,15 +92,75 @@ def create_app(config_name="dev"):
         app.config.from_object(config[config_name])
 
     app.wsgi_app = PrefixMiddleware(app.wsgi_app, prefix=app.config["APP_URL_PREFIX"])
+    #api_bp.url_prefix = app.config["API_URL_PREFIX"]
     app.debug = app.config["DEBUG"]
 
     db.init_app(app)
     config[config_name].init_app(app)
+
     app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) if app.config['ELASTICSEARCH_URL'] else None
 
-    # Hook elasticsearch to the session
-    from app.search import SearchIndexManager
-    #app.mce = ModelChangeEvent(app, db.session, SearchIndexManager.reindex_resources)
+    CORS(app, resources={r"*": {"origins": "*"}})
+
+    from app.models import User
+    from app.models import UserInvitation
+
+    """
+    ========================================================
+        Setup Flask-User
+    ========================================================
+    """
+    class CustomUserManager(UserManager):
+        def customize(self, app):
+            self.UserInvitationClass = UserInvitation
+            self.email_manager._render_and_send_email_with_exceptions = self.email_manager._render_and_send_email
+
+            def with_protection(*args, **kargs):
+                try:
+                    self.email_manager._render_and_send_email_with_exceptions(*args, **kargs)
+                except Exception as e:
+                    print(e)
+            self.email_manager._render_and_send_email = with_protection
+
+        def hash_password(self, password):
+            return generate_password_hash(password.encode('utf-8'))
+
+        def verify_password(self, password, password_hash):
+            return check_password_hash(password_hash, password)
+
+        def _endpoint_url(self, endpoint):
+            return url_for(endpoint) if endpoint else url_for('app_bp.index')
+
+    # Initialize Flask-User
+    app.user_manager = CustomUserManager(app, db, UserClass=User, UserInvitationClass=UserInvitation)
+
+    #from flask_user import user_logged_in, user_logged_out, user_changed_password, user_changed_username
+
+    """
+    ========================================================
+        Setup Flask-JWT-Extended
+    ========================================================
+    """
+    app.jwt = JWTManager(app)
+
+    # Create a function that will be called whenever create_access_token
+    # is used. It will take whatever object is passed into the
+    # create_access_token method, and lets us define what custom claims
+    # should be added to the access token.
+    @app.jwt.user_claims_loader
+    def add_claims_to_access_token(user):
+        return user["roles"]
+
+    # Create a function that will be called whenever create_access_token
+    # is used. It will take whatever object is passed into the
+    # create_access_token method, and lets us define what the identity
+    # of the access token should be.
+    @app.jwt.user_identity_loader
+    def user_identity_lookup(user):
+        return user["username"]
+
+    from app.api.manifest.manifest_factory import ManifestFactory
+    app.manifest_factory = ManifestFactory()
 
     # =====================================
     # Import models & app routes
@@ -123,8 +189,9 @@ def create_app(config_name="dev"):
     from app.api.note.routes import register_note_api_urls
     from app.api.user.routes import register_user_api_urls
     from app.api.user_role.routes import register_user_role_api_urls
-    from app.api.whitelist.routes import register_whitelist_api_urls
     from app.api.witness.routes import register_witness_api_urls
+    from app.api.lock.routes import register_lock_api_urls
+    from app.api.changelog.routes import register_changelog_api_urls
 
     with app.app_context():
         # generate routes for the API
@@ -138,7 +205,8 @@ def create_app(config_name="dev"):
         register_note_api_urls(app)
         register_user_api_urls(app)
         register_user_role_api_urls(app)
-        register_whitelist_api_urls(app)
+        register_lock_api_urls(app)
+        register_changelog_api_urls(app)
         register_collection_role_api_urls(app)
         register_witness_api_urls(app)
 

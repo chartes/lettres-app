@@ -12,3 +12,5 @@ def register_note_api_urls(app):
 
     registrar.register_relationship_get_route(NoteFacade, 'document')
 
+    registrar.register_relationship_get_route(NoteFacade, 'changes')
+    registrar.register_relationship_post_route(NoteFacade, 'changes')

@@ -1,9 +1,9 @@
 
-from app.api.abstract_facade import JSONAPIAbstractFacade
+from app.api.abstract_facade import JSONAPIAbstractChangeloggedFacade
 from app.models import CorrespondentRole
 
 
-class CorrespondentRoleFacade(JSONAPIAbstractFacade):
+class CorrespondentRoleFacade(JSONAPIAbstractChangeloggedFacade):
     """
 
     """
@@ -44,11 +44,3 @@ class CorrespondentRoleFacade(JSONAPIAbstractFacade):
             resource["relationships"] = self.get_exposed_relationships()
         return resource
 
-    def __init__(self, *args, **kwargs):
-        super(CorrespondentRoleFacade, self).__init__(*args, **kwargs)
-        """Make a JSONAPI resource object describing what is a correspondent role
-        """
-
-        self.relationships = {
-
-        }

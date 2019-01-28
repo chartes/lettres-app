@@ -1,6 +1,6 @@
 
 from app.api.abstract_facade import JSONAPIAbstractFacade
-from app.models import User
+from app.models import User, datetime_to_str
 
 
 class UserFacade(JSONAPIAbstractFacade):
@@ -39,7 +39,7 @@ class UserFacade(JSONAPIAbstractFacade):
             "attributes": {
                 "username": self.obj.username,
                 "email": self.obj.email,
-                "confirmed-at": self.obj.email_confirmed_at,
+                "confirmed-at": datetime_to_str(self.obj.email_confirmed_at),
                 "is-active": self.obj.active,
                 "firstname": self.obj.first_name,
                 "lastname": self.obj.last_name
@@ -59,18 +59,11 @@ class UserFacade(JSONAPIAbstractFacade):
         super(UserFacade, self).__init__(*args, **kwargs)
         """Make a JSONAPI resource object describing what is a user 
         """
-
         from app.api.user_role.facade import UserRoleFacade
-        from app.api.document.facade import DocumentFacade
         self.relationships = {
-            "role": {
-                "links": self._get_links(rel_name="role"),
-                "resource_identifier_getter": self.get_related_resource_identifiers(UserRoleFacade, "role"),
-                "resource_getter": self.get_related_resources(UserRoleFacade, "role"),
-            },
-            "owned-documents": {
-                "links": self._get_links(rel_name="owned-documents"),
-                "resource_identifier_getter": self.get_related_resource_identifiers(DocumentFacade, "owned_documents", to_many=True),
-                "resource_getter": self.get_related_resources(DocumentFacade, "owned_documents", to_many=True),
+            "roles": {
+                "links": self._get_links(rel_name="roles"),
+                "resource_identifier_getter": self.get_related_resource_identifiers(UserRoleFacade, "roles", to_many=True),
+                "resource_getter": self.get_related_resources(UserRoleFacade, "roles", to_many=True),
             }
         }

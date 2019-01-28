@@ -13,3 +13,6 @@ def register_correspondent_has_role_api_urls(app):
     registrar.register_relationship_patch_route(CorrespondentHasRoleFacade, 'correspondent')
     registrar.register_relationship_get_route(CorrespondentHasRoleFacade, 'correspondent-role')
 
+    registrar.register_relationship_post_route(CorrespondentHasRoleFacade, 'changes')
+    registrar.register_relationship_get_route(CorrespondentHasRoleFacade, 'changes')
+

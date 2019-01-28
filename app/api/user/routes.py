@@ -1,3 +1,4 @@
+from app.api.decorators import api_require_roles
 from app.api.user.facade import UserFacade
 from app.models import User
 
@@ -5,10 +6,9 @@ from app.models import User
 def register_user_api_urls(app):
     registrar = app.api_url_registrar
 
-    registrar.register_get_routes(User, UserFacade)
+    registrar.register_get_routes(User, UserFacade, [api_require_roles("contributor")])
 
-    registrar.register_relationship_get_route(UserFacade, 'role')
-    registrar.register_relationship_get_route(UserFacade, 'owned-documents')
+    registrar.register_relationship_get_route(UserFacade, 'roles', [api_require_roles("contributor")])
 
-    #registrar.register_relationship_get_route(CorrespondentRoleFacade, 'roles-within-document')
-    #registrar.register_post_routes(CorrespondentRole, CorrespondentRoleFacade)
+    registrar.register_relationship_patch_route(UserFacade, 'roles', [api_require_roles("admin")])
+    registrar.register_relationship_post_route(UserFacade, 'roles', [api_require_roles("admin")])

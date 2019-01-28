@@ -7,7 +7,9 @@
 <script>
   import Document from './components/Document';
   export default {
-    props: ['doc_id', 'auth_token'],
+    props: {
+      "doc_id" : {required: true}
+    },
     components: {Document}
   }
 </script>

@@ -1,74 +1,59 @@
-import axios from "axios/index";
+import {http, baseApiURL} from '../../../modules/http-common';
+import {getRoles} from '../../../modules/document-helpers';
 
 const state = {
-
-  currentUser: undefined,
-  authToken: undefined,
-  author: undefined,
-
+  current_user: null
 };
 
 const mutations = {
-
-  UPDATE_CURRENT_USER (state, payload) {
-    state.currentUser = payload;
-    //console.log('STORE MUTATION user/UPDATE_CURRENT_USER')
-  },
-  UPDATE_AUTHOR (state, payload) {
-    state.author = payload;
-    //console.log('STORE MUTATION user/UPDATE_AUTHOR', state.author.id, state.author)
-  },
-  UPDATE_AUTH_TOKEN (state, payload) {
-    state.authToken = payload;
+  UPDATE_USER (state, {data, included}) {
+    console.log('UPDATE_USER', data);
+    if (!data) {
+      state.current_user = null;
+    } else {
+      state.current_user = {
+        ...data.attributes,
+        roles: getRoles(included)
+      };
+    }
   }
-
 };
 
 const actions = {
 
-  getCurrentUser ({ commit, rootGetters }) {
-    const auth = rootGetters['user/authHeader'];
-    return axios.get('/adele/api/1.0/user', auth).then( (response) => {
-      commit('UPDATE_CURRENT_USER', response.data.data)
-      commit('UPDATE_AUTHOR', response.data.data)
-    })
+  fetchCurrent ({ commit }) {
+    return http.get("token/refresh")
+      .then(response => {
+        if (response.data && response.data.user) {
+          const user_api_url = response.data.user.replace(baseApiURL, '');
+          http.get(`${user_api_url}?include=roles&without-relationships`).then( response => {
+            commit('UPDATE_USER', response.data);
+          })
+        } else {
+          commit('UPDATE_USER', {data: null});
+        }
+      }).catch(error => {
+        commit('UPDATE_USER', {data: null});
+        reject(error)
+      });
   },
-  setAuthToken ({ commit }, token) {
-    commit('UPDATE_AUTH_TOKEN', token)
+  /*
+  save ({ commit, rootGetters }, data) {
+    return http.put(`/documents`, { data: data })
+      .then(response => {
+        commit('UPDATE_DOCUMENT', response.data.data);
+        resolve(response.data)
+      })
+      .catch(error => {
+        console.error("error", error);
+        reject(error)
+      })
   },
-  setAuthor({ commit }, author) {
-    //console.log('STORE ACTION user/setAuthor', author.id, author)
-    commit('UPDATE_AUTHOR', author)
-  }
-
-};
-
-const checkRole = (user, role) => {
-  let theRole = '';
-  if (!(user && user.roles)) return false;
-  switch (user.roles.length) {
-    case 1: theRole = 'student'; break;
-    case 2: theRole = 'teacher'; break;
-    case 3: theRole = 'admin'; break;
-  }
-  return theRole === role;
+  */
 };
 
 const getters = {
 
-  authHeader: state => { return { auth: { username: state.authToken, password: undefined }}},
-  currentUserIsAdmin: state => {
-    return checkRole(state.currentUser, 'admin')
-  },
-  currentUserIsAuthor: state => {
-    return state.currentUser.id === state.author.id;
-  },
-  currentUserIsTeacher: state => {
-    return checkRole(state.currentUser, 'teacher')
-  },
-  currentUserIsStudent: state => {
-    return checkRole(state.currentUser, 'student')
-  },
 
 };
 
@@ -78,6 +63,6 @@ const userModule = {
   mutations,
   actions,
   getters
-}
+};
 
 export default userModule;

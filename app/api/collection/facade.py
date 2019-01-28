@@ -1,9 +1,9 @@
 from app import db
-from app.api.abstract_facade import JSONAPIAbstractFacade
+from app.api.abstract_facade import JSONAPIAbstractChangeloggedFacade
 from app.models import Collection
 
 
-class CollectionFacade(JSONAPIAbstractFacade):
+class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
     """
 
     """
@@ -51,21 +51,37 @@ class CollectionFacade(JSONAPIAbstractFacade):
         """
 
         from app.api.document.facade import DocumentFacade
-        self.relationships = {
+
+        self.relationships.update({
             "documents": {
                 "links": self._get_links(rel_name="documents"),
                 "resource_identifier_getter": self.get_related_resource_identifiers(DocumentFacade, "documents", to_many=True),
                 "resource_getter": self.get_related_resources(DocumentFacade, "documents", to_many=True),
             },
+        })
+
+    def get_data_to_index_when_added(self, propagate):
+        _res = self.resource
+        payload = {
+            "id": _res["id"],
+            "type": _res["type"],
+
+            "title": _res["attributes"]["title"],
+            "description": _res["attributes"]["description"],
         }
+        collection_data = [{"id": _res["id"], "index": self.get_index_name(), "payload": payload}]
+        if not propagate:
+            return collection_data
+        else:
+            return collection_data + self.get_relationship_data_to_index(rel_name="documents")
 
-    def get_data_to_index_when_added(self):
-        return self.get_relationship_data_to_index(rel_name="documents")
-
-    def remove_from_index(self):
-        # do not remove entries from the index but reindex the docs without the resource
+    def remove_from_index(self, propagate):
         from app.search import SearchIndexManager
-        for data in self.get_data_to_index_when_added():
-            my_id = self.id
-            data["payload"]["collections"] = [l for l in data["payload"]["collections"] if l["id"] != my_id]
-            SearchIndexManager.add_to_index(index=data["index"], id=data["id"], payload=data["payload"])
+        SearchIndexManager.remove_from_index(index=self.get_index_name(), id=self.id)
+
+        if propagate:
+            # reindex the docs without the resource
+            for data in self.get_data_to_index_when_added():
+                if data["payload"]["id"] != self.id and data["payload"]["type"] != self.TYPE:
+                    data["payload"]["collections"] = [l for l in data["payload"]["collections"] if l.get("id") != self.id]
+                    SearchIndexManager.add_to_index(index=data["index"], id=data["id"], payload=data["payload"])
