@@ -28,6 +28,10 @@ const mutations = {
     state.witnesses = getWitnesses(included);
     state.notes = getNotes(included);
   },
+  UPDATE_DOCUMENT_DATA (state, data) {
+    console.log('UPDATE_DOCUMENT_DATA', data);
+    state.document = { ...data.attributes, id: data.id};
+  },
   UPDATE_DOCUMENT_PREVIEW (state, {data, included}) {
     console.log('UPDATE_DOCUMENT_PREVIEW');
     const newPreviewCard = {
@@ -67,11 +71,15 @@ const actions = {
     })
   },
   save ({ commit, rootGetters }, data) {
+
+    console.log('document/save', data)
     //const auth = rootGetters['user/authHeader'];
     //return http.put(`/documents`, { data: data }, auth)
-    return http.put(`/documents`, { data: data })
+    data.type = 'document'
+    return http.patch(`/documents/${data.id}`, { data })
       .then(response => {
-        commit('UPDATE_DOCUMENT', response.data.data);
+        console.log('response', response)
+        commit('UPDATE_DOCUMENT_DATA', response.data.data);
         resolve(response.data)
       })
       .catch(error => {
