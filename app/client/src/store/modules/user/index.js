@@ -1,4 +1,6 @@
-import {http, baseApiURL} from '../../../modules/http-common';
+import http_with_csrf_token from '../../../modules/http-common';
+import {baseApiURL} from '../../../modules/http-common';
+
 import {getRoles} from '../../../modules/document-helpers';
 
 const state = {
@@ -23,6 +25,7 @@ const mutations = {
 const actions = {
 
   fetchCurrent ({ commit }) {
+    const http = http_with_csrf_token();
     return http.get("token/refresh")
       .then(response => {
         if (response.data && response.data.user) {

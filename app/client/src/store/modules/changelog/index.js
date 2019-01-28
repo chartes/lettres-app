@@ -1,4 +1,4 @@
-import {http, baseApiURL} from '../../../modules/http-common';
+import http_with_csrf_token from '../../../modules/http-common';
 
 const state = {
   changes: null
@@ -15,6 +15,7 @@ const actions = {
 
   fetchObjectChanges ({ commit }, {objectType, objectId, userId}) {
     console.log(`fetching changes for ${objectType} '${objectId}'`);
+    const http = http_with_csrf_token();
     return http.get(`${objectType}/${objectId}/changes?include=user`).then( response => {
       let object_changes = response.data.data.filter(c => {
         console.warn(c.attributes["object-type"], c.attributes["object-id"]);
