@@ -1,15 +1,20 @@
 
 /*
-  User store
+  Change
  */
 
-const getRoles = function (included) {
-  return  included.filter(item => item.type === 'user_role').map(role => { return { id: role.id, ...role.attributes }});
+const getUser = function (user_id, included) {
+  for (let item of included) {
+    if (item.type === 'user' && item.id === user_id) {
+      return { id: item.id, username: item.attributes.username };
+    }
+  }
+  return null;
 };
 
 
 export  {
 
   /* user */
-  getRoles,
+  getUser,
 }

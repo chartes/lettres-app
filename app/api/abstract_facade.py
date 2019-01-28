@@ -44,9 +44,6 @@ class JSONAPIAbstractFacade(object):
     def id(self):
         raise NotImplementedError
 
-    #def bind_facade(self):
-    #   raise NotImplementedError
-
     @property
     def resource(self):
         raise NotImplementedError

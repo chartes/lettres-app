@@ -12,8 +12,6 @@ const state = {
   collections: [],
   notes: [],
 
-  changes: [],
-
   documents: [],
   documentsPreview: {},
   links: [],
@@ -73,13 +71,6 @@ const actions = {
 
     const http = http_with_csrf_token();
     return http.get(`documents/${id}?include=${incs.join(',')}`).then( response => {
-
-      if (rootState.user.current_user) {
-        this.dispatch('changelog/fetchObjectChanges',
-          { objectType: 'documents', objectId: id, userId: rootState.user.current_user.id}
-        );
-      }
-
       commit('UPDATE_DOCUMENT', response.data);
       commit('LOADING_STATUS', false)
     })

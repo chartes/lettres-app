@@ -8,25 +8,25 @@
           <document-correspondents/>
           <document-transcription/>
         </div>
-        <div class="column is-one-fifth">
-          Second column
+        <div class="column is-one-quarter">
+
+          <section class="changes-section section" v-if="changelog.documents">
+            <header>
+              <h2 class="section__title subtitle">Historique des modifications</h2>
+            </header>
+            <article class="changes-section__content">
+              <ol>
+                <ul v-for="change in changelog.documents" :key="change.data.id">
+                  <span>{{change.data.attributes["event-date"]}}</span>
+                  <span>{{change.data.attributes["description"]}}</span>
+                  <span class="tag">{{change.user.username}}</span>
+                </ul>
+              </ol>
+            </article>
+          </section>
         </div>
       </div>
 
-      <section class="changes-section section" v-if="changes">
-        <header>
-          <h2 class="section__title subtitle">Historique des modifications</h2>
-        </header>
-        <article class="changes-section__content">
-          <ol>
-            <ul v-for="change in changes" :key="change.id">
-              <span>{{change.attributes["event-date"]}}</span>
-              <span>{{change.attributes["description"]}}</span>
-              <span class="tag">{{change.user}}</span>
-            </ul>
-          </ol>
-        </article>
-      </section>
     </article>
 
     <loading-indicator :active="documentLoading" :full-page="true"/>
@@ -49,22 +49,29 @@
     },
     created () {
       this.$store.dispatch('user/fetchCurrent').then(response => {
+
         this.$store.dispatch('document/fetch', this.doc_id);
+
+        if (this.current_user) {
+          this.$store.dispatch('changelog/fetchObjectChanges', {objectType: 'documents', objectId: this.doc_id});
+        }
       });
     },
     computed: {
       ...mapState('document', ['document', 'documentLoading']),
       ...mapState('user', ['current_user']),
-      ...mapState('changelog', ['changes'])
+      ...mapState('changelog', ['changelog'])
     }
   }
 </script>
 
 <style scoped>
-  .changes-section__content {
+  .changes-section {
     color: #962D3E;
+    font-size: small;
   }
   .section__title {
     margin-bottom: 20px;
+    color: #962D3E;
   }
 </style>

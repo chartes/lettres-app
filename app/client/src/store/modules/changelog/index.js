@@ -1,29 +1,48 @@
 import http_with_csrf_token from '../../../modules/http-common';
+import {getUser} from "../../../modules/change-helpers";
 
 const state = {
-  changes: null
+  changelog: {}
 };
 
+function cmp_dates(d1, d2) {
+  if (d1 < d2) {
+    return -1;
+  }
+  if (d1 > d2) {
+    return 1;
+  }
+  return 0;
+}
+
 const mutations = {
-  UPDATE_CHANGELOG (state, changes) {
-    console.log("UPDATE_CHANGELOG", changes);
-    state.changes = changes;
+  UPDATE_CHANGELOG (state, {objectType, changes, included}) {
+    console.log("UPDATE_CHANGELOG", objectType, changes);
+
+    // sort changes by event-date
+    let changelog = [];
+    changes.sort((c1, c2) => {return cmp_dates(c2.attributes['event-date'], c1.attributes['event-date'])});
+
+    for(let _chg of changes) {
+      changelog.push({
+        data: _chg,
+        user: getUser(_chg.relationships.user.data.id, included)
+      });
+    }
+
+    // perform the state mutation
+    state.changelog[objectType] = changelog;
   }
 };
 
 const actions = {
 
-  fetchObjectChanges ({ commit }, {objectType, objectId, userId}) {
-    console.log(`fetching changes for ${objectType} '${objectId}'`);
+  fetchObjectChanges ({ commit }, {objectType, objectId}) {
     const http = http_with_csrf_token();
     return http.get(`${objectType}/${objectId}/changes?include=user`).then( response => {
-      let object_changes = response.data.data.filter(c => {
-        console.warn(c.attributes["object-type"], c.attributes["object-id"]);
-        return true;//c.attributes["object-type"] === objectType && c.attributes["object-id"] === objectId
-      });
-      console.log(object_changes);
-      commit('UPDATE_CHANGELOG', object_changes);
+      commit('UPDATE_CHANGELOG', {objectType: objectType, changes: response.data.data, included: response.data.included});
     });
+
   }
 
 };

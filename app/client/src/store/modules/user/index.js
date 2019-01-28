@@ -1,7 +1,7 @@
 import http_with_csrf_token from '../../../modules/http-common';
 import {baseApiURL} from '../../../modules/http-common';
 
-import {getRoles} from '../../../modules/document-helpers';
+import {getRoles} from '../../../modules/user-helpers';
 
 const state = {
   current_user: null
