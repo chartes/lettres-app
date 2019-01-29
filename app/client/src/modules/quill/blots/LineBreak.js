@@ -4,7 +4,6 @@ import Parchment from 'parchment';
 class LineBreak extends Parchment.Embed {
   static create(value) {
     let node = super.create(value);
-    node.innerHTML = '<span class="br"></span><span class="segment-bullet"></span>';
     return node;
   }
   length () {
@@ -15,7 +14,7 @@ class LineBreak extends Parchment.Embed {
   }
 }
 LineBreak.blotName = 'linebreak';
-LineBreak.tagName = 'lb';
+LineBreak.tagName = 'br';
 
 
 export default LineBreak;

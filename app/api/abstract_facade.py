@@ -44,9 +44,6 @@ class JSONAPIAbstractFacade(object):
     def id(self):
         raise NotImplementedError
 
-    #def bind_facade(self):
-    #   raise NotImplementedError
-
     @property
     def resource(self):
         raise NotImplementedError
@@ -144,11 +141,11 @@ class JSONAPIAbstractFacade(object):
         :param related_resources:
         :return:
         """
-        #print("UPDATING RESOURCE:", obj, obj_type, attributes, related_resources)
+        print("UPDATING RESOURCE:", obj, obj_type, attributes, related_resources)
         # update attributes
         for att, att_value in attributes.items():
             att_name = att.replace("-", "_")
-            #print("  setting attr", att, att_value)
+            print("  setting attr", att, att_value)
             if hasattr(obj, att_name):
                 setattr(obj, att_name, att_value)
             else:

@@ -117,4 +117,8 @@
   .unknown {
     color: grey;
   }
+
+  .field {
+    outline: none;
+  }
 </style>

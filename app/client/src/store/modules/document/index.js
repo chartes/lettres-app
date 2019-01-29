@@ -1,4 +1,4 @@
-import {http} from '../../../modules/http-common';
+import http_with_csrf_token from '../../../modules/http-common';
 import {getCorrespondents, getLanguages, getWitnesses,
         getNotes, getCollections, getLocks, getChanges,} from '../../../modules/document-helpers';
 
@@ -11,8 +11,6 @@ const state = {
   languages: [],
   collections: [],
   notes: [],
-
-  changes: [],
 
   documents: [],
   documentsPreview: {},
@@ -73,14 +71,8 @@ const actions = {
 
     this.dispatch('languages/fetch')
 
+    const http = http_with_csrf_token();
     return http.get(`documents/${id}?include=${incs.join(',')}`).then( response => {
-
-      if (rootState.user.current_user) {
-        this.dispatch('changelog/fetchObjectChanges',
-          { objectType: 'documents', objectId: id, userId: rootState.user.current_user.id}
-        );
-      }
-
       commit('UPDATE_DOCUMENT', response.data);
       commit('LOADING_STATUS', false)
     })
@@ -90,6 +82,7 @@ const actions = {
     //console.log(`fetching doc preview '${id}'`);
     const incs = ['collections', 'correspondents', 'correspondents-having-roles', 'roles', 'witnesses', 'languages', 'locks'];
 
+    const http = http_with_csrf_token();
     return http.get(`documents/${id}?include=${incs.join(',')}&without-relationships`).then( response => {
       commit('UPDATE_DOCUMENT_PREVIEW', response.data);
       commit('LOADING_STATUS', false)
@@ -97,6 +90,7 @@ const actions = {
   },
   fetchAll ({ commit }, {pageId, pageSize}) {
     commit('LOADING_STATUS', true);
+    const http = http_with_csrf_token();
     return http.get(`/documents?page[size]=${pageSize}&page[number]=${pageId}`)
       .then( (response) => {
       commit('UPDATE_ALL', response.data);
@@ -109,7 +103,7 @@ const actions = {
     console.warn("performing searches using the DEV index");
     const index = 'lettres__development__document';
     const incs = ['collections', 'correspondents', 'correspondents-having-roles', 'roles', 'witnesses', 'languages'];
-
+    const http = http_with_csrf_token();
     return http.get(`/search?query=${query}&index=${index}&include=${incs.join(',')}&without-relationships&page[size]=${pageSize}&page[number]=${pageId}`)
       .then( (response) => {
       commit('UPDATE_ALL', response.data);
@@ -123,15 +117,16 @@ const actions = {
     //const auth = rootGetters['user/authHeader'];
     //return http.put(`/documents`, { data: data }, auth)
     data.type = 'document'
+    const http = http_with_csrf_token();
     return http.patch(`/documents/${data.id}`, { data })
       .then(response => {
         console.log('response', response)
         commit('UPDATE_DOCUMENT_DATA', response.data.data);
-        resolve(response.data)
+        //resolve(response.data)
       })
       .catch(error => {
         console.error("error", error);
-        reject(error)
+        //reject(error)
       })
   },
 

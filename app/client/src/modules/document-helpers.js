@@ -26,10 +26,6 @@ const getCorrespondents = function (included) {
     return getSimpleRelation('institution', included)
   },
 
-  getWhitelist = function (included) {
-    return getSimpleRelation('whitelist', included)
-  },
-
   getLanguages = function (included) {
     return  included.filter(item => item.type === 'language').map(lang => { return { id: lang.id, ...lang.attributes }});
   },
@@ -49,15 +45,8 @@ const getCorrespondents = function (included) {
   getSimpleRelation = function (propName, included) {
     let found = included.find(item => item.type === propName);
     return found ? { id: found.id, ...found.attributes} : {id: null}
-  },
-
-  /*
-    User store
-   */
-
-  getRoles = function (included) {
-    return  included.filter(item => item.type === 'user_role').map(role => { return { id: role.id, ...role.attributes }});
   };
+
 
 
 export  {
@@ -68,8 +57,5 @@ export  {
   getWitnesses,
   getNotes,
   getCollections,
-  getLocks,
-  getChanges,
-  /* user */
-  getRoles,
+
 }

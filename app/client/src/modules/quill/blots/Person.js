@@ -3,7 +3,6 @@
  Blot : inline
  TEI : persName/@ref
  HTML5 : a[@class="persName"]/@href
- Utilisation : transcription, traduction, commentaire
 */
 
 import Quill from 'quill';
@@ -22,8 +21,6 @@ class PersonBlot extends Inline {
     let ref = domNode.getAttribute('href');
     return ref || true;
   }
-
-
 
   format(name, data) {
     if (name === 'person' && data) {

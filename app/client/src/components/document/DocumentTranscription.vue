@@ -5,11 +5,11 @@
       <h2 class="document__transcription--title subtitle">Transcription</h2>
     </header>
 
-    <div class="document__transcription--content" v-html="transcriptionContent">
-    </div>
-    <ol v-if="notesContent.length > 0" class="document__notes--content notes">
-       <li  v-for="(note, index) in notesContent" v-html="note.content" :id="note.id">
-       </li>
+    <transcription-editor v-if="userCanEdit" :initial-content="transcriptionContent"/>
+    <div v-else class="document__transcription--content" v-html="transcriptionContent"></div>
+
+    <ol v-if="notesContent.length" class="document__notes--content notes">
+       <li  v-for="(note, index) in notesContent" v-html="note.content" :id="note.id"></li>
     </ol>
   </section>
 </template>
@@ -18,9 +18,15 @@
 
   import { mapState } from 'vuex'
   import DocumentAttributes from './DocumentAttributes';
+  import TranscriptionEditor from '../forms/fields/TranscriptionEditor';
   export default {
     name: 'DocumentTranscription',
-    components: {DocumentAttributes},
+    components: {TranscriptionEditor, DocumentAttributes},
+    data() {
+      return {
+        userCanEdit: true,
+      }
+    },
     created() {
       this.transcriptionContent = this.document.transcription;
       this.notesContent = this.notes;

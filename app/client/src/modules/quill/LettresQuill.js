@@ -4,19 +4,19 @@ import Delta from 'quill-delta';
 import PlainClipboard from './PlainClipboard'
 
 import BoldBlot from './blots/Bold';
+import CiteBlot from './blots/Cite';
+import DelBlot from './blots/Del';
 import ItalicBlot from './blots/Italic';
+import LineBreak from './blots/LineBreak';
+import LinkBlot from './blots/Link';
+import LocationBlot from './blots/Location';
+import NoteBlot from './blots/Note';
+import PageBlot from './blots/Page';
+import ParagraphBlot from './blots/Paragraph';
+import PersonBlot from './blots/Person';
 import SuperscriptBlot from './blots/Superscript';
 
-import DelBlot from './blots/Del';
-import LinkBlot from './blots/Link';
-import PersonBlot from './blots/Person';
-import CiteBlot from './blots/Cite';
-import LocationBlot from './blots/Location';
 
-import LineBreak from './blots/LineBreak';
-import Paragraph from './blots/Paragraph';
-import NoteBlot from './blots/Note';
-import ZoneBlot from './blots/Zone';
 
 let Inline = Quill.import('blots/inline');
 let Embed = Quill.import('blots/embed');
@@ -31,21 +31,18 @@ Inline.order = [
 
 Quill.register('modules/clipboard', PlainClipboard, true);
 
-Quill.register(LineBreak, true);
 Quill.register(BoldBlot, true);
-Quill.register(ItalicBlot, true);
-Quill.register(SuperscriptBlot, true);
+Quill.register(CiteBlot, true);
 Quill.register(DelBlot, true);
+Quill.register(ItalicBlot, true);
+Quill.register(LineBreak, true);
 Quill.register(LinkBlot, true);
 Quill.register(LocationBlot, true);
-Quill.register(CiteBlot, true);
-Quill.register(PersonBlot, true);
-Quill.register(Paragraph, true);
 Quill.register(NoteBlot, true);
-Quill.register(ZoneBlot, true);
-
-// other
-Quill.register(SpeechpartBlot, true);
+Quill.register(PageBlot, true);
+Quill.register(ParagraphBlot, true);
+Quill.register(PersonBlot, true);
+Quill.register(SuperscriptBlot, true);
 
 function lineBreakMatcher() {
   var newDelta = new Delta();

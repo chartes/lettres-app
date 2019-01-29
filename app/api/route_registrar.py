@@ -724,14 +724,25 @@ class JSONAPIRouteRegistrar(object):
 
                     # try to include related resources if requested
                     included_resources = None
-                    if "include" in request.args:
-                        included_resources, errors = JSONAPIRouteRegistrar.get_included_resources(
-                            request.args["include"].split(","),
-                            f_obj
-                        )
-                        if errors:
-                            return errors
 
+                    # get the related resources to include
+                    if "include" in request.args:
+                        included_resources = []
+                        for res in resource_data:
+                            f_class = JSONAPIFacadeManager.FACADES[res["type"]]
+                            f_obj, kwargs, errors = f_class["default"].get_resource_facade(
+                                url_prefix, res["id"],
+                                with_relationships_links=w_rel_links,
+                                with_relationships_data=w_rel_data
+                            )
+                            i_resources, errors = JSONAPIRouteRegistrar.get_included_resources(
+                                request.args["include"].split(","),
+                                f_obj
+                            )
+                            included_resources.extend(i_resources)
+                            if errors:
+                                return errors
+                    # respond
                     return JSONAPIResponseFactory.make_data_response(
                         resource_data, links=links, included_resources=included_resources, meta={"total-count": count},
                     )

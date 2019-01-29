@@ -1,3 +1,4 @@
+from app.api.changelog.facade import ChangelogFacade
 from app.api.collection.facade import CollectionFacade
 from app.api.correspondent.facade import CorrespondentFacade
 from app.api.correspondent_has_role.facade import CorrespondentHasRoleFacade
@@ -69,6 +70,10 @@ class JSONAPIFacadeManager(object):
         Lock.__name__: {
             "default": LockFacade,
             "search": LockFacade,
+        },
+        "change": {
+            "default": ChangelogFacade,
+            "search": ChangelogFacade,
         },
     }
 
