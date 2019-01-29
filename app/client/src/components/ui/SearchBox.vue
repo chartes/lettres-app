@@ -1,14 +1,14 @@
 <template>
     <section class="search-container">
-       <h1 class="title is-size-5">Rechercher</h1>
        <div class="field has-addons">
-         <div class="control">
+
+         <div class="control container">
            <input id="search-box" class="input search-container__search-box" type="text"
                   placeholder="Catherine de Medicis"
                   @keyup.enter="action()">
          </div>
          <div class="control" v-on:click="action()">
-           <button :class="myClasses">Search</button>
+           <button :class="myClasses"><i class="fas fa-search"></i></button>
          </div>
        </div>
     </section>
@@ -42,7 +42,7 @@
 
 <style scoped>
   .search-container__search-box {
-      width: 420px;
+    padding-left: 1em !important;
   }
   .search-container__search-box__submit-btn {
     color: #962D3E;
@@ -51,8 +51,8 @@
   .search-container__search-box__submit-btn:hover {
     color: #348899 ;
   }
-  .search-container {
-      margin-top: 10px;
-      padding-bottom: 60px;
+  .search-container .control {
+    padding-bottom: 10px;
+    padding-top: 10px;
   }
 </style>

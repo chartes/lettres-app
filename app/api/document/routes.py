@@ -19,9 +19,9 @@ def register_document_api_urls(app):
     for rel in ('notes', 'languages', 'witnesses', 'collections', 'locks', 'changes',
                 'correspondents-having-roles',
                 'whitelist', 'next-document'):
-        registrar.register_relationship_post_route(DocumentFacade, rel)
+        registrar.register_relationship_post_route(DocumentFacade, rel, [api_require_roles("contributor")])
 
     for rel in ('notes', 'languages', 'witnesses', 'collections',
                 'correspondents-having-roles',
                 'whitelist', 'next-document'):
-        registrar.register_relationship_patch_route(DocumentFacade, rel)
+        registrar.register_relationship_patch_route(DocumentFacade, rel, [api_require_roles("contributor")])

@@ -14,5 +14,3 @@
   }
 </script>
 
-<style>
-</style>

@@ -9,7 +9,12 @@
         <article>
           <header class="title">
             <a :href="`${baseURL}/documents/${documentPreview.id}`">
-              <span class="tag document-preview-card__doc-tag">Document {{documentPreview.id}}</span>
+              <span class="tags has-addons">
+                <span class="tag document-preview-card__doc-tag">Document {{documentPreview.id}}</span>
+                <span v-if="current_user && documentPreview.locks.length > 0" class="tag is-warning">
+                    <i class="fas fa-lock"></i>
+                </span>
+              </span>
               <span><h1 class="document-preview-card__title" v-html="titleContent"></h1></span>
             </a>
           </header>
@@ -63,6 +68,7 @@
     },
     computed: {
         ...mapState('document', ['documentsPreview', 'documentLoading']),
+        ...mapState('user', ['current_user']),
     },
     methods: {
       getCorrespondentFullname : function(obj){
@@ -93,7 +99,7 @@
   }
 
   .document-preview-card__title:hover{
-    color: #1BBC9B;
+    color: #3273dc;
   }
 
   .document-preview-card__doc-tag {

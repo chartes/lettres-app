@@ -42,6 +42,10 @@ const getCorrespondents = function (included) {
     return  included.filter(item => item.type === 'note').map(lang => { return { id: lang.id, ...lang.attributes }});
   },
 
+  getLocks = function (included) {
+    return  included.filter(item => item.type === 'lock').map(lock => { return { id: lock.id, ...lock.attributes }});
+  },
+
   getSimpleRelation = function (propName, included) {
     let found = included.find(item => item.type === propName);
     return found ? { id: found.id, ...found.attributes} : {id: null}
@@ -57,5 +61,5 @@ export  {
   getWitnesses,
   getNotes,
   getCollections,
-
+  getLocks
 }

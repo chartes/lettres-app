@@ -8,7 +8,6 @@
 
     <document-attributes></document-attributes>
 
-    <!-- TODO: placer les composants document-witness ici -->
     <div class="document__witnesses" v-if="witnesses.length > 0">
       <header>
         <h2 class="document__witnesses--title subtitle">Témoins</h2>
