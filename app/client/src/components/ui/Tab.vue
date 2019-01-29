@@ -11,7 +11,9 @@
     name: "tab",
     props: {
         name: { required: true },
-        selected: { default: false }
+        selected: { default: false },
+        iconClass : {},
+        spacer: {default: false}
     },
     data () {
       return {

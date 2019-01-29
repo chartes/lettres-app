@@ -24,81 +24,35 @@
       </aside>
 
       <section class="column documents-index__main-column">
-
-        <div v-if="current_user" class="documents-index__main-column__tabs tabs is-centered is-boxed">
-          <ul>
-            <li id="documents-index__main-column__documents__tab" class="tab">
-              <a @click="goToTab('documents-index__main-column__documents')">
-                <span class="icon is-small"><i class="fas fa-file" aria-hidden="true"></i></span>
-                <span>Documents</span>
-              </a>
-            </li>
-            <li id="documents-index__main-column__my-bookmarks__tab" class="tab">
-              <a @click="goToTab('documents-index__main-column__my-bookmarks')">
-                <span class="icon is-small"><i class="fas fa-bookmark" aria-hidden="true"></i></span>
-                <span>Mes favoris</span>
-              </a>
-            </li>
-            <li id="documents-index__main-column__my-locks__tab" class="tab">
-              <a @click="goToTab('documents-index__main-column__my-locks')">
-                <span class="icon is-small"><i class="fas fa-lock" aria-hidden="true"></i></span>
-                <span>Mes verrous</span>
-              </a>
-            </li>
-            <li id="documents-index__main-column__my-changelog__tab" class="tab">
-              <a @click="goToTab('documents-index__main-column__my-changelog')">
-                <span class="icon is-small"><i class="fas fa-history" aria-hidden="true"></i></span>
-                <span>Mon historique</span>
-              </a>
-            </li>
-
-            <li v-if="current_user && current_user.isAdmin">
-              <span style="min-width: 80px; display: block;"></span>
-            </li>
-            <li v-if="current_user && current_user.isAdmin" id="documents-index__main-column__all-locks__tab" class="tab">
-              <a @click="goToTab('documents-index__main-column__all-locks')">
-                <span class="icon is-small"><i class="fas fa-lock" aria-hidden="true"></i></span>
-                <span>Tous les verrous</span>
-              </a>
-
-            <li v-if="current_user && current_user.isAdmin" id="documents-index__main-column__all-changelog__tab" class="tab">
-              <a @click="goToTab('documents-index__main-column__all-changelog')">
-                <span class="icon is-small"><i class="fas fa-user-lock" aria-hidden="true"></i></span>
-                <span>Historique général</span>
-              </a>
-            </li>
-            <li v-if="current_user && current_user.isAdmin" id="documents-index__main-column__all-users__tab" class="tab">
-              <a @click="goToTab('documents-index__main-column__all-users')">
-                <span class="icon is-small"><i class="fas fa-users" aria-hidden="true"></i></span>
-                <span>Utilisateurs</span>
-              </a>
-            </li>
-
-          </ul>
-        </div>
-
-        <div id="documents-index__main-column__documents" class="tab-container">
-          <pagination :current="currentPage" :end="nbPages" :size="page_size" :action="goToDocPage"/>
-          <ul id="preview-cards" >
-            <li v-for="doc in documents" :key="doc.id">
-              <document-preview-card :doc_id="doc.id"></document-preview-card>
-            </li>
-          </ul>
-          <pagination :current="currentPage" :end="nbPages" :size="page_size" :action="goToDocPage"/>
-        </div>
-
-        <div v-if="current_user" id="documents-index__main-column__my-bookmarks" class="tab-container">
-        </div>
-        <div v-if="current_user" id="documents-index__main-column__my-locks" class="tab-container">
-        </div>
-        <div v-if="current_user" id="documents-index__main-column__my-changelog" class="tab-container">
-        </div>
-        <div v-if="current_user && current_user.isAdmin" id="documents-index__main-column__all-locks tab-container" class="tab-container">
-        </div>
-        <div v-if="current_user && current_user.isAdmin" id="documents-index__main-column__all-changelog tab-container" class="tab-container">
-        </div>
-        <div v-if="current_user && current_user.isAdmin" id="documents-index__main-column__all-users tab-container" class="tab-container">
-        </div>
+        <document-list v-if="!current_user"
+                    :documents="documents"
+                    :nb-pages="nbPages"
+                    :page-size="page_size"
+                    :current-page="currentPage"
+                    :on-page-change="goToDocPage"
+        />
+        <tabs v-else tabsStyle="documents-index__main-column__tabs is-boxed is-centered">
+          <tab name="Documents" :selected="true" icon-class="fas fa-file">
+            <document-list
+                    :documents="documents"
+                    :nb-pages="nbPages"
+                    :page-size="page_size"
+                    :current-page="currentPage"
+                    :on-page-change="goToDocPage"
+            />
+          </tab>
+          <tab name="Mes favoris" icon-class="fas fa-bookmark">
+            <bookmarks/>
+          </tab>
+          <tab :name="current_user.isAdmin ? 'Verrous' : 'Mes verrous'" icon-class="fas fa-lock">
+            <locks :data="current_user.isAdmin ? fullLocks : userLocks"/>
+          </tab>
+          <tab :name="current_user.isAdmin ? 'Historique' : 'Mon historique'" icon-class="fas fa-history">
+            <changelog :data="current_user.isAdmin ? fullChangelog : userChangelog"/>
+          </tab>
+          <tab v-if="current_user.isAdmin" name="Utilisateurs" icon-class="fas fa-users">
+          </tab>
+        </tabs>
 
       </section>
 
@@ -107,66 +61,63 @@
 </template>
 
 <script>
-  import { mapState } from 'vuex'
-  import DocumentPreviewCard from './DocumentPreviewCard';
-  import Pagination from './ui/Pagination';
+  import { mapState } from 'vuex';
+
   import SearchBox from './ui/SearchBox';
+  import Tab from './ui/Tab';
+  import Tabs from './ui/Tabs';
+  import Bookmarks from './sections/Bookmarks';
+  import Changelog from './sections/Changelog';
+  import Locks from './sections/Locks';
+  import DocumentList from './sections/DocumentList';
 
   function getUrlParameter(url, paramName) {
     paramName = paramName.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-    var regex = new RegExp('[\\?&]' + paramName + '=([^&#]*)');
-    var results = regex.exec(url);
+    const regex = new RegExp('[\\?&]' + paramName + '=([^&#]*)');
+    let results = regex.exec(url);
     return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
   }
 
   export default {
 
     name: 'DocumentIndex',
-    components: {DocumentPreviewCard, Pagination, SearchBox},
+    components: {DocumentList, SearchBox,  Tab, Tabs, Changelog, Bookmarks, Locks},
     props: {
-      "page_id" : {required: true},
-      "page_size" : {required: true}
+      page_id : {required: true},
+      page_size : {required: true}
     },
     created () {
-
       this.$store.dispatch('user/fetchCurrent').then(response => {
-        this.goToTab(this.currentTabName);
         this.goToDocPage(parseInt(this.page_id));
+
+        if (this.current_user) {
+          if (this.current_user.isAdmin) {
+            this.$store.dispatch('changelog/fetchFullChangelog');
+            this.$store.dispatch('locks/fetchFullLocks');
+          } else {
+            this.$store.dispatch('changelog/fetchUserChangelog', {user: this.current_user});
+            this.$store.dispatch('locks/fetchUserLocks', {user: this.current_user});
+          }
+        }
       });
     },
     data: function() {
       return {
-        currentPage: 1,
-        currentTabName: 'documents-index__main-column__documents'
+        currentPage: 1
       }
     },
     computed: {
       ...mapState('document', ['documents', 'links', 'documentLoading']),
       ...mapState('user', ['current_user']),
+      ...mapState('changelog', ['fullChangelog', 'userChangelog']),
+      ...mapState('locks', ['fullLocks', 'userLocks']),
+
       nbPages() {
         return parseInt(this.links.last ? getUrlParameter(this.links.last, "page%5Bnumber%5D") : 1);
       }
     },
     methods: {
-        goToTab(tabname) {
-          /* hide everything */
-          const tabContainers = document.getElementsByClassName('tab-container');
-          for (let i = 0; i < tabContainers.length; ++i ) {
-            tabContainers[i].classList.add('is-invisible');
-          }
-          const tabs = document.getElementsByClassName('tab');
-          for (let i = 0; i < tabs.length; ++i ) {
-            tabs[i].classList.remove('is-active');
-          }
-          /* then show selectively */
-          const currentTab = document.getElementById(tabname+"__tab");
-          if (currentTab) {
-            currentTab.classList.add('is-active');
-            document.getElementById(tabname).classList.remove('is-invisible');
-            this.currentTabName = tabname;
-          }
-        },
-        goToDocPage(num){
+      goToDocPage(num){
           this.currentPage = num;
           if (document.getElementById("search-box") && document.getElementById("search-box").value) {
             this.performSearch(this.currentPage);
@@ -197,13 +148,10 @@
   .documents-index__main-column {
       padding-bottom: 60px;
   }
+
   a.is-active {
-    background: #962D3E ;
+    background: #962D3E;
   }
-  .documents-index__main-column__tabs {
-    margin-bottom: 80px;
-  }
-  .documents-index__main-column__tabs  li.is-active a {
-    color: #962D3E ;
-  }
+
+
 </style>

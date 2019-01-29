@@ -1,12 +1,15 @@
 <template>
-
   <div>
 
     <div class="tabs" :class="tabsStyle">
       <ul>
-        <li v-for="tab in tabs"
-            :class="{ 'is-active': tab.isActive }"
-        ><a @click="selectTab(tab)">{{ tab.name }}</a></li>
+        <li v-for="tab in tabs" :class="{ 'is-active': tab.isActive }">
+          <div v-if="tab.spacer" class="spacer"></div>
+          <a v-else @click="selectTab(tab)">
+            <i v-if="tab.iconClass" :class="`icon ${tab.iconClass}`"></i>
+            {{ tab.name }}
+          </a>
+        </li>
       </ul>
     </div>
 
@@ -64,3 +67,15 @@
 
   }
 </script>
+
+<style scoped>
+  .icon {
+    margin-right: 12px;
+  }
+  li.is-active a {
+    color: #962D3E;
+  }
+  .spacer {
+    min-width: 100px;
+  }
+</style>
