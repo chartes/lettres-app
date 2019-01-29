@@ -24,44 +24,35 @@
       </aside>
 
       <section class="column documents-index__main-column">
-        <document-list v-if="!current_user"
-                    :documents="documents"
-                    :nb-pages="nbPages"
-                    :page-size="page_size"
-                    :current-page="currentPage"
-                    :on-page-change="goToDocPage"
-        />
-        <tabs v-else tabsStyle="documents-index__main-column__tabs is-boxed is-centered">
-          <tab name="Documents" :selected="true" icon-class="fas fa-file">
-            <document-list
-                    :documents="documents"
-                    :nb-pages="nbPages"
-                    :page-size="page_size"
-                    :current-page="currentPage"
-                    :on-page-change="goToDocPage"
-            />
-          </tab>
-          <tab name="Mes favoris" icon-class="fas fa-bookmark">
-            <div style="min-height: 700px">
-              <bookmarks/>
-            </div>
-          </tab>
-          <tab :name="current_user.isAdmin ? 'Verrous' : 'Mes verrous'" icon-class="fas fa-lock">
-            <div style="min-height: 700px">
-              <locks :data="current_user.isAdmin ? fullLocks : userLocks"/>
-            </div>
-          </tab>
-          <tab :name="current_user.isAdmin ? 'Historique' : 'Mon historique'" icon-class="fas fa-history">
-            <div style="min-height: 700px">
-              <changelog :data="current_user.isAdmin ? fullChangelog : userChangelog"/>
-            </div>
-          </tab>
-          <tab v-if="current_user.isAdmin" name="Utilisateurs" icon-class="fas fa-users">
-            <div style="min-height: 700px">
-            </div>
-          </tab>
-        </tabs>
-
+          <document-list v-if="!current_user"
+                      :documents="documents"
+                      :nb-pages="nbPages"
+                      :page-size="page_size"
+                      :current-page="currentPage"
+                      :on-page-change="goToDocPage"
+          />
+          <tabs v-else tabsStyle="documents-index__main-column__tabs is-boxed is-centered">
+            <tab name="Documents" :selected="true" icon-class="fas fa-file">
+              <document-list
+                      :documents="documents"
+                      :nb-pages="nbPages"
+                      :page-size="page_size"
+                      :current-page="currentPage"
+                      :on-page-change="goToDocPage"
+              />
+            </tab>
+            <tab name="Mes favoris" icon-class="fas fa-bookmark">
+                <bookmarks/>
+            </tab>
+            <tab :name="current_user.isAdmin ? 'Verrous' : 'Mes verrous'" icon-class="fas fa-lock">
+                <locks :data="current_user.isAdmin ? fullLocks : userLocks"/>
+            </tab>
+            <tab :name="current_user.isAdmin ? 'Historique' : 'Mon historique'" icon-class="fas fa-history">
+                <changelog :data="current_user.isAdmin ? fullChangelog : userChangelog"/>
+            </tab>
+            <tab v-if="current_user.isAdmin" name="Utilisateurs" icon-class="fas fa-users">
+            </tab>
+          </tabs>
       </section>
 
     </section>
@@ -154,7 +145,8 @@
       margin-left: 14px;
   }
   .documents-index__main-column {
-      padding-bottom: 60px;
+    padding-bottom: 60px;
+    min-height: 700px;
   }
 
   a.is-active {
