@@ -1,6 +1,6 @@
 import http_with_csrf_token from '../../../modules/http-common';
 import {getCorrespondents, getLanguages, getWitnesses,
-        getNotes, getCollections, getLocks, getChanges,} from '../../../modules/document-helpers';
+        getNotes, getCollections, getLocks} from '../../../modules/document-helpers';
 
 const state = {
 
@@ -11,6 +11,7 @@ const state = {
   languages: [],
   collections: [],
   notes: [],
+  locks: [],
 
   documents: [],
   documentsPreview: {},
@@ -41,6 +42,7 @@ const mutations = {
       correspondents: getCorrespondents(included),
       languages: getLanguages(included),
       collections: getCollections(included),
+      locks: getLocks(included)
     };
 
     state.documentsPreview[data.id] = {
@@ -64,10 +66,12 @@ const actions = {
 
   fetch ({ commit, rootState }, id) {
     commit('LOADING_STATUS', true);
-    console.log(`fetching doc '${id}'`);
-    let incs = ['collections', 'correspondents', 'roles',
-                'correspondents-having-roles', 'notes',
-                'witnesses', 'languages'];
+
+    let incs = [
+      'collections', 'correspondents', 'roles',
+      'correspondents-having-roles', 'notes',
+      'witnesses', 'languages'
+    ];
 
     this.dispatch('languages/fetch')
 
@@ -79,8 +83,10 @@ const actions = {
   },
   fetchPreview ({ commit }, id) {
     commit('LOADING_STATUS', true);
-    //console.log(`fetching doc preview '${id}'`);
-    const incs = ['collections', 'correspondents', 'correspondents-having-roles', 'roles', 'witnesses', 'languages', 'locks'];
+    const incs = [
+      'collections', 'correspondents', 'correspondents-having-roles',
+      'roles', 'witnesses', 'languages', 'locks'
+    ];
 
     const http = http_with_csrf_token();
     return http.get(`documents/${id}?include=${incs.join(',')}&without-relationships`).then( response => {

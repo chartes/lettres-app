@@ -1,5 +1,5 @@
 
-from app.api.abstract_facade import JSONAPIAbstractChangeloggedFacade
+from app.api.abstract_facade import JSONAPIAbstractChangeloggedFacade, JSONAPIAbstractFacade
 from app.models import Correspondent
 
 

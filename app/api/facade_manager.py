@@ -19,55 +19,55 @@ from app.models import Collection, Correspondent, CorrespondentHasRole, Correspo
 class JSONAPIFacadeManager(object):
 
     FACADES = {
-        Collection.__name__: {
+        Collection.__tablename__: {
             "default": CollectionFacade,
             "search": CollectionFacade,
         },
-        Correspondent.__name__: {
+        Correspondent.__tablename__: {
             "default": CorrespondentFacade,
             "search": CorrespondentFacade,
         },
-        CorrespondentHasRole.__name__: {
+        CorrespondentHasRole.__tablename__: {
             "default": CorrespondentHasRoleFacade,
             "search": CorrespondentHasRoleFacade,
         },
-        CorrespondentRole.__name__: {
+        CorrespondentRole.__tablename__: {
             "default": CorrespondentRoleFacade,
             "search": CorrespondentRoleFacade,
         },
-        Document.__name__: {
+        Document.__tablename__: {
             "default": DocumentFacade,
             "search": DocumentSearchFacade,
         },
-        Image.__name__: {
+        Image.__tablename__: {
             "default": ImageFacade,
             "search": ImageFacade,
         },
-        Institution.__name__: {
+        Institution.__tablename__: {
             "default": InstitutionFacade,
             "search": InstitutionFacade,
         },
-        Language.__name__: {
+        Language.__tablename__: {
             "default": LanguageFacade,
             "search": LanguageFacade,
         },
-        Note.__name__: {
+        Note.__tablename__: {
             "default": NoteFacade,
             "search": NoteFacade,
         },
-        User.__name__: {
+        User.__tablename__: {
             "default": UserFacade,
             "search": UserFacade,
         },
-        UserRole.__name__: {
+        UserRole.__tablename__: {
             "default": UserRoleFacade,
             "search": UserRoleFacade,
         },
-        Witness.__name__: {
+        Witness.__tablename__: {
             "default": WitnessFacade,
             "search": WitnessFacade,
         },
-        Lock.__name__: {
+        Lock.__tablename__: {
             "default": LockFacade,
             "search": LockFacade,
         },
@@ -80,7 +80,7 @@ class JSONAPIFacadeManager(object):
     @staticmethod
     def get_facade_class(obj, facade_type="default"):
         try:
-            return JSONAPIFacadeManager.FACADES[obj.__class__.__name__][facade_type]
+            return JSONAPIFacadeManager.FACADES[obj.__class__.__tablename__][facade_type]
         except KeyError as e:
-            print("Facade %s %s unknown" % (obj.__class__.__name__, facade_type))
+            print("Facade %s %s unknown" % (obj.__class__.__tablename__, facade_type))
             return None

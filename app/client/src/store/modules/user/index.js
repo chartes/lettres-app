@@ -13,10 +13,12 @@ const mutations = {
     if (!data) {
       state.current_user = null;
     } else {
+      const roles = getRoles(included);
       state.current_user = {
         id: data.id,
         ...data.attributes,
-        roles: getRoles(included)
+        roles: roles,
+        isAdmin: roles.filter(r => r.name === "admin").length === 1
       };
     }
   }

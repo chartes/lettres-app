@@ -2,7 +2,9 @@ import http_with_csrf_token from '../../../modules/http-common';
 import {getUser} from "../../../modules/change-helpers";
 
 const state = {
-  changelog: {}
+  documentChangelog: [],
+  userChangelog: [],
+  fullChangelog: []
 };
 
 function cmp_dates(d1, d2) {
@@ -15,37 +17,60 @@ function cmp_dates(d1, d2) {
   return 0;
 }
 
+function addUserDataToChanges(changes, included) {
+  // sort changes by event-date
+  changes.sort((c1, c2) => {return cmp_dates(c2.attributes['event-date'], c1.attributes['event-date'])});
+
+  let changelog = [];
+  for(let _chg of changes) {
+    changelog.push({
+      data: _chg,
+      user: getUser(_chg.relationships.user.data.id, included)
+    });
+  }
+  return changelog;
+}
+
 const mutations = {
-  UPDATE_CHANGELOG (state, {objectType, changes, included}) {
-    console.log("UPDATE_CHANGELOG", objectType, changes);
-
-    // sort changes by event-date
-    let changelog = [];
-    changes.sort((c1, c2) => cmp_dates(c2.attributes['event-date'], c1.attributes['event-date']));
-
-    // TODO: passer en fonctionnel avec map
-    for(let _chg of changes) {
-      changelog.push({
-        data: _chg,
-        user: getUser(_chg.relationships.user.data.id, included)
-      });
-    }
-
+  UPDATE_DOCUMENT_CHANGELOG (state, {changes, included}) {
+    console.log("UPDATE_DOCUMENT_CHANGELOG", changes);
     // perform the state mutation
-    state.changelog[objectType] = changelog;
+    state.documentChangelog = addUserDataToChanges(changes, included);
+  },
+
+  UPDATE_USER_CHANGELOG (state, {changes, included}) {
+    console.log("UPDATE_USER_CHANGELOG", changes, included);
+    // perform the state mutation
+    state.userChangelog = addUserDataToChanges(changes, included);
+  },
+
+  UPDATE_FULL_CHANGELOG (state, {changes, included}) {
+    console.log("UPDATE_FULL_CHANGELOG", changes, included);
+    // perform the state mutation
+    state.fullChangelog = addUserDataToChanges(changes, included);
   }
 };
 
 const actions = {
 
-  fetchObjectChanges ({ commit }, {objectType, objectId}) {
+  fetchDocumentChangelog ({ commit }, {docId}) {
     const http = http_with_csrf_token();
-    return http.get(`${objectType}/${objectId}/changes?include=user`).then( response => {
-      commit('UPDATE_CHANGELOG', {objectType: objectType, changes: response.data.data, included: response.data.included});
+    return http.get(`documents/${docId}/changes?include=user`).then( response => {
+      commit('UPDATE_DOCUMENT_CHANGELOG', {changes: response.data.data, included: response.data.included});
     });
-
+  },
+  fetchUserChangelog ({ commit }, {user}) {
+    const http = http_with_csrf_token();
+    return http.get(`users/${user.id}/changes?include=user`).then( response => {
+      commit('UPDATE_USER_CHANGELOG', {changes: response.data.data, included: response.data.included});
+    });
+  },
+  fetchFullChangelog ({ commit }) {
+    const http = http_with_csrf_token();
+    return http.get(`changes?include=user`).then( response => {
+      commit('UPDATE_FULL_CHANGELOG', {changes: response.data.data, included: response.data.included});
+    });
   }
-
 };
 
 const getters = {
