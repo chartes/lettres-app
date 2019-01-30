@@ -24,33 +24,45 @@
       </aside>
 
       <section class="column documents-index__main-column">
-          <document-list v-if="!current_user"
-                      :documents="documents"
-                      :nb-pages="nbPages"
-                      :page-size="page_size"
-                      :current-page="currentPage"
-                      :on-page-change="goToDocPage"
-          />
+          <div v-if="!current_user" class="container is-fluid">
+            <document-list
+                        :documents="documents"
+                        :nb-pages="nbPages"
+                        :page-size="page_size"
+                        :current-page="currentPage"
+                        :on-page-change="goToDocPage"
+            />
+          </div>
           <tabs v-else tabsStyle="documents-index__main-column__tabs is-boxed is-centered">
             <tab name="Documents" :selected="true" icon-class="fas fa-file">
-              <document-list
-                      :documents="documents"
-                      :nb-pages="nbPages"
-                      :page-size="page_size"
-                      :current-page="currentPage"
-                      :on-page-change="goToDocPage"
-              />
+              <div class="container is-fluid">
+                <document-list
+                        :documents="documents"
+                        :nb-pages="nbPages"
+                        :page-size="page_size"
+                        :current-page="currentPage"
+                        :on-page-change="goToDocPage"
+                />
+              </div>
             </tab>
             <tab name="Mes favoris" icon-class="fas fa-bookmark">
+              <div class="container is-fluid">
                 <bookmarks/>
+              </div>
             </tab>
             <tab :name="current_user.isAdmin ? 'Verrous' : 'Mes verrous'" icon-class="fas fa-lock">
+              <div class="container is-fluid">
                 <locks :data="current_user.isAdmin ? fullLocks : userLocks"/>
+              </div>
             </tab>
             <tab :name="current_user.isAdmin ? 'Historique' : 'Mon historique'" icon-class="fas fa-history">
+              <div class="container is-fluid">
                 <changelog :data="current_user.isAdmin ? fullChangelog : userChangelog"/>
+              </div>
             </tab>
             <tab v-if="current_user.isAdmin" name="Utilisateurs" icon-class="fas fa-users">
+              <div class="container is-fluid">
+              </div>
             </tab>
           </tabs>
       </section>
@@ -152,6 +164,8 @@
   a.is-active {
     background: #962D3E;
   }
-
+  .container {
+    margin-top: 70px;
+  }
 
 </style>

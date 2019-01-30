@@ -56,6 +56,7 @@ const mutations = {
     state.links = payload.links;
     state.totalCount = payload.meta["total-count"];
   },
+
   LOADING_STATUS (state, payload) {
     state.documentLoading = payload;
   },
@@ -115,11 +116,9 @@ const actions = {
     })
   },
 
-  save ({ commit, rootGetters }, data) {
-
+  save ({ commit, rootGetters, rootState, dispatch }, data) {
+    const modifiedData = data;
     console.log('document/save', data)
-    //const auth = rootGetters['user/authHeader'];
-    //return http.put(`/documents`, { data: data }, auth)
     data.type = 'document'
     const http = http_with_csrf_token();
     return http.patch(`/documents/${data.id}`, { data })
@@ -127,6 +126,32 @@ const actions = {
         console.log('response', response)
         commit('UPDATE_DOCUMENT_DATA', response.data.data);
         //resolve(response.data)
+        return response.data.data
+      })
+      .then( doc => {
+        let desc = 'Modifications';
+        if (doc.attributes) {
+          desc = `Modification de ${Object.keys(modifiedData.attributes).join(', ')}`;
+        }
+        const data = {
+          type: 'change',
+          attributes: {
+            'object-type': 'document',
+            'object-id': doc.id,
+            'description': desc,
+          },
+          relationships: {
+            document: {
+              data: {id: doc.id, type: 'document'}
+            },
+            user: {
+              data: {id: rootState.user.current_user.id, type: 'user'}
+            }
+          }
+        };
+        return http.post(`changes`, { data }).then(response => {
+          dispatch('changelog/fetchDocumentChangelog', {docId: doc.id}, { root: true });
+        })
       })
       .catch(error => {
         console.error("error", error);
