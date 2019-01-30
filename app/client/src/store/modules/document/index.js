@@ -74,6 +74,8 @@ const actions = {
       'witnesses', 'languages'
     ];
 
+    this.dispatch('languages/fetch')
+
     const http = http_with_csrf_token();
     return http.get(`documents/${id}?include=${incs.join(',')}`).then( response => {
       commit('UPDATE_DOCUMENT', response.data);

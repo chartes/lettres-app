@@ -1,0 +1,15 @@
+.document__content {
+
+
+  counter-reset: notes-count 1;
+
+  a.note {
+
+    counter-increment: notes-count;
+    &::after {
+      //content: counter(notes-count);
+
+    }
+  }
+
+}

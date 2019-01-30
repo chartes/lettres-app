@@ -8,9 +8,12 @@
   import Document from './components/Document';
   export default {
     props: {
-      "doc_id" : {required: true}
+      doc_id : {required: true}
     },
     components: {Document}
   }
 </script>
 
+<style lang="scss">
+    @import "styles/styles.scss";
+</style>

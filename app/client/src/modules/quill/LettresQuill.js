@@ -3,76 +3,46 @@ import Delta from 'quill-delta';
 
 import PlainClipboard from './PlainClipboard'
 
-import BoldBlot from './blots/typo/Bold';
-import ItalicBlot from './blots/typo/Italic';
-import SmallCapsBlot from './blots/typo/SmallCaps';
-import SuperscriptBlot from './blots/typo/Superscript';
+import BoldBlot from './blots/Bold';
+import CiteBlot from './blots/Cite';
+import DelBlot from './blots/Del';
+import ItalicBlot from './blots/Italic';
+import LineBreak from './blots/LineBreak';
+import LinkBlot from './blots/Link';
+import LocationBlot from './blots/Location';
+import NoteBlot from './blots/Note';
+import PageBlot from './blots/Page';
+import ParagraphBlot from './blots/Paragraph';
+import PersonBlot from './blots/Person';
+import SuperscriptBlot from './blots/Superscript';
 
-import AbbreviationBlot from './blots/semantic/Abbreviation';
-import DelBlot from './blots/semantic/Del';
-import LinkBlot from './blots/semantic/Link';
-import BlockquoteBlot from './blots/semantic/Blockquote';
-import InlinequoteBlot from './blots/semantic/Inlinequote';
-import PersonBlot from './blots/semantic/Person';
-import CiteBlot from './blots/semantic/Cite';
-import LocationBlot from './blots/semantic/Location';
-import SegmentBlot from './blots/semantic/Segment';
 
-import LineBreak from './blots/editorial/LineBreak';
-import Paragraph from './blots/editorial/Paragraph';
-import Verse from './blots/editorial/Verse';
-import NoteBlot from './blots/editorial/Note';
-import ZoneBlot from './blots/editorial/Zone';
-import List from 'quill/formats/list';
-
-import SpeechpartBlot from './blots/editorial/SpeechpartBlot';
-import ColumnBreakBlot from './blots/editorial/ColumnBreak';
-
-//import Inline from 'quill/blots/inline';
 
 let Inline = Quill.import('blots/inline');
 let Embed = Quill.import('blots/embed');
 
 // Lower index means deeper in the DOM tree, since not found (-1) is for embeds
 Inline.order = [
-  'cursor', 'expan', 'inline',   // Must be lower
+  'cursor', 'inline',   // Must be lower
   'underline', 'strike', 'italic', 'bold', 'script',
   'del', 'link', 'code',
-  'person', 'location', 'note', 'zone', 'speechpart',          // Must be higher
+  'person', 'location',          // Must be higher
 ];
 
 Quill.register('modules/clipboard', PlainClipboard, true);
 
-Quill.register(LineBreak, true);
-
-// typo
 Quill.register(BoldBlot, true);
-Quill.register(ItalicBlot, true);
-Quill.register(SmallCapsBlot, true);
-Quill.register(SuperscriptBlot, true);
-
-// semantic
-Quill.register(AbbreviationBlot, true);
-Quill.register(DelBlot, true);
-Quill.register(LinkBlot, true);
-Quill.register(BlockquoteBlot, true);
-Quill.register(InlinequoteBlot, true);
-Quill.register(LocationBlot, true);
 Quill.register(CiteBlot, true);
-Quill.register(PersonBlot, true);
-Quill.register(SegmentBlot, true);
-
-// editorial
-Quill.register(Paragraph, true);
-Quill.register(Verse, true);
+Quill.register(DelBlot, true);
+Quill.register(ItalicBlot, true);
+Quill.register(LineBreak, true);
+Quill.register(LinkBlot, true);
+Quill.register(LocationBlot, true);
 Quill.register(NoteBlot, true);
-Quill.register(ZoneBlot, true);
-Quill.register(ColumnBreakBlot, true);
-//Quill.register(List, true);
-//Quill.register(ListItem, true);
-
-// other
-Quill.register(SpeechpartBlot, true);
+Quill.register(PageBlot, true);
+Quill.register(ParagraphBlot, true);
+Quill.register(PersonBlot, true);
+Quill.register(SuperscriptBlot, true);
 
 function lineBreakMatcher() {
   var newDelta = new Delta();
@@ -127,18 +97,6 @@ export {
   Embed,
 
   options,
-
-  BoldBlot,
-  ItalicBlot,
-  SmallCapsBlot,
-
-  AbbreviationBlot,
-  LinkBlot,
-  BlockquoteBlot,
-  InlinequoteBlot,
-
-  SpeechpartBlot,
-  ZoneBlot,
 
   Quill as default
 }

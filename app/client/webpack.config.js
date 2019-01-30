@@ -92,7 +92,7 @@ module.exports = {
     hints: false
   },
   devtool: '#eval-source-map',
-    optimization: {
+  optimization: {
     minimizer: [
       // we specify a custom UglifyJsPlugin here to get source maps in production
       new UglifyJsPlugin({

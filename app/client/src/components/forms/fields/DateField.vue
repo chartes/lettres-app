@@ -1,15 +1,16 @@
 <template>
-  <div class="field-text">
+  <div class="field-date">
     <field-label :label="label"/>
 
     <div class="field" v-if="editable && editMode" ref="hover">
       <div class="control">
         <input ref="input" class="input" type="text" v-model="value"
-           :tabindex="tabulationIndex"
            @change="inputChanged"
            @keyup.enter="exitEditMode(false)"
            @blur="exitEditMode(false)"
            @keyup.esc="cancelInput"
+           placeholder="AAAA-MM-JJ"
+           v-mask="{mask: '9999-99-99', placeholder: 'AAAA-MM-JJ'}"
         />
       </div>
     </div>
@@ -38,15 +39,15 @@
   import FieldLabel from './FieldLabel';
   import IconPenEdit from '../IconPenEdit';
   export default {
-    name: 'TextField',
+    name: 'DateField',
     components: {IconPenEdit, FieldLabel},
     props: {
       name: { type: String, required: true },
       label: { type: String, required: true },
       notSet: { type: String, default: '&mdash;' },
       editable: { type: Boolean, default: false },
-      tabulationIndex: { type: Number },
-      initialValue: null,
+      initialValue: { type: String },
+      tabulationIndex:  null,
     },
     data() {
       return {
@@ -71,8 +72,8 @@
       exitEditMode (preventEmit = false) {
         this.editMode = false
         if (this.valueChanged && !preventEmit) {
-          console.log(" => emit", this.name, this.initialValue, '=>', this.value)
-          this.$emit('changed', { value: this.value, name: this.name, oldValue: this.initialValue })
+          console.log(" => emit", this.value)
+          this.$emit('changed', { value: this.value, name: this.name })
         }
         this.valueChanged = false
       },
@@ -116,6 +117,7 @@
   .unknown {
     color: grey;
   }
+
   .field {
     outline: none;
   }
