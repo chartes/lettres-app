@@ -2,8 +2,8 @@ import http_with_csrf_token from '../../../modules/http-common';
 import {getUser} from "../../../modules/change-helpers";
 
 const state = {
-  documentChangelog: [],
-  userChangelog: [],
+  //documentChangelog: [],
+  //userChangelog: [],
   fullChangelog: []
 };
 
@@ -32,6 +32,7 @@ function addUserDataToChanges(changes, included) {
 }
 
 const mutations = {
+  /*
   UPDATE_DOCUMENT_CHANGELOG (state, {changes, included}) {
     console.log("UPDATE_DOCUMENT_CHANGELOG", changes);
     // perform the state mutation
@@ -43,7 +44,7 @@ const mutations = {
     // perform the state mutation
     state.userChangelog = addUserDataToChanges(changes, included);
   },
-
+  */
   UPDATE_FULL_CHANGELOG (state, {changes, included}) {
     console.log("UPDATE_FULL_CHANGELOG", changes, included);
     // perform the state mutation
@@ -52,22 +53,23 @@ const mutations = {
 };
 
 const actions = {
-
+  /*
   fetchDocumentChangelog ({ commit }, {docId}) {
     const http = http_with_csrf_token();
     return http.get(`documents/${docId}/changes?include=user`).then( response => {
       commit('UPDATE_DOCUMENT_CHANGELOG', {changes: response.data.data, included: response.data.included});
     });
   },
-  fetchUserChangelog ({ commit }, {user}) {
+  fetchUserChangelog ({ commit }, {user, filters}) {
     const http = http_with_csrf_token();
-    return http.get(`users/${user.id}/changes?include=user`).then( response => {
+    return http.get(`changes?include=user&filter[user_id]=${user.id}${filters ? '&'+filters : ''}`).then( response => {
       commit('UPDATE_USER_CHANGELOG', {changes: response.data.data, included: response.data.included});
     });
   },
-  fetchFullChangelog ({ commit }) {
+  */
+  fetchFullChangelog ({ commit }, filters) {
     const http = http_with_csrf_token();
-    return http.get(`changes?include=user`).then( response => {
+    return http.get(`changes?include=user${filters ? '&'+filters : ''}`).then( response => {
       commit('UPDATE_FULL_CHANGELOG', {changes: response.data.data, included: response.data.included});
     });
   }

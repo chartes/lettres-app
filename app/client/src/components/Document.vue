@@ -12,7 +12,7 @@
 
         </div>
       </div>
-    <changelog v-bind:compact="true" v-if="documentChangelog" :data="documentChangelog"/>
+      <changelog v-if="current_user" v-bind:compact="true"/>
     </article>
 
     <loading-indicator :active="documentLoading" :full-page="true"/>
@@ -36,18 +36,12 @@
     },
     created () {
       this.$store.dispatch('user/fetchCurrent').then(response => {
-
         this.$store.dispatch('document/fetch', this.doc_id);
-
-        if (this.current_user) {
-          this.$store.dispatch('changelog/fetchDocumentChangelog', {docId: this.doc_id});
-        }
       });
     },
     computed: {
       ...mapState('document', ['document', 'documentLoading']),
       ...mapState('user', ['current_user']),
-      ...mapState('changelog', ['documentChangelog'])
     }
   }
 </script>

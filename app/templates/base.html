@@ -33,7 +33,7 @@
                      <a class="navbar-item">À propos</a>
                      <div class="navbar-end">
                         {% if current_user.is_anonymous %}
-                        <a class="navbar-item" href="{{url_for("user.login")}}"><i class="fas fa-sign-in-alt"></i></a>
+                        <a class="navbar-item" href="{{url_for("user.login")}}"><span style="margin-right: 12px;">Connexion</span><i class="fas fa-sign-in-alt"></i></a>
                         {% else %}
                         <a class="navbar-item" href=""><i class="fas fa-user-alt"></i><span>{{current_user.username}}</span></a>
                         <a class="navbar-item" href="{{url_for("user.logout")}}"><i class="fas fa-sign-out-alt"></i></a>

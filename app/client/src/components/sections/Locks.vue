@@ -7,15 +7,25 @@
       <table class="table is-narrow" :class="!compact ? 'is-bordered is-striped is-hoverable' : ''">
         <thead :class="compact ? 'is-invisible' : ''">
           <tr>
-             <th>Date de début</th>
-             <th>Date de fin</th>
+             <th style="min-width: 180px;">Date de début</th>
+             <th style="min-width: 180px;">Date de fin</th>
              <th v-if="!compact">Objet</th>
              <th>Description</th>
              <th>Utilisateur</th>
           </tr>
         </thead>
          <tbody v-for="change in data" :key="change.id">
-            <lock-entry v-bind:compact="compact" :entry="change.data" :user="change.user"/>
+            <tr>
+              <td>{{change.data.attributes["event-date"]}}</td>
+              <td>{{change.data.attributes["expiration-date"]}}</td>
+              <td v-if="!compact">
+                 <a :href="url">
+                    <span class="tag">{{change.data.attributes["object-type"]}} {{change.data.attributes["object-id"]}}</span>
+                 </a>
+              </td>
+              <td>{{change.data.attributes["description"]}}</td>
+              <td><span class="tag">{{change.user.username}}</span></td>
+            </tr>
          </tbody>
       </table>
 
@@ -23,11 +33,9 @@
 </template>
 
 <script>
-  import LockEntry from '../ui/LockEntry';
-
   export default {
     name: "locks",
-    components : {LockEntry},
+    components : {},
     props: {
       data: {required: true},
       compact: {default: false}
@@ -48,5 +56,12 @@
 <style scoped>
   .section__title {
     margin-bottom: 20px;
+  }
+  td {
+    color: #962D3E;
+  }
+  td a:hover span{
+    background: #EBEBEB;
+    color: #348899 ;
   }
 </style>

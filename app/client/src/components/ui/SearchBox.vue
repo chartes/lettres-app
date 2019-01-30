@@ -1,8 +1,7 @@
 <template>
-    <section class="search-container">
+    <div class="search-container">
        <div class="field has-addons">
-
-         <div class="control container">
+         <div class="control">
            <input id="search-box" class="input search-container__search-box" type="text"
                   placeholder="Catherine de Medicis"
                   @keyup.enter="action()">
@@ -11,7 +10,7 @@
            <button :class="myClasses"><i class="fas fa-search"></i></button>
          </div>
        </div>
-    </section>
+    </div>
 </template>
 
 <script>
@@ -43,6 +42,8 @@
 <style scoped>
   .search-container__search-box {
     padding-left: 1em !important;
+
+    margin-bottom: 30px;
   }
   .search-container__search-box__submit-btn {
     color: #962D3E;
@@ -52,7 +53,6 @@
     color: #348899 ;
   }
   .search-container .control {
-    padding-bottom: 10px;
-    padding-top: 10px;
+     width: 400px;
   }
 </style>
