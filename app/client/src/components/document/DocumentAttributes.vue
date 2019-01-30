@@ -84,9 +84,9 @@
     },
     methods: {
       fieldChanged (fieldProps) {
-        console.log("fieldChanged", fieldProps)
-        const data = { id: this.document.id, attributes:{} }
-        data.attributes[fieldProps.name] = fieldProps.value
+        console.log("fieldChanged", fieldProps);
+        const data = { id: this.document.id, attributes: {} };
+        data.attributes[fieldProps.name] = fieldProps.value;
         this.$store.dispatch('document/save', data)
 
       },

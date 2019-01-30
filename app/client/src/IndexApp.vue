@@ -1,5 +1,5 @@
 <template>
-  <documentIndex :page_id="1" :page_size="15"></documentIndex>
+  <documentIndex/>
 </template>
 
 <script>

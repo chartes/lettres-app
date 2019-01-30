@@ -13,7 +13,7 @@ from flask_login import current_user
 from flask_sqlalchemy import BaseQuery
 from flask_user.decorators import _is_logged_in_with_confirmed_email
 from functools import wraps
-from sqlalchemy import func, desc, asc, column, union
+from sqlalchemy import func, desc, asc, column, union, text
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Query
 
@@ -124,7 +124,6 @@ class JSONAPIRouteRegistrar(object):
         filter_criteriae = []
         filters = [(f, f[len('filter['):-1])  # (filter_param, filter_fieldname)
                    for f in request.args.keys() if f.startswith('filter[') and f.endswith(']')]
-        print(filters)
         if len(filters) > 0:
             for filter_param, filter_fieldname in filters:
                 filter_fieldname = filter_fieldname.replace("-", "_")
@@ -153,7 +152,7 @@ class JSONAPIRouteRegistrar(object):
                         new_criteria = column(col, is_literal=True).isnot(None)
 
                     print(str(new_criteria))
-                    filter_criteriae.append(new_criteria)
+                    filter_criteriae.append(text(new_criteria))
 
             objs_query = objs_query.filter(*filter_criteriae)
         return objs_query
@@ -318,7 +317,11 @@ class JSONAPIRouteRegistrar(object):
                         if errors:
                             pass
                             #return errors
-                        included_resources.extend(included_res)
+                        # extend the included_res but avoid duplicates
+                        for _res in included_res:
+                            if (_res["type"], _res["id"]) not in [(r["type"], r["id"]) for r in included_resources]:
+                                included_resources.append(_res)
+                        #included_resources.extend(included_res)
             return JSONAPIResponseFactory.make_data_response(
                 [f.resource for f in facade_objs],
                 links=links,
@@ -464,7 +467,10 @@ class JSONAPIRouteRegistrar(object):
                         )
                         if errors:
                             return errors
-                        included_resources.extend(included_res)
+                        # extend the included_res but avoid duplicates
+                        for _res in included_res:
+                            if (_res["type"], _res["id"]) not in [(r["type"], r["id"]) for r in included_resources]:
+                                included_resources.append(_res)
 
                 return JSONAPIResponseFactory.make_data_response(
                     [obj.resource for obj in facade_objs],
@@ -570,6 +576,7 @@ class JSONAPIRouteRegistrar(object):
             api_version=self.api_version,
             type_plural=facade_class.TYPE_PLURAL, rel_name=rel_name
         )
+
         def resource_relationship_endpoint(id):
             url_prefix = request.host_url[:-1] + self.url_prefix
             f_obj, kwargs, errors = facade_class.get_resource_facade(url_prefix, id)
@@ -739,7 +746,10 @@ class JSONAPIRouteRegistrar(object):
                                 request.args["include"].split(","),
                                 f_obj
                             )
-                            included_resources.extend(i_resources)
+                            # extend the included_res but avoid duplicates
+                            for _res in i_resources:
+                                if (_res["type"], _res["id"]) not in [(r["type"], r["id"]) for r in included_resources]:
+                                    included_resources.append(_res)
                             if errors:
                                 return errors
                     # respond
