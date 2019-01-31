@@ -16,13 +16,7 @@
   import Pagination from '../ui/Pagination';
   import SearchBox from '../ui/SearchBox';
   import { mapState } from 'vuex';
-
-  function getUrlParameter(url, paramName) {
-    paramName = paramName.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-    const regex = new RegExp('[\\?&]' + paramName + '=([^&#]*)');
-    let results = regex.exec(url);
-    return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
-  }
+  import {getUrlParameter} from "../../modules/utils";
 
   export default {
     name: "document-list",
@@ -39,19 +33,25 @@
       this.goToDocPage(parseInt(this.currentPage));
     },
     methods: {
+      fetchAll() {
+        this.$store.dispatch('document/fetchAll', {pageId: this.currentPage, pageSize: this.pageSize});
+      },
       goToDocPage(num){
           this.currentPage = num;
           if (document.getElementById("search-box") && document.getElementById("search-box").value) {
             this.performSearch(this.currentPage);
           } else {
-            this.$store.dispatch('document/fetchAll', {pageId: num, pageSize: this.pageSize});
+            this.fetchAll();
           }
         },
       performSearch(numPage = 1){
         const term = document.getElementById("search-box").value;
-        if (term.length > 2) {
+        if (term.length > 1) {
           this.$store.dispatch('document/fetchSearch', {pageId: numPage, pageSize: this.pageSize, query: term});
           this.currentPage = numPage;
+        } else {
+          document.getElementById("search-box").value = null;
+          this.goToDocPage(1);
         }
       }
     },

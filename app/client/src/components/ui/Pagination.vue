@@ -1,5 +1,5 @@
 <template>
-    <div class="pagination buttons are-normal" v-if="end > 1">
+    <div class="container pagination buttons are-normal" v-if="end > 1">
         <span v-if="curr > 1" class="pagination__button button" @click="action(1)">1</span>
         <span v-if="curr > 2"  class="pagination__dot-dot">...</span>
         <span v-if="prev > 1" class="pagination__button button" @click="action(prev)">{{prev}}</span>

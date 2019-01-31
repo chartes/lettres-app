@@ -30,6 +30,10 @@
     methods: {
         toggle() {
             this.isActive = !this.isActive;
+            if (!this.isActive) {
+                this.filterValue = null;
+                this.action(this.filterValue);
+            }
         }
     }
   }

@@ -38,12 +38,12 @@
             </tab>
             <tab :name="current_user.isAdmin ? 'Verrous' : 'Mes verrous'" icon-class="fas fa-lock">
               <div class="container is-fluid">
-                <locks :data="current_user.isAdmin ? fullLocks : userLocks"/>
+                <locks page-size="25"/>
               </div>
             </tab>
             <tab :name="current_user.isAdmin ? 'Historique' : 'Mon historique'" icon-class="fas fa-history">
               <div class="container is-fluid">
-                <changelog />
+                <changelog page-size="25"/>
               </div>
             </tab>
             <tab v-if="current_user.isAdmin" name="Utilisateurs" icon-class="fas fa-users">
@@ -83,7 +83,6 @@
     },
     computed: {
       ...mapState('user', ['current_user']),
-      ...mapState('locks', ['fullLocks', 'userLocks']),
     },
     methods: {
     }

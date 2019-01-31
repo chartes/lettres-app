@@ -1,10 +1,12 @@
 <template>
    <section>
-      <header v-if="!compact">
+      <header>
          <h2 class="section__title subtitle">Historique des modifications</h2>
       </header>
 
-      <table class="table is-narrow" :class="!compact ? 'is-bordered is-striped is-hoverable' : ''">
+      <pagination :current="currentPage" :end="nbPages" :size="pageSize" :action="goToChangelogPage"/>
+
+      <table class="table is-narrow" :class="!compact ? 'is-bordered is-striped is-hoverable container' : ''">
         <thead>
           <tr>
              <th style="min-width: 180px;">
@@ -38,6 +40,9 @@
            </tr>
          </tbody>
       </table>
+
+      <pagination v-if="!compact" :current="currentPage" :end="nbPages" :size="pageSize" :action="goToChangelogPage"/>
+
    </section>
 </template>
 
@@ -45,18 +50,25 @@
   import { mapState } from 'vuex';
 
   import InputFilter from '../ui/InputFilter';
+  import Pagination from '../ui/Pagination';
+
   import http_with_csrf_token from "../../modules/http-common";
+  import {getUrlParameter} from "../../modules/utils";
 
   export default {
     name: "changelog",
-    components : {InputFilter},
+    components : {InputFilter, Pagination},
     props: {
-      compact: {default: false}
+      docId: {required: false},
+      compact: {default: false},
+      pageSize : {required: true},
     },
     data() {
       return {
         filteredDocId: null,
-        filteredUsername: null
+        filteredUsername: null,
+
+        currentPage: 1
       }
     },
     created() {
@@ -68,15 +80,19 @@
     },
     computed: {
       ...mapState('user', ['current_user']),
-      ...mapState('changelog', ['fullChangelog'])
+      ...mapState('changelog', ['fullChangelog', 'links']),
+      nbPages() {
+        return parseInt(this.links.last ? getUrlParameter(this.links.last, "page%5Bnumber%5D") : 1);
+      }
     },
     methods: {
        url: (entry) => `documents/${entry.attributes["object-id"]}`,
        computeFilters() {
            let _f = [];
            /* compute the document filter */
-           if (this.filteredDocId) {
-              _f.push(`filter[object-type]=document&filter[object-id]=${this.filteredDocId}`);
+           if (this.docId || this.filteredDocId) {
+               const objectId = this.docId ? this.docId : this.filteredDocId;
+              _f.push(`filter[object-type]=document&filter[object-id]=${objectId}`);
            }
            /* compute the user filter by fetching the user id from a username */
            if (this.filteredUsername) {
@@ -95,16 +111,25 @@
        },
        applyFilters() {
            this.computeFilters().then(filters => {
-             console.info(filters);
-             this.$store.dispatch('changelog/fetchFullChangelog', filters);
+             this.$store.dispatch('changelog/fetchFullChangelog', {
+               pageId: this.currentPage,
+               pageSize: this.pageSize,
+               filters :filters
+             });
            });
        },
        filterDoc(docId) {
            this.filteredDocId = parseInt(docId);
+           this.currentPage = 1;
            this.applyFilters();
        },
        filterUsername(username) {
            this.filteredUsername = username;
+           this.currentPage = 1;
+           this.applyFilters();
+       },
+       goToChangelogPage(num) {
+           this.currentPage = num;
            this.applyFilters();
        }
     }

@@ -10,12 +10,11 @@ from collections import OrderedDict
 
 from flask import request, current_app
 from flask_login import current_user
-from flask_sqlalchemy import BaseQuery
 from flask_user.decorators import _is_logged_in_with_confirmed_email
 from functools import wraps
 from sqlalchemy import func, desc, asc, column, union, text
 from sqlalchemy.exc import OperationalError
-from sqlalchemy.orm import Query
+from sqlalchemy.sql.operators import ColumnOperators
 
 from app import JSONAPIResponseFactory, api_bp, db
 from app.api.facade_manager import JSONAPIFacadeManager
@@ -122,6 +121,7 @@ class JSONAPIRouteRegistrar(object):
     def parse_filter_parameter(objs_query, model):
         # if request has filter parameter
         filter_criteriae = []
+        properties_fieldnames = []
         filters = [(f, f[len('filter['):-1])  # (filter_param, filter_fieldname)
                    for f in request.args.keys() if f.startswith('filter[') and f.endswith(']')]
         if len(filters) > 0:
@@ -131,6 +131,10 @@ class JSONAPIRouteRegistrar(object):
                 not_null_operator = filter_fieldname.startswith("!")
                 if not_null_operator:
                     filter_fieldname = filter_fieldname[1:]
+
+                if isinstance(getattr(model, filter_fieldname), property):
+                    properties_fieldnames.append((filter_param, filter_fieldname, not_null_operator))
+                    continue
 
                 for criteria in request.args[filter_param].split(','):
                     if not not_null_operator:
@@ -151,10 +155,35 @@ class JSONAPIRouteRegistrar(object):
                         col = "{table}.{field}".format(table=model.__tablename__, field=filter_fieldname)
                         new_criteria = column(col, is_literal=True).isnot(None)
 
-                    print(str(new_criteria))
+                    #print(str(new_criteria))
                     filter_criteriae.append(text(new_criteria))
 
             objs_query = objs_query.filter(*filter_criteriae)
+
+            # Filter the 'property fields' after the 'true' model fields
+            filtered_prop_ids = []
+            if len(properties_fieldnames) > 0:
+                for obj in objs_query.all():
+                    for p, p_field, not_null_operator in properties_fieldnames:
+                        if request.args[p] == '':
+                            criteriae = []
+                        else:
+                            criteriae = request.args[p].split(',')
+                        #print("prop criteriae:", criteriae)
+                        if not not_null_operator:
+                            if len(criteriae) == 0:
+                                if getattr(obj, p_field, False): # filter[myprop] means myprop is True (in pythonic terms)
+                                    filtered_prop_ids.append(obj.id)
+                            else:
+                                if getattr(obj, p_field, None) in criteriae: # filter[myprop]=values
+                                    filtered_prop_ids.append(obj.id)
+                        else:
+                            if not getattr(obj, p_field, True):  # filter[!myprop] means myprop is False (in pythonic terms)
+                                filtered_prop_ids.append(obj.id)
+
+                #print("filtered prop id:", filtered_prop_ids)
+                objs_query = objs_query.filter(ColumnOperators.in_(model.id, filtered_prop_ids))
+
         return objs_query
 
     def search(self, index, query, num_page, page_size):
