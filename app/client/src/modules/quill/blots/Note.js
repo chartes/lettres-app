@@ -7,9 +7,31 @@
 import Parchment from 'parchment';
 
 class NoteBlot extends Parchment.Embed {
+
   static create(value) {
     let node = super.create();
+    node.setAttribute('href', value);
+    node.innerText = '[note]'
     return node;
+  }
+
+  static formats(domNode) {
+    console.log('NoteBlot.formats', domNode.getAttribute('href'))
+    return { note: domNode.getAttribute('href') }
+  }
+
+  static value(domNode) {
+    console.log('note value', domNode.getAttribute('href'))
+    return domNode.getAttribute('href')
+  }
+
+  format(name, value) {
+    console.log('note format', name, value)
+    if (name === 'note' && value) {
+      this.domNode.setAttribute('href', value);
+    } else {
+      super.format(name, value);
+    }
   }
 
 }

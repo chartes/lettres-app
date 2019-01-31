@@ -65,17 +65,17 @@ Il doit être possible de modifier ces informations (changer le rôle d'un corre
 
 ### `admin` (administrateur)
 * tous les droits  (création, modification, suppression, (dé)publication) sur tous les documents
-* vérouillage et dévérouillage de tous les documents
+* verrouillage et déverrouillage de tous les documents
 * tous les droits (création, modification, suppression) sur toutes les collections
 * tous les droits  (création, modification, suppression) sur toutes les entités des référentiels (langues, personnes, rôle des correspondants, institutions de conservation)
 * invitation d'utilisateurs extérieurs à devenir contributeur ou administrateur
 
 ### `contributor` (contributeur)
 * lecture de tous les documents
-* modification de tout document non vérouillé par autrui (dont (dé)publication et association à une ou plusieurs collections)
+* modification de tout document non verrouillé par autrui (dont (dé)publication et association à une ou plusieurs collections)
 * modification des référentiels utilisés (langues, personnes, rôle des correspondants, institutions de conversation)
-* vérouillage d'un document non vérouillé par autrui
-* dévérouillage d'un document dont on possède le vérrou
+* verrouillage d'un document non verrouillé par autrui
+* déverrouillage d'un document dont on possède le vérrou
 
 ### utilisateur non identifié
   * lecture seule de tous les documents publiés
@@ -83,17 +83,17 @@ Il doit être possible de modifier ces informations (changer le rôle d'un corre
 ## Statut du document
 Le statut du document (`publié` ou `non publié`) conditionne uniquement l'accès en lecture de ce dernier aux visiteurs : un document au statut `non publié` ne sera pas visible pour un utilisateur non connecté.
 
-## Vérouillage du document
-Indépendamment de son statut de publication, un document peut être vérouillé par un contributeur afin d'éviter toute modification concomitante de la part d'autres contributeurs. Autrement dit, un contributeur peut se réserver le droit de modifier un document pour une période donnée.
+## Verrouillage du document
+Indépendamment de son statut de publication, un document peut être verrouillé par un contributeur afin d'éviter toute modification concomitante de la part d'autres contributeurs. Autrement dit, un contributeur peut se réserver le droit de modifier un document pour une période donnée.
 
 Un contributeur peut :
-- vérouiller un document pour une période renouvelable de 7 jours
-- dévérouiller un document qu'il a lui-même vérouillé avant la fin de la période de 7 jours
-- voir quels sont les documents vérouillés, par qui et pourquoi (lorsque la raison a été indiquée)
+- verrouiller un document pour une période renouvelable de 7 jours
+- déverrouiller un document qu'il a lui-même verrouillé avant la fin de la période de 7 jours
+- voir quels sont les documents verrouillés, par qui et pourquoi (lorsque la raison a été indiquée)
 
-Un administrateur peut vérouiller et déverouiller tous les documents à n'importe quel moment.
+Un administrateur peut verrouiller et déverrouiller tous les documents à n'importe quel moment.
 
-**Un document publié est dévérouillé**.
+**Un document publié est déverrouillé**.
 
 ## Historique des changements
 
