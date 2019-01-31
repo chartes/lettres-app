@@ -4,44 +4,42 @@
          <h2 class="section__title subtitle">Historique des modifications</h2>
       </header>
 
-      <pagination :current="currentPage" :end="nbPages" :size="pageSize" :action="goToChangelogPage"/>
+      <pagination :current="currentPage" :end="nbPages" :size="pageSize" :action="goToChangelogPage" :bottom-widget="!compact">
+          <table class="table is-narrow" :class="!compact ? 'is-bordered is-striped is-hoverable container' : ''">
+            <thead>
+              <tr>
+                 <th style="min-width: 180px;">
+                     <button class="button is-white " disabled>Date</button>
+                 </th>
+                 <th v-if="!compact">
+                     <input-filter label="Objet" place-holder="Numéro de document" :action="filterDoc"/>
+                 </th>
+                 <th>
+                     <button class="button is-white " disabled>Description</button>
+                 </th>
+                 <th style="min-width: 130px;">
+                     <input-filter v-if="current_user.isAdmin" label="Utilisateur" place-holder="nom d'utilisateur" :action="filterUsername"/>
+                     <button v-else class="button is-white " disabled>Utilisateur</button>
+                 </th>
+              </tr>
+            </thead>
 
-      <table class="table is-narrow" :class="!compact ? 'is-bordered is-striped is-hoverable container' : ''">
-        <thead>
-          <tr>
-             <th style="min-width: 180px;">
-                 <button class="button is-white " disabled>Date</button>
-             </th>
-             <th v-if="!compact">
-                 <input-filter label="Objet" place-holder="Numéro de document" :action="filterDoc"/>
-             </th>
-             <th>
-                 <button class="button is-white " disabled>Description</button>
-             </th>
-             <th style="min-width: 130px;">
-                 <input-filter v-if="current_user.isAdmin" label="Utilisateur" place-holder="nom d'utilisateur" :action="filterUsername"/>
-                 <button v-else class="button is-white " disabled>Utilisateur</button>
-             </th>
-          </tr>
-        </thead>
-
-         <tbody v-for="change in fullChangelog" :key="change.id">
-            <tr>
-              <td>{{change.data.attributes["event-date"]}}</td>
-              <td v-if="!compact">
-                 <a :href="url(change.data)">
-                    <span class="tag">
-                        {{change.data.attributes["object-type"]}} {{change.data.attributes["object-id"]}}
-                    </span>
-                 </a>
-              </td>
-              <td>{{change.data.attributes["description"]}}</td>
-              <td><span class="tag">{{change.user.username}}</span></td>
-           </tr>
-         </tbody>
-      </table>
-
-      <pagination v-if="!compact" :current="currentPage" :end="nbPages" :size="pageSize" :action="goToChangelogPage"/>
+             <tbody v-for="change in fullChangelog" :key="change.id">
+                <tr>
+                  <td>{{change.data.attributes["event-date"]}}</td>
+                  <td v-if="!compact">
+                     <a :href="url(change.data)">
+                        <span class="tag">
+                            {{change.data.attributes["object-type"]}} {{change.data.attributes["object-id"]}}
+                        </span>
+                     </a>
+                  </td>
+                  <td>{{change.data.attributes["description"]}}</td>
+                  <td><span class="tag">{{change.user.username}}</span></td>
+               </tr>
+             </tbody>
+          </table>
+      </pagination>
 
    </section>
 </template>
@@ -137,6 +135,9 @@
 </script>
 
 <style scoped>
+  table {
+    min-width: 75%;
+  }
   .section__title {
     margin-bottom: 20px;
   }

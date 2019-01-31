@@ -1,13 +1,13 @@
 <template>
   <div>
     <search-box :action="performSearch" :loading="documentLoading"/>
-    <pagination :current="currentPage" :end="nbPages" :size="pageSize" :action="goToDocPage"/>
+    <pagination :current="currentPage" :end="nbPages" :size="pageSize" :action="goToDocPage">
       <ul id="preview-cards" >
         <li v-for="doc in documents" :key="doc.id">
           <document-preview-card :doc_id="doc.id"></document-preview-card>
         </li>
       </ul>
-    <pagination :current="currentPage" :end="nbPages" :size="pageSize" :action="goToDocPage"/>
+    </pagination>
   </div>
 </template>
 

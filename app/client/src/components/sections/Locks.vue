@@ -4,55 +4,54 @@
          <h2 class="section__title subtitle">Statuts des verrouillages</h2>
       </header>
 
-      <pagination :current="currentPage" :end="nbPages" :size="pageSize" :action="goToLocksPage"/>
+      <pagination :current="currentPage" :end="nbPages" :size="pageSize" :action="goToLocksPage" :bottom-widget="!compact">
+          <table class="table container is-narrow" :class="!compact ? 'is-bordered is-striped is-hoverable' : ''">
+            <thead>
+              <tr>
+                 <th style="min-width: 180px;">
+                     <button class="button is-white " disabled>Date</button>
+                 </th>
+                 <th style="min-width: 180px;">
+                     <button class="button is-white " disabled>Date d'expiration</button>
+                 </th>
+                 <th>
+                     <input-filter label="Statut" place-holder="A ou E (Actif ou Expiré)" :action="filterStatus"/>
+                 </th>
+                 <th v-if="!compact">
+                     <input-filter label="Objet" place-holder="Numéro de document" :action="filterDoc"/>
+                 </th>
+                 <th>
+                     <button class="button is-white " disabled>Description</button>
+                 </th>
+                 <th style="min-width: 130px;">
+                     <input-filter v-if="current_user.isAdmin" label="Utilisateur" place-holder="nom d'utilisateur" :action="filterUsername"/>
+                     <button v-else class="button is-white " disabled>Utilisateur</button>
+                 </th>
+              </tr>
+            </thead>
 
-      <table class="table container is-narrow" :class="!compact ? 'is-bordered is-striped is-hoverable' : ''">
-        <thead>
-          <tr>
-             <th style="min-width: 180px;">
-                 <button class="button is-white " disabled>Date</button>
-             </th>
-             <th style="min-width: 180px;">
-                 <button class="button is-white " disabled>Date d'expiration</button>
-             </th>
-             <th>
-                 <input-filter label="Statut" place-holder="A ou E (Actif ou Expiré)" :action="filterStatus"/>
-             </th>
-             <th v-if="!compact">
-                 <input-filter label="Objet" place-holder="Numéro de document" :action="filterDoc"/>
-             </th>
-             <th>
-                 <button class="button is-white " disabled>Description</button>
-             </th>
-             <th style="min-width: 130px;">
-                 <input-filter v-if="current_user.isAdmin" label="Utilisateur" place-holder="nom d'utilisateur" :action="filterUsername"/>
-                 <button v-else class="button is-white " disabled>Utilisateur</button>
-             </th>
-          </tr>
-        </thead>
+             <tbody v-for="lock in fullLocks" :key="lock.id">
+                <tr>
+                  <td>{{lock.data.attributes["event-date"]}}</td>
+                  <td>{{lock.data.attributes["expiration-date"]}}</td>
+                  <td>
+                      <span v-if="lock.data.attributes['is-active']" class="tag is-warning status">Actif</span>
+                      <span v-else class="tag is-static status">Expiré</span>
+                  </td>
+                  <td v-if="!compact">
+                     <a :href="url(lock.data)">
+                        <span class="tag">
+                            {{lock.data.attributes["object-type"]}} {{lock.data.attributes["object-id"]}}
+                        </span>
+                     </a>
+                  </td>
+                  <td>{{lock.data.attributes["description"]}}</td>
+                  <td><span class="tag">{{lock.user.username}}</span></td>
+               </tr>
+             </tbody>
+          </table>
+      </pagination>
 
-         <tbody v-for="lock in fullLocks" :key="lock.id">
-            <tr>
-              <td>{{lock.data.attributes["event-date"]}}</td>
-              <td>{{lock.data.attributes["expiration-date"]}}</td>
-              <td>
-                  <span v-if="lock.data.attributes['is-active']" class="tag is-warning status">Actif</span>
-                  <span v-else class="tag is-static status">Expiré</span>
-              </td>
-              <td v-if="!compact">
-                 <a :href="url(lock.data)">
-                    <span class="tag">
-                        {{lock.data.attributes["object-type"]}} {{lock.data.attributes["object-id"]}}
-                    </span>
-                 </a>
-              </td>
-              <td>{{lock.data.attributes["description"]}}</td>
-              <td><span class="tag">{{lock.user.username}}</span></td>
-           </tr>
-         </tbody>
-      </table>
-
-      <pagination :current="currentPage" :end="nbPages" :size="pageSize" :action="goToLocksPage"/>
    </section>
 </template>
 
@@ -143,7 +142,7 @@
            this.applyFilters();
        },
        filterStatus(status) {
-           this.filteredStatus = status.toUpperCase();
+           this.filteredStatus = status ? status.toUpperCase() : '';
            this.currentPage = 1;
            this.applyFilters();
        },
