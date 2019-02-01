@@ -73,11 +73,6 @@ class Document(db.Model, ChangesMixin):
                                 backref=db.backref('documents', ))
     next_document = db.relationship("Document", backref=db.backref('prev_document', remote_side=id), uselist=False)
 
-    #locks = db.relationship("Lock",
-    #                        primaryjoin="and_(Document.id==foreign(Lock.object_id),"
-    #                                    "Lock.object_type=='{0}',"
-    #                                    "Lock.expiration_date > {1})".format(__tablename__, 'func.current_date()'))
-
     locks = db.relationship("Lock",
                             primaryjoin="and_(Document.id==foreign(Lock.object_id), Lock.object_type=='{0}')".format(__tablename__))
 
@@ -226,7 +221,7 @@ class User(db.Model, UserMixin):
     last_name = db.Column('lastname', db.String(), nullable=False, server_default='')
 
     roles = db.relationship('UserRole', secondary=association_user_has_role)
-    bookmarked_documents = db.relationship("Document", secondary=association_user_has_bookmark)
+    bookmarks = db.relationship("Document", secondary=association_user_has_bookmark)
 
     @staticmethod
     def add_default_users():

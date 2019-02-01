@@ -54,16 +54,18 @@
     }  ,
     methods: {
        performAction(num) {
-           if (!parseInt(num)) {
-               num = 1;
+           if (this.currentPage !== num) {
+               if (!parseInt(num)) {
+                   num = 1;
+               }
+               if (num > this.end) {
+                   num = this.end;
+               } else if (num < this.start) {
+                   num = this.start;
+               }
+               this.currentPage = num;
+               this.action(this.currentPage);
            }
-           if (num > this.end) {
-               num = this.end;
-           } else if (num < this.start) {
-               num = this.start;
-           }
-           this.currentPage = num;
-           this.action(this.currentPage);
        },
     }
   }

@@ -1,9 +1,9 @@
 
-from app.api.abstract_facade import JSONAPIAbstractFacade
+from app.api.abstract_facade import  JSONAPIAbstractChangeloggedFacade
 from app.models import User, datetime_to_str
 
 
-class UserFacade(JSONAPIAbstractFacade):
+class UserFacade(JSONAPIAbstractChangeloggedFacade):
     """
 
     """
@@ -62,6 +62,7 @@ class UserFacade(JSONAPIAbstractFacade):
         from app.api.user_role.facade import UserRoleFacade
         from app.api.changelog.facade import ChangelogFacade
         from app.api.lock.facade import LockFacade
+        from app.api.document.facade import DocumentFacade
 
         self.relationships = {
             "roles": {
@@ -76,10 +77,11 @@ class UserFacade(JSONAPIAbstractFacade):
                                                                                     to_many=True),
                 "resource_getter": self.get_related_resources(LockFacade, "locks", to_many=True),
             },
-            "changes": {
-                "links": self._get_links(rel_name="roles"),
-                "resource_identifier_getter": self.get_related_resource_identifiers(ChangelogFacade, "changes",
+
+            "bookmarks": {
+                "links": self._get_links(rel_name="bookmarks"),
+                "resource_identifier_getter": self.get_related_resource_identifiers(DocumentFacade, "bookmarks",
                                                                                     to_many=True),
-                "resource_getter": self.get_related_resources(ChangelogFacade, "changes", to_many=True),
+                "resource_getter": self.get_related_resources(DocumentFacade, "bookmarks", to_many=True),
             }
         }

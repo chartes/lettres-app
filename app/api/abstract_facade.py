@@ -194,6 +194,46 @@ class JSONAPIAbstractFacade(object):
         return resource, errors
 
     @staticmethod
+    def delete_related_resources(obj, related_resources):
+        errors = None
+        resource = None
+        try:
+            if obj is None:
+                raise Exception("Object is None")
+
+            # update related resources
+            for rel_name, rel_data in related_resources.items():
+                rel_name = rel_name.replace("-", "_")
+                #print("  setting rel", rel_name, rel_data)
+                if hasattr(obj, rel_name):
+                    #print(getattr(obj, rel_name))
+                    #print(obj, rel_name, [r for r in getattr(obj, rel_name)
+                    #                            if r.id not in
+                    #                            [rd.id for rd in rel_data]])
+                    try:
+                        setattr(obj, rel_name, [r for r in getattr(obj, rel_name)
+                                                if r.id not in
+                                                [rd.id for rd in rel_data]])
+                    except Exception:
+                        setattr(obj, rel_name, None)
+                else:
+                    raise AttributeError("Relationship %s does not exist" % rel_name)
+
+            db.session.add(obj)
+            db.session.commit()
+        except Exception as e:
+            print(e)
+            errors = {
+                "status": 404 if obj is None else 403,
+                "title": "Error deleting related resource from '%s' with data: %s" % (
+                    obj.__class__.__name__, str([obj.id,  related_resources])),
+                "detail": str(e)
+            }
+            db.session.rollback()
+
+        return errors
+
+    @staticmethod
     def delete_resource(obj):
         errors = None
         try:

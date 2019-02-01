@@ -33,7 +33,7 @@
             </tab>
             <tab name="Mes favoris" icon-class="fas fa-bookmark">
               <div class="container is-fluid">
-                <bookmarks/>
+                <bookmarks page-size="25"/>
               </div>
             </tab>
             <tab :name="current_user.isAdmin ? 'Verrous' : 'Mes verrous'" icon-class="fas fa-lock">

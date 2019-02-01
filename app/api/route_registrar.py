@@ -1305,3 +1305,82 @@ class JSONAPIRouteRegistrar(object):
         # register the rule
         api_bp.add_url_rule(single_obj_rule, endpoint=single_obj_endpoint.__name__, view_func=single_obj_endpoint,
                             methods=["DELETE"])
+
+    def register_relationship_delete_route(self,  facade_class, rel_name, decorators=()):
+        """
+
+        :param model:
+        :param facade_class:
+        :return:
+        """
+
+        resource_relationship_rule = '/api/{api_version}/{type_plural}/<id>/relationships/{rel_name}'.format(
+            api_version=self.api_version,
+            type_plural=facade_class.TYPE_PLURAL,
+            rel_name=rel_name
+        )
+
+        def resource_relationship_endpoint(id):
+            # parse the body data
+            try:
+                request_data = json_loads(request.data)
+
+            except json.decoder.JSONDecodeError as e:
+                return JSONAPIResponseFactory.make_errors_response(
+                    {"status": 403, "title": "The request body is malformed", "detail": str(e)}, status=403
+                )
+
+            if "data" not in request_data:
+                return JSONAPIResponseFactory.make_errors_response(
+                    {"status": 403, "title": "Missing 'data' section" % request.data}, status=403
+                )
+            else:
+                if not isinstance(request_data["data"], list):
+                    request_data = [request_data["data"]]
+                else:
+                    request_data = request_data["data"]
+
+                related_resources = {rel_name: []}
+                for rdi in request_data:
+                    if rdi is None:
+                        related_resources[rel_name].append(None)
+                    else:
+                        related_resource, errors = self.get_obj_from_resource_identifier(rdi)
+                        if errors:
+                            return JSONAPIResponseFactory.make_errors_response(errors, status=403)
+
+                        if related_resource is None:
+                            return JSONAPIResponseFactory.make_errors_response(
+                                {"status": 404, "title": "Resource %s does not exist" % rdi}, status=404
+                            )
+                        related_resources[rel_name].append(related_resource)
+            # data to be removed from object 'type_plural' 'id' are in related_resources dict
+
+            w_rel_links, w_rel_data = JSONAPIRouteRegistrar.get_relationships_mode(request.args)
+            url_prefix = request.host_url[:-1] + self.url_prefix
+            f_obj, kwargs, errors = facade_class.get_resource_facade(url_prefix, id,
+                                                                     with_relationships_links=w_rel_links,
+                                                                     with_relationships_data=w_rel_data)
+            # ===============================
+            # Delete the related resources
+            # ===============================
+            errors = facade_class.delete_related_resources(f_obj.obj, related_resources)
+            if errors is not None:
+                return JSONAPIResponseFactory.make_errors_response(errors, status=404)
+
+            f_obj.reindex("update", propagate=True)
+
+            return JSONAPIResponseFactory.make_data_response(None, None, None, None, status=204)
+
+        # APPLY decorators if any
+        for dec in decorators:
+            resource_relationship_endpoint = dec(resource_relationship_endpoint)
+
+        resource_relationship_endpoint.__name__ = "delete_%s_%s" % (
+            facade_class.TYPE_PLURAL.replace("-", "_"), rel_name
+        )
+        # register the rule
+        print("register ", resource_relationship_rule, )
+        api_bp.add_url_rule(resource_relationship_rule, endpoint=resource_relationship_endpoint.__name__,
+                            view_func=resource_relationship_endpoint,
+                            methods=["DELETE"])

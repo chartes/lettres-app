@@ -6,6 +6,7 @@ import languages from './modules/languages';
 import user from './modules/user';
 import changelog from './modules/changelog';
 import locks from './modules/locks';
+import bookmarks from './modules/bookmarks';
 
 Vue.use(Vuex);
 
@@ -15,6 +16,7 @@ export default new Vuex.Store({
       languages,
       user,
       changelog,
-      locks
+      locks,
+      bookmarks
     }
 });
