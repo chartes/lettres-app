@@ -36,6 +36,7 @@ class LockFacade(JSONAPIAbstractFacade):
 
                 "event-date": datetime_to_str(self.obj.event_date),
                 "expiration-date": datetime_to_str(self.obj.expiration_date),
+                "is-active": self.obj.is_active,
                 "description": self.obj.description,
             },
             "meta": self.meta,

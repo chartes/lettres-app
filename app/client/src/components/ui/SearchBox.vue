@@ -43,7 +43,7 @@
   .search-container__search-box {
     padding-left: 1em !important;
 
-    margin-bottom: 30px;
+    margin-bottom: 50px;
   }
   .search-container__search-box__submit-btn {
     color: #962D3E;

@@ -1,12 +1,26 @@
 <template>
-    <div class="pagination buttons are-normal" v-if="end > 1">
-        <span v-if="curr > 1" class="pagination__button button" @click="action(1)">1</span>
-        <span v-if="curr > 2"  class="pagination__dot-dot">...</span>
-        <span v-if="prev > 1" class="pagination__button button" @click="action(prev)">{{prev}}</span>
-        <span v-if="curr <= end" class="pagination__button button pagination__button--current" @click="action(curr)">{{curr}}</span>
-        <span v-if="next > 1 && next < end" class="pagination__button button" @click="action(next)">{{next}}</span>
-        <span v-if="end > 1 && next+1 < end" class="pagination__dot-dot">...</span>
-        <span v-if="end > 1 && curr < end" class="pagination__button button" @click="action(end)">{{end}}</span>
+    <div>
+        <div class="container pagination buttons are-normal" v-if="topWidget && end > 1">
+            <span class="icon pagination__button button"  @click="performAction(start)"><i class="fas fa-step-backward"></i></span>
+            <span class="icon pagination__button button"  @click="performAction(currentPage-1)"><i class="fas fa-chevron-left"></i></span>
+            <span class="pagination__button__input-box">
+                <input class="input" style="width: 60px; height: 24px" v-model="currentPage" @change="performAction(currentPage)"/>
+                <span>/ {{end}}</span>
+            </span>
+            <span class="icon pagination__button button"  @click="performAction(currentPage+1)"><i class="fas fa-chevron-right"></i></span>
+            <span class="icon pagination__button button" @click="performAction(end)"><i class="fas fa-step-forward"></i></span>
+        </div>
+        <slot></slot>
+        <div class="container pagination buttons are-normal" v-if="bottomWidget && end > 1">
+            <span class="icon pagination__button button"  @click="performAction(start)"><i class="fas fa-step-backward"></i></span>
+            <span class="icon pagination__button button"  @click="performAction(currentPage-1)"><i class="fas fa-chevron-left"></i></span>
+            <span class="pagination__button__input-box">
+                <input class="input" style="width: 60px; height: 24px" v-model="currentPage" @change="performAction(currentPage)"/>
+                <span>/ {{end}}</span>
+            </span>
+            <span class="icon pagination__button button"  @click="performAction(currentPage+1)"><i class="fas fa-chevron-right"></i></span>
+            <span class="icon pagination__button button" @click="performAction(end)"><i class="fas fa-step-forward"></i></span>
+        </div>
     </div>
 </template>
 
@@ -15,47 +29,63 @@
     name: "pagination",
     props: {
         start: {default: 1, type: Number},
-        current: { required: true, default: 1, type: Number},
+        current: { required: true, default: 1},
         end: { required: true, type: Number },
-        action: { required: true, type: Function}
+        action: { required: true, type: Function},
+
+        topWidget: {default: true},
+        bottomWidget: {default: true}
     },
     data () {
       return {
-
+        currentPage : parseInt(this.current)
       }
     },
     created() {
+
     },
     computed: {
-        prev: function() { return (this.current > 1 ) ? this.current - 1 : 1},
-        curr: function() { return this.current },
-        next: function() { return (this.current < this.end) ? this.current + 1 : this.end },
+
+    },
+    watch: {
+        current: function() {
+           this.performAction(this.current);
+        }
+    }  ,
+    methods: {
+       performAction(num) {
+           if (this.currentPage !== num) {
+               if (!parseInt(num)) {
+                   num = 1;
+               }
+               if (num > this.end) {
+                   num = this.end;
+               } else if (num < this.start) {
+                   num = this.start;
+               }
+               this.currentPage = num;
+               this.action(this.currentPage);
+           }
+       },
     }
   }
 </script>
 
 <style scoped>
-    .pagination + span {
-        color: #962D3E;
-        background: white;
-    }
-    .pagination {
+    .pagination, .icon, input {
        justify-content: center;
+       color: #4a4a4a;
+    }
+    .pagination__button__input-box {
+        margin-right: 10px;
     }
     .pagination__button {
-        min-width: 40px;
+        min-width: 28px;
+        margin-bottom: 0px;
     }
     .pagination__button:hover {
         background: #962D3E;
         color: white;
     }
-    .pagination__dot-dot {
-        margin-left: 6px;
-        margin-right: 12px;
-        color: #962D3E;
-    }
-    .pagination__button--current {
-        background: #962D3E;
-        color: white;
-    }
+
 </style>

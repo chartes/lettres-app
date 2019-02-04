@@ -12,7 +12,9 @@
 
         </div>
       </div>
-      <changelog v-if="current_user" v-bind:compact="true"/>
+      <div style="margin-left: 0px;">
+        <changelog v-if="current_user" v-bind:compact="true" :doc-id="doc_id" page-size="10"/>
+      </div>
     </article>
 
     <loading-indicator :active="documentLoading" :full-page="true"/>
