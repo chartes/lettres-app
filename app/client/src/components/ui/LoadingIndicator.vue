@@ -1,8 +1,8 @@
 <template>
     <transition name="fade">
-        <div class="loading-overlay" v-if="active" :class="myClasses">
-            <div class="loading-background"></div>
-            <div class="loading-icon">loading</div>
+        <div class="loading__overlay" v-if="active" :class="myClasses">
+            <div class="loading__background"></div>
+            <div class="loading__icon"><span>loading</span></div>
         </div>
     </transition>
 </template>

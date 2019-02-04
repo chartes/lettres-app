@@ -2,22 +2,13 @@
   <section class="document__notice section">
 
     <header class="title">
-      <span class="tag doc-tag">Document {{document.id}}</span>
+      <p><span class="tag doc-tag">Document {{document.id}}</span></p>
       <span><h1 class="title" v-html="titleContent"></h1></span>
     </header>
 
-    <document-attributes></document-attributes>
+    <document-attributes/>
 
-    <div class="document__witnesses" v-if="witnesses.length > 0">
-      <header>
-        <h2 class="document__witnesses--title subtitle">Témoins</h2>
-      </header>
-      <div class="document__witnesses--content">
-        <ul v-for="witness in witnesses">
-          <li><span v-html="witness.content"></span></li>
-        </ul>
-      </div>
-    </div>
+    <document-witnesses :list="witnesses"/>
 
     <div class="document__collections" v-if="collections.length > 0">
       <header>
@@ -46,9 +37,10 @@
 
   import { mapState } from 'vuex'
   import DocumentAttributes from './DocumentAttributes';
+  import DocumentWitnesses from './DocumentWitnesses';
   export default {
     name: 'DocumentNotice',
-    components: {DocumentAttributes},
+    components: {DocumentWitnesses, DocumentAttributes},
     props: {
       data: {
         type: Object,
@@ -70,6 +62,6 @@
     margin-bottom: 40px;
   }
   h2 {
-    margin-top: 20px;
+    margin: 1rem 0 .5rem 0;
   }
 </style>

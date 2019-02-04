@@ -1,5 +1,7 @@
 @charset "utf-8";
 
+// Based on ITCSS and BEM: https://www.xfive.co/blog/itcss-scalable-maintainable-css-architecture/
+
 @import "vendor/bulma";
 
 // Settings – used with preprocessors and contain font, colors definitions, etc.
@@ -45,7 +47,12 @@
 
 //
 
+@import "components/field.text";
+@import "components/field.select-autocomplete";
+@import "components/icons";
+@import "components/loading";
 @import "components/note";
+@import "components/document.witness-list";
 
 
 // Utilities / trumps – utilities and helper classes

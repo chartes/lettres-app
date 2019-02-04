@@ -1,9 +1,9 @@
 <template>
     <div class="field field-multiselect">
         <field-label :label="label"/>
-        <div class="field selected-list  is-grouped is-grouped-multiline">
+        <div class="field selected-list is-grouped is-grouped-multiline">
             <div class="control" v-for="item in items" :key="item[optionIdField]">
-                <div class="tags has-addons selected-item">
+                <div class="tags has-addons selected-item are-medium">
                     <span class="tag">{{item[optionLabelField]}}</span>
                     <a v-if="editable" class="tag is-delete" @click.prevent="deleteItem(item[optionIdField])"></a>
                 </div>

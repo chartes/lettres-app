@@ -20,7 +20,7 @@
               v-on:changed="fieldChanged"/>
     </div>
     <div class="column is-one-third">
-      <text-field
+      <text-field-in-place
               :tabulation-index="0"
               label="creation-label"
               name="creation-label"
@@ -30,7 +30,7 @@
               v-on:changed="fieldChanged"/>
     </div>
     <div class="column is-one-third">
-      <text-field
+      <text-field-in-place
               :tabulation-index="0"
               label="Date de lieu d'expédition"
               name="location-date-from-ref"
@@ -40,7 +40,7 @@
               v-on:changed="fieldChanged"/>
     </div>
     <div class="column is-one-third">
-      <text-field
+      <text-field-in-place
               :tabulation-index="0"
               label="Date de lieu de réception"
               name="location-date-to-ref"
@@ -61,13 +61,13 @@
 </template>
 <script>
   import { mapState } from 'vuex';
-  import TextField from '../forms/fields/TextField';
+  import TextFieldInPlace from '../forms/fields/TextFieldInPlace';
   import MultiselectField from '../forms/fields/MultiselectField';
   import DateField from '../forms/fields/DateField';
 
   export default {
     name: 'DocumentAttributes',
-    components: {DateField, MultiselectField, TextField },
+    components: {TextFieldInPlace, DateField, MultiselectField, TextFieldInPlace },
     props: {
       editable: {
         type: Boolean,

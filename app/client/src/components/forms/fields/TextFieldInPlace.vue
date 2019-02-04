@@ -1,16 +1,15 @@
 <template>
-  <div class="field-date">
+  <div class="field-text">
     <field-label :label="label"/>
 
-
-    <div class="field field-date__field" v-if="editable && editMode" ref="hover">
+    <div class="field field-text__field" v-if="editable && editMode" ref="hover">
       <div class="control">
-        <input ref="input" class="field-date__input" type="text" v-model="value"
+        <input ref="input" class="input field-text__input" type="text" v-model="value"
+           :tabindex="tabulationIndex"
            @change="inputChanged"
            @keyup.enter="exitEditMode(false)"
            @blur="exitEditMode(false)"
            @keyup.esc="cancelInput"
-           v-mask="{mask: '9999-99-99', placeholder: 'AAAA-MM-JJ'}"
         />
       </div>
     </div>
@@ -21,9 +20,9 @@
          @focus="enterEditMode"
          @mouseover="overField"
          @mouseout="outField">
-      <div class="control">
-        <span class="field-date__input field-date__input--fake" :class="unknownClass" v-html="value || notSet"/>
-        <icon-pen-edit class="field-date__icon" />
+      <div class="field-text__control control">
+        <span class="field-text__input field-text__input--fake" :class="unknownClass" v-html="value || notSet"/>
+        <icon-pen-edit class="field-text__icon" />
       </div>
     </div>
 
@@ -35,12 +34,11 @@
 </template>
 
 <script>
-  import Vue from 'vue';
   import FieldLabel from './FieldLabel';
   import IconPenEdit from '../icons/IconPenEdit';
   import TextFieldMixins from './TextFieldMixins';
   export default {
-    name: 'DateField',
+    name: 'TextFieldInPlace',
     components: {IconPenEdit, FieldLabel},
     mixins: [TextFieldMixins],
   }

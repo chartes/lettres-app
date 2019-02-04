@@ -1,0 +1,26 @@
+.witness-list {
+
+  margin-bottom: 2em;
+
+  &__header {
+    margin-bottom: 1em;
+  }
+
+  &__list {
+    //list-style-type: square;
+
+  }
+}
+.witness-item {
+
+  margin-bottom: .5em;
+
+  &__content {
+    display: inline;
+  }
+  &__edit, &__delete {
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+}

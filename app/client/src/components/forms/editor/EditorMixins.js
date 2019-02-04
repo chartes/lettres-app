@@ -1,8 +1,8 @@
-import Quill, { getNewQuill } from '../modules/quill/LettresQuill';
-import { getNewDelta } from '../modules/quill/DeltaUtils';
+import Quill, { getNewQuill } from '../../../modules/quill/LettresQuill';
+import { getNewDelta } from '../../../modules/quill/DeltaUtils';
 import _isEmpty from 'lodash/isEmpty';
 
-var EditorMixin = {
+const EditorMixin = {
 
   data() {
     return {
@@ -86,11 +86,17 @@ var EditorMixin = {
     },
 
     insertNote () {
-
+      this.insertEmbed('note', true)
+    },
+    insertPageBreak () {
+      this.insertEmbed('page', true)
+    },
+    insertEmbed (formatName, value) {
+      let format = {}
+      format[formatName] = value;
       let range = this.editor.getSelection(true);
-      this.editor.updateContents(getNewDelta().retain(range.index).delete(range.length).insert({ segment: true }), Quill.sources.USER);
+      this.editor.updateContents(getNewDelta().retain(range.index).delete(range.length).insert(format), Quill.sources.USER);
       this.editor.setSelection(range.index + 1, Quill.sources.SILENT);
-
     },
 
     updateButtons (formats) {
