@@ -43,7 +43,7 @@
             </tab>
             <tab :name="current_user.isAdmin ? 'Historique' : 'Mon historique'" icon-class="fas fa-history">
               <div class="container is-fluid">
-                <changelog page-size="25"/>
+                <changelog page-size="25" :currentUserOnly="true" />
               </div>
             </tab>
             <tab v-if="current_user.isAdmin" name="Utilisateurs" icon-class="fas fa-users">

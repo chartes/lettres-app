@@ -1,7 +1,7 @@
 <template>
    <section>
       <header>
-         <h2 class="section__title subtitle">Mes documents mis en favoris</h2>
+         <h2 class="section__title subtitle">Mes documents favoris</h2>
       </header>
 
       <pagination :current="currentPage" :end="nbPages" :size="pageSize" :action="goToBookmarkPage">
@@ -106,14 +106,12 @@
        },
 
        goToBookmarkPage(num) {
-          console.warn('GOT TO', num);
-
            this.currentPage = num;
            this.applyFilters();
        },
 
        removeBookmark(docId){
-          this.$store.dispatch('bookmarks/deleteBookmark', {
+          this.$store.dispatch('bookmarks/deleteUserBookmark', {
              userId: this.current_user.id,
              docId: docId,
            }).then(response => {

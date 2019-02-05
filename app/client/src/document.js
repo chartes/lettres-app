@@ -3,9 +3,19 @@ import App from './App.vue';
 
 import store from './store'
 
-const VueInputMask = require('vue-inputmask').default
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faBookmark as fasBookmark } from '@fortawesome/free-solid-svg-icons';
+import { faBookmark as farBookmark } from '@fortawesome/free-regular-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
-Vue.use(VueInputMask)
+
+const VueInputMask = require('vue-inputmask').default;
+
+Vue.use(VueInputMask);
+
+library.add(fasBookmark, farBookmark);
+Vue.component('font-awesome-icon', FontAwesomeIcon);
+
 
 new Vue({
   el: '#app',

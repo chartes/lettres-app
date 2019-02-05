@@ -161,7 +161,7 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
             "witnesses": (WitnessFacade, True),
             "prev-document": (DocumentFacade, False),
             "next-document": (DocumentFacade, False),
-            "locks": (LockFacade, True)
+            "current-lock": (LockFacade, False)
         }.items():
             u_rel_name = rel_name.replace("-", "_")
 

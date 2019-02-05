@@ -2,7 +2,7 @@
   <section class="document__notice section">
 
     <header class="title">
-      <p><span class="tag doc-tag">Document {{document.id}}</span></p>
+      <document-tag-bar :doc-id="document.id"/>
       <span><h1 class="title" v-html="titleContent"></h1></span>
     </header>
 
@@ -38,9 +38,11 @@
   import { mapState } from 'vuex'
   import DocumentAttributes from './DocumentAttributes';
   import DocumentWitnesses from './DocumentWitnesses';
+  import DocumentTagBar from "./DocumentTagBar";
+
   export default {
     name: 'DocumentNotice',
-    components: {DocumentWitnesses, DocumentAttributes},
+    components: {DocumentWitnesses, DocumentAttributes, DocumentTagBar},
     props: {
       data: {
         type: Object,
@@ -48,7 +50,8 @@
       }
     },
     computed: {
-      ...mapState('document', ['document', 'collections', 'witnesses'])
+      ...mapState('document', ['document', 'collections', 'witnesses', 'currentLock']),
+      ...mapState('user', ['current_user'])
     },
     created() {
         this.titleContent = this.document.title;

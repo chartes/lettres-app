@@ -1,16 +1,17 @@
 <template>
    <section>
       <header v-if="!compact">
-         <h2 class="section__title subtitle">Statuts des verrouillages</h2>
+         <h2 class="section__title subtitle">Statut des verrouillages</h2>
       </header>
 
       <pagination :current="currentPage" :end="nbPages" :size="pageSize" :action="goToLocksPage" :bottom-widget="!compact">
           <table class="table container is-narrow" :class="!compact ? 'is-bordered is-striped is-hoverable' : ''">
             <thead>
               <tr>
+                  <!--
                  <th style="min-width: 180px;">
                      <button class="button is-white " disabled>Date</button>
-                 </th>
+                 </th> -->
                  <th style="min-width: 180px;">
                      <button class="button is-white " disabled>Date d'expiration</button>
                  </th>
@@ -20,19 +21,19 @@
                  <th v-if="!compact">
                      <input-filter label="Objet" place-holder="Numéro de document" :action="filterDoc"/>
                  </th>
-                 <th>
-                     <button class="button is-white " disabled>Description</button>
-                 </th>
                  <th style="min-width: 130px;">
                      <input-filter v-if="current_user.isAdmin" label="Utilisateur" place-holder="nom d'utilisateur" :action="filterUsername"/>
                      <button v-else class="button is-white " disabled>Utilisateur</button>
+                 </th>
+                 <th>
+                     <button class="button is-white " disabled>Description</button>
                  </th>
               </tr>
             </thead>
 
              <tbody v-for="lock in fullLocks" :key="lock.id">
                 <tr>
-                  <td>{{lock.data.attributes["event-date"]}}</td>
+                  <!--<td>{{lock.data.attributes["event-date"]}}</td> -->
                   <td>{{lock.data.attributes["expiration-date"]}}</td>
                   <td>
                       <span v-if="lock.data.attributes['is-active']" class="tag is-warning status">Actif</span>
@@ -45,8 +46,8 @@
                         </span>
                      </a>
                   </td>
-                  <td>{{lock.data.attributes["description"]}}</td>
                   <td><span class="tag">{{lock.user.username}}</span></td>
+                  <td>{{lock.data.attributes["description"]}}</td>
                </tr>
              </tbody>
           </table>

@@ -3,23 +3,13 @@ import {getUser} from "../../../modules/change-helpers";
 
 const state = {
   fullChangelog: [],
-  links: []
+  links: [],
+  pageId: null,
+  pageSize: null
 };
-
-function cmp_dates(d1, d2) {
-  if (d1 < d2) {
-    return -1;
-  }
-  if (d1 > d2) {
-    return 1;
-  }
-  return 0;
-}
 
 function addUserToData(data, included) {
   // sort changes by event-date
-  data.sort((c1, c2) => {return cmp_dates(c2.attributes['event-date'], c1.attributes['event-date'])});
-
   let dataWithUsers = [];
   for(let _d of data) {
     dataWithUsers.push({
@@ -31,22 +21,32 @@ function addUserToData(data, included) {
 }
 
 const mutations = {
-  UPDATE_FULL_CHANGELOG (state, {changes, included, links}) {
-    console.log("UPDATE_FULL_CHANGELOG", changes, included);
+  UPDATE_FULL_CHANGELOG (state, {changes, included, links, pageId, pageSize}) {
+    console.log("UPDATE_FULL_CHANGELOG", changes, included, pageId, pageSize);
     state.fullChangelog = addUserToData(changes, included);
     state.links = links;
+    state.pageId = pageId;
+    state.pageSize = pageSize;
   }
 };
 
 const actions = {
   fetchFullChangelog ({ commit }, {pageId, pageSize, filters}) {
     const http = http_with_csrf_token();
-    return http.get(`changes?include=user&page[size]=${pageSize}&page[number]=${pageId}${filters ? '&'+filters : ''}`)
+    if (pageId === undefined) {
+      pageId = this.state.changelog.pageId;
+    }
+    if (pageSize === undefined) {
+      pageSize = this.state.changelog.pageSize;
+    }
+    return http.get(`changes?include=user&sort=-event-date&page[size]=${pageSize}&page[number]=${pageId}${filters ? '&'+filters : ''}`)
       .then( response => {
         commit('UPDATE_FULL_CHANGELOG', {
           changes: response.data.data,
           included: response.data.included,
-          links:response.data.links
+          links:response.data.links,
+          pageId: pageId,
+          pageSize: pageSize
         });
     });
   }

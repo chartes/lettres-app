@@ -1,6 +1,6 @@
 import http_with_csrf_token from '../../../modules/http-common';
 import {getCorrespondents, getLanguages, getWitnesses,
-        getNotes, getCollections, getLocks} from '../../../modules/document-helpers';
+        getNotes, getCollections, getCurrentLock} from '../../../modules/document-helpers';
 
 const state = {
 
@@ -11,7 +11,6 @@ const state = {
   languages: [],
   collections: [],
   notes: [],
-  locks: [],
 
   documents: [],
   documentsPreview: {},
@@ -29,6 +28,7 @@ const mutations = {
     state.languages = getLanguages(included);
     state.witnesses = getWitnesses(included);
     state.notes = getNotes(included);
+    state.currentLock = getCurrentLock(included);
   },
   UPDATE_DOCUMENT_DATA (state, data) {
     console.log('UPDATE_DOCUMENT_DATA', data);
@@ -42,7 +42,7 @@ const mutations = {
       correspondents: getCorrespondents(included),
       languages: getLanguages(included),
       collections: getCollections(included),
-      locks: getLocks(included)
+      currentLock: getCurrentLock(included)
     };
 
     state.documentsPreview[data.id] = {
@@ -71,10 +71,10 @@ const actions = {
     let incs = [
       'collections', 'correspondents', 'roles',
       'correspondents-having-roles', 'notes',
-      'witnesses', 'languages'
+      'witnesses', 'languages', 'current-lock'
     ];
 
-    this.dispatch('languages/fetch')
+    this.dispatch('languages/fetch');
 
     const http = http_with_csrf_token();
     return http.get(`documents/${id}?include=${incs.join(',')}`).then( response => {
@@ -86,7 +86,7 @@ const actions = {
     commit('LOADING_STATUS', true);
     const incs = [
       'collections', 'correspondents', 'correspondents-having-roles',
-      'roles', 'witnesses', 'languages', 'locks'
+      'roles', 'witnesses', 'languages', 'current-lock'
     ];
 
     const http = http_with_csrf_token();
@@ -98,7 +98,7 @@ const actions = {
   fetchAll ({ commit }, {pageId, pageSize}) {
     commit('LOADING_STATUS', true);
     const http = http_with_csrf_token();
-    return http.get(`/documents?page[size]=${pageSize}&page[number]=${pageId}`)
+    return http.get(`/documents?page[size]=${pageSize}&page[number]=${pageId}&without-relationships`)
       .then( (response) => {
       commit('UPDATE_ALL', response.data);
       commit('LOADING_STATUS', false);
@@ -152,7 +152,9 @@ const actions = {
           }
         };
         return http.post(`changes`, { data }).then(response => {
-          dispatch('changelog/fetchDocumentChangelog', {docId: doc.id}, { root: true });
+          dispatch('changelog/fetchFullChangelog', {
+            filters: `filter[object-id]=${doc.id}&filter[object-type]=document`
+          }, { root: true });
         })
       })
       .catch(error => {
