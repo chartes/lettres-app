@@ -19,16 +19,16 @@
            </template>
        </badge>
 
-       <badge v-if="current_user && lockOwner !== null"
+       <badge v-if="current_user"
               classesActive="tag is-warning"
               classesInactive="tag"
-              :starts-on="documentPreview.currentLock.id"
+              :starts-on="lockOwner !== null"
        >
            <template #active>
                <font-awesome-icon :icon="['fas', 'lock']"/>
            </template>
            <template #activeLabel>
-               <span class="badge-label">{{lockOwner.attributes.username}}</span>
+               <span v-if="lockOwner" class="badge-label">{{lockOwner.attributes.username}}</span>
            </template>
            <template #inactive>
                <font-awesome-icon :icon="['fas', 'unlock']"/>
@@ -55,26 +55,20 @@
       ...mapState('document', ['documentsPreview']),
     },
     created() {
-      const http = http_with_csrf_token();
 
       if (this.documentsPreview[this.docId] === undefined) {
         this.$store.dispatch('document/fetchPreview', this.docId).then(() => {
             this.documentPreview = this.documentsPreview[this.docId];
+            this.fetchLockOwner();
         });
       } else {
         this.documentPreview = this.documentsPreview[this.docId];
-
-        /* fetch lock user info*/
-        if (this.documentPreview.currentLock.id) {
-            console.log(this.documentPreview.currentLock);
-            http.get(`/locks/${this.documentPreview.currentLock.id}/user`).then(response => {
-              this.lockOwner = response.data.data;
-            });
-        }
+        this.fetchLockOwner();
       }
 
       /* isBookmarked */
       if (this.current_user) {
+          const http = http_with_csrf_token();
           http.get(`/users/${this.current_user.id}/relationships/bookmarks`).then(response => {
               this.isBookmarked = response.data.data.filter(d => d.id === this.docId).length > 0;
           });
@@ -107,6 +101,15 @@
            this.isBookmarked = false;
            return Promise.resolve(resp);
         })
+      },
+      fetchLockOwner() {
+        /* fetch lock user info*/
+        if (this.documentPreview.currentLock.id) {
+            const http = http_with_csrf_token();
+            http.get(`/locks/${this.documentPreview.currentLock.id}/user`).then(response => {
+              this.lockOwner = response.data.data;
+            });
+        }
       }
     },
   }
