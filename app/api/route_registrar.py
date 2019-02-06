@@ -770,7 +770,7 @@ class JSONAPIRouteRegistrar(object):
                     if "include" in request.args:
                         included_resources = []
                         for res in resource_data:
-                            f_class = JSONAPIFacadeManager.FACADES[res["type"]]
+                            f_class = JSONAPIFacadeManager.FACADES[res["type"].replace('-', '_')]
                             f_obj, kwargs, errors = f_class["default"].get_resource_facade(
                                 url_prefix, res["id"],
                                 with_relationships_links=w_rel_links,
