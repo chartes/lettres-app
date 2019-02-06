@@ -17,8 +17,8 @@
     props: {
         classesActive: {},
         classesInactive: {},
-        actionWhenOn: {},
-        actionWhenOff: {},
+        actionWhenOn: {type: Function},
+        actionWhenOff: {type: Function},
         startsOn: {default: false}
     },
     data() {
@@ -44,7 +44,8 @@
                    return
                }
                this.actionWhenOff().then(resp => {
-                   this.isActive = false;
+                   console.warn("WHEN OFF", resp);
+                   this.isActive = resp;
                }).catch(resp => {
                    console.warn(resp);
                });
@@ -54,7 +55,8 @@
                    return
                }
                this.actionWhenOn().then(resp => {
-                   this.isActive = true;
+                   console.warn("WHEN ON", resp);
+                   this.isActive = resp;
                }).catch(resp => {
                    console.warn(resp);
                });
@@ -65,10 +67,7 @@
 </script>
 
 <style scoped>
-    .badge:hover {
+    .badge:hover, label:hover {
         cursor: pointer;
-    }
-    label {
-
     }
 </style>

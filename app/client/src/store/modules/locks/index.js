@@ -23,7 +23,7 @@ const mutations = {
     console.log("UPDATE_FULL_LOCKS", locks, included);
     state.fullLocks = addUserToData(locks, included);
     state.links = links;
-  }
+  },
 };
 
 const actions = {

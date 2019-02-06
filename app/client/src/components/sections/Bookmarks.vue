@@ -8,10 +8,8 @@
           <table class="table is-narrow is-bordered is-striped is-hoverable container" >
             <thead>
               <tr>
-                 <th><button class="button is-white " disabled>Action</button></th>
                  <th>
-                    <!--<input-filter label="Objet" place-holder="Numéro de document" :action="filterDoc"/>-->
-                    <button class="button is-white " disabled>Document</button>
+                    <button class="button is-white " disabled>Objet</button>
                  </th>
                  <th>
                     <button class="button is-white " disabled>Titre</button>
@@ -23,13 +21,8 @@
             </thead>
              <tbody>
                 <tr v-for="bookmark in userBookmarks" :key="bookmark.id">
-                  <td><button class="button" @click="removeBookmark(bookmark.id)">Retirer</button></td>
                   <td>
-                     <a :href="url(bookmark)">
-                        <span class="tag">
-                            Document {{bookmark.id}}
-                        </span>
-                     </a>
+                     <document-tag-bar  :doc-id="bookmark.id"/>
                   </td>
                   <td  v-html="bookmark.attributes['title']"></td>
                   <td>
@@ -52,10 +45,11 @@
   import Pagination from '../ui/Pagination';
 
   import {getUrlParameter} from "../../modules/utils";
+  import DocumentTagBar from "../document/DocumentTagBar";
 
   export default {
     name: "bookmarks",
-    components : {InputFilter, Pagination},
+    components : {InputFilter, Pagination, DocumentTagBar},
     props: {
       docId: {required: false},
       pageSize : {required: true},
@@ -109,16 +103,6 @@
            this.currentPage = num;
            this.applyFilters();
        },
-
-       removeBookmark(docId){
-          this.$store.dispatch('bookmarks/deleteUserBookmark', {
-             userId: this.current_user.id,
-             docId: docId,
-           }).then(response => {
-             //refresh the bookmark list
-             this.goToBookmarkPage(this.currentPage);
-          });
-       }
     }
   }
 </script>
