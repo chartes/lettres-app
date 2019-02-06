@@ -8,7 +8,7 @@
         </aside>
         <article>
           <header class="title">
-              <document-tag-bar :doc-id="doc_id"/>
+              <document-tag-bar v-if="documentPreview" :doc-id="doc_id"/>
               <span><h1 class="document-preview-card__title" v-html="titleContent"></h1></span>
           </header>
 

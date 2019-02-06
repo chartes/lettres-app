@@ -27,10 +27,14 @@
         }
     },
     created(){
-      this.isActive = this.startsOn;
     },
     computed: {
         myclasses() {return this.isActive ? this.classesActive: this.classesInactive},
+    },
+    watch: {
+        startsOn: function(){
+            this.isActive = this.startsOn;
+        }
     },
     methods: {
         toggle() {

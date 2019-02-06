@@ -21,7 +21,7 @@
           </ul>
       </aside>
 
-      <section class="column documents-index__main-column">
+      <section v-if="loaded" class="column documents-index__main-column">
           <div v-if="!current_user" class="container is-fluid">
             <document-list :page-size="pageSize"/>
           </div>
@@ -74,11 +74,15 @@
     props: {
     },
     created () {
-      this.$store.dispatch('user/fetchCurrent');
+      this.$store.dispatch('user/fetchCurrent').then(resp => {
+          this.loaded = true;
+      });
     },
     data: function() {
       return {
-        pageSize: 15
+        pageSize: 15,
+
+        loaded: false
       }
     },
     computed: {
