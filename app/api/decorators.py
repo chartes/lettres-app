@@ -21,8 +21,7 @@ def api_require_roles(*required_roles):
                 'current_identity': get_jwt_identity(),  # username
                 'current_roles': get_jwt_claims()  # roles
             }
-            print("You are", ret)
-            print("You need to be", required_roles)
+            print("You are %s." % ret, "You need to be", required_roles)
             for required_role in required_roles:
                 if required_role not in ret["current_roles"]:
                     print("Sorry, you are not '" + required_role + "'")

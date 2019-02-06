@@ -1,6 +1,13 @@
 <template>
     <span class="badge" :class="myclasses" @click="toggle">
-        <font-awesome-icon :icon="[isActive ? 'fas' : 'far', fontawesomeIcon]"/>
+        <span v-if="isActive">
+            <slot id="active" name="active"></slot>
+            <label for="active"><slot name="activeLabel"></slot></label>
+        </span>
+        <span v-else>
+            <slot id="inactive" name="inactive"></slot>
+            <label for="inactive"><slot name="inactiveLabel"></slot></label>
+        </span>
     </span>
 </template>
 
@@ -8,7 +15,6 @@
   export default {
     name: "badge",
     props: {
-        fontawesomeIcon: {required: true},
         classesActive: {},
         classesInactive: {},
         actionWhenOn: {},
@@ -57,5 +63,8 @@
 <style scoped>
     .badge:hover {
         cursor: pointer;
+    }
+    label {
+
     }
 </style>

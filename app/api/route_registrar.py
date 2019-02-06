@@ -1385,7 +1385,6 @@ class JSONAPIRouteRegistrar(object):
             facade_class.TYPE_PLURAL.replace("-", "_"), rel_name
         )
         # register the rule
-        print("register ", resource_relationship_rule, )
         api_bp.add_url_rule(resource_relationship_rule, endpoint=resource_relationship_endpoint.__name__,
                             view_func=resource_relationship_endpoint,
                             methods=["DELETE"])
