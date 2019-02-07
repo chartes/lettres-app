@@ -58,6 +58,8 @@
     components : {InputFilter, Pagination},
     props: {
       docId: {required: false},
+      currentUserOnly: {required: false, default: false},
+
       compact: {default: false},
       pageSize : {required: true},
     },
@@ -70,11 +72,13 @@
       }
     },
     created() {
-      if (this.current_user.isAdmin) {
-        this.applyFilters();
-      }  else {
+      if (this.docId !== undefined) {
+        this.filterDoc(this.docId);
+      }
+      if (this.currentUserOnly && !this.current_user.isAdmin) {
         this.filterUsername(this.current_user.username);
       }
+      this.applyFilters();
     },
     computed: {
       ...mapState('user', ['current_user']),

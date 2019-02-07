@@ -186,6 +186,24 @@ class JSONAPIRouteRegistrar(object):
 
         return objs_query
 
+    @staticmethod
+    def parse_sort_parameter(objs_query, model):
+        # if request has sorting parameter
+        if "sort" in request.args:
+            sort_criteriae = []
+            sort_order = asc
+            for criteria in request.args["sort"].split(','):
+                if criteria.startswith('-'):
+                    sort_order = desc
+                    criteria = criteria[1:]
+                sort_criteriae.append(getattr(model, criteria.replace("-", "_")))
+            print("sort criteriae: ", request.args["sort"], sort_criteriae)
+            # reset the order clause
+            objs_query = objs_query.order_by(False)
+            # then apply the user order criteriae
+            objs_query = objs_query.order_by(sort_order(*sort_criteriae))
+        return objs_query
+
     def search(self, index, query, num_page, page_size):
         # query the search engine
         results, total = SearchIndexManager.query_index(index=index, query=query, page=num_page, per_page=page_size)
@@ -435,21 +453,8 @@ class JSONAPIRouteRegistrar(object):
 
                 # FILTER
                 objs_query = JSONAPIRouteRegistrar.parse_filter_parameter(objs_query, model)
-
-                # if request has sorting parameter
-                if "sort" in request.args:
-                    sort_criteriae = []
-                    sort_order = asc
-                    for criteria in request.args["sort"].split(','):
-                        if criteria.startswith('-'):
-                            sort_order = desc
-                            criteria = criteria[1:]
-                        sort_criteriae.append(getattr(model, criteria.replace("-", "_")))
-                    print("sort criteriae: ", request.args["sort"], sort_criteriae)
-                    # reset the order clause
-                    objs_query = objs_query.order_by(False)
-                    # then apply the user order criteriae
-                    objs_query = objs_query.order_by(sort_order(*sort_criteriae))
+                # SORT
+                objs_query = JSONAPIRouteRegistrar.parse_sort_parameter(objs_query, model)
 
                 pagination_obj = objs_query.paginate(num_page, page_size, False)
                 all_objs = pagination_obj.items
@@ -765,7 +770,7 @@ class JSONAPIRouteRegistrar(object):
                     if "include" in request.args:
                         included_resources = []
                         for res in resource_data:
-                            f_class = JSONAPIFacadeManager.FACADES[res["type"]]
+                            f_class = JSONAPIFacadeManager.FACADES[res["type"].replace('-', '_')]
                             f_obj, kwargs, errors = f_class["default"].get_resource_facade(
                                 url_prefix, res["id"],
                                 with_relationships_links=w_rel_links,
@@ -1380,7 +1385,6 @@ class JSONAPIRouteRegistrar(object):
             facade_class.TYPE_PLURAL.replace("-", "_"), rel_name
         )
         # register the rule
-        print("register ", resource_relationship_rule, )
         api_bp.add_url_rule(resource_relationship_rule, endpoint=resource_relationship_endpoint.__name__,
                             view_func=resource_relationship_endpoint,
                             methods=["DELETE"])

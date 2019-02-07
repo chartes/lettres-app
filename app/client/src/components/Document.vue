@@ -13,7 +13,7 @@
         </div>
       </div>
       <div style="margin-left: 0px;">
-        <changelog v-if="current_user" v-bind:compact="true" :doc-id="doc_id" page-size="10"/>
+        <changelog v-if="current_user" v-bind:compact="true" :doc-id="doc_id" :currentUserOnly="false" page-size="10"/>
       </div>
     </article>
 

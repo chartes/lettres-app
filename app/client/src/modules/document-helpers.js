@@ -42,8 +42,8 @@ const getCorrespondents = function (included) {
     return  included.filter(item => item.type === 'note').map(lang => { return { id: lang.id, ...lang.attributes }});
   },
 
-  getLocks = function (included) {
-    return  included.filter(item => item.type === 'lock').map(lock => { return { id: lock.id, ...lock.attributes }});
+  getCurrentLock = function (included) {
+    return  getSimpleRelation('lock', included)
   },
 
   getSimpleRelation = function (propName, included) {
@@ -61,5 +61,5 @@ export  {
   getWitnesses,
   getNotes,
   getCollections,
-  getLocks
+  getCurrentLock
 }

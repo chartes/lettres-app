@@ -74,8 +74,14 @@ class Document(db.Model, ChangesMixin):
     next_document = db.relationship("Document", backref=db.backref('prev_document', remote_side=id), uselist=False)
 
     locks = db.relationship("Lock",
-                            primaryjoin="and_(Document.id==foreign(Lock.object_id), Lock.object_type=='{0}')".format(__tablename__))
+                           primaryjoin="and_(Document.id==foreign(Lock.object_id), Lock.object_type=='{0}')".format(__tablename__))
 
+    @property
+    def current_lock(self):
+        for l in self.locks:
+            if l.expiration_date >= datetime.datetime.now():
+                return l
+        return None
 
 class Collection(db.Model, ChangesMixin):
     """ Une collection: un regroupement de lettres.

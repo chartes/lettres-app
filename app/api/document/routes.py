@@ -11,12 +11,12 @@ def register_document_api_urls(app):
     registrar.register_patch_routes(Document, DocumentFacade, [api_require_roles("contributor")])
     registrar.register_delete_routes(Document, DocumentFacade, [api_require_roles("admin")])
 
-    for rel in ('notes', 'languages', 'witnesses', 'images', 'locks', 'changes',
+    for rel in ('notes', 'languages', 'witnesses', 'images',  'current-lock', 'changes',
                 'correspondents-having-roles', 'roles', 'correspondents', 'collections',
                 'prev-document', 'next-document'):
         registrar.register_relationship_get_route(DocumentFacade, rel)
 
-    for rel in ('notes', 'languages', 'witnesses', 'collections', 'locks', 'changes',
+    for rel in ('notes', 'languages', 'witnesses', 'collections',  'changes',
                 'correspondents-having-roles',
                 'whitelist', 'next-document'):
         registrar.register_relationship_post_route(DocumentFacade, rel, [api_require_roles("contributor")])

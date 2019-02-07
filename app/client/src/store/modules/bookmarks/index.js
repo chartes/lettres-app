@@ -1,13 +1,15 @@
 import http_with_csrf_token from '../../../modules/http-common';
 
 const state = {
-  userBookmarks: [],
+
+  userBookmarks: {},
   links: []
 };
 
 const mutations = {
-  UPDATE_USER_BOOKMARKS (state, {documents}) {
+  UPDATE_USER_BOOKMARKS (state, {documents, links}) {
     console.log("UPDATE_USER_BOOKMARKS", documents);
+    state.links = links;
     state.userBookmarks = documents.map(document => {
       return {
         id: document.id,
@@ -30,10 +32,6 @@ const mutations = {
         bookmark.witnesses = witnesses;
         return bookmark;
     });
-  },
-  UPDATE_USER_BOOKMARKS_LINKS (state, {links}) {
-    console.log("UPDATE_USER_BOOKMARKS_LINKS", document);
-    state.links = links;
   }
 };
 
@@ -42,11 +40,11 @@ const actions = {
     const http = http_with_csrf_token();
     return http.get(`users/${userId}/bookmarks?without-relationships&page[size]=${pageSize}&page[number]=${pageId}${filters ? '&'+filters : ''}`).then( response => {
       response.data.data.sort((d1, d2) => {return d1.attributes["title"] - d2.attributes["title"]});
-      commit('UPDATE_USER_BOOKMARKS_LINKS', {links: response.data.links});
       return response.data;
     }).then (docs =>{
       commit('UPDATE_USER_BOOKMARKS', {
-            documents: docs.data
+          documents: docs.data,
+          links: docs.links
       });
 
       for (let doc of docs.data) {
@@ -63,7 +61,7 @@ const actions = {
 
   },
 
-  deleteBookmark({ commit }, {userId, docId}) {
+  deleteUserBookmark({ commit }, {userId, docId}) {
     const http = http_with_csrf_token();
     const dataToRemove = {
       data: [
@@ -71,6 +69,16 @@ const actions = {
       ]
     };
     return http.delete(`users/${userId}/relationships/bookmarks`, {data: dataToRemove});
+  },
+
+  postUserBookmark({ commit }, {userId, docId}) {
+    const http = http_with_csrf_token();
+    const dataToAdd = {
+      data: [
+        {id: docId, type: "document"}
+      ]
+    };
+    return http.post(`users/${userId}/relationships/bookmarks`, dataToAdd);
   }
 };
 

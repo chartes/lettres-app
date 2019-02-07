@@ -1,22 +1,15 @@
 <template>
-    <div class="document-preview-card"  v-if="documentPreview">
+    <div class="document-preview-card" v-if="documentPreview">
         <aside class="document-preview-card__thumbnail">
-            <a :href="`${baseURL}/documents/${documentPreview.id}`">
+            <a :href="`${baseUrl}/documents/${documentPreview.id}`">
                 <img v-if='documentPreview.attributes["iiif-thumbnail-url"]'
                      :src='documentPreview.attributes["iiif-thumbnail-url"]'/>
            </a>
         </aside>
         <article>
           <header class="title">
-            <a :href="`${baseURL}/documents/${documentPreview.id}`">
-              <span class="tags has-addons">
-                <span class="tag document-preview-card__doc-tag">Document {{documentPreview.id}}</span>
-                <span v-if="current_user && documentPreview.locks.length > 0" class="tag is-warning">
-                    <i class="fas fa-lock"></i>
-                </span>
-              </span>
+              <document-tag-bar v-if="documentPreview" :doc-id="doc_id"/>
               <span><h1 class="document-preview-card__title" v-html="titleContent"></h1></span>
-            </a>
           </header>
 
           <div class="content">
@@ -43,16 +36,17 @@
   import LoadingIndicator from './ui/LoadingIndicator';
   import DocumentAttributes from './document/DocumentAttributes';
   import {baseAppURL} from '../modules/http-common';
+  import DocumentTagBar from "./document/DocumentTagBar";
 
   export default {
 
     name: 'DocumentPreviewCard',
-    components: {DocumentAttributes, LoadingIndicator},
+    components: {DocumentAttributes, LoadingIndicator, DocumentTagBar},
     props: ['doc_id'],
     data() {
       return {
         documentPreview: null,
-        baseURL: baseAppURL
+        baseUrl: baseAppURL
       }
     },
     created () {
@@ -64,21 +58,24 @@
 
           this.titleContent = this.documentPreview.attributes.title;
           this.previewContent = this.documentPreview.attributes.argument ? this.documentPreview.attributes.argument : this.documentPreview.attributes.transcription;
-      })
+      });
+
     },
     computed: {
-        ...mapState('document', ['documentsPreview', 'documentLoading']),
-        ...mapState('user', ['current_user']),
+        ...mapState('document', ['documentsPreview', 'documentLoading'])
     },
     methods: {
       getCorrespondentFullname : function(obj){
           return `${obj.correspondent.firstname} ${obj.correspondent.lastname}`
-      }
+      },
+
     },
   }
 </script>
 
 <style scoped>
+
+
   .document-preview-card__correspondents ul {
     list-style: none;
   }
@@ -102,10 +99,6 @@
     color: #3273dc;
   }
 
-  .document-preview-card__doc-tag {
-    float: left;
-    margin-right: 20px;
-  }
 
     /* styles for '...' */
   .document-preview-card__content {
