@@ -10,10 +10,10 @@
         <slot></slot>
       </section>
       <footer class="modal-card-foot">
-        <button class="button is-success" v-if="submit" :disabled="!valid || submitting" @click="submit">Valider</button>
+        <button class="button is-success" v-if="submit" :disabled="!valid || submitting" @click="submit">{{submitText}}</button>
         <button class="button" v-if="cancel" :disabled="submitting" @click="cancel">Annuler</button>
         <div style="float: right;width: 100%;text-align: right;" v-if="remove">
-          <button class="button is-danger" :disabled="submitting" @click="remove">Supprimer</button>
+          <button class="button is-danger" :disabled="submitting" @click="remove">{{removeText}}</button>
         </div>
       </footer>
     </div>
@@ -31,6 +31,7 @@
       remove: { type: Function},
       valid: { type: Boolean, required: true},
       submitText: { type: String, default: 'Soumettre'},
+      removeText: {type: String, default: 'Supprimer'},
       submitting: { type: Boolean, default: false},
     },
     mounted () {
