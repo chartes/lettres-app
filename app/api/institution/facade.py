@@ -57,11 +57,21 @@ class InstitutionFacade(JSONAPIAbstractFacade):
                 "links": self._get_links(rel_name="witnesses"),
                 "resource_identifier_getter":  self.get_related_resource_identifiers(WitnessFacade, "witnesses", to_many=True),
                 "resource_getter":  self.get_related_resources(WitnessFacade, "witnesses", to_many=True),
-            },
-            "changes": {
-                "links": self._get_links(rel_name="changes"),
-                "resource_identifier_getter": self.get_related_resource_identifiers(ChangelogFacade, "changes",
-                                                                                    to_many=True),
-                "resource_getter": self.get_related_resources(ChangelogFacade, "changes", to_many=True),
-            },
+            }
         }
+
+    def get_data_to_index_when_added(self, propagate):
+        _res = self.resource
+        payload = {
+            "id": _res["id"],
+            "type": _res["type"],
+
+            "name": _res["attributes"]["name"],
+            "ref": _res["attributes"]["ref"],
+        }
+        institution_data = [{"id": _res["id"], "index": self.get_index_name(), "payload": payload}]
+        return institution_data
+
+    def remove_from_index(self, propagate):
+        from app.search import SearchIndexManager
+        SearchIndexManager.remove_from_index(index=self.get_index_name(), id=self.id)

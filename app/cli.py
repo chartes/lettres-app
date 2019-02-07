@@ -5,9 +5,10 @@ from app import create_app
 from app.api.collection.facade import CollectionFacade
 from app.api.correspondent.facade import CorrespondentFacade
 from app.api.document.facade import DocumentFacade
+from app.api.institution.facade import InstitutionFacade
 from app.api.language.facade import LanguageFacade
 from app.api.witness.facade import WitnessFacade
-from app.models import UserRole, User, Document, Collection, Language, Witness, Correspondent
+from app.models import UserRole, User, Document, Collection, Language, Witness, Correspondent, Institution
 
 app = None
 
@@ -93,6 +94,7 @@ def make_cli():
             "witnesses": {"facade": WitnessFacade, "model": Witness},
             "correspondents": {"facade": CorrespondentFacade, "model": Correspondent},
             "documents": {"facade": DocumentFacade, "model": Document},
+            "institutions": {"facade": InstitutionFacade, "model": Institution},
         }
 
         def reindex_from_info(name, info):
