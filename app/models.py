@@ -6,8 +6,9 @@ from sqlalchemy.ext.declarative import declared_attr
 from app import db
 
 
+DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 def datetime_to_str(d):
-    return d.strftime("%Y-%m-%d %H:%M:%S") if d else None
+    return d.strftime(DATETIME_FORMAT) if d else None
 
 
 association_document_has_language = db.Table('document_has_language',

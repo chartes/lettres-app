@@ -1,10 +1,12 @@
-import http_with_csrf_token from '../../../modules/http-common';
+import http_with_csrf_token, {http} from '../../../modules/http-common';
 import {baseApiURL} from '../../../modules/http-common';
 
-import {getRoles} from '../../../modules/user-helpers';
+import {getRoles, getUserRoles} from '../../../modules/user-helpers';
 
 const state = {
-  current_user: null
+  current_user: null,
+
+  usersSearchResults: [],
 };
 
 const mutations = {
@@ -21,6 +23,18 @@ const mutations = {
         isAdmin: roles.filter(r => r.name === "admin").length === 1
       };
     }
+  },
+
+  SEARCH_RESULTS(state, {users, included}) {
+    state.usersSearchResults = users.map( u => {
+      const roles = getUserRoles(users, included, u);
+      return  {
+        id: u.id,
+        ...u.attributes,
+        roles: roles,
+        isAdmin: roles.filter(r => r.name === "admin").length === 1
+      }
+    });
   }
 };
 
@@ -43,6 +57,14 @@ const actions = {
         commit('UPDATE_USER', {data: null});
       });
   },
+
+  search({commit}, what) {
+    console.log('user search', what);
+    commit('SEARCH_RESULTS', {users: [], included: []});
+    http.get(`/search?query=*${what}*&index=lettres__${process.env.NODE_ENV}__user&include=roles`).then(response => {
+      commit('SEARCH_RESULTS', {users: response.data.data, included: response.data.included});
+    });
+  }
   /*
   save ({ commit, rootGetters }, data) {
     return http.put(`/documents`, { data: data })

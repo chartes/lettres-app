@@ -1,11 +1,13 @@
+import datetime
 from flask import request
 from flask_jwt_extended import verify_jwt_in_request, get_jwt_claims
 from flask_login import current_user
 from functools import wraps
 
+from app import db
 from app.api.decorators import error_403_privileges, error_403_unhandled_error
 from app.api.route_registrar import json_loads
-from app.models import Lock
+from app.models import Lock, DATETIME_FORMAT
 
 
 def manage_lock_addition():
@@ -26,7 +28,23 @@ def manage_lock_addition():
             if 'admin' not in roles and current_user.id != lock_user_id:
                 return error_403_privileges
 
-            return view_function(*args, **kwargs)
+            # if the doc is already locked, expire the previous locks on this object
+            response = view_function(*args, **kwargs)
+            if response.status.startswith("20"):
+                new_lock = json_loads(response.data)
+                previous_locks = Lock.query.filter(Lock.id != new_lock['data']['id'],
+                                    Lock.object_id == new_lock['data']['attributes']['object-id'],
+                                    Lock.object_type == new_lock['data']['attributes']['object-type']).all()
+
+                for plock in previous_locks:
+                    plock.expiration_date = datetime.datetime.strptime(
+                        new_lock['data']['attributes']['event-date'],
+                        DATETIME_FORMAT
+                    )
+                    db.session.add(plock)
+                db.session.commit()
+
+            return response
 
         return wrapped_f
 
@@ -63,6 +81,8 @@ def manage_lock_removal():
             if 'admin' not in roles and current_user.id != lock.user_id:
                 return error_403_privileges
 
+            # HOOK ici pour transformer le DELETE en UPDATE
+            print("TODO: transformer le delete en update (déverrouillage")
             return view_function(*args, **kwargs)
 
         return wrapped_f

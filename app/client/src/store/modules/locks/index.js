@@ -3,7 +3,9 @@ import {getUser} from "../../../modules/change-helpers";
 
 const state = {
   fullLocks: [],
-  links: []
+  links: [],
+
+  currentLock: null
 };
 
 
@@ -24,6 +26,14 @@ const mutations = {
     state.fullLocks = addUserToData(locks, included);
     state.links = links;
   },
+
+  SAVE_LOCK(state, lock) {
+    state.currentLock = lock;
+  },
+
+  REMOVE_LOCK (state) {
+    state.currentLock = null;
+  }
 };
 
 const actions = {
@@ -35,6 +45,20 @@ const actions = {
         included: response.data.included,
         links:response.data.links
       });
+    });
+  },
+
+  saveLock({commit}, lock) {
+    const http = http_with_csrf_token();
+    return http.post(`/locks`, {data: lock}).then(response => {
+      commit('SAVE_LOCK', response.data.data);
+    });
+  },
+
+  removeLock({commit}, lock) {
+    const http = http_with_csrf_token();
+    return http.delete(`locks/${lock.id}`, {data : {data: [{id: lock.id, type: 'lock'}]}}).then(response => {
+      commit('REMOVE_LOCK');
     });
   }
 };
