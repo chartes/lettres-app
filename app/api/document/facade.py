@@ -208,7 +208,7 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
 class DocumentSearchFacade(DocumentFacade):
     def __init__(self, *args, **kwargs):
         super(DocumentSearchFacade, self).__init__(*args, **kwargs)
-        self.relationships.pop("locks")
+        self.relationships.pop("current-lock")
         self.relationships.pop("changes")
 
     @property

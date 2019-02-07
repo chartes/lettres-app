@@ -916,9 +916,9 @@ class JSONAPIRouteRegistrar(object):
                 resource, e = facade_class.create_resource(model, obj_id, attributes, related_resources)
                 if e is None:
                     url_prefix = request.host_url[:-1] + self.url_prefix
-
-                    f_obj = facade_class(url_prefix, resource, with_relationships_links=True,
-                                         with_relationships_data=True)
+                    w_rel_links, w_rel_data = JSONAPIRouteRegistrar.get_relationships_mode(request.args)
+                    f_obj = facade_class(url_prefix, resource, with_relationships_links=w_rel_links,
+                                         with_relationships_data=w_rel_data)
 
                     # reindex
                     f_obj.reindex("insert")
@@ -995,9 +995,9 @@ class JSONAPIRouteRegistrar(object):
                 resource, e = facade_class.update_resource(obj, facade_class.TYPE, {}, related_resources, append=True)
                 if e is None:
                     url_prefix = request.host_url[:-1] + self.url_prefix
-
-                    f_obj = facade_class(url_prefix, resource, with_relationships_links=True,
-                                         with_relationships_data=True)
+                    w_rel_links, w_rel_data = JSONAPIRouteRegistrar.get_relationships_mode(request.args)
+                    f_obj = facade_class(url_prefix, resource, with_relationships_links=w_rel_links,
+                                         with_relationships_data=w_rel_data)
 
                     # reindex
                     f_obj.reindex("insert")

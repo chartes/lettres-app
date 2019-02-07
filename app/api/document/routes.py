@@ -16,12 +16,15 @@ def register_document_api_urls(app):
                 'prev-document', 'next-document'):
         registrar.register_relationship_get_route(DocumentFacade, rel)
 
-    for rel in ('notes', 'languages', 'witnesses', 'collections',  'changes',
-                'correspondents-having-roles',
-                'whitelist', 'next-document'):
+    for rel in ('notes', 'languages', 'witnesses', 'collections', 'changes',
+                'correspondents-having-roles','next-document'):
         registrar.register_relationship_post_route(DocumentFacade, rel, [api_require_roles("contributor")])
 
     for rel in ('notes', 'languages', 'witnesses', 'collections',
-                'correspondents-having-roles',
-                'whitelist', 'next-document'):
+                'correspondents-having-roles', 'next-document'):
         registrar.register_relationship_patch_route(DocumentFacade, rel, [api_require_roles("contributor")])
+
+    for rel in ('notes', 'languages', 'witnesses', 'collections',
+                'correspondents-having-roles','next-document'):
+        registrar.register_relationship_delete_route(DocumentFacade, rel, [api_require_roles("contributor")])
+

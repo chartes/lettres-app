@@ -11,6 +11,24 @@ error_401 = JSONAPIResponseFactory.make_errors_response(
     status=401
 )
 
+error_403_privileges = JSONAPIResponseFactory.make_errors_response(
+    {
+        "status": 403,
+        "title": "Insufficient privileges"
+    },
+    status=403
+)
+
+def error_403_unhandled_error(e):
+    return JSONAPIResponseFactory.make_errors_response(
+        {
+            "status": 403,
+            "title": "Unhandled error. Check your data",
+            "details": str(e)
+        },
+        status=403
+)
+
 
 def api_require_roles(*required_roles):
     def wrap(view_function):

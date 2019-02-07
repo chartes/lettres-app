@@ -1,9 +1,9 @@
 
-from app.api.abstract_facade import  JSONAPIAbstractChangeloggedFacade
+from app.api.abstract_facade import JSONAPIAbstractFacade
 from app.models import User, datetime_to_str
 
 
-class UserFacade(JSONAPIAbstractChangeloggedFacade):
+class UserFacade(JSONAPIAbstractFacade):
     """
 
     """
@@ -60,7 +60,6 @@ class UserFacade(JSONAPIAbstractChangeloggedFacade):
         """Make a JSONAPI resource object describing what is a user 
         """
         from app.api.user_role.facade import UserRoleFacade
-        from app.api.changelog.facade import ChangelogFacade
         from app.api.lock.facade import LockFacade
         from app.api.document.facade import DocumentFacade
 
@@ -85,3 +84,19 @@ class UserFacade(JSONAPIAbstractChangeloggedFacade):
                 "resource_getter": self.get_related_resources(DocumentFacade, "bookmarks", to_many=True),
             }
         }
+
+    def get_data_to_index_when_added(self, propagate):
+        _res = self.resource
+        payload = {
+            "id": _res["id"],
+            "type": _res["type"],
+
+            "username": _res["attributes"]["username"],
+            "firstname": _res["attributes"]["firstname"],
+            "lastname": _res["attributes"]["lastname"],
+        }
+        return [{"id": _res["id"], "index": self.get_index_name(), "payload": payload}]
+
+    def remove_from_index(self, propagate):
+        from app.search import SearchIndexManager
+        SearchIndexManager.remove_from_index(index=self.get_index_name(), id=self.id)

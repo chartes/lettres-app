@@ -7,6 +7,7 @@ from app.api.correspondent.facade import CorrespondentFacade
 from app.api.document.facade import DocumentFacade
 from app.api.institution.facade import InstitutionFacade
 from app.api.language.facade import LanguageFacade
+from app.api.user.facade import UserFacade
 from app.api.witness.facade import WitnessFacade
 from app.models import UserRole, User, Document, Collection, Language, Witness, Correspondent, Institution
 
@@ -95,6 +96,7 @@ def make_cli():
             "correspondents": {"facade": CorrespondentFacade, "model": Correspondent},
             "documents": {"facade": DocumentFacade, "model": Document},
             "institutions": {"facade": InstitutionFacade, "model": Institution},
+            "users": {"facade": UserFacade, "model": User}
         }
 
         def reindex_from_info(name, info):

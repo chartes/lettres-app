@@ -316,6 +316,7 @@ class Lock(db.Model):
     def is_active(self):
         return datetime.datetime.now() < self.expiration_date
 
+
 # ====================================
 # CHANGE LOG
 # ====================================
