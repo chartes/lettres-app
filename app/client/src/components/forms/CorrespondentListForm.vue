@@ -10,21 +10,20 @@
   >
     <div class="correspondent-list-form">
 
-      <header class="correspondent-list-form__header has-text-centered">
 
-        <p><button class="button">Créer un nouveau correspondant</button></p>
+      <list-autocomplete-field
+        search-placeholder="Rechercher un correspondant"
+        v-model="form"
+        :items="correspondentsSearchResults"
+        :is-async="true"
+        @search="searchCorrespondent"
+        label-key="key"
+      />
+
+      <footer class="correspondent-list-form__footer has-text-centered">
         <p>&mdash; <em>ou</em> &mdash; </p>
-
-        <list-autocomplete-field
-          search-placeholder="Rechercher un correspondant"
-          v-model="form"
-          :items="correspondentsSearchResults"
-          :is-async="true"
-          @search="searchCorrespondent"
-          label-key="key"
-        />
-
-      </header>
+        <p><button class="button">Créer un nouveau correspondant</button></p>
+      </footer>
 
 
     </div>
@@ -77,6 +76,11 @@
         this.$props.cancel();
       }
 
+    },
+    watch: {
+      form (val, oldVal) {
+        console.log('watch form', val, oldVal)
+      },
     },
     computed: {
 

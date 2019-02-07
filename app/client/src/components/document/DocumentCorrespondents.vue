@@ -52,7 +52,7 @@
             <a if="userCanEdit"
                 href="#"
                 class="button"
-                @click.prevent="addCorrespondent"
+                @click.prevent="addCorrespondent('recipient')"
             >Ajouter un destinataire</a>
           </p>
         </div>
@@ -61,7 +61,9 @@
       </div>
 
       <correspondent-list-form
+          v-if="correspondentsForm"
           title="Ajouter un correspondant"
+          :cancel="closeCorrespondentChoice"
       />
 
     </div>
@@ -76,10 +78,17 @@
   export default {
     name: 'DocumentCorrespondents',
     components: {CorrespondentListForm, IconBin},
+    data () {
+      return {
+        correspondentsForm: ''
+      }
+    },
     methods: {
-
       addCorrespondent (role) {
-
+        this.correspondentsForm = role;
+      },
+      closeCorrespondentChoice() {
+        this.correspondentsForm = '';
       }
     },
     computed: {

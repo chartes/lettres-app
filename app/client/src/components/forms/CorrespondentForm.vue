@@ -59,6 +59,9 @@
         loading: false,
       }
     },
+    mounted () {
+
+    },
     methods: {
 
       submitAction () {
@@ -73,6 +76,9 @@
 
     },
     computed: {
+
+      ...mapState('correspondents', ['roles']),
+
       validForm () {
         console.log('validForm', !!this.form.name && (this.form.name.length >= 1))
         return !!this.form.name && (this.form.name.length >= 1);

@@ -49,7 +49,7 @@ const actions = {
   search ({ commit }, what) {
     console.log('institution search', what)
     commit('SEARCH_RESULTS', [])
-    http.get(`/institutions?without-relationships`).then( response => {
+    http.get(`/search?query=*${what}*&index=lettres__${process.env.NODE_ENV}__institution&without-relationships`).then( response => {
       const institutions = response.data.data.map(inst => { return { id: inst.id, ...inst.attributes}});
       commit('SEARCH_RESULTS', institutions)
     });

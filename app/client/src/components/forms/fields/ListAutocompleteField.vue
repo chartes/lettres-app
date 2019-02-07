@@ -33,7 +33,7 @@
                 class="field-list-autocomplete__item"
                 :class="{ 'is-active': i === arrowCounter }"
             >
-              {{i}} {{ labelString(result) }}
+              {{ labelString(result) }}
             </li>
           </ul>
 
