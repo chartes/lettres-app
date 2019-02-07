@@ -311,7 +311,7 @@ class Lock(db.Model):
 
     description = db.Column(db.String, nullable=True)
 
-    user = db.relationship('User', backref=db.backref("locks", uselist=True), cascade="all, delete-orphan", single_parent=True)
+    user = db.relationship('User', backref=db.backref("locks", uselist=True), single_parent=True)
 
     @property
     def is_active(self):
@@ -341,4 +341,4 @@ class Changelog(db.Model):
     event_date = db.Column(DateTime(timezone=True), server_default=func.now())
     description = db.Column(db.String, nullable=True)
 
-    user = db.relationship('User', backref=db.backref("changes", uselist=True), cascade="all, delete-orphan", single_parent=True)
+    user = db.relationship('User', backref=db.backref("changes", uselist=True),  single_parent=True)
