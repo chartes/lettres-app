@@ -84,15 +84,8 @@
         results: [],
         search: '',
         isLoading: false,
-        arrowCounter: 0,
+        arrowCounter: -1,
       };
-    },
-
-    mounted() {
-      document.addEventListener('click', this.handleClickOutside)
-    },
-    destroyed() {
-      document.removeEventListener('click', this.handleClickOutside)
     },
 
     methods: {
@@ -113,20 +106,16 @@
         console.log('setResult', result)
         this.$emit('input', result);;
       },
-      onArrowDown(evt) {
-        this.arrowCounter = (this.arrowCounter + 1) % this.results.length;
+      onArrowDown() {
+        if (this.results.length) this.arrowCounter = (this.arrowCounter + 1) % this.results.length;
+        console.log('onArrowDown', this.arrowCounter)
       },
       onArrowUp() {
-        this.arrowCounter = (this.arrowCounter + this.results.length - 1) % this.results.length;
+        if (this.results.length) this.arrowCounter = (this.arrowCounter + this.results.length - 1) % this.results.length;
+        console.log('onArrowUp', this.arrowCounter)
       },
       onEnter() {
-        this.setResult(this.results[this.arrowCounter]);
-        this.closeSearchBox()
-      },
-      handleClickOutside(evt) {
-        if (!this.$el.contains(evt.target)) {
-          this.closeSearchBox()
-        }
+        if (this.results.length) this.setResult(this.results[this.arrowCounter]);
       },
       labelString (val) {
         if (!val) return this.notSet
@@ -138,6 +127,7 @@
         console.log('watch autocomplete items', val)
         // actually compare them
         if (val.length !== oldValue.length) {
+          this.arrowCounter = -1;
           this.results = val;
           this.isLoading = false;
         }

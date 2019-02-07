@@ -61,6 +61,15 @@ const mutations = {
     state.documentLoading = payload;
   },
 
+  ADD_COLLECTION (state, payload) {
+    const exists = state.collections.find(coll => coll.id !== payload.id)
+    if (exists) return;
+    state.collections = [ ...state.collections, payload ]
+  },
+  REMOVE_COLLECTION (state, payload) {
+    state.collections = state.collections.filter(coll => coll.id !== payload.id)
+  },
+
 };
 
 const actions = {
@@ -161,6 +170,35 @@ const actions = {
         //reject(error)
       })
   },
+
+  addCollection ({commit, state}, collection) {
+    console.log('document store addCollection', collection, state.document.id)
+
+    const data = { data: [ { id : collection.id, type: "collection" }, ] }
+
+    const http = http_with_csrf_token();
+    return http.post(`/documents/${state.document.id}/relationships/collections?without-relationships`, data)
+      .then(response => {
+        console.log('response', response)
+        commit('ADD_COLLECTION', collection);
+        //resolve(response.data)
+        return true
+      })
+  },
+  removeCollection ({commit, state}, collection) {
+    console.log('document store removeCollection', collection, state.document.id)
+
+    const data = { data: [ { id : collection.id, type: "collection" }, ] }
+
+    const http = http_with_csrf_token();
+    return http.delete(`/documents/${state.document.id}/relationships/collections?without-relationships`, data)
+      .then(response => {
+        console.log('response', response)
+        commit('REMOVE_COLLECTION', collection);
+        //resolve(response.data)
+        return true
+      })
+  }
 
 
 };
