@@ -2,56 +2,26 @@ import {http} from '../../../modules/http-common';
 
 const state = {
 
-  institutions: [],
-  currentInstitution: null,
-  institutionsSearchResults: [],
-  newInstitution: null,
+  collectionsSearchResults: [],
 
 };
 
 const mutations = {
 
-  UPDATE (state, payload) {
-    state.languages = payload;
-  },
-  UPDATE_ONE (state, payload) {
-    state.currentInstitution = payload;
-  },
-
   SEARCH_RESULTS (state, payload) {
-    state.institutionsSearchResults = payload;
+    state.collectionsSearchResults = payload;
   }
 
 };
 
 const actions = {
 
-  fetch ({ commit }) {
-    http.get(`/institutions?without-relationships`).then( response => {
-      const institutions = response.data.data.map(inst => { return { id: inst.id, ...inst.attributes}});
-      commit('UPDATE', institutions)
-    });
-  },
-  fetchOne ({ commit }, id) {
-    console.log('institution fetchOne', id)
-    http.get(`/institution/${id}?without-relationships`).then( response => {
-      const institution = { id: response.data.data.id, ...response.data.data.attributes };
-      console.log('institution fetchOne', institution)
-      commit('UPDATE_ONE', institution)
-    });
-  },
-
-  addOne ({commit}, institution) {
-    console.log('institution addOne', institution)
-
-  },
-
   search ({ commit }, what) {
-    console.log('institution search', what)
+    console.log('collection search', what)
     commit('SEARCH_RESULTS', [])
-    http.get(`/search?query=*${what}*&index=lettres__${process.env.NODE_ENV}__institution&without-relationships`).then( response => {
-      const institutions = response.data.data.map(inst => { return { id: inst.id, ...inst.attributes}});
-      commit('SEARCH_RESULTS', institutions)
+    http.get(`/search?query=*${what}*&index=lettres__${process.env.NODE_ENV}__collection&without-relationships`).then( response => {
+      const collections = response.data.data.map(coll => { return { id: coll.id, ...coll.attributes}});
+      commit('SEARCH_RESULTS', collections)
     });
   }
 

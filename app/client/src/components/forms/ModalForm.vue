@@ -10,8 +10,8 @@
         <slot></slot>
       </section>
       <footer class="modal-card-foot">
-        <button class="button is-success" :disabled="!valid || submitting" @click="submit">Valider</button>
-        <button class="button" :disabled="submitting" @click="cancel">Annuler</button>
+        <button class="button is-success" v-if="submit" :disabled="!valid || submitting" @click="submit">Valider</button>
+        <button class="button" v-if="cancel" :disabled="submitting" @click="cancel">Annuler</button>
         <div style="float: right;width: 100%;text-align: right;" v-if="remove">
           <button class="button is-danger" :disabled="submitting" @click="remove">Supprimer</button>
         </div>
@@ -26,8 +26,8 @@
     name: "modal-form",
     props: {
       title: { type: String, default: ''},
-      cancel: { type: Function, required: true},
-      submit: { type: Function, required: true},
+      cancel: { type: Function},
+      submit: { type: Function},
       remove: { type: Function},
       valid: { type: Boolean, required: true},
       submitText: { type: String, default: 'Soumettre'},

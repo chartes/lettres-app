@@ -7,7 +7,7 @@
               name="creation"
               not-set="Inconnue"
               :initial-value="document['creation']"
-              :editable="userCanEdit"
+              :editable="editable"
               v-on:changed="fieldChanged"/>
     </div>
     <div class="column is-one-third">
@@ -16,7 +16,7 @@
               label="creation-not-after"
               name="creation-not-after"
               :initial-value="document['creation-not-after']"
-              :editable="userCanEdit"
+              :editable="editable"
               v-on:changed="fieldChanged"/>
     </div>
     <div class="column is-one-third">
@@ -26,7 +26,7 @@
               name="creation-label"
               not-set="Inconnue"
               :initial-value="document['creation-label']"
-              :editable="userCanEdit"
+              :editable="editable"
               v-on:changed="fieldChanged"/>
     </div>
     <div class="column is-one-third">
@@ -36,7 +36,7 @@
               name="location-date-from-ref"
               not-set="Inconnue"
               :initial-value="document['location-date-from-ref']"
-              :editable="userCanEdit"
+              :editable="editable"
               v-on:changed="fieldChanged"/>
     </div>
     <div class="column is-one-third">
@@ -46,12 +46,12 @@
               name="location-date-to-ref"
               not-set="Inconnue"
               :initial-value="document['location-date-to-ref']"
-              :editable="userCanEdit"
+              :editable="editable"
               v-on:changed="fieldChanged"/>
     </div>
     <div class="column is-one-third">
       <multiselect-field
-              :editable="userCanEdit"
+              :editable="editable"
               label="Langue(s)"
               :optionsList="allLanguages"
               :selectedItems="languages"
@@ -76,11 +76,6 @@
       data: {
 
       },
-    },
-    data() {
-      return {
-        userCanEdit: true,
-      }
     },
     methods: {
       fieldChanged (fieldProps) {

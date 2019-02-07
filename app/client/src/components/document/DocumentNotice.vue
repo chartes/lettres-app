@@ -6,20 +6,11 @@
       <span><h1 class="title" v-html="titleContent"></h1></span>
     </header>
 
-    <document-attributes/>
+    <document-attributes :editable="userCanEdit"/>
 
     <document-witnesses :list="witnesses"/>
 
-    <div class="document__collections" v-if="collections.length > 0">
-      <header>
-        <h2 class="document__collections--title subtitle">Collections</h2>
-      </header>
-      <div class="document__collections--content">
-        <ul v-for="collection in collections">
-          <li><a href="#">{{collection.title}}</a></li>
-        </ul>
-      </div>
-    </div>
+    <document-collections :editable="userCanEdit"/>
 
     <div v-if="!!document.argument" class="document__argument">
       <header>
@@ -39,14 +30,20 @@
   import DocumentAttributes from './DocumentAttributes';
   import DocumentWitnesses from './DocumentWitnesses';
   import DocumentTagBar from "./DocumentTagBar";
+  import DocumentCollections from './DocumentCollections';
 
   export default {
     name: 'DocumentNotice',
-    components: {DocumentWitnesses, DocumentAttributes, DocumentTagBar},
+    components: {DocumentCollections, DocumentWitnesses, DocumentAttributes, DocumentTagBar},
     props: {
       data: {
         type: Object,
         default: null,
+      }
+    },
+    data() {
+      return {
+        userCanEdit: true,
       }
     },
     computed: {
