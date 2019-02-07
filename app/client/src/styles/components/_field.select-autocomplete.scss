@@ -1,22 +1,7 @@
-.field-select-autocomplete {
+.field-select-autocomplete, .field-list-autocomplete {
 
-  &__value {
-
-    @include input;
-    cursor: pointer;
-    padding-right: 2.5em;
-
-    &::after {
-      @extend %arrow;
-      border-color: $input-arrow;
-      right: 1.125em;
-      z-index: 4;
-    }
-  }
-
-  &__searchbox {
-    border: 1px solid #dbdbdb;
-    border-radius: 4px;
+  &__wrapper {
+    position: relative;
   }
   &__search, &__footer {
     padding: 1em;
@@ -49,4 +34,43 @@
     }
   }
 
+}
+.field-select-autocomplete {
+
+  &__value {
+
+    @include input;
+    cursor: pointer;
+    padding-right: 2.5em;
+
+    &::after {
+      @extend %arrow;
+      border-color: $input-arrow;
+      right: 1.125em;
+      z-index: 4;
+    }
+  }
+  &__searchbox {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    //margin-top: -2.25em;
+    border: 1px solid #dbdbdb;
+    border-radius: 4px;
+    background: #fff;
+    z-index: 10;
+  }
+  &__items {
+    min-height: 4em;
+    max-height: 9em;
+  }
+
+}
+.field-list-autocomplete {
+  &__items {
+    height: 9em;
+    overflow: auto;
+    width: 100%;
+  }
 }

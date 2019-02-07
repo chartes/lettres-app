@@ -107,8 +107,7 @@ const actions = {
   fetchSearch ({ commit }, {pageId, pageSize, query}) {
     commit('LOADING_STATUS', true);
 
-    console.warn("performing searches using the DEV index");
-    const index = 'lettres__development__document';
+    const index = `lettres__${process.env.NODE_ENV}__document`;
     const incs = ['collections', 'correspondents', 'correspondents-having-roles', 'roles', 'witnesses', 'languages'];
     const http = http_with_csrf_token();
     return http.get(`/search?query=${query}&index=${index}&include=${incs.join(',')}&without-relationships&page[size]=${pageSize}&page[number]=${pageId}`)
@@ -168,6 +167,18 @@ const actions = {
 
 const getters = {
 
+  documentSender (state) {
+    return state.correspondents.filter( corr => {
+      if (!corr.role) return false;
+      return corr.role.label === 'sender'
+    })
+  },
+  documentRecipients (state) {
+    return state.correspondents.filter( corr => {
+      if (!corr.role) return false;
+      return corr.role.label !== 'sender'
+    })
+  },
 
 };
 

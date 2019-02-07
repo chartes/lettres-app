@@ -1,43 +1,36 @@
 <template>
-  <div class="field field-select-autocomplete">
-    <field-label :label="label"/>
+  <div class="field field-list-autocomplete">
+    <field-label v-if="label" :label="label"/>
 
-    <div class="field-select-autocomplete__wrapper">
-
-      <div class="control">
-        <a class="field-select-autocomplete__value" @click.prevent="openSearchBox">
-          {{ labelString(value) }}
-        </a>
-      </div>
+    <div class="field-list-autocomplete__wrapper">
 
 
-      <div class="field-select-autocomplete__searchbox" v-show="isOpen">
+      <div class="field-list-autocomplete__searchbox">
 
-        <div class="field-select-autocomplete__search">
+        <div class="field-list-autocomplete__search">
           <div class="control" :class="{ 'is-loading': isLoading }">
             <input ref="searchInput"
                 class="input is-search"
-                placeholder="Rechercher"
+                :placeholder="searchPlaceholder"
                 type="text"
                 @input="onChange"
                 v-model="search"
                 @keydown.down="onArrowDown"
                 @keydown.up="onArrowUp"
                 @keydown.enter="onEnter"
-                @keydown.capture.esc="closeSearchBox"
             />
           </div>
         </div>
 
-        <div class="field-select-autocomplete__results">
-          <ul class="field-select-autocomplete__items">
+        <div class="field-list-autocomplete__results">
+          <ul class="field-list-autocomplete__items">
             <li class="loading" v-if="isLoading">
               <loading-indicator :active="true"/>
             </li>
             <li v-else v-for="(result, i) in results"
                 :key="i"
                 @click="setResult(result)"
-                class="field-select-autocomplete__item"
+                class="field-list-autocomplete__item"
                 :class="{ 'is-active': i === arrowCounter }"
             >
               {{ labelString(result) }}
@@ -46,9 +39,6 @@
 
         </div>
 
-        <div class="field-select-autocomplete__footer" v-if="slotNotEmpty">
-          <slot></slot>
-        </div>
       </div>
 
     </div>
@@ -61,7 +51,7 @@
   import FieldLabel from './FieldLabel';
   import LoadingIndicator from '../../ui/LoadingIndicator';
   export default {
-    name: 'SelectAutocompleteField',
+    name: 'ListAutocompleteField',
     components: {LoadingIndicator, FieldLabel},
     props: {
       value: {},
@@ -70,11 +60,6 @@
         type: Array,
         required: false,
         default: () => [],
-      },
-      isAsync: {
-        type: Boolean,
-        required: false,
-        default: false,
       },
       valueKey: {
         type: String,
@@ -87,12 +72,15 @@
       notSet: {
         type: String,
         default: 'non renseigné'
+      },
+      searchPlaceholder: {
+        type: String,
+        default: 'Rechercher'
       }
     },
 
     data() {
       return {
-        isOpen: false,
         results: [],
         search: '',
         isLoading: false,
@@ -113,12 +101,7 @@
         this.loading = true
         this.$emit('search', this.search);
 
-        if (this.isAsync) {
-          this.isLoading = true;
-        } else {
-          this.filterResults();
-          this.isOpen = true;
-        }
+        this.isLoading = true;
       },
 
       filterResults() {
@@ -127,8 +110,8 @@
         });
       },
       setResult(result) {
+        console.log('setResult', result)
         this.$emit('input', result);;
-        this.isOpen = false;
       },
       onArrowDown(evt) {
         this.arrowCounter = (this.arrowCounter + 1) % this.results.length;
@@ -145,17 +128,6 @@
           this.closeSearchBox()
         }
       },
-      openSearchBox () {
-        this.search = '';
-        this.isOpen = true;
-        Vue.nextTick(() => {
-          this.$refs.searchInput.focus()
-        })
-      },
-      closeSearchBox () {
-        this.isOpen = false;
-        this.arrowCounter = -1;
-      },
       labelString (val) {
         if (!val) return this.notSet
         return val[this.labelKey] || this.notSet
@@ -168,7 +140,6 @@
         if (val.length !== oldValue.length) {
           this.results = val;
           this.isLoading = false;
-          this.isOpen = true;
         }
       },
     },

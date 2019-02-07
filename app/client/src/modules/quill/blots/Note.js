@@ -16,17 +16,14 @@ class NoteBlot extends Parchment.Embed {
   }
 
   static formats(domNode) {
-    console.log('NoteBlot.formats', domNode.getAttribute('href'))
     return { note: domNode.getAttribute('href').substring(1) }
   }
 
   static value(domNode) {
-    console.log('note value', domNode.getAttribute('href').substring(1))
     return domNode.getAttribute('href').substring(1)
   }
 
   format(name, value) {
-    console.log('note format', name, value)
     if (name === 'note' && value) {
       this.domNode.setAttribute('href', '#' + value);
     } else {
