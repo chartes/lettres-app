@@ -4,7 +4,8 @@ const state = {
 
   institutions: [],
   currentInstitution: null,
-  institutionsSearchResults: []
+  institutionsSearchResults: [],
+  newInstitution: null,
 
 };
 
@@ -38,6 +39,11 @@ const actions = {
       console.log('institution fetchOne', institution)
       commit('UPDATE_ONE', institution)
     });
+  },
+
+  addOne ({commit}, institution) {
+    console.log('institution addOne', institution)
+
   },
 
   search ({ commit }, what) {

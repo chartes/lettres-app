@@ -166,6 +166,18 @@ const actions = {
 
 const getters = {
 
+  documentSender (state) {
+    return state.correspondents.filter( corr => {
+      if (!corr.role) return false;
+      return corr.role.label === 'sender'
+    })
+  },
+  documentRecipients (state) {
+    return state.correspondents.filter( corr => {
+      if (!corr.role) return false;
+      return corr.role.label !== 'sender'
+    })
+  },
 
 };
 

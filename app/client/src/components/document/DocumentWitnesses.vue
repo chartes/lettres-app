@@ -11,7 +11,11 @@
           <a if="userCanEdit" class="witness-item__delete"><icon-bin/></a>
         </li>
       </ul>
-      <a if="userCanEdit" href="#" class="button">Ajouter un témoin</a>
+      <a if="userCanEdit"
+         href="#"
+         class="button"
+         @click.prevent="addWitness"
+      >Ajouter un témoin</a>
     </div>
     <witness-form
             v-if="editMode == 'new' || editMode == 'edit'"
@@ -52,6 +56,13 @@
     methods: {
       updateWitness (witness) {
         console.log('updateWitness', witness)
+      },
+      addWitness () {
+        console.log('addWitness')
+        this.openWitnessEdit({
+          content: '',
+          institution: null,
+        })
       },
       openWitnessEdit (witness) {
         console.log('openWitnessEdit', witness)

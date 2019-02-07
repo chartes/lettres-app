@@ -80,7 +80,6 @@ function getNewQuill (elt, opt = null) {
 
   let quill = new Quill(elt, options);
   var length = quill.getLength()
-  console.log("getNewQuill", quill.getLength(), quill.getText())
   var text = quill.getText(length - 2, 2)
 
   // Remove extraneous new lines

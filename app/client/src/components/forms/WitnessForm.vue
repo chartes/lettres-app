@@ -5,7 +5,7 @@
           :cancel="cancelAction"
           :submit="submitAction"
           :remove="remove"
-          :valid="form.length >= 1"
+          :valid="form.content && form.content.length >= 1"
           :submitting="false"
   >
     <loading-indicator :active="loading"/>
@@ -21,6 +21,20 @@
                 :options="traditionsList"
                 v-model="form.tradition"
         />
+        <select-autocomplete-field
+                label="Institution"
+                v-model="form.institution"
+                :items="institutionsSearchResults"
+                :is-async="true"
+                @search="searchInstitution"
+                label-key="ref"
+        >
+          <button
+                  class="button is-outlined is-link"
+                  @click="openInstitutionForm">
+            Ajouter une institution
+          </button>
+        </select-autocomplete-field>
         <rich-text-editor
                 label="Contenu"
                 v-model="form.content"
@@ -30,18 +44,13 @@
                 v-model="form['classification-mark']"
                 :formats="[['italic','superscript','note']]"
         />
-        <select-autocomplete-field
-                label="Institution"
-                v-model="form.institution"
-                :items="institutionsSearchResults"
-                :is-async="true"
-                @search="searchInstitution"
-                label-key="ref"
-        >
-          <button class="button is-outlined is-link">Ajouter une institution</button>
-        </select-autocomplete-field>
       </form>
     </div>
+    <institution-form
+            v-if="institutionForm"
+            title="Ajouter une institution"
+            :cancel="closeInstitutionForm"
+    />
   </modal-form>
 
 </template>
@@ -58,10 +67,12 @@
   import RichTextEditor from './fields/RichTextEditor';
   import SelectAutocompleteField from './fields/SelectAutocompleteField';
   import LoadingIndicator from '../ui/LoadingIndicator';
+  import InstitutionForm from './InstitutionForm';
 
   export default {
     name: "witness-form",
     components: {
+      InstitutionForm,
       LoadingIndicator,
       SelectAutocompleteField,
       RichTextEditor,
@@ -81,11 +92,15 @@
     data() {
       return {
         form: { ...this.$props.witness },
-        loading: true,
+        loading: false,
+        institutionForm: false,
       }
     },
     mounted () {
-      this.$store.dispatch('witnesses/fetchOne', this.$props.witness.id)
+      if (this.$props.witness.id) {
+        this.$store.dispatch('witnesses/fetchOne', this.$props.witness.id)
+        this.loading = true;
+      }
     },
     methods: {
 
@@ -107,7 +122,14 @@
       },
       removeAction () {
         this.$props.cancel();
-      }
+      },
+
+      openInstitutionForm () {
+        this.institutionForm = true
+      },
+      closeInstitutionForm () {
+        this.institutionForm = false
+      },
     },
     watch: {
       currentWitness (val) {
