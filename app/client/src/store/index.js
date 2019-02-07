@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 
+import collections from './modules/collections';
 import correspondents from './modules/correspondents';
 import document from './modules/document';
 import institutions from './modules/institutions';
@@ -15,6 +16,7 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
     modules: {
+      collections,
       correspondents,
       document,
       institutions,
