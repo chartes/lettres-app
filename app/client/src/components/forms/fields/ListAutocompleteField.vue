@@ -103,16 +103,13 @@
         });
       },
       setResult(result) {
-        console.log('setResult', result)
-        this.$emit('input', result);;
+        this.$emit('input', result);
       },
       onArrowDown() {
         if (this.results.length) this.arrowCounter = (this.arrowCounter + 1) % this.results.length;
-        console.log('onArrowDown', this.arrowCounter)
       },
       onArrowUp() {
         if (this.results.length) this.arrowCounter = (this.arrowCounter + this.results.length - 1) % this.results.length;
-        console.log('onArrowUp', this.arrowCounter)
       },
       onEnter() {
         if (this.results.length) this.setResult(this.results[this.arrowCounter]);
@@ -124,9 +121,7 @@
     },
     watch: {
       items: function (val, oldValue) {
-        console.log('watch autocomplete items', val)
-        // actually compare them
-        if (val.length !== oldValue.length) {
+        if (val !== oldValue) {
           this.arrowCounter = -1;
           this.results = val;
           this.isLoading = false;
