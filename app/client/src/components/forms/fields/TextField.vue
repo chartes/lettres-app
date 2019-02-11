@@ -48,7 +48,6 @@
     },
     methods: {
       updateField() {
-        console.log("updateField", this.$refs.field.value)
         this.$emit('input', this.$refs.field.value)
       }
     }

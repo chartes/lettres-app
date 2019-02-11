@@ -6,9 +6,10 @@
     <div class="field field-date__field" v-if="editable && editMode" ref="hover">
       <div class="control">
         <input ref="input" class="field-date__input" type="text" v-model="value"
+           @change="inputChanged"
            @keyup="maskCheck"
-           @keyup.enter="exitEditMode(false)"
-           @blur="exitEditMode(false)"
+           @keyup.enter="checkAndExitEditMode"
+           @blur="checkAndExitEditMode"
            @keyup.esc="cancelInput"
            v-mask="{mask: '(9999)|(9999-99)|(9999-99-99)', placeholder: 'AAAA-MM-DD', greedy: false}"
         />
@@ -35,7 +36,6 @@
 </template>
 
 <script>
-  import Vue from 'vue';
   import FieldLabel from './FieldLabel';
   import IconPenEdit from '../icons/IconPenEdit';
   import TextFieldMixins from './TextFieldMixins';
@@ -50,7 +50,10 @@
     },
     methods: {
       maskCheck: function (field){
-          this.isValid = !this.value || field.target.inputmask.isComplete()
+        this.isValid = !this.value || field.target.inputmask.isComplete()
+      },
+      checkAndExitEditMode () {
+        this.exitEditMode(!this.isValid)
       }
     },
     computed: {
@@ -64,9 +67,3 @@
     }
   }
 </script>
-
-<style scoped>
-  .invalid {
-    color: #f00;
-  }
-</style>

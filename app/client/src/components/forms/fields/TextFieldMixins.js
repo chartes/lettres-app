@@ -31,8 +31,8 @@ const TextFieldMixins = {
     exitEditMode (preventEmit = false) {
       if (!this.editMode) return;
       this.editMode = false
+
       if (this.valueChanged && !preventEmit) {
-        console.log(" => emit", this.name, this.initialValue, '=>', this.value)
         this.$emit('changed', { value: this.value, name: this.name, oldValue: this.initialValue })
       }
       this.valueChanged = false
