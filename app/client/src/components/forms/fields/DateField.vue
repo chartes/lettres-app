@@ -6,11 +6,11 @@
     <div class="field field-date__field" v-if="editable && editMode" ref="hover">
       <div class="control">
         <input ref="input" class="field-date__input" type="text" v-model="value"
-           @change="inputChanged"
+           @keyup="maskCheck"
            @keyup.enter="exitEditMode(false)"
            @blur="exitEditMode(false)"
            @keyup.esc="cancelInput"
-           v-mask="{mask: '9999-99-99', placeholder: 'AAAA-MM-JJ'}"
+           v-mask="{mask: '(9999)|(9999-99)|(9999-99-99)', placeholder: 'AAAA-MM-DD', greedy: false}"
         />
       </div>
     </div>
@@ -22,7 +22,7 @@
          @mouseover="overField"
          @mouseout="outField">
       <div class="control">
-        <span class="field-date__input field-date__input--fake" :class="unknownClass" v-html="value || notSet"/>
+        <span class="field-date__input field-date__input--fake" :class="fieldClasses" v-html="value || notSet"/>
         <icon-pen-edit class="field-date__icon" />
       </div>
     </div>
@@ -43,8 +43,30 @@
     name: 'DateField',
     components: {IconPenEdit, FieldLabel},
     mixins: [TextFieldMixins],
+    data() {
+      return {
+        isValid: true
+      }
+    },
+    methods: {
+      maskCheck: function (field){
+          this.isValid = !this.value || field.target.inputmask.isComplete()
+      }
+    },
+    computed: {
+
+      fieldClasses () {
+        return {
+          ...this.unknownClass,
+          'field-text--invalid': !this.isValid
+        }
+      }
+    }
   }
 </script>
 
 <style scoped>
+  .invalid {
+    color: #f00;
+  }
 </style>

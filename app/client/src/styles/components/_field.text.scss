@@ -7,6 +7,9 @@
   &--unknown {
     color: grey;
   }
+  &--invalid {
+    color: red;
+  }
 
   &__field {
     width: 100%;

@@ -29,6 +29,7 @@ const TextFieldMixins = {
       Vue.nextTick(()=>this.$refs.input.focus())
     },
     exitEditMode (preventEmit = false) {
+      if (!this.editMode) return;
       this.editMode = false
       if (this.valueChanged && !preventEmit) {
         console.log(" => emit", this.name, this.initialValue, '=>', this.value)
