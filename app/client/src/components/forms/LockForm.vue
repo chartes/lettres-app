@@ -3,8 +3,8 @@
   <modal-form class="lock-form"
       :title="title"
       :cancel="cancelAction"
-      :submit="submitAction"
-      :remove="lock.id ? removeAction: undefined"
+      :submit="canBeLocked ? submitAction: undefined"
+      :remove="canBeUnlocked ? removeAction: undefined"
       :valid="true"
       :submitting="false"
       submit-text="Verrouiller"
@@ -166,6 +166,12 @@
                         }
                     }
                 }
+            },
+            canBeLocked() {
+                return this.current_user.isAdmin ? true : this.lock.id === null ;
+            },
+            canBeUnlocked() {
+                return this.lock.id ? (this.current_user.isAdmin ? true : this.lockOwner && this.lockOwner.id === this.current_user.id) : false;
             }
         }
     }

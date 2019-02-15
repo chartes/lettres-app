@@ -1,6 +1,6 @@
 <template>
-    <div class="document-preview-card" v-if="documentPreview">
-        <aside class="document-preview-card__thumbnail">
+    <div class="document-preview-card">
+        <aside class="document-preview-card__thumbnail" v-if="documentPreview">
             <a :href="`${baseUrl}/documents/${documentPreview.id}`">
                 <img v-if='documentPreview.attributes["iiif-thumbnail-url"]'
                      :src='documentPreview.attributes["iiif-thumbnail-url"]'/>
@@ -8,11 +8,11 @@
         </aside>
         <article>
           <header class="title">
-              <document-tag-bar v-if="documentPreview" :doc-id="doc_id"/>
+              <document-tag-bar :doc-id="doc_id"/>
               <span><h1 class="document-preview-card__title" v-html="titleContent"></h1></span>
           </header>
 
-          <div class="content">
+          <div class="content" v-if="documentPreview">
              <div class="columns">
                <div class="column is-three-quarters">
                  <p class="document-preview-card__content" v-html="previewContent"></p>
@@ -46,28 +46,47 @@
     data() {
       return {
         documentPreview: null,
-        baseUrl: baseAppURL
+        baseUrl: baseAppURL,
+
+          titleContent: null,
+          previewContent: null
       }
     },
-    created () {
-      this.titleContent = "";
-      this.previewContent = "";
-
+    mounted () {
+        this.updateCurrentDocumentPreviewCard();
+      /*
       this.$store.dispatch('document/fetchPreview', this.doc_id).then(() => {
           this.documentPreview = this.documentsPreview[this.doc_id];
 
           this.titleContent = this.documentPreview.attributes.title;
           this.previewContent = this.documentPreview.attributes.argument ? this.documentPreview.attributes.argument : this.documentPreview.attributes.transcription;
       });
+      */
 
     },
     computed: {
         ...mapState('document', ['documentsPreview', 'documentLoading'])
     },
+    watch: {
+       documentsPreview() {
+           this.updateCurrentDocumentPreviewCard();
+       }
+    }   ,
     methods: {
       getCorrespondentFullname : function(obj){
           return `${obj.correspondent.firstname} ${obj.correspondent.lastname}`
       },
+      updateCurrentDocumentPreviewCard: function() {
+          this.titleContent = "";
+          this.previewContent = "";
+
+          if (this.documentsPreview[this.doc_id]) {
+              this.documentPreview = this.documentsPreview[this.doc_id];
+
+              this.titleContent = this.documentPreview.attributes.title;
+              this.previewContent = this.documentPreview.attributes.argument ? this.documentPreview.attributes.argument : this.documentPreview.attributes.transcription;
+          }
+      }
 
     },
   }

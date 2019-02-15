@@ -1,6 +1,7 @@
 import http_with_csrf_token from '../../../modules/http-common';
 import {getCorrespondents, getLanguages, getWitnesses,
         getNotes, getCollections, getCurrentLock} from '../../../modules/document-helpers';
+import Vue from "vue";
 
 const state = {
 
@@ -44,11 +45,7 @@ const mutations = {
       collections: getCollections(included),
       currentLock: getCurrentLock(included)
     };
-
-    state.documentsPreview[data.id] = {
-      ...state.documentsPreview[data.id],
-      ...newPreviewCard
-    };
+    Vue.set(state.documentsPreview, data.id, newPreviewCard);
   },
   UPDATE_ALL (state, payload) {
     console.log('UPDATE_ALL');
