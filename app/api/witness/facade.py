@@ -42,7 +42,8 @@ class WitnessFacade(JSONAPIAbstractChangeloggedFacade):
                 "tradition": self.obj.tradition,
                 "classification-mark": self.obj.classification_mark,
                 "status": self.obj.status,
-                "manifest-url": self.get_iiif_manifest_url()
+                "manifest-url": self.get_iiif_manifest_url(),
+                "num": self.obj.num if self.obj.num else 1
             },
             "meta": self.meta,
             "links": {
