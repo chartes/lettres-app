@@ -5,12 +5,13 @@
           :cancel="cancelAction"
           :submit="submitAction"
           :remove="remove"
-          :valid="form.content && form.content.length >= 1"
+          :valid="isValid"
           :submitting="false"
   >
     <loading-indicator :active="loading"/>
     <div class="location-form textinput-form" v-if="!loading">
       <form @submit.prevent="">
+
         <field-select
                 label="Statut"
                 :options="statusesList"
@@ -49,7 +50,9 @@
     <institution-form
             v-if="institutionForm"
             title="Ajouter une institution"
+            :submit="submitInstitutionForm"
             :cancel="closeInstitutionForm"
+            :error="institutionError"
     />
   </modal-form>
 
@@ -58,6 +61,7 @@
 <script>
 
   import { mapState } from 'vuex';
+  import Vue from 'vue'
 
   import ModalForm from './ModalForm';
   import FieldLabel from './fields/FieldLabel';
@@ -90,10 +94,12 @@
       remove: { type: Function },
     },
     data() {
+      console.log("data", this.$props.witness)
       return {
         form: { ...this.$props.witness },
         loading: false,
         institutionForm: false,
+        institutionError: null,
       }
     },
     mounted () {
@@ -104,12 +110,6 @@
     },
     methods: {
 
-      changeStatus (val) {
-        console.log("changeStatus", val)
-      },
-      changeTradition (val) {
-        console.log("changeTradition", val)
-      },
       searchInstitution (search) {
         this.$store.dispatch('institutions/search', search)
       },
@@ -118,12 +118,21 @@
         this.$props.submit(this.form);
       },
       cancelAction () {
+        if (this.institutionForm) return;
         this.$props.cancel();
       },
       removeAction () {
         this.$props.cancel();
       },
 
+      submitInstitutionForm (inst) {
+        console.log('submitInstitutionForm', inst)
+        this.institutionError = null;
+        this.$store.dispatch('institutions/addOne', inst).catch(error => {
+          console.log(error)
+          this.institutionError = error.toString()
+        })
+      },
       openInstitutionForm () {
         this.institutionForm = true
       },
@@ -147,6 +156,10 @@
       traditionsList () {
         return traditions;
       },
+      isValid () {
+        console.log("isValid", !!this.form.content && this.form.content.length >= 1 && this.form.content !== '<p><br></p>')
+        return this.form.content && this.form.content.length >= 1 && this.form.content !== '<p><br></p>'
+      }
 
     }
   }

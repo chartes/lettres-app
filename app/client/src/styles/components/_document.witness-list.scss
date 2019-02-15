@@ -13,14 +13,26 @@
 }
 .witness-item {
 
+  display: flex;
   margin-bottom: .5em;
 
-  &__content {
-    display: inline;
+  &__text {
+    display: flex;
   }
   &__edit, &__delete {
     display: inline-block;
     vertical-align: middle;
+  }
+
+  &__order {
+    display: flex;
+    margin-right: 1em;
+  }
+  &__order-button {
+    border: none;
+    width: rem-calc(24);
+    height: rem-calc(24);
+    padding: 0;
   }
 
 }

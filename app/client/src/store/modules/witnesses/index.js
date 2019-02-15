@@ -30,7 +30,8 @@ const actions = {
       };
       commit('UPDATE_ONE', witness)
     });
-  }
+  },
+
 
 };
 

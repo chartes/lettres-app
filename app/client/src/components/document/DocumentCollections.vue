@@ -28,11 +28,7 @@
       </div>
 
       <p v-if="editable">
-        <a
-         href="#"
-         class="button"
-         @click.prevent="addCollection"
-        >Ajouter une collection</a>
+        <launch-button label="Ajouter une collection" @click="openCollectionEdit"/>
       </p>
 
     </div>
@@ -54,9 +50,10 @@
   import IconPenEdit from '../forms/icons/IconPenEdit';
   import IconBin from '../forms/icons/IconBin';
   import CollectionListForm from '../forms/CollectionListForm';
+  import LaunchButton from '../forms/LaunchButton';
   export default {
     name: 'DocumentCollections',
-    components: {CollectionListForm, IconBin, IconPenEdit},
+    components: {LaunchButton, CollectionListForm, IconBin, IconPenEdit},
     props: {
       editable: {
         type: Boolean,
@@ -72,7 +69,7 @@
     },
     methods: {
       updateCollection (collection) {
-        console.log('updateCollection', collection)
+        this.error = '';
         this.$store.dispatch('document/addCollection', collection).then(response => {
           this.closeCollectionEdit()
         })
@@ -81,15 +78,7 @@
           this.error = 'Une erreur est survenue';
         })
       },
-      addCollection () {
-        console.log('addCollection')
-        this.openCollectionEdit({
-          content: '',
-          institution: null,
-        })
-      },
       removeCollection (collection) {
-        console.log('removeCollection', collection)
         this.$store.dispatch('document/removeCollection', collection).then(response => {
             this.closeCollectionEdit()
           })
@@ -99,11 +88,9 @@
           })
       },
       openCollectionEdit () {
-        console.log('openCollectionEdit')
         this.editMode = true
       },
       closeCollectionEdit () {
-        console.log('closeCollectionEdit')
         this.editMode = false
       },
     },

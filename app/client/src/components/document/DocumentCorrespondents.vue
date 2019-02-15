@@ -23,11 +23,7 @@
         <div v-else>
           <p class="correspondent-item"><em>Aucun expéditeur n'a été renseigné</em></p>
           <p>
-            <a if="userCanEdit"
-               href="#"
-               class="button"
-               @click.prevent="addCorrespondent('sender')"
-            >Ajouter l'expéditeur</a>
+            <lauch-button if="userCanEdit" label="Ajouter l'expéditeur" @click="openAddCorrespondent('sender')"/>
           </p>
         </div>
 
@@ -49,11 +45,7 @@
         <div v-else>
           <p class="correspondent-item"><em>Aucun destinataire n'a été renseigné</em></p>
           <p>
-            <a if="userCanEdit"
-                href="#"
-                class="button"
-                @click.prevent="addCorrespondent('recipient')"
-            >Ajouter un destinataire</a>
+            <lauch-button if="userCanEdit" label="Ajouter un destinataire" @click="openAddCorrespondent('recipient')"/>
           </p>
         </div>
 
@@ -63,6 +55,7 @@
       <correspondent-list-form
           v-if="correspondentsForm"
           title="Ajouter un correspondant"
+          :submit="linkCorrespondentToDoc"
           :cancel="closeCorrespondentChoice"
       />
 
@@ -75,26 +68,42 @@
   import { mapState, mapGetters } from 'vuex'
   import IconBin from '../forms/icons/IconBin';
   import CorrespondentListForm from '../forms/CorrespondentListForm';
+  import LauchButton from '../forms/LaunchButton';
   export default {
     name: 'DocumentCorrespondents',
-    components: {CorrespondentListForm, IconBin},
+    components: {LauchButton, CorrespondentListForm, IconBin},
     data () {
       return {
-        correspondentsForm: ''
+        correspondentsForm: null
       }
     },
+    mounted () {
+      this.$store.dispatch('correspondents/fetchRoles')
+    },
     methods: {
-      addCorrespondent (role) {
+      openAddCorrespondent (role) {
         this.correspondentsForm = role;
       },
       closeCorrespondentChoice() {
-        this.correspondentsForm = '';
+        console.log("closeCorrespondentChoice")
+        this.correspondentsForm = null;
+      },
+      linkCorrespondentToDoc(correspondent) {
+        console.log('linkCorrespondentToDoc', correspondent)
+        const correspondentId = correspondent.id
+        const role = this.getRoleByLabel(this.correspondentsForm)
+        const roleId =  role && role.id ? role.id : null;
+        this.$store.dispatch('correspondents/linkToDocument', {
+          correspondentId,
+          roleId
+        })
       }
     },
     computed: {
       ...mapState('document', ['correspondents']),
+      ...mapState('correspondents', ['roles']),
       ...mapGetters('document', ['documentSender', 'documentRecipients']),
-      ...mapState('document', ['correspondents']),
+      ...mapGetters('correspondents', ['getRoleByLabel']),
     }
   }
 

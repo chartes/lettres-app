@@ -9,6 +9,9 @@
           :submitting="false"
   >
     <div class="institution-form">
+
+      <error-message :error="error"/>
+
       <form @submit.prevent="">
         <field-text
                 label="Nom"
@@ -38,10 +41,12 @@
   import RichTextEditor from './fields/RichTextEditor';
   import SelectAutocompleteField from './fields/SelectAutocompleteField';
   import LoadingIndicator from '../ui/LoadingIndicator';
+  import ErrorMessage from '../ui/ErrorMessage';
 
   export default {
     name: "institution-form",
     components: {
+      ErrorMessage,
       FieldText,
       ModalForm
     },
@@ -49,6 +54,7 @@
       title: { type: String, default: '' },
       label: { type: String, default: '' },
       institution: { type: Object, default: null },
+      error: { type: String, default: null },
       cancel: { type: Function },
       submit: { type: Function },
       remove: { type: Function },
@@ -74,7 +80,6 @@
     },
     computed: {
       validForm () {
-        console.log('validForm', !!this.form.name && (this.form.name.length >= 1))
         return !!this.form.name && (this.form.name.length >= 1);
       },
 

@@ -5,17 +5,20 @@
     </header>
     <div class="witness-list__content">
       <ul class="witness-list__list">
-        <li v-for="witness in list" class="witness-item">
-          <p class="witness-item__content" v-html="witness.content"/>
-          <a if="userCanEdit" @click="openWitnessEdit(witness)" class="witness-item__edit"><icon-pen-edit/></a>
-          <a if="userCanEdit" class="witness-item__delete"><icon-bin/></a>
+        <li v-for="witness, index in list" class="witness-item">
+          <div class="witness-item__order">
+            <button v-if="index < list.length-1" class="witness-item__order-button"><icon-arrow-down/></button>
+            <button v-if="index > 0" class="witness-item__order-button witness-item__order-button-up"><icon-arrow-down class="is-upside-down"/></button>
+          </div>
+          <div class="witness-item__content">
+            <p class="witness-item__text" v-html="witness.content"/>
+            <a if="userCanEdit" @click="openWitnessEdit(witness)" class="witness-item__edit"><icon-pen-edit/></a>
+            <a if="userCanEdit" class="witness-item__delete"><icon-bin/></a>
+          </div>
         </li>
       </ul>
-      <a if="userCanEdit"
-         href="#"
-         class="button"
-         @click.prevent="addWitness"
-      >Ajouter un témoin</a>
+      <lauch-button if="userCanEdit" label="Ajouter un témoin" @click="addWitness"/>
+      <error-message :error="error"/>
     </div>
     <witness-form
             v-if="editMode == 'new' || editMode == 'edit'"
@@ -32,9 +35,12 @@
   import IconPenEdit from '../forms/icons/IconPenEdit';
   import IconBin from '../forms/icons/IconBin';
   import WitnessForm from '../forms/WitnessForm';
+  import LauchButton from '../forms/LaunchButton';
+  import ErrorMessage from '../ui/ErrorMessage';
+  import IconArrowDown from '../forms/icons/IconArrowDown';
   export default {
     name: 'DocumentWitnesses',
-    components: {WitnessForm, IconBin, IconPenEdit},
+    components: {ErrorMessage, LauchButton, WitnessForm, IconBin, IconPenEdit, IconArrowDown},
     props: {
       editable: {
         type: Boolean,
@@ -51,13 +57,18 @@
         userCanEdit: true,
         selectedWitness: null,
         selectedWitnessId: null,
+        error: null
       }
     },
     methods: {
       updateWitness (witness) {
         console.log('updateWitness', witness)
+        this.$store.dispatch('document/addWitness', witness)
+          .catch(error => {
+
+          })
       },
-      addWitness () {
+      addWitness (evt) {
         console.log('addWitness')
         this.openWitnessEdit({
           content: '',

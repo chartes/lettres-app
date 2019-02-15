@@ -5,12 +5,9 @@ export const statuses =  [
 
 export const traditions =  [
   {id: null, label:'Non renseigné'},
-  {id: 'cartulaire', label: 'Cartulaire'},
-  {id: 'cp_authentique', label:	'Copie authentique'},
-  {id: 'cp_figuree', label:	'Copie figurée'},
-  {id: 'cp_informe', label:	'Copie informe'},
+  {id: 'autographe', label: 'Autographe'},
+  {id: 'copie', label:	'Copie'},
   {id: 'édition', label:'Édition'},
-  {id: 'orig', label:	'Original'},
-  {id: 'orig_multiple', label:	'Original multiple'},
-  {id: 'chancellerie', label:	'Registre de chancellerie'},
+  {id: 'minute', label:'Minute'},
+  {id: 'original', label:	'Original'},
 ]

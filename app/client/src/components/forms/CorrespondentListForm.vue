@@ -3,7 +3,6 @@
   <modal-form
           :title="title"
           :cancel="cancelAction"
-          :submit="submitAction"
           :remove="remove"
           :valid="validForm"
           :submitting="false"
@@ -22,11 +21,24 @@
 
       <footer class="correspondent-list-form__footer has-text-centered">
         <p>&mdash; <em>ou</em> &mdash; </p>
-        <p><button class="button">Créer un nouveau correspondant</button></p>
+        <p>
+          <launch-button
+                  label="Créer un nouveau correspondant"
+                  @click="openNewCorrespondentForm"
+          />
+        </p>
       </footer>
 
 
     </div>
+
+    <correspondent-form v-if="correspondentForm"
+            label="Créer un nouveau correspondant"
+            :error="newCorrespondentError"
+            :submit="createNewCorrespondent"
+            :cancel="closeNewCorrespondentForm"
+    />
+
   </modal-form>
 
 </template>
@@ -37,10 +49,14 @@
   import ModalForm from './ModalForm';
   import FieldText from './fields/TextField';
   import ListAutocompleteField from './fields/ListAutocompleteField';
+  import LaunchButton from './LaunchButton';
+  import CorrespondentForm from './CorrespondentForm';
 
   export default {
     name: "CorrespondentListForm",
     components: {
+      CorrespondentForm,
+      LaunchButton,
       ListAutocompleteField,
       FieldText,
       ModalForm
@@ -57,6 +73,8 @@
       return {
         form: {},
         loading: false,
+        correspondentForm: false,
+        newCorrespondentError: null
       }
     },
     methods: {
@@ -70,16 +88,33 @@
         this.$props.submit(this.form);
       },
       cancelAction () {
+        if (this.correspondentForm) return;
         this.$props.cancel();
       },
       removeAction () {
         this.$props.cancel();
-      }
+      },
+
+      openNewCorrespondentForm () {
+        this.correspondentForm = true
+      },
+      closeNewCorrespondentForm () {
+        this.correspondentForm = false
+      },
+      createNewCorrespondent (correspondent) {
+        console.log('createNewCorrespondent', correspondent)
+        this.$store.dispatch('correspondents/addOne', correspondent)
+          .catch(error => {
+            console.log('correspondent add error', error)
+            this.newCorrespondentError = error.toString()
+          })
+      },
 
     },
     watch: {
       form (val, oldVal) {
         console.log('watch form', val, oldVal)
+        this.submitAction()
       },
     },
     computed: {

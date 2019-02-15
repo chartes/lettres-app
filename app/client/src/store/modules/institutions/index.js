@@ -1,3 +1,4 @@
+import http_with_csrf_token from '../../../modules/http-common';
 import {http} from '../../../modules/http-common';
 
 const state = {
@@ -17,6 +18,9 @@ const mutations = {
   UPDATE_ONE (state, payload) {
     state.currentInstitution = payload;
   },
+  ADD_ONE (state, payload) {
+    state.currentInstitution = payload;
+  },
 
   SEARCH_RESULTS (state, payload) {
     state.institutionsSearchResults = payload;
@@ -27,6 +31,7 @@ const mutations = {
 const actions = {
 
   fetch ({ commit }) {
+    commit('UPDATE', [])
     http.get(`/institutions?without-relationships`).then( response => {
       const institutions = response.data.data.map(inst => { return { id: inst.id, ...inst.attributes}});
       commit('UPDATE', institutions)
@@ -38,12 +43,25 @@ const actions = {
       const institution = { id: response.data.data.id, ...response.data.data.attributes };
       console.log('institution fetchOne', institution)
       commit('UPDATE_ONE', institution)
-    });
+    })
   },
 
   addOne ({commit}, institution) {
     console.log('institution addOne', institution)
 
+    const institutionData = {
+      data: {
+        type: 'institution',
+        attributes: institution
+      }
+    }
+
+    const http = http_with_csrf_token();
+    return http.post(`/institutions`, institutionData).then( response => {
+      const institution = { id: response.data.data.id, ...response.data.data.attributes };
+      console.log('institution fetchOne', institution)
+      commit('ADD_ONE', institution)
+    })
   },
 
   search ({ commit }, what) {

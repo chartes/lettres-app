@@ -10,14 +10,20 @@
   >
     <div class="institution-form">
       <form @submit.prevent="">
+        <error-message v-if="error" :error="error"/>
+        <field-text
+                label="Prénom"
+                placeholder="Prénom"
+                v-model="form.lastname"
+        />
         <field-text
                 label="Nom"
-                placeholder="Nom de l'institution"
-                v-model="form.name"
+                placeholder="Nom"
+                v-model="form.firstname"
         />
         <field-text
                 label="Référence"
-                placeholder="Référence de l'institution"
+                placeholder="Référence"
                 v-model="form.ref"
         />
       </form>
@@ -31,17 +37,13 @@
   import { mapState } from 'vuex';
 
   import ModalForm from './ModalForm';
-  import FieldLabel from './fields/FieldLabel';
-  import FieldSelect from './fields/SelectField';
   import FieldText from './fields/TextField';
-  import { statuses, traditions } from './data';
-  import RichTextEditor from './fields/RichTextEditor';
-  import SelectAutocompleteField from './fields/SelectAutocompleteField';
-  import LoadingIndicator from '../ui/LoadingIndicator';
+  import ErrorMessage from '../ui/ErrorMessage';
 
   export default {
-    name: "institution-form",
+    name: "correspondent-form",
     components: {
+      ErrorMessage,
       FieldText,
       ModalForm
     },
@@ -52,6 +54,7 @@
       cancel: { type: Function },
       submit: { type: Function },
       remove: { type: Function },
+      error: { type: Object, default: null },
     },
     data() {
       return {
@@ -65,6 +68,7 @@
     methods: {
 
       submitAction () {
+        this.form.key = `${this.form.lastname}, ${this.form.firstname}`
         this.$props.submit(this.form);
       },
       cancelAction () {
@@ -80,8 +84,11 @@
       ...mapState('correspondents', ['roles']),
 
       validForm () {
-        console.log('validForm', !!this.form.name && (this.form.name.length >= 1))
-        return !!this.form.name && (this.form.name.length >= 1);
+        return (
+          !!this.form.firstname && (this.form.firstname.length >= 1)
+          &&
+          !!this.form.lastname && (this.form.lastname.length >= 1)
+        );
       },
 
     }

@@ -8,6 +8,9 @@
   g, path {
     fill: #ccc;
   }
+  .line {
+    stroke: #ccc;
+  }
 }
 
 .icon__bin:hover {
@@ -18,5 +21,11 @@
 .icon__pen-edit:hover {
   g, path {
     fill: $blue;
+  }
+}
+.icon__arrow-down:hover {
+  cursor: pointer;
+  .line {
+    stroke: $blue;
   }
 }
