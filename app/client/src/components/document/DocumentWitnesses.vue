@@ -7,17 +7,29 @@
       <ul class="witness-list__list">
         <li v-for="witness, index in list" class="witness-item">
           <div class="witness-item__order">
-            <button v-if="index < list.length-1" class="witness-item__order-button"><icon-arrow-down/></button>
-            <button v-if="index > 0" class="witness-item__order-button witness-item__order-button-up"><icon-arrow-down class="is-upside-down"/></button>
+            <button
+                    v-if="index < list.length-1"
+                    class="witness-item__order-button"
+                    @click="reorderWitness(witness, 1)"
+            >
+              <icon-arrow-down/>
+            </button>
+            <button
+                    v-if="index > 0"
+                    class="witness-item__order-button witness-item__order-button-up"
+                    @click="reorderWitness(witness, -1)"
+            >
+              <icon-arrow-down class="is-upside-down"/>
+            </button>
           </div>
           <div class="witness-item__content">
             <p class="witness-item__text" v-html="witness.content"/>
             <a if="userCanEdit" @click="openWitnessEdit(witness)" class="witness-item__edit"><icon-pen-edit/></a>
-            <a if="userCanEdit" class="witness-item__delete"><icon-bin/></a>
+            <a if="userCanEdit" @click="removeWitness(witness)" class="witness-item__delete"><icon-bin/></a>
           </div>
         </li>
       </ul>
-      <lauch-button if="userCanEdit" label="Ajouter un témoin" @click="addWitness"/>
+      <lauch-button if="userCanEdit" label="Ajouter un témoin" @click="openNewWitnessEdit"/>
       <error-message :error="error"/>
     </div>
     <witness-form
@@ -25,7 +37,7 @@
             :title="editMode == 'new' ? 'Nouveau témoin' : 'Éditer le témoin'"
             :witness="selectedWitness"
             :witnessId="selectedWitnessId"
-            :submit="updateWitness"
+            :submit="editMode == 'new' ? addWitness : updateWitness"
             :cancel="closeWitnessEdit"
     />
   </div>
@@ -62,26 +74,55 @@
     },
     methods: {
       updateWitness (witness) {
-        console.log('updateWitness', witness)
-        this.$store.dispatch('document/addWitness', witness)
+        this.removeError()
+        this.$store.dispatch('document/updateWitness', witness)
+          .then( response => {
+            this.closeWitnessEdit()
+          })
           .catch(error => {
-
+            console.log('error', error)
           })
       },
-      addWitness (evt) {
-        console.log('addWitness')
+      addWitness (witness) {
+        this.removeError()
+        this.$store.dispatch('document/addWitness', witness)
+          .then( response => {
+            this.closeWitnessEdit()
+          })
+          .catch(error => {
+            console.log('error', error)
+          })
+      },
+      removeWitness (witness) {
+        this.removeError()
+        this.$store.dispatch('document/removeWitness', witness)
+          .then( response => {
+            this.closeWitnessEdit()
+          })
+          .catch(error => {
+            console.log('error', error)
+          })
+      },
+      reorderWitness (witness, dir) {
+        console.log('reorderWitness', witness, dir)
+
+      },
+
+      removeError () {
+        this.error = null
+      },
+
+      openNewWitnessEdit (evt) {
         this.openWitnessEdit({
           content: '',
           institution: null,
         })
       },
       openWitnessEdit (witness) {
-        console.log('openWitnessEdit', witness)
         this.selectedWitness = witness
-        this.editMode = !!witness ? 'edit' : 'new'
+        this.editMode = !!witness.id ? 'edit' : 'new'
       },
       closeWitnessEdit () {
-        console.log('closeWitnessEdit')
         this.selectedWitness = null
         this.editMode = null
       },

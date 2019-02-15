@@ -66,14 +66,23 @@ const mutations = {
     if (exists) return;
     state.collections = [ ...state.collections, payload ]
   },
+
   ADD_WITNESS (state, payload) {
     state.witnesses = [ ...state.witnesses, payload ]
   },
-  REMOVE_COLLECTION (state, payload) {
-    state.collections = state.collections.filter(coll => coll.id !== payload.id)
+  UPDATE_WITNESS (state, payload) {
+    let wit = state.witnesses.find(w => w.id === payload.id)
+    const index = state.witnesses.indexOf(wit)
+    wit = { ...payload }
+    state.witnesses.splice(index, 1, wit)
   },
   REMOVE_WITNESS (state, payload) {
-    state.witnesses = state.witnesses.filter(wit => wit.id !== payload.id)
+    let wit = state.witnesses.find(w => w.id === payload.id)
+    const index = state.witnesses.indexOf(wit)
+    state.witnesses.splice(index, 1)
+  },
+  REMOVE_COLLECTION (state, payload) {
+    state.collections = state.collections.filter(coll => coll.id !== payload.id)
   },
 
 };
@@ -201,35 +210,65 @@ const actions = {
       }
     }
     const data = {
-      data: {
         type: "witness",
         attributes: witnessData,
         relationships
-      }
     }
-    console.log('data yo send', data)
 
     const http = http_with_csrf_token();
-    return http.post(`/witnesses?without-relationships`, data)
+    return http.post(`/witnesses?without-relationships`, {data})
       .then(response => {
         console.log('response', response)
-        commit('ADD_WITNESS', collection);
-        //resolve(response.data)
-        return true
+        witness.id = response.data.data.id;
+        commit('ADD_WITNESS', witness);
+      })
+  },
+  updateWitness ({commit, state}, witness) {
+
+    const attributes = {...witness}
+    const institutionId = witness.institution ? witness.institution.id : null;
+    delete (attributes.id)
+    delete (attributes.institution)
+    delete (attributes['manifest-url'])
+    const relationships = {
+      document: {
+        data: {
+          id: state.document.id,
+          type: "document"
+        }
+      }
+    }
+    if (!!institutionId) {
+      relationships.institution = {
+        data: {
+          id: institutionId,
+          type: "institution"
+        }
+      }
+    }
+    const data = {
+        id : witness.id,
+        type: "witness",
+        attributes: attributes,
+        relationships
+    }
+    const http = http_with_csrf_token();
+    return http.patch(`witnesses/${witness.id}?without-relationships`, {data})
+      .then(response => {
+        console.log('response', response)
+        commit('UPDATE_WITNESS', witness);
       })
   },
   removeWitness ({commit, state}, witness) {
 
     const data = { data: { id : witness.id, type: "witness" } }
-    console.log('document store removeCollection', data, state.document.id)
+    console.log('document store removeWitness', data, state.document.id)
 
     const http = http_with_csrf_token();
-    return http.delete(`/documents/${state.document.id}/relationships/collections?without-relationships`, {data})
+    return http.delete(`/witnesses/${witness.id}`, {data})
       .then(response => {
         console.log('response', response)
-        commit('REMOVE_COLLECTION', collection);
-        //resolve(response.data)
-        return true
+        commit('REMOVE_WITNESS', witness);
       })
   },
 

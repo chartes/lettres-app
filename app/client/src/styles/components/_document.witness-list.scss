@@ -13,11 +13,13 @@
 }
 .witness-item {
 
+  $action-w: rem-calc(24);
+
   display: flex;
   margin-bottom: .5em;
 
   &__text {
-    display: flex;
+    display: inline;
   }
   &__edit, &__delete {
     display: inline-block;
@@ -25,14 +27,22 @@
   }
 
   &__order {
-    display: flex;
-    margin-right: 1em;
+    margin-right: .5em;
+    width: $action-w * 2;
+    flex: 0 0 $action-w * 2;
   }
   &__order-button {
+    display: block;
     border: none;
-    width: rem-calc(24);
-    height: rem-calc(24);
+    width: $action-w;
+    height: $action-w;
     padding: 0;
+    float: left;
   }
+  &__order-button-up {
+    float: right;
+  }
+
+
 
 }
