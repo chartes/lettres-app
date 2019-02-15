@@ -1,11 +1,11 @@
 <template>
-  <section v-if="document.transcription.length > 0" class="document__transcription section">
+  <section v-if="document.transcription.length  || editable> 0" class="document__transcription section">
     <br/>
     <header class="title">
       <h2 class="document__transcription--title subtitle">Transcription</h2>
     </header>
 
-    <transcription-editor v-if="userCanEdit" :initial-content="transcriptionContent"/>
+    <transcription-editor v-if="editable" :initial-content="transcriptionContent"/>
     <div v-else class="document__transcription--content" v-html="transcriptionContent"></div>
 
     <ol v-if="notesContent.length" class="document__notes--content notes">
@@ -22,10 +22,11 @@
   export default {
     name: 'DocumentTranscription',
     components: {TranscriptionEditor, DocumentAttributes},
-    data() {
-      return {
-        userCanEdit: true,
-      }
+    props: {
+      editable: {
+        type: Boolean,
+        default: false
+      },
     },
     created() {
       this.transcriptionContent = this.document.transcription;

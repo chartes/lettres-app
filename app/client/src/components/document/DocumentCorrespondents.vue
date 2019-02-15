@@ -16,13 +16,13 @@
               {{ c.correspondent.firstname + ' ' + c.correspondent.lastname }}
             </a>
             <span class="tag">{{ c.role.label }}</span>
-            <a if="userCanEdit" class="witness-item__delete"><icon-bin/></a>
+            <a v-if="editable" class="witness-item__delete"><icon-bin/></a>
           </li>
         </ul>
 
         <div v-else>
           <p class="correspondent-item"><em>Aucun expéditeur n'a été renseigné</em></p>
-          <p>
+          <p v-if="editable">
             <lauch-button if="userCanEdit" label="Ajouter l'expéditeur" @click="openAddCorrespondent('sender')"/>
           </p>
         </div>
@@ -38,14 +38,14 @@
             <a :href="c.correspondent.ref" target="_blank">
               {{ c.correspondent.firstname + ' ' + c.correspondent.lastname }}</a>
             <span class="tag">{{ c.role.label }}</span>
-            <a if="userCanEdit" class="correspondent-item__delete"><icon-bin/></a>
+            <a v-if="editable" class="correspondent-item__delete"><icon-bin/></a>
           </li>
         </ul>
 
         <div v-else>
           <p class="correspondent-item"><em>Aucun destinataire n'a été renseigné</em></p>
-          <p>
-            <lauch-button if="userCanEdit" label="Ajouter un destinataire" @click="openAddCorrespondent('recipient')"/>
+          <p v-if="editable">
+            <lauch-button label="Ajouter un destinataire" @click="openAddCorrespondent('recipient')"/>
           </p>
         </div>
 
@@ -53,7 +53,7 @@
       </div>
 
       <correspondent-list-form
-          v-if="correspondentsForm"
+          v-if="correspondentsForm && editable"
           title="Ajouter un correspondant"
           :submit="linkCorrespondentToDoc"
           :cancel="closeCorrespondentChoice"
@@ -72,6 +72,12 @@
   export default {
     name: 'DocumentCorrespondents',
     components: {LauchButton, CorrespondentListForm, IconBin},
+    props: {
+      editable: {
+        type: Boolean,
+        default: false
+      },
+    },
     data () {
       return {
         correspondentsForm: null

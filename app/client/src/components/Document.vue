@@ -4,9 +4,9 @@
     <article v-if="document" class="document__content">
       <div class="columns">
         <div class="column">
-          <document-notice/>
-          <document-correspondents/>
-          <document-transcription/>
+          <document-notice :editable="canEdit"/>
+          <document-correspondents :editable="canEdit"/>
+          <document-transcription :editable="canEdit"/>
         </div>
         <div class="column is-one-quarter">
 
@@ -42,6 +42,9 @@
       });
     },
     computed: {
+      canEdit () {
+        return true;
+      },
       ...mapState('document', ['document', 'documentLoading']),
       ...mapState('user', ['current_user']),
     }

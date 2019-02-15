@@ -6,7 +6,7 @@
     <div class="witness-list__content">
       <ul class="witness-list__list">
         <li v-for="witness, index in list" class="witness-item">
-          <div class="witness-item__order">
+          <div class="witness-item__order" v-if="editable">
             <button
                     v-if="index < list.length-1"
                     class="witness-item__order-button"
@@ -24,12 +24,12 @@
           </div>
           <div class="witness-item__content">
             <p class="witness-item__text" v-html="witness.content"/>
-            <a if="userCanEdit" @click="openWitnessEdit(witness)" class="witness-item__edit"><icon-pen-edit/></a>
-            <a if="userCanEdit" @click="removeWitness(witness)" class="witness-item__delete"><icon-bin/></a>
+            <a v-if="editable" @click="openWitnessEdit(witness)" class="witness-item__edit"><icon-pen-edit/></a>
+            <a v-if="editable" @click="removeWitness(witness)" class="witness-item__delete"><icon-bin/></a>
           </div>
         </li>
       </ul>
-      <lauch-button if="userCanEdit" label="Ajouter un témoin" @click="openNewWitnessEdit"/>
+      <lauch-button v-if="editable" label="Ajouter un témoin" @click="openNewWitnessEdit"/>
       <error-message :error="error"/>
     </div>
     <witness-form
@@ -66,7 +66,6 @@
     data() {
       return {
         editMode: null,
-        userCanEdit: true,
         selectedWitness: null,
         selectedWitnessId: null,
         error: null

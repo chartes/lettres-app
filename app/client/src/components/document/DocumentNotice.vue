@@ -6,11 +6,11 @@
       <span><h1 class="title" v-html="titleContent"></h1></span>
     </header>
 
-    <document-attributes :editable="userCanEdit"/>
+    <document-attributes :editable="editable"/>
 
     <document-witnesses :list="witnesses"/>
 
-    <document-collections :editable="userCanEdit"/>
+    <document-collections :editable="editable"/>
 
     <div v-if="!!document.argument" class="document__argument">
       <header>
@@ -39,12 +39,11 @@
       data: {
         type: Object,
         default: null,
-      }
-    },
-    data() {
-      return {
-        userCanEdit: true,
-      }
+      },
+      editable: {
+        type: Boolean,
+        default: false
+      },
     },
     computed: {
       ...mapState('document', ['document', 'collections', 'witnesses', 'currentLock']),
