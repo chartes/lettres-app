@@ -87,7 +87,7 @@ class JSONAPIAbstractFacade(object):
         :param related_resources:
         :return:
         """
-        #print("POSTING RESOURCE:", obj_id, attributes, related_resources)
+        #print("POSTING RESOURCE:", model, obj_id, attributes, related_resources)
         for att in attributes.keys():
             attributes[att.replace("-", "_")] = attributes.pop(att)
 
@@ -107,7 +107,7 @@ class JSONAPIAbstractFacade(object):
                         setattr(resource, rel_name, None)
                     else:
                         setattr(resource, rel_name, rel_data[0])
-        print(resource.user)
+        #print(resource.user)
         return resource
 
     @staticmethod

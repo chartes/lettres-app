@@ -1,4 +1,3 @@
-from app import db
 from app.api.abstract_facade import JSONAPIAbstractFacade
 from app.models import Institution
 
@@ -50,7 +49,6 @@ class InstitutionFacade(JSONAPIAbstractFacade):
         """
 
         from app.api.witness.facade import WitnessFacade
-        from app.api.changelog.facade import ChangelogFacade
 
         self.relationships = {
             "witnesses": {
