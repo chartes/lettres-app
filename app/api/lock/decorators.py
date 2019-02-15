@@ -18,6 +18,14 @@ def manage_lock_addition():
             try:
                 r = json_loads(request.data)
                 lock_user_id = r['data']['relationships']['user']['data'][0]['id']
+
+                old_locks = Lock.query.filter(
+                    Lock.object_id == r['data']['attributes']['object-id'],
+                    Lock.object_type == r['data']['attributes']['object-type']).order_by(Lock.event_date).all()
+                active_lock = [l for l in old_locks if l.is_active]
+                if len(active_lock) > 1:
+                    raise Exception("Two locks are active at the same time on the same object: %s" % active_lock)
+
             except Exception as e:
                 return error_403_unhandled_error(e)
 
@@ -25,10 +33,14 @@ def manage_lock_addition():
             roles = get_jwt_claims()
 
             # contributor cannot add locks it does not own
-            if 'admin' not in roles and current_user.id != lock_user_id:
+            # contributor cannot add locks if an active lock already exists
+            print(roles, current_user.id, lock_user_id, old_locks, active_lock)
+
+            if 'admin' not in roles and (current_user.id != lock_user_id or len(active_lock) >= 1):
                 return error_403_privileges
 
             # if the doc is already locked, expire the previous locks on this object
+            # TODO watch permissions first
             response = view_function(*args, **kwargs)
             if response.status.startswith("20"):
                 new_lock = json_loads(response.data)

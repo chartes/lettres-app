@@ -1,8 +1,8 @@
 <template>
-  <span v-if="documentPreview" class="tags has-addons">
-    <a :href="`${baseUrl}/documents/${documentPreview.id}`"
+  <span v-if="documentsPreview[docId]" class="tags has-addons">
+    <a :href="`${baseUrl}/documents/${docId}`"
        class="tag document-preview-card__doc-tag">
-      <span>Document {{documentPreview.id}}</span>
+      <span>Document {{docId}}</span>
     </a>
   
     <!--
@@ -44,9 +44,9 @@
       </template>
     </badge>
   
-    <lock-form v-if="documentPreview && lockEditMode"
+    <lock-form v-if="documentsPreview[docId] && lockEditMode"
                :doc-id="docId"
-               :current-lock="documentPreview.currentLock"
+               :current-lock="documentsPreview[docId].currentLock"
                :cancel="stopLockEditor"
                :submit="stopLockEditor"
     />
@@ -70,13 +70,8 @@
             ...mapState('user', ['current_user']),
             ...mapState('document', ['documentsPreview']),
         },
-        created() {
-            if (this.documentsPreview[this.docId] === undefined) {
-                this.fetchPreviewCard();
-            } else {
-                this.documentPreview = this.documentsPreview[this.docId];
-                this.fetchLockOwner();
-            }
+        mounted() {
+            this.fetchPreviewCard();
 
             /* isBookmarked */
             if (this.current_user) {
@@ -89,7 +84,6 @@
         data() {
             return {
                 baseUrl: baseAppURL,
-                documentPreview: null,
 
                 isBookmarked: null,
                 lockOwner: null,
@@ -118,18 +112,16 @@
             },
             fetchPreviewCard() {
                 this.$store.dispatch('document/fetchPreview', this.docId).then(() => {
-                    this.documentPreview = this.documentsPreview[this.docId];
-                    this.fetchLockOwner();
+                    /* fetch lock user info*/
+                    if (this.documentsPreview[this.docId].currentLock.id) {
+                        const http = http_with_csrf_token();
+                        http.get(`/locks/${this.documentsPreview[this.docId].currentLock.id}/user`).then(response => {
+                            this.lockOwner = response.data.data;
+                        });
+                    } else {
+                        this.lockOwner = null;
+                    }
                 });
-            },
-            fetchLockOwner() {
-                /* fetch lock user info*/
-                if (this.documentPreview.currentLock.id) {
-                    const http = http_with_csrf_token();
-                    http.get(`/locks/${this.documentPreview.currentLock.id}/user`).then(response => {
-                        this.lockOwner = response.data.data;
-                    });
-                }
             },
             startLockEditor() {
                 this.lockEditMode = true;
