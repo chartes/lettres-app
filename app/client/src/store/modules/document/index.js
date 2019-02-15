@@ -62,7 +62,7 @@ const mutations = {
   },
 
   ADD_COLLECTION (state, payload) {
-    const exists = state.collections.find(coll => coll.id !== payload.id)
+    const exists = state.collections.find(coll => coll.id === payload.id)
     if (exists) return;
     state.collections = [ ...state.collections, payload ]
   },
