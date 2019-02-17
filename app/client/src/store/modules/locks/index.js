@@ -1,11 +1,13 @@
 import http_with_csrf_token from '../../../modules/http-common';
 import {getUser} from "../../../modules/change-helpers";
+import Vue from "vue";
 
 const state = {
   fullLocks: [],
   links: [],
 
-  currentLock: null
+  currentLock: null,
+  lockOwner: {}
 };
 
 
@@ -33,6 +35,16 @@ const mutations = {
 
   REMOVE_LOCK (state) {
     state.currentLock = null;
+  },
+
+  FETCH_LOCK_OWNER(state, {docId, user}) {
+    console.log("FETCH_LOCK_OWNER", docId, user);
+    Vue.set(state.lockOwner, docId, user);
+  },
+
+  RESET_LOCK_OWNER(state, {docId}) {
+    console.log("RESET_LOCK_OWNER", docId);
+    Vue.set(state.lockOwner, docId, null);
   }
 };
 
@@ -48,6 +60,13 @@ const actions = {
     });
   },
 
+  fetchLockOwner({commit}, {docId, lockId}) {
+    const http = http_with_csrf_token();
+    return http.get(`/locks/${lockId}/user`).then(response => {
+      commit('FETCH_LOCK_OWNER', {docId: docId, user: response.data.data});
+    });
+  },
+
   saveLock({commit}, lock) {
     const http = http_with_csrf_token();
     return http.post(`/locks`, {data: lock}).then(response => {
@@ -59,6 +78,7 @@ const actions = {
     const http = http_with_csrf_token();
     return http.delete(`locks/${lock.id}`, {data : {data: [{id: lock.id, type: 'lock'}]}}).then(response => {
       commit('REMOVE_LOCK');
+      commit('RESET_LOCK_OWNER', {docId: lock['object-id']});
     });
   }
 };

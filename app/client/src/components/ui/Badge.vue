@@ -44,7 +44,6 @@
                    return
                }
                this.actionWhenOff().then(resp => {
-                   console.warn("WHEN OFF", resp);
                    this.isActive = resp;
                }).catch(resp => {
                    console.warn(resp);
@@ -55,7 +54,6 @@
                    return
                }
                this.actionWhenOn().then(resp => {
-                   console.warn("WHEN ON", resp);
                    this.isActive = resp;
                }).catch(resp => {
                    console.warn(resp);

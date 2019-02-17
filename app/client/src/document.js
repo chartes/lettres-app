@@ -25,7 +25,7 @@ new Vue({
     documentId: undefined
   },
   beforeMount: function () {
-    this.documentId = this.$el.dataset.documentId;
+    this.documentId = parseInt(this.$el.dataset.documentId);
   },
   render (h) {
     return h(App, { props: {

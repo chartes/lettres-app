@@ -135,5 +135,10 @@ class ManifestFactory(object):
         else:
             manifest = cls._fetch(manifest_url)
 
-        return [canvas for canvas in manifest["sequences"][0]["canvases"]
-                if canvas["@id"] in canvas_ids if "sequences" in manifest]
+        try:
+            canvases = [canvas for canvas in manifest["sequences"][0]["canvases"]
+                    if canvas["@id"] in canvas_ids if "sequences" in manifest]
+        except KeyError:
+            canvases = []
+
+        return canvases

@@ -2,7 +2,6 @@
   <section class="document__notice section">
 
     <header class="title">
-      <document-tag-bar :doc-id="document.id"/>
       <span><h1 class="title" v-html="titleContent"></h1></span>
     </header>
 

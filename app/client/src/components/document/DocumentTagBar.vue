@@ -27,17 +27,17 @@
       Lock
     -->
     <badge v-if="current_user"
-           classesActive="tag is-warning"
+           classesActive="tag lock-tag"
            classesInactive="tag"
            :action-when-on="startLockEditor"
            :action-when-off="startLockEditor"
-           :starts-on="lockOwner !== null"
+           :starts-on="lockOwner[docId]"
     >
       <template #active>
         <font-awesome-icon :icon="['fas', 'lock']"/>
       </template>
       <template #activeLabel>
-        <span v-if="lockOwner" class="badge-label">{{lockOwner.attributes.username}}</span>
+        <span v-if="lockOwner[docId]" class="badge-label">{{lockOwner[docId].attributes.username}}</span>
       </template>
       <template #inactive>
         <font-awesome-icon :icon="['fas', 'unlock']"/>
@@ -64,11 +64,12 @@
         name: 'DocumentTagBar',
         components: {Badge, LockForm},
         props: {
-            docId : {required: true},
+            docId : {required: true, type: Number},
         },
         computed: {
             ...mapState('user', ['current_user']),
             ...mapState('document', ['documentsPreview']),
+            ...mapState('locks', ['lockOwner'])
         },
         mounted() {
             this.fetchPreviewCard();
@@ -86,8 +87,6 @@
                 baseUrl: baseAppURL,
 
                 isBookmarked: null,
-                lockOwner: null,
-
                 lockEditMode: false,
             }
         },
@@ -113,24 +112,23 @@
             fetchPreviewCard() {
                 this.$store.dispatch('document/fetchPreview', this.docId).then(() => {
                     /* fetch lock user info*/
-                    if (this.documentsPreview[this.docId].currentLock.id) {
-                        const http = http_with_csrf_token();
-                        http.get(`/locks/${this.documentsPreview[this.docId].currentLock.id}/user`).then(response => {
-                            this.lockOwner = response.data.data;
-                        });
-                    } else {
-                        this.lockOwner = null;
+                    const lockId = this.documentsPreview[this.docId].currentLock.id;
+                    if (lockId) {
+                        this.fetchLockOwner(lockId);
                     }
                 });
             },
+            fetchLockOwner(lockId) {
+                return this.$store.dispatch('locks/fetchLockOwner', {docId: this.docId, lockId: lockId});
+            },
             startLockEditor() {
                 this.lockEditMode = true;
-                return Promise.resolve(!!this.lockOwner);
+                return Promise.resolve(!!this.lockOwner[this.docId]);
             },
             stopLockEditor() {
                 this.lockEditMode = false;
                 this.fetchPreviewCard();
-                return Promise.resolve(!!this.lockOwner);
+                return Promise.resolve(!!this.lockOwner[this.docId]);
             }
         },
     }

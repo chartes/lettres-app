@@ -8,7 +8,7 @@
   import Document from './components/Document';
   export default {
     props: {
-      doc_id : {required: true}
+      doc_id : {required: true, type: Number}
     },
     components: {Document}
   }
