@@ -1,7 +1,7 @@
 <template>
   <div class="document">
   
-    <document-tag-bar :doc-id="doc_id"/>
+    <document-tag-bar v-if="isUserLoaded" :doc-id="doc_id"/>
     
     <article v-if="document && documentsPreview[doc_id]" class="document__content" >
       <div class="columns">
@@ -53,7 +53,7 @@
         },
         computed: {
             ...mapState('document', ['document', 'documentLoading', 'documentsPreview']),
-            ...mapState('user', ['current_user']),
+            ...mapState('user', ['current_user', 'isUserLoaded']),
             ...mapState('locks', ['lockOwner']),
         },
         watch: {

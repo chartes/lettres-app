@@ -27,7 +27,7 @@
       Lock
     -->
     <badge v-if="current_user"
-           classesActive="tag lock-tag"
+           classesActive="tag is-warning"
            classesInactive="tag"
            :action-when-on="startLockEditor"
            :action-when-off="startLockEditor"
@@ -73,14 +73,6 @@
         },
         mounted() {
             this.fetchPreviewCard();
-
-            /* isBookmarked */
-            if (this.current_user) {
-                const http = http_with_csrf_token();
-                http.get(`/users/${this.current_user.id}/relationships/bookmarks`).then(response => {
-                    this.isBookmarked = response.data.data.filter(d => d.id === this.docId).length > 0;
-                });
-            }
         },
         data() {
             return {
@@ -89,6 +81,11 @@
                 isBookmarked: null,
                 lockEditMode: false,
             }
+        },
+        watch: {
+          current_user(val) {
+       
+          }
         },
         methods: {
             addBookmark() {
@@ -112,9 +109,17 @@
             fetchPreviewCard() {
                 this.$store.dispatch('document/fetchPreview', this.docId).then(() => {
                     /* fetch lock user info*/
-                    const lockId = this.documentsPreview[this.docId].currentLock.id;
-                    if (lockId) {
-                        this.fetchLockOwner(lockId);
+                    if (this.current_user){
+                        /* isBookmarked */
+                        const http = http_with_csrf_token();
+                        http.get(`/users/${this.current_user.id}/relationships/bookmarks`).then(response => {
+                            this.isBookmarked = response.data.data.filter(d => d.id === this.docId).length > 0;
+                        });
+                        
+                        const lockId = this.documentsPreview[this.docId].currentLock.id;
+                        if (lockId) {
+                            this.fetchLockOwner(lockId);
+                        }
                     }
                 });
             },

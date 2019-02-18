@@ -5,6 +5,7 @@ import {getRoles, getUserRoles} from '../../../modules/user-helpers';
 
 const state = {
   current_user: null,
+  isUserLoaded: false,
 
   usersSearchResults: [],
 };
@@ -23,6 +24,11 @@ const mutations = {
         isAdmin: roles.filter(r => r.name === "admin").length === 1
       };
     }
+    state.isUserLoaded = true;
+  },
+
+  RESET_USER(state) {
+    state.isUserLoaded = false;
   },
 
   SEARCH_RESULTS(state, {users, included}) {
@@ -41,6 +47,7 @@ const mutations = {
 const actions = {
 
   fetchCurrent ({ commit }) {
+    commit('RESET_USER');
     const http = http_with_csrf_token();
     return http.get("token/refresh")
       .then(response => {
