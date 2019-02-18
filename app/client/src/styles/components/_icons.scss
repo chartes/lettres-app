@@ -5,10 +5,11 @@
   padding: .25rem;
   box-sizing: initial;
 
-  g, path {
+  &__fill {
     fill: #ccc;
   }
-  .line {
+  &__line {
+    fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:2px;
     stroke: #ccc;
   }
 }
@@ -25,7 +26,7 @@
 }
 .icon__arrow-down:hover {
   cursor: pointer;
-  .line {
+  .icon__line {
     stroke: $blue;
   }
 }

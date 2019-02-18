@@ -81,6 +81,12 @@ const mutations = {
   REMOVE_COLLECTION (state, payload) {
     state.collections = state.collections.filter(coll => coll.id !== payload.id)
   },
+  REMOVE_CORRESPONDENT (state, payload) {
+    state.correspondents = state.correspondents.filter(corr => corr.relationId !== payload)
+  },
+  ADD_CORRESPONDENT (state, payload) {
+    state.correspondents = [ ...state.correspondents, payload ]
+  },
 
 };
 
@@ -145,7 +151,6 @@ const actions = {
     const http = http_with_csrf_token();
     return http.patch(`/documents/${data.id}`, { data })
       .then(response => {
-        console.log('response', response)
         commit('UPDATE_DOCUMENT_DATA', response.data.data);
         //resolve(response.data)
         return response.data.data
@@ -179,13 +184,10 @@ const actions = {
       })
       .catch(error => {
         console.error("error", error);
-        //reject(error)
       })
   },
 
   addWitness ({commit, state}, witness) {
-    console.log('document store addWitness', witness, state.document.id)
-
     const witnessData = { ...witness }
     const institutionId = witness.institution ? witness.institution.id : null;
     delete(witnessData.id)
@@ -269,37 +271,30 @@ const actions = {
       })
   },
 
-  addCorrespondent ({commit, state}, correspondent) {
-    console.log('document store addCorrespondent', witness, state.document.id)
-
-
+  addCorrespondent ({commit}, correspondent) {
+    commit('ADD_CORRESPONDENT', correspondent)
+  },
+  removeCorrespondent ({commit}, relationId) {
+    commit('REMOVE_CORRESPONDENT', relationId)
   },
 
   addCollection ({commit, state}, collection) {
-    console.log('document store addCollection', collection, state.document.id)
 
     const data = { data: [ { id : collection.id, type: "collection" }, ] }
 
     const http = http_with_csrf_token();
     return http.post(`/documents/${state.document.id}/relationships/collections?without-relationships`, data)
       .then(response => {
-        console.log('response', response)
         commit('ADD_COLLECTION', collection);
-        //resolve(response.data)
         return true
       })
   },
   removeCollection ({commit, state}, collection) {
-
     const data = { data: { id : collection.id, type: "collection" } }
-    console.log('document store removeCollection', data, state.document.id)
-
     const http = http_with_csrf_token();
     return http.delete(`/documents/${state.document.id}/relationships/collections?without-relationships`, {data})
       .then(response => {
-        console.log('response', response)
         commit('REMOVE_COLLECTION', collection);
-        //resolve(response.data)
         return true
       })
   }

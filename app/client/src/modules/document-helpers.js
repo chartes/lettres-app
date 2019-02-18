@@ -17,7 +17,9 @@ const getCorrespondents = function (included) {
       }
     });
     return Object.values(hasRoleById).map(hasRole => { return {
-        ...hasRole, correspondent: correspondentsById[hasRole.correspondentId], role: rolesById[hasRole.roleId]
+      ...hasRole, correspondent: correspondentsById[hasRole.correspondentId],
+      role: rolesById[hasRole.roleId],
+      relationId: hasRole.relationId
     }})
 
   },

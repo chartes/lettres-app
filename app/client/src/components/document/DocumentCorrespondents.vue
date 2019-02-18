@@ -16,7 +16,7 @@
               {{ c.correspondent.firstname + ' ' + c.correspondent.lastname }}
             </a>
             <span class="tag">{{ c.role.label }}</span>
-            <a v-if="editable" class="witness-item__delete"><icon-bin/></a>
+            <a v-if="editable" class="witness-item__delete" @click="unlinkCorrespondentFromDoc(c)"><icon-bin/></a>
           </li>
         </ul>
 
@@ -33,18 +33,21 @@
 
         <h3 class="document-correspondents__subtitle">Destinataire{{ documentRecipients.length > 1 ? 's':'' }}</h3>
 
-        <ul class="document-correspondents__recipients-list"  v-if="documentRecipients.length">
+        <ul class="document-correspondents__recipients-list" v-if="documentRecipients.length">
           <li v-for="c in documentRecipients" :key="c.correspondent.id" class="correspondent-item">
             <a :href="c.correspondent.ref" target="_blank">
               {{ c.correspondent.firstname + ' ' + c.correspondent.lastname }}</a>
             <span class="tag">{{ c.role.label }}</span>
-            <a v-if="editable" class="correspondent-item__delete"><icon-bin/></a>
+            <a v-if="editable" class="correspondent-item__delete" @click="unlinkCorrespondentFromDoc(c)"><icon-bin/></a>
           </li>
         </ul>
 
         <div v-else>
           <p class="correspondent-item"><em>Aucun destinataire n'a été renseigné</em></p>
-          <p v-if="editable">
+        </div>
+
+        <div v-if="editable">
+          <p>
             <lauch-button label="Ajouter un destinataire" @click="openAddCorrespondent('recipient')"/>
           </p>
         </div>
@@ -91,11 +94,9 @@
         this.correspondentsForm = role;
       },
       closeCorrespondentChoice() {
-        console.log("closeCorrespondentChoice")
         this.correspondentsForm = null;
       },
       linkCorrespondentToDoc(correspondent) {
-        console.log('linkCorrespondentToDoc', correspondent)
         const correspondentId = correspondent.id
         const role = this.getRoleByLabel(this.correspondentsForm)
         const roleId =  role && role.id ? role.id : null;
@@ -103,6 +104,29 @@
           correspondentId,
           roleId
         })
+          .then(correspondentHasRole => {
+            const corrData = {
+              correspondent,
+              correspondentId,
+              relationId: correspondentHasRole.id,
+              role,
+              roleId
+            }
+            this.$store.dispatch('document/addCorrespondent', corrData);
+            this.closeCorrespondentChoice()
+          })
+      },
+      unlinkCorrespondentFromDoc(correspondent) {
+        const correspondentId = correspondent.correspondentId
+        const roleId =  correspondent.roleId
+        this.$store.dispatch('correspondents/unlinkFromDocument', {
+            relationId: correspondent.relationId,
+            correspondentId,
+            roleId
+          })
+          .then(response => {
+            this.closeCorrespondentChoice()
+          })
       }
     },
     computed: {
