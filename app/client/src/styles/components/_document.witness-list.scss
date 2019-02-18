@@ -40,9 +40,11 @@
     float: left;
   }
   &__order-button-up {
-    float: right;
+
   }
 
-
+  .line {
+    stroke: white;
+  }
 
 }

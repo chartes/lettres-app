@@ -7,7 +7,7 @@
 
     <document-attributes :editable="editable"/>
 
-    <document-witnesses :list="witnesses"/>
+    <document-witnesses :editable="editable" :list="witnesses"/>
 
     <document-collections :editable="editable"/>
 

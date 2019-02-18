@@ -12,5 +12,5 @@
 </script>
 
 <style scoped>
-  .line {fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.5px;}
+  .line {fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:2px;}
 </style>
