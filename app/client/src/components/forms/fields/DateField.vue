@@ -29,7 +29,7 @@
     </div>
 
     <div v-else>
-      <span :class="unknownClass">{{ value || notSet }}</span>
+      <span :class="unknownClass" v-html="value || notSet"></span>
     </div>
 
   </div>
@@ -37,7 +37,7 @@
 
 <script>
   import FieldLabel from './FieldLabel';
-  import IconPenEdit from '../icons/IconPenEdit';
+  import IconPenEdit from '../../ui/icons/IconPenEdit';
   import TextFieldMixins from './TextFieldMixins';
   export default {
     name: 'DateField',
@@ -50,7 +50,8 @@
     },
     methods: {
       maskCheck: function (field){
-        this.isValid = !this.value || field.target.inputmask.isComplete()
+        const isValidDate = !!Date.parse(this.value)
+        this.isValid = !this.value || (field.target.inputmask.isComplete() && isValidDate)
       },
       checkAndExitEditMode () {
         this.exitEditMode(!this.isValid)
