@@ -26,9 +26,7 @@ const mutations = {
 const actions = {
 
   search ({ commit }, what) {
-    console.log('correspondents search', what)
     commit('SEARCH_RESULTS', [])
-
     http.get(`/search?query=*${what}*&index=lettres__${process.env.NODE_ENV}__correspondent&without-relationships`)
       .then( response => {
         const correspondents = response.data.data.map(inst => { return { id: inst.id, ...inst.attributes}});
@@ -47,50 +45,50 @@ const actions = {
   },
 
   addOne ({ commit }, correspondent) {
-    console.log('store correspondent addOne', correspondent )
-
     const http = http_with_csrf_token();
-
     const data = { type: 'correspondent', attributes: { ...correspondent }}
-
     return http.post(`correspondents`, {data})
-      .then( response => {
-        console.log('correspondent added', response.data)
+      .then(response => {
+        return response.data.data
       })
   },
-  linkToDocument ({ commit, rootState }, {roleId, correspondentId}) {
 
+  linkToDocument ({ commit, rootState }, {roleId, correspondentId}) {
     const data = { data: {
-      type: 'correspondent-has-role',
-      relationships: {
-        document: {
-          data: {
-            id: rootState.document.document.id,
-            type: 'document'
-          }
-        },
-        'correspondent-role': {
-          data: {
-            id: roleId,
-            type: 'correspondent-role'
-          }
-        },
-        correspondent: {
-          data: {
-            id: correspondentId,
-            type: 'correspondent'
+        type: 'correspondent-has-role',
+        relationships: {
+          document: {
+            data: {
+              id: rootState.document.document.id,
+              type: 'document'
+            }
+          },
+          'correspondent-role': {
+            data: {
+              id: roleId,
+              type: 'correspondent-role'
+            }
+          },
+          correspondent: {
+            data: {
+              id: correspondentId,
+              type: 'correspondent'
+            }
           }
         }
-      }
-    }}
-    console.log('store correspondent linkToDocument', rootState.document.document.id, roleId, correspondentId )
-
+      }}
     const http = http_with_csrf_token()
     return http.post(`/correspondents-having-roles`, data).then( response => {
-      console.log('linkToDocument =>', response)
-    })
+        return response.data.data
+      })
       .catch(error => console.log(error))
-  }
+  },
+  unlinkFromDocument ({ commit, rootState }, {relationId, correspondentId, roleId}) {
+    const http = http_with_csrf_token()
+    return http.delete(`/correspondents-having-roles/${relationId}`)
+      .then (() => this.dispatch('document/removeCorrespondent', relationId))
+      .catch(error => console.log(error))
+  },
 
 };
 

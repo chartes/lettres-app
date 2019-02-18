@@ -80,7 +80,6 @@
     methods: {
 
       searchCorrespondent (search) {
-        console.log('searchCorrespondent', search)
         this.$store.dispatch('correspondents/search', search)
       },
 
@@ -102,10 +101,14 @@
         this.correspondentForm = false
       },
       createNewCorrespondent (correspondent) {
-        console.log('createNewCorrespondent', correspondent)
         this.$store.dispatch('correspondents/addOne', correspondent)
+          .then(corr => {
+            this.$props.submit({
+              id: corr.id,
+              ...corr.attributes
+            });
+          })
           .catch(error => {
-            console.log('correspondent add error', error)
             this.newCorrespondentError = error.toString()
           })
       },
@@ -113,7 +116,6 @@
     },
     watch: {
       form (val, oldVal) {
-        console.log('watch form', val, oldVal)
         this.submitAction()
       },
     },
@@ -122,7 +124,6 @@
       ...mapState('correspondents', ['correspondentsSearchResults']),
 
       validForm () {
-        console.log('validForm', !!this.form.name && (this.form.name.length >= 1))
         return !!this.form.name && (this.form.name.length >= 1);
       },
 

@@ -14,12 +14,12 @@
         <field-text
                 label="Prénom"
                 placeholder="Prénom"
-                v-model="form.lastname"
+                v-model="form.firstname"
         />
         <field-text
                 label="Nom"
                 placeholder="Nom"
-                v-model="form.firstname"
+                v-model="form.lastname"
         />
         <field-text
                 label="Référence"
