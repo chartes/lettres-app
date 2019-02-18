@@ -8,7 +8,7 @@
           <table class="table is-narrow is-bordered is-striped is-hoverable container" >
             <thead>
               <tr>
-                 <th>
+                 <th style="min-width: 260px;">
                     <button class="button is-white " disabled>Objet</button>
                  </th>
                  <th>

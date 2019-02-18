@@ -18,10 +18,13 @@
          </p>
          <article class="message lock-form__description">
            <div class="message-body">
-             <u>
-               Raison invoquée :</u>
-            
-             {{lock.description}}
+             <p class="lock-form__description__lock-dates">
+               Verrouillé du <b>{{lock['event-date']}}</b> au <b>{{lock['expiration-date']}}</b>
+             </p>
+             <p>
+               <u>Raison invoquée :</u>
+               {{lock.description}}
+              </p>
            </div>
          </article>
        </div>
@@ -30,6 +33,10 @@
            Vous pouvez verrouiller le <b>document {{docId}}</b> pour une période renouvelable de sept
            jours.
          </p>
+         <div class="lock-form__textarea">
+           <label for="description"><u>Raison du verrouillage :</u></label>
+           <textarea id="description" v-model="description" class="textarea"></textarea>
+         </div>
        </div>
      </div>
      <!-- Admin features -->
@@ -90,6 +97,8 @@
                 lock: {...this.$props.currentLock},
                 lockOwner: null,
                 nextLockOwner: null,
+                defaultDescription: 'Ce document est verrouillé afin de me permettre de compléter la transcription et de corriger les metadonnées.',
+                description: null,
                 
                 loading: true
             }
@@ -97,6 +106,7 @@
         mounted () {
             this.fetchLock();
             this.nextLockOwner = this.current_user;
+            this.description = this.defaultDescription;
         },
         methods: {
             submitAction() {
@@ -137,6 +147,9 @@
             searchUser(search) {
                 return this.$store.dispatch('user/search', search);
             },
+            resetDescription() {
+                this.description = this.defaultDescription;
+            }
         },
         watch: {
             currentLock: () => {this.fetchLock();},
@@ -148,7 +161,7 @@
                     return {
                         type: 'lock',
                         attributes: {
-                            description: 'Ceci est la raison pour laquelle je décide de verouiller ce document.',
+                            description: this.description ? this.description : this.defaultDescription,
                             'object-type': 'document',
                             'object-id' : this.docId
                         },
