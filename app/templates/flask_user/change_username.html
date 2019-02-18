@@ -2,13 +2,24 @@
 
 {% block content %}
 {% from "flask_user/_macros.html" import render_field, render_submit_field %}
-<h1>{%trans%}Change username{%endtrans%}</h1>
+<div class="user-profile-container container">
+<h1 class="title">{%trans%}Change username{%endtrans%}</h1>
 
 <form action="" method="POST" class="form" role="form">
     {{ form.hidden_tag() }}
-    {{ render_field(form.new_username, tabindex=10) }}
-    {{ render_field(form.old_password, tabindex=20) }}
-    {{ render_submit_field(form.submit, tabindex=90) }}
+    {{ render_field(form.new_username, tabindex=10, class="input") }}
+    {{ render_field(form.old_password, tabindex=20, class="input") }}
+    <div class="is-pulled-right block">{{ render_submit_field(form.submit, tabindex=90) }}</div>
 </form>
+</div>
+
+<style type="text/css">
+     .user-profile-container {
+         width:  600px;
+         min-height: 600px;
+         margin-top: 120px;
+         margin-bottom: 160px;
+     }
+</style>
 
 {% endblock %}

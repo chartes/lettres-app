@@ -19,7 +19,24 @@
     {% block head_scripts %}
     {% endblock head_scripts %}
 </head>
-<body >
+<body>
+
+{% macro render_active_navbar_item(endpoint, label,  icon_cls='', active='') %}
+  {% if request.endpoint == endpoint or active == endpoint %}
+    <a class='navbar-item is-active {{cls}}' href="{{url_for(endpoint)}}">
+  {% else %}
+    <a class='navbar-item  {{cls}}' href="{{url_for(endpoint)}}">
+  {% endif %}
+  {% if icon_cls|length > 0 %}
+      <i class="{{icon_cls}}"></i>
+      <span style="margin-right: 12px;">
+      {{label}}
+      </span>
+  {% else %}
+      {{label}}
+  {% endif %}
+    </a>
+{% endmacro %}
 
 {% block hero %}
     <section class="red-hero">
@@ -28,15 +45,15 @@
         <div class="hero-head">
              <div id="navbar" >
                 <nav class="navbar-menu">
-                     <a class="navbar-item is-active" href="{{url_for("app_bp.index")}}">Les collections</a>
-                     <a class="navbar-item">Documentation</a>
-                     <a class="navbar-item">À propos</a>
+                     {{ render_active_navbar_item('app_bp.index', 'Les collections') }}
+                     {{ render_active_navbar_item('app_bp.documentation', 'Documentation') }}
+                     {{ render_active_navbar_item('app_bp.about', 'À propos') }}
                      <div class="navbar-end">
                         {% if current_user.is_anonymous %}
-                        <a class="navbar-item" href="{{url_for("user.login")}}"><span style="margin-right: 12px;">Connexion</span><i class="fas fa-sign-in-alt"></i></a>
+                          {{ render_active_navbar_item('user.login', 'Connexion', icon_cls='fas fa-sign-in-alt') }}
                         {% else %}
-                        <a class="navbar-item" href=""><i class="fas fa-user-alt"></i><span>{{current_user.username}}</span></a>
-                        <a class="navbar-item" href="{{url_for("user.logout")}}"><i class="fas fa-sign-out-alt"></i></a>
+                          {{ render_active_navbar_item('user.edit_user_profile', current_user.username, icon_cls='fas fa-user-alt') }}
+                          {{ render_active_navbar_item('user.logout', 'Déconnexion', icon_cls='fas fa-sign-out-alt') }}
                         {% endif %}
                     </div>
                 </nav>
@@ -87,6 +104,11 @@
 </body>
 
 <style type="text/css">
+
+  body {
+    min-height: 800px;
+  }
+
   nav span {
     margin-left: 12px;
   }

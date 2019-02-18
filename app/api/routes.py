@@ -17,7 +17,7 @@ def refresh_token(user, resp=None):
         else:
             resp = jsonify(auth_headers)
         set_access_cookies(resp, access_token)
-        print("set cookies", user)
+        print("token refreshed")
     else:
         auth_headers = {'logout': True, 'user': None}
         if resp:
@@ -26,7 +26,7 @@ def refresh_token(user, resp=None):
         else:
             resp = jsonify(auth_headers)
         unset_jwt_cookies(resp)
-        print("unset cookies")
+        print("token cleared")
     return resp, 200
 
 
