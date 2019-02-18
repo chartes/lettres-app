@@ -12,6 +12,22 @@
     fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:2px;
     stroke: #ccc;
   }
+
+  &__pen-edit{
+    &:hover {
+      g, path {
+        fill: $blue;
+      }
+    }
+  }
+  &__arrow-down, &__add {
+    &:hover {
+      cursor: pointer;
+      .icon__line {
+        stroke: $blue;
+      }
+    }
+  }
 }
 
 .icon__bin:hover {
@@ -19,14 +35,4 @@
     fill: $red;
   }
 }
-.icon__pen-edit:hover {
-  g, path {
-    fill: $blue;
-  }
-}
-.icon__arrow-down:hover {
-  cursor: pointer;
-  .icon__line {
-    stroke: $blue;
-  }
-}
+

@@ -69,7 +69,7 @@
 <script>
 
   import { mapState, mapGetters } from 'vuex'
-  import IconBin from '../forms/icons/IconBin';
+  import IconBin from '../ui/icons/IconBin';
   import CorrespondentListForm from '../forms/CorrespondentListForm';
   import LauchButton from '../forms/LaunchButton';
   export default {

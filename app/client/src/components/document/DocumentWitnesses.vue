@@ -44,12 +44,12 @@
 </template>
 
 <script>
-  import IconPenEdit from '../forms/icons/IconPenEdit';
-  import IconBin from '../forms/icons/IconBin';
+  import IconPenEdit from '../ui/icons/IconPenEdit';
+  import IconBin from '../ui/icons/IconBin';
   import WitnessForm from '../forms/WitnessForm';
   import LauchButton from '../forms/LaunchButton';
   import ErrorMessage from '../ui/ErrorMessage';
-  import IconArrowDown from '../forms/icons/IconArrowDown';
+  import IconArrowDown from '../ui/icons/IconArrowDown';
   export default {
     name: 'DocumentWitnesses',
     components: {ErrorMessage, LauchButton, WitnessForm, IconBin, IconPenEdit, IconArrowDown},
@@ -104,6 +104,7 @@
       },
       reorderWitness (witness, dir) {
         console.log('reorderWitness', witness, dir)
+        this.$store.dispatch('document/reorderWitnesses', {witness, dir})
 
       },
 

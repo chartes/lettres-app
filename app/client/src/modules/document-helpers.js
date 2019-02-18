@@ -33,7 +33,12 @@ const getCorrespondents = function (included) {
   },
 
   getWitnesses = function (included) {
-    return  included.filter(item => item.type === 'witness').map(wit => { return { id: wit.id, ...wit.attributes }});
+    return  included.filter(item => item.type === 'witness')
+      .map(wit => { return { id: wit.id, ...wit.attributes }})
+      .map((wit, index) => {
+        wit.num = index + 1
+        return wit
+      })
   },
 
   getCollections = function (included) {

@@ -38,9 +38,13 @@
     height: $action-w;
     padding: 0;
     float: left;
+    &:focus {
+      outline: none;
+    }
   }
   &__order-button-up {
 
+    float: right;
   }
 
   .line {

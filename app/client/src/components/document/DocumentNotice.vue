@@ -1,10 +1,6 @@
 <template>
   <section class="document__notice section">
 
-    <header class="title">
-      <span><h1 class="title" v-html="titleContent"></h1></span>
-    </header>
-
     <document-attributes :editable="editable"/>
 
     <document-witnesses :editable="editable" :list="witnesses"/>
@@ -55,10 +51,6 @@
 </script>
 
 <style scoped>
-  h1.title {
-    font: 90%/140% 'Oxygen', sans-serif;
-    margin-bottom: 40px;
-  }
   h2 {
     margin: 1rem 0 .5rem 0;
   }

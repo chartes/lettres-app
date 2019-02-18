@@ -47,8 +47,8 @@
 
 <script>
   import { mapState } from 'vuex';
-  import IconPenEdit from '../forms/icons/IconPenEdit';
-  import IconBin from '../forms/icons/IconBin';
+  import IconPenEdit from '../ui/icons/IconPenEdit';
+  import IconBin from '../ui/icons/IconBin';
   import CollectionListForm from '../forms/CollectionListForm';
   import LaunchButton from '../forms/LaunchButton';
   export default {

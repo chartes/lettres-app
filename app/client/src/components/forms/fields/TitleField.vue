@@ -36,7 +36,7 @@
 <script>
   import Vue from 'vue';
   import FieldLabel from './FieldLabel';
-  import IconPenEdit from '../icons/IconPenEdit';
+  import IconPenEdit from '../../ui/icons/IconPenEdit';
   export default {
     name: 'TitleField',
     components: {IconPenEdit, FieldLabel},

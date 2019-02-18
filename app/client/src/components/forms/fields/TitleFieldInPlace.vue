@@ -27,7 +27,7 @@
     </div>
 
     <div v-else>
-      <span :class="unknownClass" v-html="value || notSet"></span>
+      <span :class="unknownClass">{{ value || notSet }}</span>
     </div>
 
   </div>

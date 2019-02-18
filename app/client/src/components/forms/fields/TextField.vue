@@ -27,7 +27,7 @@
 
 <script>
   import FieldLabel from './FieldLabel';
-  import IconPenEdit from '../icons/IconPenEdit';
+  import IconPenEdit from '../../ui/icons/IconPenEdit';
   import TextFieldMixins from './TextFieldMixins';
   export default {
     name: 'TextField',

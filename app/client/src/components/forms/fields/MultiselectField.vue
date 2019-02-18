@@ -10,20 +10,20 @@
             </div>
 
 
-        </div>
-        <div class="multiselect-actions" v-if="editable && optionsList.length > ids.length">
-            <a class="icon is-large add-item" href="#" @click.prevent="displayList">
-                <span class="fa-stack ">
-                <i class="fas fa-circle fa-stack-2x"></i>
-                <i class="fas fa-plus fa-stack-1x "></i>
-              </span>
-            </a>
-            <ul class="box" v-if="listVisible" v-click-outside="hideList">
-                <li v-for="option in optionsNotSelected" :key="option[optionIdField]">
-                    <a href="#" @click.prevent="addItem(option)" class="unselected-item" v-html="option[optionLabelField]"></a>
-                </li>
-            </ul>
+            <div class="control field-multiselect__actions"
+                 v-if="editable && optionsList.length > ids.length"
+                 v-click-outside="hideList"
+            >
+                <a class="tag" href="#" @click.prevent="displayList">
+                    <icon-add/>
+                </a>
+                <ul class="field-multiselect__options box" v-if="listVisible">
+                    <li v-for="option in optionsNotSelected" :key="option[optionIdField]">
+                        <a href="#" @click.prevent="addItem(option)" class="unselected-item" v-html="option[optionLabelField]"></a>
+                    </li>
+                </ul>
 
+            </div>
         </div>
     </div>
 </template>
@@ -32,10 +32,11 @@
 
   import ClickOutside from 'vue-click-outside';
   import FieldLabel from './FieldLabel';
+  import IconAdd from '../../ui/icons/IconAdd';
 
   export default {
     name: "multiselect-field",
-    components: {FieldLabel},
+    components: {IconAdd, FieldLabel},
     props: {
       editable: {
         type: Boolean, default: false
@@ -63,11 +64,10 @@
       ClickOutside
     },
     data () {
-      return { listVisible: false, items: [], ids: []}
+      return { listVisible: true, items: [], ids: []}
     },
     mounted () {
       this.updateAllItems();
-      console.log('multiselect-field', this.items, this.ids)
     },
     methods: {
       addItem (item) {

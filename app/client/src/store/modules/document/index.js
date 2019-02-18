@@ -78,6 +78,9 @@ const mutations = {
     const index = state.witnesses.indexOf(wit)
     state.witnesses.splice(index, 1)
   },
+  REORDER_WITNESSES (state, payload) {
+    state.witnesses = [ ...payload ]
+  },
   REMOVE_COLLECTION (state, payload) {
     state.collections = state.collections.filter(coll => coll.id !== payload.id)
   },
@@ -145,7 +148,7 @@ const actions = {
   },
 
   save ({ commit, rootGetters, rootState, dispatch }, data) {
-    const modifiedData = data;
+    const modifiedData = data.attributes || data.relationships;
     console.log('document/save', data)
     data.type = 'document'
     const http = http_with_csrf_token();
@@ -158,7 +161,7 @@ const actions = {
       .then( doc => {
         let desc = 'Modifications';
         if (doc.attributes) {
-          desc = `Modification de ${Object.keys(modifiedData.attributes).join(', ')}`;
+          desc = `Modification de ${Object.keys(modifiedData).join(', ')}`;
         }
         const data = {
           type: 'change',
@@ -269,6 +272,31 @@ const actions = {
         console.log('response', response)
         commit('REMOVE_WITNESS', witness);
       })
+  },
+  reorderWitnesses ({commit, state}, { witness, dir }) {
+    let witnesses = state.witnesses.map(w => {return {...w}})
+    let found = witnesses.find(w => w.id === witness.id)
+    let foundIndex = witnesses.indexOf(found)
+    if ((foundIndex === 0 && dir === -1) || (foundIndex === (witnesses.length-1) && dir === 1)) return;
+    witnesses.splice(foundIndex, 1)
+    witnesses.splice(foundIndex + dir, 0, found)
+    witnesses = witnesses.map((w, index) => { w.num = index+1; return w})
+
+    const data = witnesses.map(w => {
+      return {
+        type: "witness",
+        id: w.id,
+        attributes: { num: w.num }
+      }
+    })
+    console.log(data)
+    const http = http_with_csrf_token();
+    return http.patch(`/witnesses`, { data })
+      .then(response => {
+        console.log(response)
+        commit('REORDER_WITNESSES', witnesses)
+      })
+
   },
 
   addCorrespondent ({commit}, correspondent) {
