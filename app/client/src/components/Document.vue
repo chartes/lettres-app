@@ -39,7 +39,7 @@
         props: {
             doc_id : {required: true, type: Number}
         },
-        created () {
+        mounted () {
             this.$store.dispatch('user/fetchCurrent').then(response => {
                 this.$store.dispatch('document/fetch', this.doc_id).then(response => {
                     this.computeCanEdit();
@@ -57,17 +57,25 @@
             ...mapState('locks', ['lockOwner']),
         },
         watch: {
-
+            lockOwner() {
+                this.computeCanEdit();
+            }
         },
         methods: {
             computeCanEdit() {
                 /*
                  * Can edit if 1) You are connected 2) You are an admin or there is no active lock or the active lock is yours
                  * */
-                if (!this.current_user)
-                    return false;
-                if (this.current_user.isAdmin)
-                    return true;
+                if (!this.current_user) {
+                    this.canEdit = false;
+                    return;
+                }
+                
+                if (this.current_user.isAdmin) {
+                    this.canEdit = true;
+                    return;
+                }
+                
                 this.canEdit = (this.documentsPreview[this.doc_id].currentLock.id === null) || (this.lockOwner[this.doc_id] && this.lockOwner[this.doc_id].id === this.current_user.id);
             }
         }

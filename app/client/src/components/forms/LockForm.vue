@@ -129,13 +129,6 @@
                 }
             },
             saveLock() {
-               /*
-                const http = http_with_csrf_token();
-               console.warn("Lock conflict management must be implemented in both back & front end!");
-               return http.post(`/locks`, {data: this.nextLock}).then(response => {
-                   console.warn("LOCK SAVED", response);
-               });
-               */
                 return this.$store.dispatch('locks/saveLock', this.nextLock);
             },
             removeLock() {
