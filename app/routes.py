@@ -1,4 +1,4 @@
-from flask import render_template, make_response, request
+from flask import render_template, make_response, request, redirect, url_for
 from flask_jwt_extended import set_access_cookies, create_access_token, unset_jwt_cookies
 from flask_login import current_user
 
@@ -22,4 +22,9 @@ def document(id):
 @app_bp.route("/documentation")
 def documentation():
     return render_template("docs/docs.html")
+
+
+@app_bp.route("/about")
+def about():
+    return render_template("docs/about.html")
 
