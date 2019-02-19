@@ -191,7 +191,7 @@ class CorrespondentHasRole(db.Model, ChangesMixin):
     __tablename__ = 'correspondent_has_role'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     __table_args__ = (
-        db.UniqueConstraint('correspondent_id', 'document_id', name='_correspondent_has_role_document_uc'),
+        db.UniqueConstraint('correspondent_id', 'document_id', 'correspondent_role_id', name='_correspondent_has_role_document_uc'),
     )
 
     correspondent_id = db.Column(db.Integer, db.ForeignKey('correspondent.id', ondelete='CASCADE'), nullable=False)
