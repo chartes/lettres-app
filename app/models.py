@@ -21,6 +21,20 @@ association_document_has_collection = db.Table('document_has_collection',
     db.Column('collection_id', db.Integer, db.ForeignKey('collection.id'), primary_key=True)
 )
 
+association_placename_in_document = db.Table('placename_in_document',
+                                             db.Column('placename_id', db.Integer, db.ForeignKey('placename.id'),
+                                                        primary_key=True),
+                                             db.Column('document_id', db.Integer, db.ForeignKey('document.id'),
+                                                        primary_key=True)
+                                             )
+
+association_person_in_document = db.Table('person_in_document',
+                                              db.Column('person_id', db.Integer, db.ForeignKey('person.id'),
+                                                        primary_key=True),
+                                              db.Column('document_id', db.Integer, db.ForeignKey('document.id'),
+                                                        primary_key=True)
+                                              )
+
 association_user_has_bookmark = db.Table('user_has_bookmark',
     db.Column('doc_id', db.Integer, db.ForeignKey('document.id'), primary_key=True),
     db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True)
@@ -57,13 +71,22 @@ class Document(db.Model, ChangesMixin):
     creation = db.Column(db.String)
     creation_not_after = db.Column(db.String)
     creation_label = db.Column(db.String)
-    location_date_from_ref = db.Column(db.String)
-    location_date_to_ref = db.Column(db.String)
+    
+    location_date_from_id = db.Column(db.Integer)
+    location_date_to_id = db.Column(db.Integer)
+    
     transcription = db.Column(db.Text)
     prev_document_id = db.Column(db.Integer, db.ForeignKey('document.id'), index=True)
     is_published = db.Column(db.Boolean, index=True)
 
     # relationships
+    location_date_from = db.relationship("Placename",
+                                         primaryjoin="Document.location_date_from_id==foreign(Placename.id)",
+                                         uselist=False)
+    location_date_to = db.relationship("Placename",
+                                       primaryjoin="Document.location_date_to_id==foreign(Placename.id)",
+                                       uselist=False)
+
     notes = db.relationship("Note", backref="document", cascade="all, delete-orphan")
     witnesses = db.relationship("Witness", backref="document", cascade="all, delete-orphan")
     languages = db.relationship("Language",
@@ -163,6 +186,23 @@ class Language(db.Model, ChangesMixin):
 
 
 # ====================================
+# placename STUFF
+# ====================================
+
+
+class Placename(db.Model, ChangesMixin):
+    __tablename__ = 'placename'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    label = db.Column(db.String, nullable=False)
+    description = db.Column(db.String)
+    ref = db.Column(db.String)
+
+    documents = db.relationship("Document",
+                                secondary=association_placename_in_document,
+                                backref=db.backref('placenames'))
+
+# ====================================
 # person STUFF
 # ====================================
 
@@ -175,6 +215,10 @@ class Person(db.Model, ChangesMixin):
     label = db.Column(db.String, nullable=False)
     description = db.Column(db.String)
     ref = db.Column(db.String)
+
+    documents = db.relationship("Document",
+                                secondary=association_person_in_document,
+                                backref=db.backref('persons'))
 
 
 class PersonRole(db.Model, ChangesMixin):

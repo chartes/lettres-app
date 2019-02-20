@@ -11,20 +11,28 @@ def register_document_api_urls(app):
     registrar.register_patch_routes(Document, DocumentFacade, [api_require_roles("contributor")])
     registrar.register_delete_routes(Document, DocumentFacade, [api_require_roles("admin")])
 
-    for rel in ('notes', 'languages', 'witnesses', 'images',  'current-lock', 'changes',
-                'persons-having-roles', 'roles', 'persons', 'collections',
+    for rel in ('notes', 'languages', 'witnesses', 'images',  'current-lock', 'changes', 'collections',
+                'persons-having-roles', 'roles', 'persons', 
+                'location-date-from', 'location-date-to',
+                'placenames', 
                 'prev-document', 'next-document'):
         registrar.register_relationship_get_route(DocumentFacade, rel)
 
     for rel in ('notes', 'languages', 'witnesses', 'collections', 'changes',
+                'location-date-from', 'location-date-to',
+                'placenames',
                 'persons-having-roles','next-document'):
         registrar.register_relationship_post_route(DocumentFacade, rel, [api_require_roles("contributor")])
 
-    for rel in ('notes', 'languages', 'witnesses', 'collections',
+    for rel in ('notes', 'languages', 'witnesses', 'collections', 
+                'location-date-from', 'location-date-to',
+                'placenames',
                 'persons-having-roles', 'next-document'):
         registrar.register_relationship_patch_route(DocumentFacade, rel, [api_require_roles("contributor")])
 
-    for rel in ('notes', 'languages', 'witnesses', 'collections',
+    for rel in ('notes', 'languages', 'witnesses', 'collections', 
+                'location-date-from', 'location-date-to',
+                'placenames',
                 'persons-having-roles','next-document'):
         registrar.register_relationship_delete_route(DocumentFacade, rel, [api_require_roles("contributor")])
 

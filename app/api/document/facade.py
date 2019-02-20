@@ -104,8 +104,6 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
                 "creation": self.obj.creation,
                 "creation-not-after": self.obj.creation_not_after,
                 "creation-label": self.obj.creation_label,
-                "location-date-from-ref": self.obj.location_date_from_ref,
-                "location-date-to-ref": self.obj.location_date_to_ref,
                 "transcription": self.obj.transcription,
 
                 "is-published": self.obj.is_published is not None,
@@ -153,8 +151,12 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
         from app.api.witness.facade import WitnessFacade
         from app.api.collection.facade import CollectionFacade
         from app.api.lock.facade import LockFacade
+        from app.api.placename.facade import PlacenameFacade
 
         for rel_name, (rel_facade, to_many) in {
+            "location-date-from": (PlacenameFacade, False),
+            "location-date-to": (PlacenameFacade, False),
+            "placenames": (PlacenameFacade, True),
             "collections": (CollectionFacade, True),
             "notes": (NoteFacade, True),
             "languages": (LanguageFacade, True),
@@ -180,8 +182,8 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
             "creation": _res["attributes"]["creation"],
             "creation-not-after": _res["attributes"]["creation-not-after"],
 
-            "location-date-from-ref": _res["attributes"]["location-date-from-ref"],
-            "location-date-to-ref": _res["attributes"]["location-date-to-ref"],
+            "location-date-from": {"id": self.obj.location_date_from.id, "content": self.obj.location_date_from.label} if self.obj.location_date_from else None,
+            "location-date-to": {"id": self.obj.location_date_to.id, "content": self.obj.location_date_to.label} if self.obj.location_date_to else None,
             "title": _res["attributes"]["title"],
             "argument": _res["attributes"]["argument"],
             "transcription": _res["attributes"]["transcription"],
@@ -197,6 +199,7 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
                 }
                 for c_h_r in self.obj.persons_having_roles
             ],
+            "placenames": [{"id": p.id, "content": p.label} for p in self.obj.placenames],
         }
         return [{"id": _res["id"], "index": self.get_index_name(), "payload": payload}]
 
@@ -225,8 +228,6 @@ class DocumentSearchFacade(DocumentFacade):
                 "creation": self.obj.creation,
                 "creation-not-after": self.obj.creation_not_after,
                 "creation-label": self.obj.creation_label,
-                "location-date-from-ref": self.obj.location_date_from_ref,
-                "location-date-to-ref": self.obj.location_date_to_ref,
                 "transcription": self.obj.transcription,
 
                 "is-published": self.obj.is_published is not None,

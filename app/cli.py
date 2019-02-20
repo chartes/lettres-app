@@ -7,9 +7,10 @@ from app.api.person.facade import PersonFacade
 from app.api.document.facade import DocumentFacade
 from app.api.institution.facade import InstitutionFacade
 from app.api.language.facade import LanguageFacade
+from app.api.placename.facade import PlacenameFacade
 from app.api.user.facade import UserFacade
 from app.api.witness.facade import WitnessFacade
-from app.models import UserRole, User, Document, Collection, Language, Witness, Person, Institution
+from app.models import UserRole, User, Document, Collection, Language, Witness, Person, Institution, Placename
 
 app = None
 
@@ -94,6 +95,7 @@ def make_cli():
             "languages": {"facade": LanguageFacade, "model": Language},
             "witnesses": {"facade": WitnessFacade, "model": Witness},
             "persons": {"facade": PersonFacade, "model": Person},
+            "placenames": {"facade": PlacenameFacade, "model": Placename},
             "documents": {"facade": DocumentFacade, "model": Document},
             "institutions": {"facade": InstitutionFacade, "model": Institution},
             "users": {"facade": UserFacade, "model": User}
