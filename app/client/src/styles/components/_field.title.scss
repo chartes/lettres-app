@@ -1,0 +1,59 @@
+.field-title {
+
+  .control, .field {
+    outline: none;
+  }
+
+  &--unknown {
+    color: grey;
+  }
+  &--invalid {
+    color: red;
+  }
+
+  &__field {
+    width: 100%;
+    outline: none;
+  }
+
+  &__input {
+    font: normal 2rem 'Oxygen', sans-serif;
+    width: 100%;
+    -webkit-appearance: none;
+    align-items: center;
+    border: 1px solid transparent;
+    border-width: 0 0 1px 0;
+    box-shadow: none;
+    display: inline-flex;
+    height: 3.25em;
+    justify-content: flex-start;
+    line-height: 1.5;
+    position: relative;
+    vertical-align: top;
+    padding-left: 0;
+    border-radius: 0;
+    outline: none;
+
+    &:hover {
+      border-bottom-color: $grey-lighter;
+    }
+    &:focus {
+      border-bottom-color: $cyan;
+      box-shadow: none;
+    }
+
+    &--fake {
+      width: 100%;
+      padding-right: 44px;
+      outline: none;
+    }
+  }
+
+  &__icon {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+  }
+}
+

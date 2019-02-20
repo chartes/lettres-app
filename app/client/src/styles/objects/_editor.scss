@@ -33,9 +33,15 @@
     font-variant: small-caps;
   }
   .button {
+
     padding-bottom: calc(.5em - 1px);
     padding-top: calc(.5em - 1px);
   }
+  .icon {
+    height: 100%;
+    padding: 0;
+  }
+
 }
 .editor-container {
   position: relative;

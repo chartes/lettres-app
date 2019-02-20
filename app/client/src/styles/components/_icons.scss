@@ -13,11 +13,14 @@
     stroke: #ccc;
   }
 
-  &__pen-edit{
-    &:hover {
-      g, path {
-        fill: $blue;
-      }
+  &__add:hover {
+    .icon__line {
+      fill: $blue;
+    }
+  }
+  &__pen-edit:hover {
+    .icon__fill {
+      fill: $blue;
     }
   }
   &__arrow-down, &__add {
@@ -28,11 +31,15 @@
       }
     }
   }
-}
-
-.icon__bin:hover {
-  g, path {
-    fill: $red;
+  &__save, &__success {
+    .icon__line {
+      stroke: $white;
+    }
   }
 }
 
+.icon__bin:hover {
+  .icon__fill {
+    fill: $red;
+  }
+}

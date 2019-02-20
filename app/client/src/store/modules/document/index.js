@@ -185,9 +185,6 @@ const actions = {
           }, { root: true });
         })
       })
-      .catch(error => {
-        console.error("error", error);
-      })
   },
 
   addWitness ({commit, state}, witness) {
@@ -282,20 +279,21 @@ const actions = {
     witnesses.splice(foundIndex + dir, 0, found)
     witnesses = witnesses.map((w, index) => { w.num = index+1; return w})
 
-    const data = witnesses.map(w => {
-      return {
+    const changed = witnesses.filter((w, index) => {
+      console.log(state.witnesses[index].id, w.id, 'add', state.witnesses[index].id !== w.id)
+      return state.witnesses[index].id !== w.id
+    })
+
+    const http = http_with_csrf_token();
+    Promise.all(changed.map(w => {
+      return http.patch(`/witnesses/${w.id}`, { data: {
         type: "witness",
         id: w.id,
         attributes: { num: w.num }
-      }
+      }})
+    })).then(() => {
+      commit('REORDER_WITNESSES', witnesses)
     })
-    console.log(data)
-    const http = http_with_csrf_token();
-    return http.patch(`/witnesses`, { data })
-      .then(response => {
-        console.log(response)
-        commit('REORDER_WITNESSES', witnesses)
-      })
 
   },
 

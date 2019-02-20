@@ -6,7 +6,7 @@
     <div class="witness-list__content">
       <ul class="witness-list__list">
         <li v-for="witness, index in list" class="witness-item">
-          <div class="witness-item__order" v-if="editable">
+          <div class="witness-item__order" v-if="editable && list.length > 1">
             <button
                     v-if="index < list.length-1"
                     class="witness-item__order-button"
