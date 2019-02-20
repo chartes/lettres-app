@@ -8,7 +8,7 @@
           :valid="validForm"
           :submitting="false"
   >
-    <div class="institution-form">
+    <div class="correspondent-form">
       <form @submit.prevent="">
         <error-message v-if="error" :error="error"/>
         <field-text
@@ -21,11 +21,22 @@
                 placeholder="Nom"
                 v-model="form.lastname"
         />
+        <!--
         <field-text
                 label="Référence"
                 placeholder="Référence"
                 v-model="form.ref"
         />
+        -->
+        <select-autocomplete-field
+            label="Référence"
+            v-model="form.ref"
+            :items="correspondentsWikidataSearchResults"
+            :is-async="true"
+            @search="searchPersonOnWikidata"
+            label-key="label"
+        >
+        </select-autocomplete-field>
       </form>
     </div>
   </modal-form>
@@ -39,13 +50,15 @@
   import ModalForm from './ModalForm';
   import FieldText from './fields/TextField';
   import ErrorMessage from '../ui/ErrorMessage';
+  import SelectAutocompleteField from "./fields/SelectAutocompleteField";
 
   export default {
     name: "correspondent-form",
     components: {
       ErrorMessage,
       FieldText,
-      ModalForm
+      ModalForm,
+      SelectAutocompleteField
     },
     props: {
       title: { type: String, default: '' },
@@ -63,12 +76,13 @@
       }
     },
     mounted () {
-
+        //this.$store.dispatch('correspondents/searchOnWikidata', 'Catherine de Medicis')
     },
     methods: {
-
+  
       submitAction () {
-        this.form.key = `${this.form.lastname}, ${this.form.firstname}`
+        this.form.key = `${this.form.lastname}, ${this.form.firstname}`;
+        this.form.ref = `${this.form.ref.uriForDisplay}`;
         this.$props.submit(this.form);
       },
       cancelAction () {
@@ -76,12 +90,15 @@
       },
       removeAction () {
         this.$props.cancel();
+      },
+      searchPersonOnWikidata(who) {
+          return this.$store.dispatch('correspondents/searchOnWikidata', who);
       }
 
     },
     computed: {
 
-      ...mapState('correspondents', ['roles']),
+      ...mapState('correspondents', ['roles', 'correspondentsWikidataSearchResults']),
 
       validForm () {
         return (

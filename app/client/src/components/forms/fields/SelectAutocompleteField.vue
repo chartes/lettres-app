@@ -127,7 +127,7 @@
         });
       },
       setResult(result) {
-        this.$emit('input', result);;
+        this.$emit('input', result);
         this.isOpen = false;
       },
       onArrowDown(evt) {
@@ -165,7 +165,7 @@
       items: function (val, oldValue) {
         console.log('watch autocomplete items', val)
         // actually compare them
-        if (val.length !== oldValue.length) {
+        if (!!val || val.length !== oldValue.length) {
           this.results = val;
           this.isLoading = false;
           this.isOpen = true;

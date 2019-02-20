@@ -1,9 +1,11 @@
 import {http} from '../../../modules/http-common';
 import http_with_csrf_token from '../../../modules/http-common';
+import wikidata from 'wikidata-entity-lookup';
 
 const state = {
 
   correspondentsSearchResults: null,
+  correspondentsWikidataSearchResults: null,
   roles: [],
   newCorrespondent: null
 
@@ -16,6 +18,14 @@ const mutations = {
   },
   SEARCH_RESULTS (state, payload) {
     state.correspondentsSearchResults = payload;
+  },
+  WIKIDATA_SEARCH_RESULTS(state, payload) {
+    state.correspondentsWikidataSearchResults = payload.map(p => {
+      return {
+        ...p,
+        label: p.description ? `${p.name} — ${p.description}` : p.name
+      }
+    });
   },
   ADD_ONE (state, payload) {
     state.correspondentsSearchResults = payload;
@@ -32,6 +42,13 @@ const actions = {
         const correspondents = response.data.data.map(inst => { return { id: inst.id, ...inst.attributes}});
         commit('SEARCH_RESULTS', correspondents)
       });
+  },
+  searchOnWikidata({commit}, what) {
+    commit('WIKIDATA_SEARCH_RESULTS', []);
+    wikidata.findPlace(what).then((result) => {
+      console.log(result);
+      commit('WIKIDATA_SEARCH_RESULTS', result)
+    });
   },
   fetchRoles ({ commit }) {
     console.log('fetchRoles')
