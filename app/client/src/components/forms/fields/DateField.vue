@@ -11,7 +11,7 @@
            @keyup.enter="checkAndExitEditMode"
            @blur="checkAndExitEditMode"
            @keyup.esc="cancelInput"
-           v-mask="{mask: '(9999)|(9999-99)|(9999-99-99)', placeholder: 'AAAA-MM-DD', greedy: false}"
+           v-mask="{mask: '(9999)|(9999-99)|(9999-99-99)', placeholder: 'AAAA-MM-JJ', greedy: false}"
         />
       </div>
     </div>
