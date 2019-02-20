@@ -35,19 +35,19 @@ class TestGetRoutes(TestBaseServer):
         self.assertEqual(2, resource["meta"]["total-count"])
         self.assertEqual("language", set([d["type"] for d in resource["data"]]).pop())
 
-        # ------ correspondents -------
-        r, status, resource = self.api_get("documents/1/correspondents")
+        # ------ persons -------
+        r, status, resource = self.api_get("documents/1/persons")
         self.assertEqual(3, resource["meta"]["total-count"])
         self.assertEqual("correspondent", set([d["type"] for d in resource["data"]]).pop())
-        r, status, resource = self.api_get("documents/1/relationships/correspondents")
+        r, status, resource = self.api_get("documents/1/relationships/persons")
         self.assertEqual(3, resource["meta"]["total-count"])
         self.assertEqual("correspondent", set([d["type"] for d in resource["data"]]).pop())
 
-        # ------ correspondents-having-roles -------
-        r, status, resource = self.api_get("documents/1/correspondents-having-roles")
+        # ------ persons-having-roles -------
+        r, status, resource = self.api_get("documents/1/persons-having-roles")
         self.assertEqual(3, resource["meta"]["total-count"])
         self.assertEqual("correspondent-has-role", set([d["type"] for d in resource["data"]]).pop())
-        r, status, resource = self.api_get("documents/1/relationships/correspondents-having-roles")
+        r, status, resource = self.api_get("documents/1/relationships/persons-having-roles")
         self.assertEqual(3, resource["meta"]["total-count"])
         self.assertEqual("correspondent-has-role", set([d["type"] for d in resource["data"]]).pop())
 

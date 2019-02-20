@@ -17,10 +17,10 @@
                <div class="column is-three-quarters">
                  <p class="document-preview-card__content" v-html="previewContent"></p>
                </div>
-               <div class="column document-preview-card__correspondents">
+               <div class="column document-preview-card__persons">
                  <ul>
-                   <li class="" v-for="obj in documentPreview.correspondents">
-                     <a href="">{{getCorrespondentFullname(obj)}}</a>
+                   <li class="" v-for="obj in documentPreview.persons">
+                     <a href="">{{getPersonFullname(obj)}}</a>
                      <span class="tag is-light is-rounded">{{obj.role.label}}</span>
                    </li>
                  </ul>
@@ -73,8 +73,8 @@
        }
     }   ,
     methods: {
-      getCorrespondentFullname : function(obj){
-          return `${obj.correspondent.firstname} ${obj.correspondent.lastname}`
+      getPersonFullname : function(obj){
+          return obj.person.label;
       },
       updateCurrentDocumentPreviewCard: function() {
           this.titleContent = "";
@@ -95,7 +95,7 @@
 <style scoped>
 
 
-  .document-preview-card__correspondents ul {
+  .document-preview-card__persons ul {
     list-style: none;
   }
 

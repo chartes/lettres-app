@@ -3,13 +3,13 @@ import sqlalchemy
 
 from app import create_app
 from app.api.collection.facade import CollectionFacade
-from app.api.correspondent.facade import CorrespondentFacade
+from app.api.person.facade import PersonFacade
 from app.api.document.facade import DocumentFacade
 from app.api.institution.facade import InstitutionFacade
 from app.api.language.facade import LanguageFacade
 from app.api.user.facade import UserFacade
 from app.api.witness.facade import WitnessFacade
-from app.models import UserRole, User, Document, Collection, Language, Witness, Correspondent, Institution
+from app.models import UserRole, User, Document, Collection, Language, Witness, Person, Institution
 
 app = None
 
@@ -77,7 +77,7 @@ def make_cli():
             from db.fixtures.create_fake_data import create_fake_documents, create_fake_users
             print("Generating fake data...", end=" ", flush=True)
             create_fake_users(db, nb_users=5, fake=fake)
-            create_fake_documents(db, nb_docs=10, nb_correspondents=20, fake=fake)
+            create_fake_documents(db, nb_docs=10, nb_persons=20, fake=fake)
             print("done !")
 
             click.echo("Loaded fixtures to the database")
@@ -93,7 +93,7 @@ def make_cli():
             "collections": {"facade": CollectionFacade, "model": Collection},
             "languages": {"facade": LanguageFacade, "model": Language},
             "witnesses": {"facade": WitnessFacade, "model": Witness},
-            "correspondents": {"facade": CorrespondentFacade, "model": Correspondent},
+            "persons": {"facade": PersonFacade, "model": Person},
             "documents": {"facade": DocumentFacade, "model": Document},
             "institutions": {"facade": InstitutionFacade, "model": Institution},
             "users": {"facade": UserFacade, "model": User}
@@ -107,6 +107,7 @@ def make_cli():
 
                 index_name = info["facade"].get_index_name()
                 app.elasticsearch.indices.delete(index=index_name, ignore=[400, 404])  # remove all records
+
                 for obj in info["model"].query.all():
                     f_obj = info["facade"](prefix, obj)
                     f_obj.reindex("insert", propagate=False)

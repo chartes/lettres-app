@@ -15,10 +15,10 @@ def insert_ref_data(db, cursor):
 
     try:
         cursor.execute(
-            "INSERT INTO correspondent ("
+            "INSERT INTO person ("
             "id,"
-            "firstname,"
-            "lastname,"
+            "label,"
+            "description,"
             "key,"
             "ref)"
             "VALUES (?, ?, ?, ?, ?)",
@@ -31,7 +31,7 @@ def insert_ref_data(db, cursor):
         print(e)
 
     try:
-        cursor.execute("INSERT INTO correspondent_role (id, label, description) VALUES (?, ?, ?)",
+        cursor.execute("INSERT INTO person_role (id, label, description) VALUES (?, ?, ?)",
                        (1, 'sender', 'Expéditeur de la lettre'))
     except sqlite3.IntegrityError as e:
         print(e)

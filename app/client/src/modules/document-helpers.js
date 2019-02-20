@@ -1,23 +1,23 @@
-const getCorrespondents = function (included) {
+const getPersons = function (included) {
 
     const hasRoleById = {};
     const rolesById = {};
-    const correspondentsById = {};
+    const personsById = {};
     included.forEach(inc => {
-      if (inc.type === 'correspondent') {
-        correspondentsById[inc.id] = {...inc.attributes}
-      } else if (inc.type === 'correspondent-role') {
+      if (inc.type === 'person') {
+        personsById[inc.id] = {...inc.attributes}
+      } else if (inc.type === 'person-role') {
         rolesById[inc.id] = {...inc.attributes}
-      } else if (inc.type === 'correspondent-has-role') {
+      } else if (inc.type === 'person-has-role') {
         hasRoleById[inc.id] = {
           relationId: inc.id,
-          roleId: inc.relationships['correspondent-role'].data.id,
-          correspondentId: inc.relationships.correspondent.data.id,
+          roleId: inc.relationships['person-role'].data.id,
+          personId: inc.relationships.person.data.id,
         }
       }
     });
     return Object.values(hasRoleById).map(hasRole => { return {
-      ...hasRole, correspondent: correspondentsById[hasRole.correspondentId],
+      ...hasRole, person: personsById[hasRole.personId],
       role: rolesById[hasRole.roleId],
       relationId: hasRole.relationId
     }})
@@ -62,7 +62,7 @@ const getCorrespondents = function (included) {
 
 export  {
   /* document */
-  getCorrespondents,
+  getPersons,
   getInstitution,
   getLanguages,
   getWitnesses,

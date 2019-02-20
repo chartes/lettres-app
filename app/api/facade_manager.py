@@ -1,8 +1,8 @@
 from app.api.changelog.facade import ChangelogFacade
 from app.api.collection.facade import CollectionFacade
-from app.api.correspondent.facade import CorrespondentFacade
-from app.api.correspondent_has_role.facade import CorrespondentHasRoleFacade
-from app.api.correspondent_role.facade import CorrespondentRoleFacade
+from app.api.person.facade import PersonFacade
+from app.api.person_has_role.facade import PersonHasRoleFacade
+from app.api.person_role.facade import PersonRoleFacade
 from app.api.document.facade import DocumentFacade, DocumentSearchFacade
 from app.api.image.facade import ImageFacade
 from app.api.institution.facade import InstitutionFacade
@@ -12,7 +12,7 @@ from app.api.user.facade import UserFacade
 from app.api.user_role.facade import UserRoleFacade
 from app.api.witness.facade import WitnessFacade
 from app.api.lock.facade import LockFacade
-from app.models import Collection, Correspondent, CorrespondentHasRole, CorrespondentRole, Document, Image, Institution, \
+from app.models import Collection, Person, PersonHasRole, PersonRole, Document, Image, Institution, \
     Language, Note, User, UserRole, Witness, Lock
 
 
@@ -23,17 +23,17 @@ class JSONAPIFacadeManager(object):
             "default": CollectionFacade,
             "search": CollectionFacade,
         },
-        Correspondent.__tablename__: {
-            "default": CorrespondentFacade,
-            "search": CorrespondentFacade,
+        Person.__tablename__: {
+            "default": PersonFacade,
+            "search": PersonFacade,
         },
-        CorrespondentHasRole.__tablename__: {
-            "default": CorrespondentHasRoleFacade,
-            "search": CorrespondentHasRoleFacade,
+        PersonHasRole.__tablename__: {
+            "default": PersonHasRoleFacade,
+            "search": PersonHasRoleFacade,
         },
-        CorrespondentRole.__tablename__: {
-            "default": CorrespondentRoleFacade,
-            "search": CorrespondentRoleFacade,
+        PersonRole.__tablename__: {
+            "default": PersonRoleFacade,
+            "search": PersonRoleFacade,
         },
         Document.__tablename__: {
             "default": DocumentFacade,

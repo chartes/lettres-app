@@ -52,8 +52,8 @@ def create_fake_documents(db, nb_docs=1000, nb_correspondents=None, fake=None):
     from app.models import Image
     from app.models import Note
     from app.models import Language
-    from app.models import CorrespondentRole
-    from app.models import Correspondent
+    from app.models import PersonRole
+    from app.models import Person
 
     if fake is None:
         fake = Faker()
@@ -78,23 +78,23 @@ def create_fake_documents(db, nb_docs=1000, nb_correspondents=None, fake=None):
 
     # add fake correspondent roles
     for i in range(5, 20):
-        db.session.add(CorrespondentRole(label=fake.word()))
+        db.session.add(PersonRole(label=fake.word()))
     db.session.commit()
-    roles = CorrespondentRole.query.all()
+    roles = PersonRole.query.all()
 
-    # add fake correspondents
+    # add fake persons
     if nb_correspondents is None:
         nb_correspondents = nb_docs * 2
 
     for i in range(0, nb_correspondents):
-        db.session.add(Correspondent(
+        db.session.add(Person(
             firstname=fake.first_name(),
             lastname=fake.last_name(),
             key=fake.name(),
             ref=random.choice([None, fake.uri()])
         ))
     db.session.commit()
-    correspondents = Correspondent.query.all()
+    correspondents = Person.query.all()
 
     # add fake Institutions
     institutions = []
@@ -156,7 +156,7 @@ def create_fake_documents(db, nb_docs=1000, nb_correspondents=None, fake=None):
                 db.session.add(n)
 
             # add fake correspondent to the doc
-            from app.models import CorrespondentHasRole
+            from app.models import PersonHasRole
 
             correspondents_have_roles = []
             for i in range(1, random.randint(1, 4)):
@@ -166,7 +166,7 @@ def create_fake_documents(db, nb_docs=1000, nb_correspondents=None, fake=None):
 
             c_h_roles = []
             for (role_id, co_id) in set(correspondents_have_roles):
-                chr = CorrespondentHasRole(
+                chr = PersonHasRole(
                     document_id=doc.id,
                     correspondent_id=co_id,
                     correspondent_role_id=role_id

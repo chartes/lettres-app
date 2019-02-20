@@ -28,48 +28,48 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
             errors = []
         return e, kwargs, errors
 
-    def get_correspondents_having_roles_resource_identifiers(self):
-        from app.api.correspondent_has_role.facade import CorrespondentHasRoleFacade
-        return [] if self.obj.correspondents_having_roles is None else [
-            CorrespondentHasRoleFacade.make_resource_identifier(c.id, CorrespondentHasRoleFacade.TYPE)
-            for c in self.obj.correspondents_having_roles
+    def get_persons_having_roles_resource_identifiers(self):
+        from app.api.person_has_role.facade import PersonHasRoleFacade
+        return [] if self.obj.persons_having_roles is None else [
+            PersonHasRoleFacade.make_resource_identifier(c.id, PersonHasRoleFacade.TYPE)
+            for c in self.obj.persons_having_roles
         ]
 
-    def get_correspondents_having_roles_resources(self):
-        from app.api.correspondent_has_role.facade import CorrespondentHasRoleFacade
-        return [] if self.obj.correspondents_having_roles is None else [
-            CorrespondentHasRoleFacade(self.url_prefix, c, True, True).resource
-            for c in self.obj.correspondents_having_roles
+    def get_persons_having_roles_resources(self):
+        from app.api.person_has_role.facade import PersonHasRoleFacade
+        return [] if self.obj.persons_having_roles is None else [
+            PersonHasRoleFacade(self.url_prefix, c, True, True).resource
+            for c in self.obj.persons_having_roles
         ]
 
     def get_role_resource_identifiers(self):
-        from app.api.correspondent_role.facade import CorrespondentRoleFacade
-        return [] if self.obj.correspondents_having_roles is None else [
-            CorrespondentRoleFacade.make_resource_identifier(c_h_r.correspondent_role.id, CorrespondentRoleFacade.TYPE)
-            for c_h_r in self.obj.correspondents_having_roles
+        from app.api.person_role.facade import PersonRoleFacade
+        return [] if self.obj.persons_having_roles is None else [
+            PersonRoleFacade.make_resource_identifier(c_h_r.person_role.id, PersonRoleFacade.TYPE)
+            for c_h_r in self.obj.persons_having_roles
         ]
 
     def get_role_resources(self):
-        from app.api.correspondent_role.facade import CorrespondentRoleFacade
-        return [] if self.obj.correspondents_having_roles is None else [
-            CorrespondentRoleFacade(self.url_prefix, c.correspondent_role, self.with_relationships_links,
-                                    self.with_relationships_data).resource
-            for c in self.obj.correspondents_having_roles
+        from app.api.person_role.facade import PersonRoleFacade
+        return [] if self.obj.persons_having_roles is None else [
+            PersonRoleFacade(self.url_prefix, c.person_role, self.with_relationships_links,
+                             self.with_relationships_data).resource
+            for c in self.obj.persons_having_roles
         ]
 
-    def get_correspondent_resource_identifiers(self):
-        from app.api.correspondent.facade import CorrespondentFacade
-        return [] if self.obj.correspondents_having_roles is None else [
-            CorrespondentFacade.make_resource_identifier(c_h_r.correspondent.id, CorrespondentFacade.TYPE)
-            for c_h_r in self.obj.correspondents_having_roles
+    def get_person_resource_identifiers(self):
+        from app.api.person.facade import PersonFacade
+        return [] if self.obj.persons_having_roles is None else [
+            PersonFacade.make_resource_identifier(c_h_r.person.id, PersonFacade.TYPE)
+            for c_h_r in self.obj.persons_having_roles
         ]
 
-    def get_correspondent_resources(self):
-        from app.api.correspondent.facade import CorrespondentFacade
-        return [] if self.obj.correspondents_having_roles is None else [
-            CorrespondentFacade(self.url_prefix, c.correspondent, self.with_relationships_links,
-                                self.with_relationships_data).resource
-            for c in self.obj.correspondents_having_roles
+    def get_person_resources(self):
+        from app.api.person.facade import PersonFacade
+        return [] if self.obj.persons_having_roles is None else [
+            PersonFacade(self.url_prefix, c.person, self.with_relationships_links,
+                         self.with_relationships_data).resource
+            for c in self.obj.persons_having_roles
         ]
 
     def get_iiif_collection_url(self):
@@ -128,20 +128,20 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
         """
 
         self.relationships.update({
-            "correspondents-having-roles": {
-                "links": self._get_links(rel_name="correspondents-having-roles"),
-                "resource_identifier_getter": self.get_correspondents_having_roles_resource_identifiers,
-                "resource_getter": self.get_correspondents_having_roles_resources
+            "persons-having-roles": {
+                "links": self._get_links(rel_name="persons-having-roles"),
+                "resource_identifier_getter": self.get_persons_having_roles_resource_identifiers,
+                "resource_getter": self.get_persons_having_roles_resources
             },
             "roles": {
                 "links": self._get_links(rel_name="roles"),
                 "resource_identifier_getter": self.get_role_resource_identifiers,
                 "resource_getter": self.get_role_resources
             },
-            "correspondents": {
-                "links": self._get_links(rel_name="correspondents"),
-                "resource_identifier_getter": self.get_correspondent_resource_identifiers,
-                "resource_getter": self.get_correspondent_resources
+            "persons": {
+                "links": self._get_links(rel_name="persons"),
+                "resource_identifier_getter": self.get_person_resource_identifiers,
+                "resource_getter": self.get_person_resources
             },
         })
 
@@ -189,13 +189,13 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
             "witnesses": [{"id": w.id, "content": w.content} for w in self.obj.witnesses],
             "languages": [{"id": l.id, "code": l.code} for l in self.obj.languages],
             "collections": [{"id": c.id, "title": c.title} for c in self.obj.collections],
-            "correspondents": [
+            "persons": [
                 {
-                    "id": c_h_r.correspondent.id,
-                    "key": c_h_r.correspondent.key,
-                    "ref": c_h_r.correspondent.ref
+                    "id": c_h_r.person.id,
+                    "key": c_h_r.person.key,
+                    "ref": c_h_r.person.ref
                 }
-                for c_h_r in self.obj.correspondents_having_roles
+                for c_h_r in self.obj.persons_having_roles
             ],
         }
         return [{"id": _res["id"], "index": self.get_index_name(), "payload": payload}]

@@ -200,9 +200,9 @@ def create_app(config_name="dev"):
 
     from app.api import routes
 
-    from app.api.correspondent.routes import register_correspondent_api_urls
-    from app.api.correspondent_has_role.routes import register_correspondent_has_role_api_urls
-    from app.api.correspondent_role.routes import register_correspondent_role_api_urls
+    from app.api.person.routes import register_person_api_urls
+    from app.api.person_has_role.routes import register_person_has_role_api_urls
+    from app.api.person_role.routes import register_person_role_api_urls
     from app.api.document.routes import register_document_api_urls
     from app.api.collection.routes import register_collection_role_api_urls
     from app.api.institution.routes import register_institution_role_api_urls
@@ -217,9 +217,9 @@ def create_app(config_name="dev"):
 
     with app.app_context():
         # generate routes for the API
-        register_correspondent_api_urls(app)
-        register_correspondent_has_role_api_urls(app)
-        register_correspondent_role_api_urls(app)
+        register_person_api_urls(app)
+        register_person_has_role_api_urls(app)
+        register_person_role_api_urls(app)
         register_document_api_urls(app)
         register_institution_role_api_urls(app)
         register_language_role_api_urls(app)

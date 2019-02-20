@@ -1,5 +1,5 @@
 import http_with_csrf_token from '../../../modules/http-common';
-import {getCorrespondents, getLanguages, getWitnesses,
+import {getPersons, getLanguages, getWitnesses,
         getNotes, getCollections, getCurrentLock} from '../../../modules/document-helpers';
 import Vue from "vue";
 
@@ -7,7 +7,7 @@ const state = {
 
   documentLoading: true,
   document: null,
-  correspondents: [],
+  persons: [],
   witnesses: [],
   languages: [],
   collections: [],
@@ -24,7 +24,7 @@ const mutations = {
   UPDATE_DOCUMENT (state, {data, included}) {
     console.log('UPDATE_DOCUMENT', data, included);
     state.document = { ...data.attributes, id: data.id};
-    state.correspondents = getCorrespondents(included);
+    state.persons = getPersons(included);
     state.collections = getCollections(included);
     state.languages = getLanguages(included);
     state.witnesses = getWitnesses(included);
@@ -40,7 +40,7 @@ const mutations = {
     const newPreviewCard = {
       id: data.id,
       attributes: data.attributes,
-      correspondents: getCorrespondents(included),
+      persons: getPersons(included),
       languages: getLanguages(included),
       collections: getCollections(included),
       currentLock: getCurrentLock(included)
@@ -84,11 +84,11 @@ const mutations = {
   REMOVE_COLLECTION (state, payload) {
     state.collections = state.collections.filter(coll => coll.id !== payload.id)
   },
-  REMOVE_CORRESPONDENT (state, payload) {
-    state.correspondents = state.correspondents.filter(corr => corr.relationId !== payload)
+  REMOVE_PERSON (state, payload) {
+    state.persons = state.persons.filter(corr => corr.relationId !== payload)
   },
-  ADD_CORRESPONDENT (state, payload) {
-    state.correspondents = [ ...state.correspondents, payload ]
+  ADD_PERSON (state, payload) {
+    state.persons = [ ...state.persons, payload ]
   },
 
 };
@@ -99,8 +99,8 @@ const actions = {
     commit('LOADING_STATUS', true);
 
     let incs = [
-      'collections', 'correspondents', 'roles',
-      'correspondents-having-roles', 'notes',
+      'collections', 'persons', 'roles',
+      'persons-having-roles', 'notes',
       'witnesses', 'languages', 'current-lock'
     ];
 
@@ -115,7 +115,7 @@ const actions = {
   fetchPreview ({ commit }, id) {
     commit('LOADING_STATUS', true);
     const incs = [
-      'collections', 'correspondents', 'correspondents-having-roles',
+      'collections', 'persons', 'persons-having-roles',
       'roles', 'witnesses', 'languages', 'current-lock'
     ];
 
@@ -138,7 +138,7 @@ const actions = {
     commit('LOADING_STATUS', true);
 
     const index = `lettres__${process.env.NODE_ENV}__document`;
-    const incs = ['collections', 'correspondents', 'correspondents-having-roles', 'roles', 'witnesses', 'languages'];
+    const incs = ['collections', 'persons', 'persons-having-roles', 'roles', 'witnesses', 'languages'];
     const http = http_with_csrf_token();
     return http.get(`/search?query=${query}&index=${index}&include=${incs.join(',')}&without-relationships&page[size]=${pageSize}&page[number]=${pageId}`)
       .then( (response) => {
@@ -299,11 +299,11 @@ const actions = {
 
   },
 
-  addCorrespondent ({commit}, correspondent) {
-    commit('ADD_CORRESPONDENT', correspondent)
+  addPerson ({commit}, person) {
+    commit('ADD_PERSON', person)
   },
-  removeCorrespondent ({commit}, relationId) {
-    commit('REMOVE_CORRESPONDENT', relationId)
+  removePerson ({commit}, relationId) {
+    commit('REMOVE_PERSON', relationId)
   },
 
   addCollection ({commit, state}, collection) {
@@ -333,13 +333,13 @@ const actions = {
 const getters = {
 
   documentSender (state) {
-    return state.correspondents.filter( corr => {
+    return state.persons.filter( corr => {
       if (!corr.role) return false;
       return corr.role.label === 'sender'
     })
   },
   documentRecipients (state) {
-    return state.correspondents.filter( corr => {
+    return state.persons.filter( corr => {
       if (!corr.role) return false;
       return corr.role.label !== 'sender'
     })

@@ -2,7 +2,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 
 import collections from './modules/collections';
-import correspondents from './modules/correspondents';
+import persons from './modules/persons';
 import document from './modules/document';
 import institutions from './modules/institutions';
 import languages from './modules/languages';
@@ -17,7 +17,7 @@ Vue.use(Vuex);
 export default new Vuex.Store({
     modules: {
       collections,
-      correspondents,
+      persons,
       document,
       institutions,
       languages,
