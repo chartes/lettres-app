@@ -192,7 +192,7 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
             "persons": [
                 {
                     "id": c_h_r.person.id,
-                    "key": c_h_r.person.key,
+                    "label": c_h_r.person.label,
                     "ref": c_h_r.person.ref
                 }
                 for c_h_r in self.obj.persons_having_roles
