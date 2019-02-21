@@ -57,21 +57,10 @@ class Document(db.Model, ChangesMixin):
     creation = db.Column(db.String)
     creation_not_after = db.Column(db.String)
     creation_label = db.Column(db.String)
-    
-    location_date_from_id = db.Column(db.Integer)
-    location_date_to_id = db.Column(db.Integer)
-    
+
     transcription = db.Column(db.Text)
     prev_document_id = db.Column(db.Integer, db.ForeignKey('document.id'), index=True)
     is_published = db.Column(db.Boolean, index=True)
-
-    # relationships
-    location_date_from = db.relationship("Placename",
-                                         primaryjoin="Document.location_date_from_id==foreign(Placename.id)",
-                                         uselist=False)
-    location_date_to = db.relationship("Placename",
-                                       primaryjoin="Document.location_date_to_id==foreign(Placename.id)",
-                                       uselist=False)
 
     notes = db.relationship("Note", backref="document", cascade="all, delete-orphan")
     witnesses = db.relationship("Witness", backref="document", cascade="all, delete-orphan")
