@@ -1,6 +1,6 @@
 import {http} from '../../../modules/http-common';
 import http_with_csrf_token from '../../../modules/http-common';
-import wikidata from 'wikidata-entity-lookup';
+import wikidata from '../../../modules/ref-providers/wikidata';
 
 const state = {
 
