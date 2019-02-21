@@ -1,6 +1,6 @@
 <template>
   <div class="field field-select-autocomplete">
-    <field-label :label="label"/>
+    <field-label :label="label" :add-colons="label.length !== 0"/>
 
     <div class="field-select-autocomplete__wrapper">
 

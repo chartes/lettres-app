@@ -1,5 +1,5 @@
 <template>
-  <section v-if="persons.length > 0" class="document-persons section">
+  <section class="document-persons section">
     <header class="document-persons__header">
       <h2 class="document-persons__title subtitle">Correspondants</h2>
     </header>
@@ -23,7 +23,7 @@
         <div v-else>
           <p class="person-item"><em>Aucun expéditeur n'a été renseigné</em></p>
           <p v-if="editable">
-            <lauch-button if="userCanEdit" label="Ajouter l'expéditeur" @click="openAddPerson('sender')"/>
+            <lauch-button label="Sélectionner un expéditeur" @click="openAddPerson('sender')"/>
           </p>
         </div>
 
@@ -36,7 +36,7 @@
         <ul class="document-persons__recipients-list" v-if="documentRecipients.length">
           <li v-for="c in documentRecipients" :key="c.person.id" class="person-item">
             <a :href="c.person.ref" target="_blank">
-              {{ c.person.label + (c.person.description ?  ' — ' + c.person.description : '') }}</a>
+              {{ c.person.label }}</a>
             <span class="tag">{{ c.role.label }}</span>
             <a v-if="editable" class="person-item__delete" @click="unlinkPersonFromDoc(c)"><icon-bin/></a>
           </li>
@@ -57,7 +57,7 @@
 
       <person-list-form
           v-if="personsForm && editable"
-          title="Ajouter un correspondant"
+          title="Sélectionner une personne"
           :submit="linkPersonToDoc"
           :cancel="closePersonChoice"
       />

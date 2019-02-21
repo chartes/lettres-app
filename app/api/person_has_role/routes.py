@@ -13,6 +13,3 @@ def register_person_has_role_api_urls(app):
     registrar.register_relationship_patch_route(PersonHasRoleFacade, 'person')
     registrar.register_relationship_get_route(PersonHasRoleFacade, 'person-role')
 
-    registrar.register_relationship_post_route(PersonHasRoleFacade, 'changes')
-    registrar.register_relationship_get_route(PersonHasRoleFacade, 'changes')
-

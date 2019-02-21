@@ -1,6 +1,6 @@
 <template>
 
-  <modal-form
+  <modal-form class="person-list-form"
           :title="title"
           :cancel="cancelAction"
           :remove="remove"
@@ -8,28 +8,32 @@
           :submitting="false"
   >
     <div class="person-list-form">
-
-
-      <list-autocomplete-field
-        search-placeholder="Rechercher une personne"
-        v-model="form"
-        :items="personsSearchResults"
-        :is-async="true"
-        @search="searchPerson"
-        label-key="label"
-      />
-
-      <footer class="person-list-form__footer has-text-centered">
-        <p>&mdash; <em>ou</em> &mdash; </p>
-        <p>
-          <launch-button
-                  label="Ajouter une nouvelle personne"
-                  @click="openNewPersonForm"
+      <div class="columns">
+        <div class="column is-5">
+          <select-autocomplete-field
+            v-model="form"
+            :items="personsSearchResults"
+            :is-async="true"
+            @search="searchPerson"
+            label-key="label"
+            notSet="Rechercher une personne"
           />
-        </p>
-      </footer>
+        </div>
+        <div class="column is-1 person-list-form__separator">
+          <div><p><em>ou</em></p></div>
+        </div>
+        <div class="column is-5">
+          <div class="person-list-form__add-new has-text-centered">
 
-
+            <p>
+              <launch-button
+                      label="Ajouter une nouvelle personne"
+                      @click="openNewPersonForm"
+              />
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
 
     <person-form v-if="personForm"
@@ -37,6 +41,7 @@
             :error="newPersonError"
             :submit="createNewPerson"
             :cancel="closeNewPersonForm"
+            title="Ajouter une nouvelle personne"
     />
 
   </modal-form>
@@ -48,16 +53,16 @@
   import { mapState } from 'vuex';
   import ModalForm from './ModalForm';
   import FieldText from './fields/TextField';
-  import ListAutocompleteField from './fields/ListAutocompleteField';
   import LaunchButton from './LaunchButton';
   import PersonForm from './PersonForm';
+  import SelectAutocompleteField from "./fields/SelectAutocompleteField";
 
   export default {
     name: "PersonListForm",
     components: {
       PersonForm,
       LaunchButton,
-      ListAutocompleteField,
+      SelectAutocompleteField,
       FieldText,
       ModalForm
     },

@@ -1,6 +1,5 @@
 from flask import current_app
 
-from app import db
 from app.api.abstract_facade import JSONAPIAbstractChangeloggedFacade
 from app.models import Document
 
@@ -42,14 +41,14 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
             for c in self.obj.persons_having_roles
         ]
 
-    def get_role_resource_identifiers(self):
+    def get_person_role_resource_identifiers(self):
         from app.api.person_role.facade import PersonRoleFacade
         return [] if self.obj.persons_having_roles is None else [
             PersonRoleFacade.make_resource_identifier(c_h_r.person_role.id, PersonRoleFacade.TYPE)
             for c_h_r in self.obj.persons_having_roles
         ]
 
-    def get_role_resources(self):
+    def get_person_role_resources(self):
         from app.api.person_role.facade import PersonRoleFacade
         return [] if self.obj.persons_having_roles is None else [
             PersonRoleFacade(self.url_prefix, c.person_role, self.with_relationships_links,
@@ -57,6 +56,21 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
             for c in self.obj.persons_having_roles
         ]
 
+    def get_placename_role_resource_identifiers(self):
+        from app.api.placename_role.facade import PlacenameRoleFacade
+        return [] if self.obj.placenames_having_roles is None else [
+            PlacenameRoleFacade.make_resource_identifier(c_h_r.placename_role.id, PlacenameRoleFacade.TYPE)
+            for c_h_r in self.obj.placenames_having_roles
+        ]
+
+    def get_placename_role_resources(self):
+        from app.api.placename_role.facade import PlacenameRoleFacade
+        return [] if self.obj.placenames_having_roles is None else [
+            PlacenameRoleFacade(self.url_prefix, c.placename_role, self.with_relationships_links,
+                             self.with_relationships_data).resource
+            for c in self.obj.placenames_having_roles
+        ]
+    
     def get_person_resource_identifiers(self):
         from app.api.person.facade import PersonFacade
         return [] if self.obj.persons_having_roles is None else [
@@ -72,6 +86,35 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
             for c in self.obj.persons_having_roles
         ]
 
+    def get_placename_resource_identifiers(self):
+        from app.api.placename.facade import PlacenameFacade
+        return [] if self.obj.placenames_having_roles is None else [
+            PlacenameFacade.make_resource_identifier(c_h_r.placename.id, PlacenameFacade.TYPE)
+            for c_h_r in self.obj.placenames_having_roles
+        ]
+
+    def get_placename_resources(self):
+        from app.api.placename.facade import PlacenameFacade
+        return [] if self.obj.placenames_having_roles is None else [
+            PlacenameFacade(self.url_prefix, c.placename, self.with_relationships_links,
+                         self.with_relationships_data).resource
+            for c in self.obj.placenames_having_roles
+        ]
+    
+    def get_placenames_having_roles_resource_identifiers(self):
+        from app.api.placename_has_role.facade import PlacenameHasRoleFacade
+        return [] if self.obj.placenames_having_roles is None else [
+            PlacenameHasRoleFacade.make_resource_identifier(c.id, PlacenameHasRoleFacade.TYPE)
+            for c in self.obj.placenames_having_roles
+        ]
+
+    def get_placenames_having_roles_resources(self):
+        from app.api.placename_has_role.facade import PlacenameHasRoleFacade
+        return [] if self.obj.placenames_having_roles is None else [
+            PlacenameHasRoleFacade(self.url_prefix, c, True, True).resource
+            for c in self.obj.placenames_having_roles
+        ]
+    
     def get_iiif_collection_url(self):
         if self.obj.witnesses:
             url = "{doc_url}/collection/default".format(doc_url=self.self_link)
@@ -131,15 +174,31 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
                 "resource_identifier_getter": self.get_persons_having_roles_resource_identifiers,
                 "resource_getter": self.get_persons_having_roles_resources
             },
-            "roles": {
+            "person-roles": {
                 "links": self._get_links(rel_name="roles"),
-                "resource_identifier_getter": self.get_role_resource_identifiers,
-                "resource_getter": self.get_role_resources
+                "resource_identifier_getter": self.get_person_role_resource_identifiers,
+                "resource_getter": self.get_person_role_resources
             },
             "persons": {
                 "links": self._get_links(rel_name="persons"),
                 "resource_identifier_getter": self.get_person_resource_identifiers,
                 "resource_getter": self.get_person_resources
+            },
+            
+            "placenames-having-roles": {
+                "links": self._get_links(rel_name="placenames-having-roles"),
+                "resource_identifier_getter": self.get_placenames_having_roles_resource_identifiers,
+                "resource_getter": self.get_placenames_having_roles_resources
+            },
+            "placename-roles": {
+                "links": self._get_links(rel_name="roles"),
+                "resource_identifier_getter": self.get_placename_role_resource_identifiers,
+                "resource_getter": self.get_placename_role_resources
+            },
+            "placenames": {
+                "links": self._get_links(rel_name="placenames"),
+                "resource_identifier_getter": self.get_placename_resource_identifiers,
+                "resource_getter": self.get_placename_resources
             },
         })
 
@@ -151,12 +210,8 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
         from app.api.witness.facade import WitnessFacade
         from app.api.collection.facade import CollectionFacade
         from app.api.lock.facade import LockFacade
-        from app.api.placename.facade import PlacenameFacade
 
         for rel_name, (rel_facade, to_many) in {
-            "location-date-from": (PlacenameFacade, False),
-            "location-date-to": (PlacenameFacade, False),
-            "placenames": (PlacenameFacade, True),
             "collections": (CollectionFacade, True),
             "notes": (NoteFacade, True),
             "languages": (LanguageFacade, True),
@@ -182,8 +237,6 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
             "creation": _res["attributes"]["creation"],
             "creation-not-after": _res["attributes"]["creation-not-after"],
 
-            "location-date-from": {"id": self.obj.location_date_from.id, "content": self.obj.location_date_from.label} if self.obj.location_date_from else None,
-            "location-date-to": {"id": self.obj.location_date_to.id, "content": self.obj.location_date_to.label} if self.obj.location_date_to else None,
             "title": _res["attributes"]["title"],
             "argument": _res["attributes"]["argument"],
             "transcription": _res["attributes"]["transcription"],
@@ -199,7 +252,14 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
                 }
                 for c_h_r in self.obj.persons_having_roles
             ],
-            "placenames": [{"id": p.id, "content": p.label} for p in self.obj.placenames],
+            "placenames": [
+                {
+                    "id": c_h_r.person.id,
+                    "label": c_h_r.person.label,
+                    "ref": c_h_r.person.ref
+                }
+                for c_h_r in self.obj.placenames_having_roles
+            ]
         }
         return [{"id": _res["id"], "index": self.get_index_name(), "payload": payload}]
 

@@ -1,6 +1,8 @@
 import http_with_csrf_token from '../../../modules/http-common';
-import {getPersons, getLanguages, getWitnesses,
-        getNotes, getCollections, getCurrentLock} from '../../../modules/document-helpers';
+import {
+  getPersons, getLanguages, getWitnesses,
+  getNotes, getCollections, getCurrentLock,  getPlacenames
+} from '../../../modules/document-helpers';
 import Vue from "vue";
 
 const state = {
@@ -8,6 +10,7 @@ const state = {
   documentLoading: true,
   document: null,
   persons: [],
+  placenames: [],
   witnesses: [],
   languages: [],
   collections: [],
@@ -25,6 +28,7 @@ const mutations = {
     console.log('UPDATE_DOCUMENT', data, included);
     state.document = { ...data.attributes, id: data.id};
     state.persons = getPersons(included);
+    state.placenames = getPlacenames(included);
     state.collections = getCollections(included);
     state.languages = getLanguages(included);
     state.witnesses = getWitnesses(included);
@@ -90,7 +94,12 @@ const mutations = {
   ADD_PERSON (state, payload) {
     state.persons = [ ...state.persons, payload ]
   },
-
+  REMOVE_PLACENAME(state, payload) {
+    state.placenames = state.placenames.filter(corr => corr.relationId !== payload)
+  },
+  ADD_PLACENAME(state, payload) {
+    state.placenames = [...state.placenames, payload]
+  },
 };
 
 const actions = {
@@ -99,8 +108,9 @@ const actions = {
     commit('LOADING_STATUS', true);
 
     let incs = [
-      'collections', 'persons', 'roles',
-      'persons-having-roles', 'notes',
+      'collections', 'notes',
+      'persons-having-roles', 'persons', 'person-roles',
+      'placenames-having-roles', 'placenames', 'placename-roles',
       'witnesses', 'languages', 'current-lock'
     ];
 
@@ -305,6 +315,12 @@ const actions = {
   removePerson ({commit}, relationId) {
     commit('REMOVE_PERSON', relationId)
   },
+  addPlacename({commit}, placename) {
+    commit('ADD_PLACENAME', placename)
+  },
+  removePlacename({commit}, relationId) {
+    commit('REMOVE_PLACENAME', relationId)
+  },
 
   addCollection ({commit, state}, collection) {
 
@@ -341,7 +357,22 @@ const getters = {
   documentRecipients (state) {
     return state.persons.filter( corr => {
       if (!corr.role) return false;
-      return corr.role.label !== 'sender'
+      return corr.role.label === 'recipient'
+    })
+  },
+
+  locationDateFrom(state) {
+    console.warn(state.placenames);
+    return state.placenames.filter(corr => {
+      if (!corr.role) return false;
+      console.warn(corr.role.label);
+      return corr.role.label === 'location-date-from'
+    })
+  },
+  locationDateTo(state) {
+    return state.placenames.filter(corr => {
+      if (!corr.role) return false;
+      return corr.role.label === 'location-date-to'
     })
   },
 

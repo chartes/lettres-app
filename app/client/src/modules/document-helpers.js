@@ -24,6 +24,33 @@ const getPersons = function (included) {
 
   },
 
+  getPlacenames = function (included) {
+      const hasRoleById = {};
+      const rolesById = {};
+      const placenamesById = {};
+      included.forEach(inc => {
+          if (inc.type === 'placename') {
+              placenamesById[inc.id] = {...inc.attributes}
+          } else if (inc.type === 'placename-role') {
+              rolesById[inc.id] = {...inc.attributes}
+          } else if (inc.type === 'placename-has-role') {
+              hasRoleById[inc.id] = {
+                  relationId: inc.id,
+                  roleId: inc.relationships['placename-role'].data.id,
+                  placenameId: inc.relationships.placename.data.id,
+              }
+          }
+      });
+      return Object.values(hasRoleById).map(hasRole => {
+          return {
+              ...hasRole, placename: placenamesById[hasRole.placenameId],
+              role: rolesById[hasRole.roleId],
+              relationId: hasRole.relationId
+          }
+      })
+
+  },
+
   getInstitution = function (included) {
     return getSimpleRelation('institution', included)
   },
@@ -63,6 +90,7 @@ const getPersons = function (included) {
 export  {
   /* document */
   getPersons,
+  getPlacenames,
   getInstitution,
   getLanguages,
   getWitnesses,

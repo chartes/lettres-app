@@ -35,27 +35,7 @@
                 :editable="editable"
                 v-on:changed="fieldChanged"/>
       </div>
-      <div class="column is-one-third">
-        <text-field-in-place
-                :tabulation-index="0"
-                label="Date de lieu d'expédition"
-                name="location-date-from-ref"
-                not-set="Inconnue"
-                :initial-value="document['location-date-from-ref']"
-                :editable="editable"
-                v-on:changed="fieldChanged"/>
-      </div>
-      <div class="column is-one-third">
-        <text-field-in-place
-                :tabulation-index="0"
-                label="Date de lieu de réception"
-                name="location-date-to-ref"
-                not-set="Inconnue"
-                :initial-value="document['location-date-to-ref']"
-                :editable="editable"
-                v-on:changed="fieldChanged"/>
-      </div>
-      <div class="column is-one-third">
+      <div class="column">
         <multiselect-field
                 :editable="editable"
                 label="Langue(s)"
@@ -64,6 +44,7 @@
                 :onChange="languagesChanged"/>
       </div>
     </div>
+
   </div>
 </template>
 <script>
@@ -71,18 +52,21 @@
   import TextFieldInPlace from '../forms/fields/TextFieldInPlace';
   import MultiselectField from '../forms/fields/MultiselectField';
   import DateField from '../forms/fields/DateField';
+  import IconBin from '../ui/icons/IconBin';
+  import LaunchButton from '../forms/LaunchButton';
+  import PlacenameListForm from "../forms/PlacenameListForm";
 
   export default {
     name: 'DocumentAttributes',
-    components: {TextFieldInPlace, DateField, MultiselectField, TextFieldInPlace },
+    components: {
+        TextFieldInPlace, DateField, MultiselectField,
+        LaunchButton, IconBin
+    },
     props: {
-      editable: {
-        type: Boolean,
-        default: false
-      },
-      data: {
-
-      },
+        editable: {
+            type: Boolean,
+            default: false
+        },
     },
     methods: {
       fieldChanged (fieldProps) {
@@ -91,7 +75,7 @@
         this.$store.dispatch('document/save', data)
       },
       languagesChanged (langs) {
-        console.log("languagesChanged", langs)
+        console.log("languagesChanged", langs);
 
         const data = { id: this.document.id,
           relationships: {
@@ -104,11 +88,12 @@
               })
             }
           }
-        }
+        };
 
-        this.$store.dispatch('document/save', data)
+        this.$store.dispatch('document/save', data);
         console.log("lang data", data)
-      }
+      },
+
     },
     computed: {
       ...mapState('document', ['document', 'languages']),

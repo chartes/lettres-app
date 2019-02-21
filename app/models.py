@@ -21,20 +21,6 @@ association_document_has_collection = db.Table('document_has_collection',
     db.Column('collection_id', db.Integer, db.ForeignKey('collection.id'), primary_key=True)
 )
 
-association_placename_in_document = db.Table('placename_in_document',
-                                             db.Column('placename_id', db.Integer, db.ForeignKey('placename.id'),
-                                                        primary_key=True),
-                                             db.Column('document_id', db.Integer, db.ForeignKey('document.id'),
-                                                        primary_key=True)
-                                             )
-
-association_person_in_document = db.Table('person_in_document',
-                                              db.Column('person_id', db.Integer, db.ForeignKey('person.id'),
-                                                        primary_key=True),
-                                              db.Column('document_id', db.Integer, db.ForeignKey('document.id'),
-                                                        primary_key=True)
-                                              )
-
 association_user_has_bookmark = db.Table('user_has_bookmark',
     db.Column('doc_id', db.Integer, db.ForeignKey('document.id'), primary_key=True),
     db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True)
@@ -196,11 +182,36 @@ class Placename(db.Model, ChangesMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     label = db.Column(db.String, nullable=False)
     description = db.Column(db.String)
+    long = db.Column(db.String)
+    lat = db.Column(db.String)
     ref = db.Column(db.String)
 
-    documents = db.relationship("Document",
-                                secondary=association_placename_in_document,
-                                backref=db.backref('placenames'))
+
+class PlacenameRole(db.Model, ChangesMixin):
+    """ Rôle des lieux (ex : date de lieu d'expédition) """
+    __tablename__ = 'placename_role'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    label = db.Column(db.String(50), nullable=False)
+    description = db.Column(db.String(100))
+
+
+class PlacenameHasRole(db.Model, ChangesMixin):
+    __tablename__ = 'placename_has_role'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    __table_args__ = (
+        db.UniqueConstraint('placename_id', 'document_id', 'placename_role_id', name='_placename_has_role_document_uc'),
+    )
+
+    placename_id = db.Column(db.Integer, db.ForeignKey('placename.id', ondelete='CASCADE'), nullable=False)
+    document_id = db.Column(db.Integer, db.ForeignKey('document.id', ondelete='CASCADE'), nullable=False)
+    placename_role_id = db.Column(db.Integer, db.ForeignKey('placename_role.id', ondelete='CASCADE'))
+
+    placename = db.relationship("Placename", backref=db.backref("placenames_having_roles"), single_parent=True)
+    document = db.relationship("Document", backref=db.backref("placenames_having_roles", cascade="all, delete-orphan"),
+                               single_parent=True)
+    placename_role = db.relationship("PlacenameRole", backref=db.backref("placenames_having_roles"), single_parent=True)
+
 
 # ====================================
 # person STUFF
@@ -215,10 +226,6 @@ class Person(db.Model, ChangesMixin):
     label = db.Column(db.String, nullable=False)
     description = db.Column(db.String)
     ref = db.Column(db.String)
-
-    documents = db.relationship("Document",
-                                secondary=association_person_in_document,
-                                backref=db.backref('persons'))
 
 
 class PersonRole(db.Model, ChangesMixin):
@@ -239,7 +246,7 @@ class PersonHasRole(db.Model, ChangesMixin):
 
     person_id = db.Column(db.Integer, db.ForeignKey('person.id', ondelete='CASCADE'), nullable=False)
     document_id = db.Column(db.Integer, db.ForeignKey('document.id', ondelete='CASCADE'), nullable=False)
-    person_role_id = db.Column(db.Integer, db.ForeignKey('person_role.id', ondelete='CASCADE'), nullable=False)
+    person_role_id = db.Column(db.Integer, db.ForeignKey('person_role.id', ondelete='CASCADE'))
 
     person = db.relationship("Person", backref=db.backref("persons_having_roles"), single_parent=True)
     document = db.relationship("Document", backref=db.backref("persons_having_roles", cascade="all, delete-orphan"), single_parent=True)

@@ -9,7 +9,3 @@ def register_person_role_api_urls(app):
     registrar.register_post_routes(PersonRole, PersonRoleFacade)
     registrar.register_patch_routes(PersonRole, PersonRoleFacade)
     registrar.register_delete_routes(PersonRole, PersonRoleFacade)
-
-    registrar.register_relationship_post_route(PersonRoleFacade, 'changes')
-    registrar.register_relationship_get_route(PersonRoleFacade, 'changes')
-

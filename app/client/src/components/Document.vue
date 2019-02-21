@@ -7,6 +7,7 @@
       <div class="columns">
         <div class="column">
           <document-notice :editable="canEdit"/>
+          <document-placenames :editable="canEdit"/>
           <document-persons :editable="canEdit"/>
           <document-transcription :editable="canEdit"/>
         </div>
@@ -31,11 +32,13 @@
     import DocumentPersons from './document/DocumentPersons';
     import DocumentTranscription from './document/DocumentTranscription';
     import DocumentTagBar from "./document/DocumentTagBar";
+    import DocumentPlacenames from "./document/DocumentPlacenames";
 
     export default {
 
         name: 'Document',
-        components: {Changelog, DocumentPersons, DocumentNotice, DocumentTranscription, LoadingIndicator, DocumentTagBar},
+        components: {Changelog, DocumentPersons, DocumentPlacenames,
+            DocumentNotice, DocumentTranscription, LoadingIndicator, DocumentTagBar},
         props: {
             doc_id : {required: true, type: Number}
         },

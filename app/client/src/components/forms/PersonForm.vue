@@ -1,6 +1,6 @@
 <template>
 
-  <modal-form
+  <modal-form class="person-form__add-new__form"
           :title="title"
           :cancel="cancelAction"
           :submit="submitAction"
@@ -12,31 +12,42 @@
       <form @submit.prevent="">
         <error-message v-if="error" :error="error"/>
         <field-text
-                label="Label"
-                placeholder="Label"
+                label="Étiquette *"
+                placeholder="ex : Nom, Prénom"
                 v-model="form.label"
         />
         <field-text
                 label="Description"
-                placeholder="Description"
+                placeholder="ex : Duc d'Anjou, prince marchand, etc."
                 v-model="form.description"
         />
-        <!--
-        <field-text
-                label="Référence"
-                placeholder="Référence"
-                v-model="form.ref"
-        />
-        -->
-        <select-autocomplete-field
-            label="Référence"
-            v-model="form.ref"
-            :items="personsWikidataSearchResults"
-            :is-async="true"
-            @search="searchPersonOnWikidata"
-            label-key="label"
-        >
-        </select-autocomplete-field>
+
+        <div class="person-form__link-to-ref">
+          <div class="columns">
+            <div class="column is-5">
+              <select-autocomplete-field
+                  class="person-form__search-ref"
+                  label="Lier la personne via un référentiel"
+                  v-model="form.ref"
+                  :items="personsWikidataSearchResults"
+                  :is-async="true"
+                  @search="searchPersonOnWikidata"
+                  label-key="label"
+                  not-set="Rechercher sur wikidata"
+              />
+            </div>
+            <div class="column is-1 person-form__separator">
+              <p><em>ou</em></p>
+            </div>
+            <div class="column is-5 person-form__input-ref">
+              <field-text
+                  label="Lier la personne à un identifiant de référence"
+                  :placeholder="form.ref ? form.ref.label : 'ex: https://data.bnf.fr/ark:/12148/cb123351707'"
+                  v-model="form.ref ? form.ref.uriForDisplay : form.ref"
+              />
+            </div>
+          </div>
+        </div>
       </form>
     </div>
   </modal-form>
@@ -76,7 +87,7 @@
       }
     },
     mounted () {
-        //this.$store.dispatch('persons/searchOnWikidata', 'Catherine de Medicis')
+
     },
     methods: {
   

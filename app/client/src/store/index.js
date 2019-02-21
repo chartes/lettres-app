@@ -3,6 +3,7 @@ import Vuex from 'vuex';
 
 import collections from './modules/collections';
 import persons from './modules/persons';
+import placenames from './modules/placenames';
 import document from './modules/document';
 import institutions from './modules/institutions';
 import languages from './modules/languages';
@@ -18,6 +19,7 @@ export default new Vuex.Store({
     modules: {
       collections,
       persons,
+      placenames,
       document,
       institutions,
       languages,

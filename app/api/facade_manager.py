@@ -8,12 +8,15 @@ from app.api.image.facade import ImageFacade
 from app.api.institution.facade import InstitutionFacade
 from app.api.language.facade import LanguageFacade
 from app.api.note.facade import NoteFacade
+from app.api.placename.facade import PlacenameFacade
+from app.api.placename_has_role.facade import PlacenameHasRoleFacade
+from app.api.placename_role.facade import PlacenameRoleFacade
 from app.api.user.facade import UserFacade
 from app.api.user_role.facade import UserRoleFacade
 from app.api.witness.facade import WitnessFacade
 from app.api.lock.facade import LockFacade
 from app.models import Collection, Person, PersonHasRole, PersonRole, Document, Image, Institution, \
-    Language, Note, User, UserRole, Witness, Lock
+    Language, Note, User, UserRole, Witness, Lock, Placename, PlacenameHasRole, PlacenameRole
 
 
 class JSONAPIFacadeManager(object):
@@ -26,6 +29,18 @@ class JSONAPIFacadeManager(object):
         Person.__tablename__: {
             "default": PersonFacade,
             "search": PersonFacade,
+        },
+        Placename.__tablename__: {
+            "default": PlacenameFacade,
+            "search": PlacenameFacade,
+        },
+        PlacenameHasRole.__tablename__: {
+            "default": PlacenameHasRoleFacade,
+            "search": PlacenameHasRoleFacade,
+        },
+        PlacenameRole.__tablename__: {
+            "default": PlacenameRoleFacade,
+            "search": PlacenameRoleFacade,
         },
         PersonHasRole.__tablename__: {
             "default": PersonHasRoleFacade,

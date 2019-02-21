@@ -26,6 +26,41 @@ class PlacenameFacade(JSONAPIAbstractChangeloggedFacade):
             errors = []
         return e, kwargs, errors
 
+    @staticmethod
+    def update_resource(obj, obj_type, attributes, related_resources, append=False):
+        # rename the relationship
+        if "roles-within-documents" in related_resources:
+            related_resources["placenames_having_roles"] = related_resources.pop("roles-within-documents")
+        return JSONAPIAbstractFacade.update_resource(obj, obj_type, attributes, related_resources, append)
+
+    def get_document_resource_identifiers(self):
+        from app.api.document.facade import DocumentFacade
+        return [] if self.obj.placenames_having_roles is None else [
+            DocumentFacade.make_resource_identifier(c_h_r.document.id, DocumentFacade.TYPE)
+            for c_h_r in self.obj.placenames_having_roles
+        ]
+
+    def get_document_resources(self):
+        from app.api.document.facade import DocumentFacade
+        return [] if self.obj.placenames_having_roles is None else [
+            DocumentFacade(self.url_prefix, c.document, self.with_relationships_links,
+                           self.with_relationships_data).resource
+            for c in self.obj.placenames_having_roles
+        ]
+
+    def get_roles_resource_identifiers(self):
+        from app.api.placename_has_role.facade import PlacenameHasRoleFacade
+        return [] if self.obj.placenames_having_roles is None else [
+            PlacenameHasRoleFacade.make_resource_identifier(e.id, PlacenameHasRoleFacade.TYPE)
+            for e in self.obj.placenames_having_roles]
+
+    def get_roles_resources(self):
+        from app.api.placename_has_role.facade import PlacenameHasRoleFacade
+        return [] if self.obj.placenames_having_roles is None else [PlacenameHasRoleFacade(self.url_prefix, e,
+                                                                                     self.with_relationships_links,
+                                                                                     self.with_relationships_data).resource
+                                                                 for e in self.obj.placenames_having_roles]
+
     @property
     def resource(self):
         resource = {
@@ -33,6 +68,8 @@ class PlacenameFacade(JSONAPIAbstractChangeloggedFacade):
             "attributes": {
                 "label": self.obj.label,
                 "description": self.obj.description,
+                "long": self.obj.long,
+                "lat": self.obj.lat,
                 "ref": self.obj.ref,
             },
             "meta": self.meta,
@@ -49,8 +86,17 @@ class PlacenameFacade(JSONAPIAbstractChangeloggedFacade):
         super(PlacenameFacade, self).__init__(*args, **kwargs)
         """Make a JSONAPI resource object describing what is a placename
         """
-
         self.relationships.update({
+            "roles-within-documents": {
+                "links": self._get_links(rel_name="roles-within-documents"),
+                "resource_identifier_getter": self.get_roles_resource_identifiers,
+                "resource_getter": self.get_roles_resources
+            },
+            "documents": {
+                "links": self._get_links(rel_name="documents"),
+                "resource_identifier_getter": self.get_document_resource_identifiers,
+                "resource_getter": self.get_document_resources
+            },
         })
 
     def get_data_to_index_when_added(self, propagate):

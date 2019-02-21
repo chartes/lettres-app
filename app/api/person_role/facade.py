@@ -1,9 +1,9 @@
 
-from app.api.abstract_facade import JSONAPIAbstractChangeloggedFacade
+from app.api.abstract_facade import JSONAPIAbstractFacade
 from app.models import PersonRole
 
 
-class PersonRoleFacade(JSONAPIAbstractChangeloggedFacade):
+class PersonRoleFacade(JSONAPIAbstractFacade):
     """
 
     """
