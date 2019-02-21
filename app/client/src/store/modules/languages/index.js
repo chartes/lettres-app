@@ -17,7 +17,7 @@ const mutations = {
 const actions = {
 
   fetch ({ commit }) {
-    http.get(`/languages`).then( response => {
+    http.get(`/languages?without-relationships`).then( response => {
       const languages = response.data.data.map(lang => { return { id: lang.id, ...lang.attributes}});
       commit('UPDATE', languages)
     });

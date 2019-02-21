@@ -1,7 +1,7 @@
 <template>
 
 
-  <div class="document__collections" v-if="collections.length > 0">
+  <div class="document__collections" >
 
     <header>
       <h2 class="document__collections--title subtitle">Collections</h2>

@@ -57,13 +57,22 @@ class Document(db.Model, ChangesMixin):
     creation = db.Column(db.String)
     creation_not_after = db.Column(db.String)
     creation_label = db.Column(db.String)
-    location_date_from_ref = db.Column(db.String)
-    location_date_to_ref = db.Column(db.String)
+    
+    location_date_from_id = db.Column(db.Integer)
+    location_date_to_id = db.Column(db.Integer)
+    
     transcription = db.Column(db.Text)
     prev_document_id = db.Column(db.Integer, db.ForeignKey('document.id'), index=True)
     is_published = db.Column(db.Boolean, index=True)
 
     # relationships
+    location_date_from = db.relationship("Placename",
+                                         primaryjoin="Document.location_date_from_id==foreign(Placename.id)",
+                                         uselist=False)
+    location_date_to = db.relationship("Placename",
+                                       primaryjoin="Document.location_date_to_id==foreign(Placename.id)",
+                                       uselist=False)
+
     notes = db.relationship("Note", backref="document", cascade="all, delete-orphan")
     witnesses = db.relationship("Witness", backref="document", cascade="all, delete-orphan")
     languages = db.relationship("Language",
@@ -163,44 +172,85 @@ class Language(db.Model, ChangesMixin):
 
 
 # ====================================
-# CORRESPONDENT STUFF
+# placename STUFF
 # ====================================
 
 
-class Correspondent(db.Model, ChangesMixin):
-    """ Correspondants d’une lettre (expéditeur(s) et destinataire(s)) """
-    __tablename__ = 'correspondent'
+class Placename(db.Model, ChangesMixin):
+    __tablename__ = 'placename'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    firstname = db.Column(db.String)
-    lastname = db.Column(db.String)
-    key = db.Column(db.String)
+    label = db.Column(db.String, nullable=False)
+    description = db.Column(db.String)
+    long = db.Column(db.String)
+    lat = db.Column(db.String)
     ref = db.Column(db.String)
 
 
-class CorrespondentRole(db.Model, ChangesMixin):
-    """ Rôle des correspondants (expéditeur, destinataire) """
-    __tablename__ = 'correspondent_role'
+class PlacenameRole(db.Model, ChangesMixin):
+    """ Rôle des lieux (ex : date de lieu d'expédition) """
+    __tablename__ = 'placename_role'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     label = db.Column(db.String(50), nullable=False)
     description = db.Column(db.String(100))
 
 
-class CorrespondentHasRole(db.Model, ChangesMixin):
-    __tablename__ = 'correspondent_has_role'
+class PlacenameHasRole(db.Model, ChangesMixin):
+    __tablename__ = 'placename_has_role'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     __table_args__ = (
-        db.UniqueConstraint('correspondent_id', 'document_id', 'correspondent_role_id', name='_correspondent_has_role_document_uc'),
+        db.UniqueConstraint('placename_id', 'document_id', 'placename_role_id', name='_placename_has_role_document_uc'),
     )
 
-    correspondent_id = db.Column(db.Integer, db.ForeignKey('correspondent.id', ondelete='CASCADE'), nullable=False)
+    placename_id = db.Column(db.Integer, db.ForeignKey('placename.id', ondelete='CASCADE'), nullable=False)
     document_id = db.Column(db.Integer, db.ForeignKey('document.id', ondelete='CASCADE'), nullable=False)
-    correspondent_role_id = db.Column(db.Integer, db.ForeignKey('correspondent_role.id', ondelete='CASCADE'), nullable=False)
+    placename_role_id = db.Column(db.Integer, db.ForeignKey('placename_role.id', ondelete='CASCADE'))
 
-    correspondent = db.relationship("Correspondent", backref=db.backref("correspondents_having_roles"), single_parent=True)
-    document = db.relationship("Document", backref=db.backref("correspondents_having_roles", cascade="all, delete-orphan"), single_parent=True)
-    correspondent_role = db.relationship("CorrespondentRole", backref=db.backref("correspondents_having_roles"), single_parent=True)
+    placename = db.relationship("Placename", backref=db.backref("placenames_having_roles"), single_parent=True)
+    document = db.relationship("Document", backref=db.backref("placenames_having_roles", cascade="all, delete-orphan"),
+                               single_parent=True)
+    placename_role = db.relationship("PlacenameRole", backref=db.backref("placenames_having_roles"), single_parent=True)
+
+
+# ====================================
+# person STUFF
+# ====================================
+
+
+class Person(db.Model, ChangesMixin):
+    """ Personne identifiée  (ex : correspondants d’une lettre (expéditeur(s) et destinataire(s)) """
+    __tablename__ = 'person'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    label = db.Column(db.String, nullable=False)
+    description = db.Column(db.String)
+    ref = db.Column(db.String)
+
+
+class PersonRole(db.Model, ChangesMixin):
+    """ Rôle des personnes identifiées (ex: expéditeur, destinataire) """
+    __tablename__ = 'person_role'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    label = db.Column(db.String(50), nullable=False)
+    description = db.Column(db.String(100))
+
+
+class PersonHasRole(db.Model, ChangesMixin):
+    __tablename__ = 'person_has_role'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    __table_args__ = (
+        db.UniqueConstraint('person_id', 'document_id', name='_person_has_role_document_uc'),
+    )
+
+    person_id = db.Column(db.Integer, db.ForeignKey('person.id', ondelete='CASCADE'), nullable=False)
+    document_id = db.Column(db.Integer, db.ForeignKey('document.id', ondelete='CASCADE'), nullable=False)
+    person_role_id = db.Column(db.Integer, db.ForeignKey('person_role.id', ondelete='CASCADE'))
+
+    person = db.relationship("Person", backref=db.backref("persons_having_roles"), single_parent=True)
+    document = db.relationship("Document", backref=db.backref("persons_having_roles", cascade="all, delete-orphan"), single_parent=True)
+    person_role = db.relationship("PersonRole", backref=db.backref("persons_having_roles"), single_parent=True)
 
 
 # ====================================
@@ -323,7 +373,7 @@ class Lock(db.Model):
 # ====================================
 
 CHANGELOG_OBJECT_TYPES = [o.__tablename__ for o in (
-    Document, Collection, Correspondent, CorrespondentHasRole, CorrespondentRole,
+    Document, Collection, Person, PersonHasRole, PersonRole,
     Image, Institution, Language, Note, Witness, Lock
 )] + ['document_has_language', 'document_has_collection']
 

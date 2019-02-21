@@ -19,7 +19,7 @@ const mutations = {
           'iiif-thumbnail-url' : document.attributes['iiif-thumbnail-url'],
 
         },
-        //correspondents: correspondents,
+        //persons: persons,
         //witnesses: witnesses
       }
     });
@@ -52,7 +52,7 @@ const actions = {
           commit('UPDATE_USER_BOOKMARK', {
             docId: doc.id,
             witnesses: witnesses.data.data,
-            //correspondents: getCorrespondents(docs.included)
+            //persons: getPersons(docs.included)
           });
         });
       }

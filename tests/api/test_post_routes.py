@@ -377,7 +377,7 @@ class TestPostRoutes(TestBaseServer):
         self.assertEqual('201 CREATED', status)
     
     def test_post_correspondent(self):
-        r, status, resource = self.api_post("correspondents", data={
+        r, status, resource = self.api_post("persons", data={
             "data": {
                 "type": "correspondent",
                 "attributes": {
@@ -413,7 +413,7 @@ class TestPostRoutes(TestBaseServer):
         })
         self.assertEqual('201 CREATED', status)
 
-        r, status, resource = self.api_post("correspondents-having-roles", data={
+        r, status, resource = self.api_post("persons-having-roles", data={
             "data": {
                 "type": "correspondent-has-role",
                 "relationships": {
@@ -431,7 +431,7 @@ class TestPostRoutes(TestBaseServer):
         })
         self.assertEqual('201 CREATED', status)
 
-        r, status, resource = self.api_get("documents/11/correspondents-having-roles")
+        r, status, resource = self.api_get("documents/11/persons-having-roles")
         self.assertEqual(1, len(resource["data"]))
 
         # ADD A DOCUMENT TO THIS CORRESPONDENT
@@ -457,7 +457,7 @@ class TestPostRoutes(TestBaseServer):
             }
         })
         self.assertEqual('201 CREATED', status)
-        r, status, resource = self.api_post("correspondents-having-roles", data={
+        r, status, resource = self.api_post("persons-having-roles", data={
             "data": {
                 "type": "correspondent-has-role",
                 "relationships": {
@@ -475,5 +475,5 @@ class TestPostRoutes(TestBaseServer):
         })
         self.assertEqual('201 CREATED', status)
 
-        r, status, resource = self.api_get("correspondents/9/documents")
+        r, status, resource = self.api_get("persons/9/documents")
         self.assertEqual(2, len(resource["data"]))

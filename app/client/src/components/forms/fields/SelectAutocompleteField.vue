@@ -1,6 +1,6 @@
 <template>
   <div class="field field-select-autocomplete">
-    <field-label :label="label"/>
+    <field-label :label="label" :add-colons="label.length !== 0"/>
 
     <div class="field-select-autocomplete__wrapper">
 
@@ -127,7 +127,7 @@
         });
       },
       setResult(result) {
-        this.$emit('input', result);;
+        this.$emit('input', result);
         this.isOpen = false;
       },
       onArrowDown(evt) {
@@ -165,7 +165,7 @@
       items: function (val, oldValue) {
         console.log('watch autocomplete items', val)
         // actually compare them
-        if (val.length !== oldValue.length) {
+        if (!!val || val.length !== oldValue.length) {
           this.results = val;
           this.isLoading = false;
           this.isOpen = true;

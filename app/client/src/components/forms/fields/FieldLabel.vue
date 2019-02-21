@@ -1,5 +1,5 @@
 <template>
-  <p><label>{{ label }} :</label></p>
+  <p><label>{{ label }} {{ addColons ? ':' : ''}}</label></p>
 </template>
 
 <script>
@@ -9,6 +9,10 @@
       label: {
         type: String,
         required: true,
+      },
+      addColons : {
+          type: Boolean,
+          default: true
       }
     }
   }
