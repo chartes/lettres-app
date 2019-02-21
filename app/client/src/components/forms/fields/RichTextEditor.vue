@@ -17,11 +17,14 @@
                   :key="format"
           />
         </div>
+        <div class="editor-controls-group is-additional" v-if="slotNotEmpty">
+          <slot></slot>
+        </div>
 
       </div>
 
       <div class="editor-container">
-        <div class="quill-editor" id="transcription-editor" ref="editor" spellcheck="false"></div>
+        <div class="quill-editor" :class="{ 'single-line': !multiline }" ref="editor" spellcheck="false"></div>
         <note-actions
                 v-show="selectedNoteId && editorHasFocus"
                 refs="noteActions"
@@ -54,6 +57,7 @@
 
 <script>
   import Vue from 'vue';
+  import ClickOutside from 'vue-click-outside';
   import EditorButton from './EditorButton.vue';
   import EditorNotesMixins from '../editor/EditorNotesMixins'
   import TextfieldForm from '../TextfieldForm';
@@ -84,9 +88,13 @@
       TextfieldForm,
       EditorButton,
     },
+    directives: {
+      ClickOutside
+    },
     data() {
       return {
         editor: null,
+        editorElement: null,
         editorContentElement: null,
         editorHasFocus: false,
         currentSelection: null,
@@ -108,7 +116,6 @@
         flattenFormats.push(...group)
       })
       flattenFormats.forEach(format => { this.buttons[format] = false })
-      //console.log('flattenFormats', flattenFormats)
 
     },
     beforeDestroy () {
@@ -122,6 +129,7 @@
 
         editorElement.innerHTML = this.sanitize(initialContent);
         this.editor = getNewQuill(editorElement);
+        this.editorElement = editorElement;
         this.editorContentElement = editorElement.children[0];
         this.activateEvents();
         this.editor.updateContents(getNewDelta().retain(this.editor.getLength(), 'silent'))
@@ -129,7 +137,9 @@
       },
 
       activateEvents () {
-        //console.log("EditorMixins.activateEvents")
+        if (!this.multiline) {
+          this.editorElement.addEventListener('keydown', this.onSingleKeyup, true)
+        }
         this.editor.on('selection-change', this.onSelection);
         this.editor.on('selection-change', this.onFocus);
         this.editor.on('text-change', this.onTextChange);
@@ -137,6 +147,7 @@
       },
       deactivateEvents () {
         //console.log("EditorMixins.deactivateEvents")
+        this.editorElement.removeEventListener('keydown', this.onSingleKeyup, true)
         this.editor.off('selection-change', this.onSelection);
         this.editor.off('selection-change', this.onFocus);
         this.editor.off('text-change', this.onTextChange);
@@ -177,21 +188,12 @@
 
       sanitize (val) {
         let newValue = val || '';
-        //console.log("")
-        //console.log("sanitize", this.multiline ? 'multi': 'single', val);
         if (!this.multiline) {
           newValue = newValue.replace(/<(br)?(\/)?(p)?>/gi, '');
-          //console.log('   0. single', newValue)
-        } else {
-          //console.log('   0. multi', newValue)
-
         }
         newValue = newValue === '' ? '<br>' : newValue;
-        //console.log('   1.', newValue)
         const test = wrapPattern.test(newValue)
         newValue = test ? newValue : `<p>${newValue}</p>`;
-        //console.log('   2.', newValue)
-        //console.log("")
         return newValue
 
       },
@@ -199,6 +201,7 @@
       preventLineBreaks (delta) {
         const ops = delta.ops;
         const l = ops.length;
+        return;
         if (ops[l-1].insert && ops[l-1].insert === '\n') {
           const updateDelta = getNewDelta();
           if (l === 1) {
@@ -235,6 +238,16 @@
             this.selectedNoteId = null;
             this.buttons.note = true;
           }
+        }
+      },
+      onSingleKeyup (evt) {
+        if (evt.code === "Escape") {
+          this.$emit('on-keyup-escape')
+        } else if (evt.code === "Enter") {
+          evt.preventDefault()
+          evt.stopImmediatePropagation()
+          evt.stopPropagation()
+          this.$emit('on-keyup-enter')
         }
       },
       onFocus () {
@@ -391,7 +404,10 @@
       isNoteButtonActive () {
         const cond = this.editorHasFocus && this.buttons.note;
         return cond;
-      }
+      },
+      slotNotEmpty () {
+        return !!this.$slots.default;
+      },
     }
   }
 </script>

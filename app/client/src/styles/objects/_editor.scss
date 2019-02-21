@@ -76,10 +76,14 @@
   }
 
 }
+.single-line .ql-editor {
+  line-height: 1.3;
+  padding: 6px 15px;
+}
 .ql-clipboard { display: none; }
 
 
-.in-editor-actions, .note-actions, .speechpart-actions, .new-speechpart-actions {
+.in-editor-actions, .note-actions {
   z-index: 1000;
   position: absolute;
   transform: translateX(-50%);
@@ -100,7 +104,7 @@
   }
 
 }
-.note-actions, .new-note-actions,.speechpart-actions, .new-speechpart-actions {
+.note-actions, .new-note-actions {
   .button { width: 100%; }
 }
 
@@ -117,8 +121,8 @@
 
   .content { font-size: 60% }
   &.selected, &:hover, &:focus {
-    box-shadow: 0 2px 3px rgba(10,10,10,.1), 0 0 0 1px #23d160;
-    border-color: #23d160;
+    box-shadow: 0 2px 3px rgba(10,10,10,.1), 0 0 0 1px $info;
+    border-color: $info;
   }
   &:not(:last-child) {
     margin-bottom: .75rem;
