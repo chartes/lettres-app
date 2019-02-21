@@ -8,7 +8,7 @@
 
       <div class="document-correspondents__senders column">
 
-        <h3 class="document-correspondents__subtitle">Expéditeur</h3>
+        <h3 class="document-correspondents__subtitle document-correspondents__subtitle--sender">Expéditeur</h3>
 
         <ul class="document-correspondents__senders-list" v-if="documentSender.length">
           <li v-for="c in documentSender" :key="c.correspondent.id" class="correspondent-item">
@@ -16,14 +16,14 @@
               {{ c.correspondent.firstname + ' ' + c.correspondent.lastname }}
             </a>
             <span class="tag">{{ c.role.label }}</span>
-            <a v-if="editable" class="witness-item__delete" @click="unlinkCorrespondentFromDoc(c)"><icon-bin/></a>
+            <a v-if="editable" class="correspondent-item__delete" @click="unlinkCorrespondentFromDoc(c)"><icon-bin/></a>
           </li>
         </ul>
 
         <div v-else>
           <p class="correspondent-item"><em>Aucun expéditeur n'a été renseigné</em></p>
           <p v-if="editable">
-            <lauch-button if="userCanEdit" label="Ajouter l'expéditeur" @click="openAddCorrespondent('sender')"/>
+            <lauch-button class="correspondent-item__add" if="userCanEdit" label="Ajouter l'expéditeur" @click="openAddCorrespondent('sender')"/>
           </p>
         </div>
 
@@ -31,7 +31,7 @@
 
       <div class="document-correspondents__recipients column">
 
-        <h3 class="document-correspondents__subtitle">Destinataire{{ documentRecipients.length > 1 ? 's':'' }}</h3>
+        <h3 class="document-correspondents__subtitle document-correspondents__subtitle--recipient">Destinataire{{ documentRecipients.length > 1 ? 's':'' }}</h3>
 
         <ul class="document-correspondents__recipients-list" v-if="documentRecipients.length">
           <li v-for="c in documentRecipients" :key="c.correspondent.id" class="correspondent-item">
@@ -48,7 +48,7 @@
 
         <div v-if="editable">
           <p>
-            <lauch-button label="Ajouter un destinataire" @click="openAddCorrespondent('recipient')"/>
+            <lauch-button class="correspondent-item__add" label="Ajouter un destinataire" @click="openAddCorrespondent('recipient')"/>
           </p>
         </div>
 

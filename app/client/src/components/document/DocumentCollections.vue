@@ -3,8 +3,8 @@
 
   <div class="document__collections" v-if="collections.length > 0">
 
-    <header>
-      <h2 class="document__collections--title subtitle">Collections</h2>
+    <header class="collection-list__header">
+      <h2 class="collection-list__title subtitle">Collections</h2>
     </header>
 
     <div class="document__collections--content">

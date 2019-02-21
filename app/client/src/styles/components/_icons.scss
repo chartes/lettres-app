@@ -20,8 +20,8 @@ $icon-default-color: #ccc;
     }
   }
   &__pen-edit:hover {
-    .icon__fill {
-      fill: $blue;
+    .icon__line {
+      stroke: $blue;
     }
   }
   &__arrow-down, &__add {
@@ -45,8 +45,8 @@ $icon-default-color: #ccc;
 }
 
 .icon__bin:hover {
-  .icon__fill {
-    fill: $danger;
+  .icon__line {
+    stroke: $danger;
   }
 }
 
@@ -57,6 +57,16 @@ $icon-default-color: #ccc;
     }
     .icon__line {
       stroke: $icon-default-color;
+    }
+  }
+}
+.button.is-success, .button.is-danger {
+  .icon {
+    .icon__fill {
+      fill: $white;
+    }
+    .icon__line {
+      stroke: $white;
     }
   }
 }

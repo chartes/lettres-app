@@ -1,5 +1,5 @@
 <template>
-  <section v-if="document.transcription.length  || editable> 0" class="document__transcription section">
+  <div v-if="document.transcription.length  || editable> 0" class="document__transcription document__subsection">
     <br/>
     <header class="title">
       <h2 class="document__transcription--title subtitle">Transcription</h2>
@@ -11,7 +11,7 @@
     <ol v-if="notesContent.length" class="document__notes--content notes">
        <li  v-for="(note, index) in notesContent" v-html="note.content" :id="note.id"></li>
     </ol>
-  </section>
+  </div>
 </template>
 
 <script>

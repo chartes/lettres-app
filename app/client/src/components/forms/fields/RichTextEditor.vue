@@ -78,6 +78,7 @@
       label: { type: String, default: null },
       value: { type: String, default: '' }, // v-model support
       multiline: { type: Boolean, default: true },
+      enabled: { type: Boolean, default: true },
       formats: { type: Array, default: () => [['note','page','link'],['bold','italic','superscript','underline','del'],['person','location','cite']] },
     },
     mixins: [EditorNotesMixins],
@@ -366,7 +367,6 @@
     watch: {
       value (val) {
         const range = this.editor.getSelection();
-        //console.log('watcher value val', val, range, this.editor.hasFocus())
         this.editorContentElement.innerHTML = this.sanitize(val);
         Vue.nextTick(() => {
           if (range) {
@@ -374,8 +374,9 @@
             this.editor.setSelection(range.index, range.length, Quill.sources.SILENT);
           }
         })
-
-        //this.editor.update();
+      },
+      enabled (val) {
+        this.editor.enable(val);
       }
     },
 
@@ -408,7 +409,7 @@
       slotNotEmpty () {
         return !!this.$slots.default;
       },
-    }
+    },
   }
 </script>
 

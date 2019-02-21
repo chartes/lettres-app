@@ -1,22 +1,15 @@
 <template>
-  <section class="document__notice section">
+  <div class="document__notice">
 
-    <document-attributes :editable="editable"/>
+    <document-attributes :editable="editable" class="document__subsection"/>
 
-    <document-witnesses :editable="editable" :list="witnesses"/>
+    <document-witnesses :editable="editable" class="document__subsection" :list="witnesses"/>
 
-    <document-collections :editable="editable"/>
+    <document-collections :editable="editable" class="document__subsection"/>
 
-    <div v-if="!!document.argument" class="document__argument">
-      <header>
-        <h2 class="document__argument--title subtitle">Argument</h2>
-      </header>
-        <div class="document__argument--content">
-        {{ document.argument }}
-      </div>
-    </div>
+    <document-argument :editable="editable" class="document__subsection"/>
 
-  </section>
+  </div>
 </template>
 
 <script>
@@ -26,10 +19,11 @@
   import DocumentWitnesses from './DocumentWitnesses';
   import DocumentTagBar from "./DocumentTagBar";
   import DocumentCollections from './DocumentCollections';
+  import DocumentArgument from './DocumentArgument';
 
   export default {
     name: 'DocumentNotice',
-    components: {DocumentCollections, DocumentWitnesses, DocumentAttributes, DocumentTagBar},
+    components: {DocumentArgument, DocumentCollections, DocumentWitnesses, DocumentAttributes, DocumentTagBar},
     props: {
       data: {
         type: Object,

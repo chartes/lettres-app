@@ -1,3 +1,15 @@
+.witness-list__title::before {
+
+  content: '';
+  display: inline-block;
+  height: 1em;
+  width: 1em;
+  margin-right: .5em;
+  background: url(#{$image-path}/icons/document-witnesses.svg) no-repeat 50% 50%;
+  vertical-align: top;
+
+}
+
 .witness-list {
 
   margin-bottom: 2em;
@@ -9,6 +21,9 @@
   &__list {
     //list-style-type: square;
 
+  }
+  &__content .button {
+    margin-top: 1rem;
   }
 }
 .witness-item {
