@@ -9,21 +9,14 @@
         <article>
           <header class="title">
               <document-tag-bar :doc-id="doc_id"/>
-              <span><h1 class="document-preview-card__title" v-html="titleContent"></h1></span>
           </header>
 
           <div class="content" v-if="documentPreview">
+            
              <div class="columns">
                <div class="column is-three-quarters">
+                 <h1 class="document-preview-card__title" v-html="titleContent"></h1>
                  <p class="document-preview-card__content" v-html="previewContent"></p>
-               </div>
-               <div class="column document-preview-card__persons">
-                 <ul>
-                   <li class="" v-for="obj in documentPreview.persons">
-                     <a href="">{{getPersonFullname(obj)}}</a>
-                     <span class="tag is-light is-rounded">{{obj.role.label}}</span>
-                   </li>
-                 </ul>
                </div>
              </div>
           </div>
@@ -54,15 +47,6 @@
     },
     mounted () {
         this.updateCurrentDocumentPreviewCard();
-      /*
-      this.$store.dispatch('document/fetchPreview', this.doc_id).then(() => {
-          this.documentPreview = this.documentsPreview[this.doc_id];
-
-          this.titleContent = this.documentPreview.attributes.title;
-          this.previewContent = this.documentPreview.attributes.argument ? this.documentPreview.attributes.argument : this.documentPreview.attributes.transcription;
-      });
-      */
-
     },
     computed: {
         ...mapState('document', ['documentsPreview', 'documentLoading'])
@@ -73,9 +57,6 @@
        }
     }   ,
     methods: {
-      getPersonFullname : function(obj){
-          return obj.person.label;
-      },
       updateCurrentDocumentPreviewCard: function() {
           this.titleContent = "";
           this.previewContent = "";
@@ -112,6 +93,8 @@
   .document-preview-card__title{
     color: #AEAEAE;
     font-size: large;
+    font-weight: lighter;
+    padding-bottom: 1em;
   }
 
   .document-preview-card__title:hover{
