@@ -11,7 +11,6 @@
               :editable="editable"
               :status="titleStatus"
               v-on:changed="titleChanged"
-              @on-click-outside=""
       />
     </header>
 
@@ -45,27 +44,7 @@
                 :editable="editable"
                 v-on:changed="fieldChanged"/>
       </div>
-      <div class="column is-one-third">
-        <text-field-in-place
-                :tabulation-index="0"
-                label="Date de lieu d'expédition"
-                name="location-date-from-ref"
-                not-set="Inconnue"
-                :initial-value="document['location-date-from-ref']"
-                :editable="editable"
-                v-on:changed="fieldChanged"/>
-      </div>
-      <div class="column is-one-third">
-        <text-field-in-place
-                :tabulation-index="0"
-                label="Date de lieu de réception"
-                name="location-date-to-ref"
-                not-set="Inconnue"
-                :initial-value="document['location-date-to-ref']"
-                :editable="editable"
-                v-on:changed="fieldChanged"/>
-      </div>
-      <div class="column is-one-third">
+      <div class="column">
         <multiselect-field
                 :editable="editable"
                 label="Langue(s)"
@@ -74,6 +53,7 @@
                 :onChange="languagesChanged"/>
       </div>
     </div>
+
   </div>
 </template>
 <script>
@@ -83,6 +63,8 @@
   import DateField from '../forms/fields/DateField';
   import TitleField from '../forms/fields/TitleField';
   import TitleFieldInPlace from '../forms/fields/TitleFieldInPlace';
+  import IconBin from '../ui/icons/IconBin';
+  import LaunchButton from '../forms/LaunchButton';
 
   export default {
     name: 'DocumentAttributes',
@@ -137,17 +119,19 @@
               })
             }
           }
-        }
+        };
 
-        this.$store.dispatch('document/save', data)
-      }
+        this.$store.dispatch('document/save', data);
+        console.log("lang data", data)
+      },
+
     },
     computed: {
       ...mapState('document', ['document', 'languages']),
       ...mapState({
         allLanguages: state => state.languages.languages
       }),
-      languagesConcat: function () {
+      languagesConcat () {
         return this.languages.map(lang => lang.label).join(', ')
       },
       languagesIds () {

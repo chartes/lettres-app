@@ -69,7 +69,7 @@ Ainsi que les relations suivantes :
 |whitelist| whitelist | un seul | Non | GET,POST,PATCH | |
 |prev-document | document | un seul | Non | GET,POST,PATCH | |
 |next-document | document | un seul | Non | GET,POST,PATCH | |
-|correspondents-having-roles| correspondent-has-role| liste | Non | GET,POST,PATCH | Liste des objets Document <-> Correspondent <-> CorrespondentRole |
+|correspondents-having-roles| correspondent-has-role| liste | Non | GET,POST,PATCH | Liste des objets Document <-> Person <-> PersonRole |
 |roles| correspondent-role| liste | Non | GET | Liste des roles des correspondants du document |
 |correspondents| correspondent| liste | Non | GET | Liste des correspondants du document  |
 
@@ -132,8 +132,8 @@ curl -X POST \
         "relationships": {
             "correspondents-having-roles": {
                 "links": {
-                    "self": "http://localhost:5004/lettres/api/1.0/documents/25/relationships/correspondents-having-roles",
-                    "related": "http://localhost:5004/lettres/api/1.0/documents/25/correspondents-having-roles"
+                    "self": persons,
+                    "related": persons
                 },
                 "data": []
             },
@@ -146,8 +146,8 @@ curl -X POST \
             },
             "correspondents": {
                 "links": {
-                    "self": "http://localhost:5004/lettres/api/1.0/documents/25/relationships/correspondents",
-                    "related": "http://localhost:5004/lettres/api/1.0/documents/25/correspondents"
+                    "self": persons,
+                    "related": persons
                 },
                 "data": []
             },

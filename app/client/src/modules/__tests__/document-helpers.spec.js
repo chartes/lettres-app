@@ -1,8 +1,8 @@
-import {getCorrespondents, getInstitution, getLanguages, getTradition} from '../document-helpers'
+import {getPersons, getInstitution, getLanguages, getTradition} from '../document-helpers'
 
 const includedIn = [
   {
-    "type": "correspondent",
+    "type": "person",
     "id": 10,
     "attributes": {
       "firstname": "Diane",
@@ -12,25 +12,25 @@ const includedIn = [
     },
     "meta": {},
     "links": {
-      "self": "http://0.0.0.0:5004/lettres/api/1.0/correspondents/10"
+      "self": "http://0.0.0.0:5004/lettres/api/1.0/persons/10"
     },
     "relationships": {
       "roles-within-documents": {
         "links": {
-          "self": "http://0.0.0.0:5004/lettres/api/1.0/correspondents/10/relationships/roles-within-documents",
-          "related": "http://0.0.0.0:5004/lettres/api/1.0/correspondents/10/roles-within-documents"
+          "self": "http://0.0.0.0:5004/lettres/api/1.0/persons/10/relationships/roles-within-documents",
+          "related": "http://0.0.0.0:5004/lettres/api/1.0/persons/10/roles-within-documents"
         },
         "data": [
           {
             "id": 6,
-            "type": "correspondent-has-role"
+            "type": "person-has-role"
           }
         ]
       },
       "documents": {
         "links": {
-          "self": "http://0.0.0.0:5004/lettres/api/1.0/correspondents/10/relationships/documents",
-          "related": "http://0.0.0.0:5004/lettres/api/1.0/correspondents/10/documents"
+          "self": "http://0.0.0.0:5004/lettres/api/1.0/persons/10/relationships/documents",
+          "related": "http://0.0.0.0:5004/lettres/api/1.0/persons/10/documents"
         },
         "data": [
           {
@@ -42,7 +42,7 @@ const includedIn = [
     }
   },
   {
-    "type": "correspondent",
+    "type": "person",
     "id": 5,
     "attributes": {
       "firstname": "Carlos",
@@ -52,37 +52,37 @@ const includedIn = [
     },
     "meta": {},
     "links": {
-      "self": "http://0.0.0.0:5004/lettres/api/1.0/correspondents/5"
+      "self": "http://0.0.0.0:5004/lettres/api/1.0/persons/5"
     },
     "relationships": {
       "roles-within-documents": {
         "links": {
-          "self": "http://0.0.0.0:5004/lettres/api/1.0/correspondents/5/relationships/roles-within-documents",
-          "related": "http://0.0.0.0:5004/lettres/api/1.0/correspondents/5/roles-within-documents"
+          "self": "http://0.0.0.0:5004/lettres/api/1.0/persons/5/relationships/roles-within-documents",
+          "related": "http://0.0.0.0:5004/lettres/api/1.0/persons/5/roles-within-documents"
         },
         "data": [
           {
             "id": 7,
-            "type": "correspondent-has-role"
+            "type": "person-has-role"
           },
           {
             "id": 9,
-            "type": "correspondent-has-role"
+            "type": "person-has-role"
           },
           {
             "id": 14,
-            "type": "correspondent-has-role"
+            "type": "person-has-role"
           },
           {
             "id": 20,
-            "type": "correspondent-has-role"
+            "type": "person-has-role"
           }
         ]
       },
       "documents": {
         "links": {
-          "self": "http://0.0.0.0:5004/lettres/api/1.0/correspondents/5/relationships/documents",
-          "related": "http://0.0.0.0:5004/lettres/api/1.0/correspondents/5/documents"
+          "self": "http://0.0.0.0:5004/lettres/api/1.0/persons/5/relationships/documents",
+          "related": "http://0.0.0.0:5004/lettres/api/1.0/persons/5/documents"
         },
         "data": [
           {
@@ -106,7 +106,7 @@ const includedIn = [
     }
   },
   {
-    "type": "correspondent",
+    "type": "person",
     "id": 4,
     "attributes": {
       "firstname": "James",
@@ -116,25 +116,25 @@ const includedIn = [
     },
     "meta": {},
     "links": {
-      "self": "http://0.0.0.0:5004/lettres/api/1.0/correspondents/4"
+      "self": "http://0.0.0.0:5004/lettres/api/1.0/persons/4"
     },
     "relationships": {
       "roles-within-documents": {
         "links": {
-          "self": "http://0.0.0.0:5004/lettres/api/1.0/correspondents/4/relationships/roles-within-documents",
-          "related": "http://0.0.0.0:5004/lettres/api/1.0/correspondents/4/roles-within-documents"
+          "self": "http://0.0.0.0:5004/lettres/api/1.0/persons/4/relationships/roles-within-documents",
+          "related": "http://0.0.0.0:5004/lettres/api/1.0/persons/4/roles-within-documents"
         },
         "data": [
           {
             "id": 8,
-            "type": "correspondent-has-role"
+            "type": "person-has-role"
           }
         ]
       },
       "documents": {
         "links": {
-          "self": "http://0.0.0.0:5004/lettres/api/1.0/correspondents/4/relationships/documents",
-          "related": "http://0.0.0.0:5004/lettres/api/1.0/correspondents/4/documents"
+          "self": "http://0.0.0.0:5004/lettres/api/1.0/persons/4/relationships/documents",
+          "related": "http://0.0.0.0:5004/lettres/api/1.0/persons/4/documents"
         },
         "data": [
           {
@@ -146,7 +146,7 @@ const includedIn = [
     }
   },
   {
-    "type": "correspondent-role",
+    "type": "person-role",
     "id": 12,
     "attributes": {
       "id": 12,
@@ -155,12 +155,12 @@ const includedIn = [
     },
     "meta": {},
     "links": {
-      "self": "http://0.0.0.0:5004/lettres/api/1.0/correspondent-roles/12"
+      "self": "http://0.0.0.0:5004/lettres/api/1.0/person-roles/12"
     },
     "relationships": {}
   },
   {
-    "type": "correspondent-role",
+    "type": "person-role",
     "id": 8,
     "attributes": {
       "id": 8,
@@ -169,12 +169,12 @@ const includedIn = [
     },
     "meta": {},
     "links": {
-      "self": "http://0.0.0.0:5004/lettres/api/1.0/correspondent-roles/8"
+      "self": "http://0.0.0.0:5004/lettres/api/1.0/person-roles/8"
     },
     "relationships": {}
   },
   {
-    "type": "correspondent-role",
+    "type": "person-role",
     "id": 9,
     "attributes": {
       "id": 9,
@@ -183,129 +183,129 @@ const includedIn = [
     },
     "meta": {},
     "links": {
-      "self": "http://0.0.0.0:5004/lettres/api/1.0/correspondent-roles/9"
+      "self": "http://0.0.0.0:5004/lettres/api/1.0/person-roles/9"
     },
     "relationships": {}
   },
   {
-    "type": "correspondent-has-role",
+    "type": "person-has-role",
     "id": 6,
     "attributes": {},
     "meta": {},
     "links": {
-      "self": "http://0.0.0.0:5004/lettres/api/1.0/correspondents-having-roles/6"
+      "self": "http://0.0.0.0:5004/lettres/api/1.0/persons-having-roles/6"
     },
     "relationships": {
-      "correspondent-role": {
+      "person-role": {
         "links": {
-          "self": "http://0.0.0.0:5004/lettres/api/1.0/correspondents-having-roles/6/relationships/correspondent-role",
-          "related": "http://0.0.0.0:5004/lettres/api/1.0/correspondents-having-roles/6/correspondent-role"
+          "self": "http://0.0.0.0:5004/lettres/api/1.0/persons-having-roles/6/relationships/person-role",
+          "related": "http://0.0.0.0:5004/lettres/api/1.0/persons-having-roles/6/person-role"
         },
         "data": {
           "id": 12,
-          "type": "correspondent-role"
+          "type": "person-role"
         }
       },
       "document": {
         "links": {
-          "self": "http://0.0.0.0:5004/lettres/api/1.0/correspondents-having-roles/6/relationships/document",
-          "related": "http://0.0.0.0:5004/lettres/api/1.0/correspondents-having-roles/6/document"
+          "self": "http://0.0.0.0:5004/lettres/api/1.0/persons-having-roles/6/relationships/document",
+          "related": "http://0.0.0.0:5004/lettres/api/1.0/persons-having-roles/6/document"
         },
         "data": {
           "id": 9,
           "type": "document"
         }
       },
-      "correspondent": {
+      "person": {
         "links": {
-          "self": "http://0.0.0.0:5004/lettres/api/1.0/correspondents-having-roles/6/relationships/correspondent",
-          "related": "http://0.0.0.0:5004/lettres/api/1.0/correspondents-having-roles/6/correspondent"
+          "self": "http://0.0.0.0:5004/lettres/api/1.0/persons-having-roles/6/relationships/person",
+          "related": "http://0.0.0.0:5004/lettres/api/1.0/persons-having-roles/6/person"
         },
         "data": {
           "id": 10,
-          "type": "correspondent"
+          "type": "person"
         }
       }
     }
   },
   {
-    "type": "correspondent-has-role",
+    "type": "person-has-role",
     "id": 7,
     "attributes": {},
     "meta": {},
     "links": {
-      "self": "http://0.0.0.0:5004/lettres/api/1.0/correspondents-having-roles/7"
+      "self": "http://0.0.0.0:5004/lettres/api/1.0/persons-having-roles/7"
     },
     "relationships": {
-      "correspondent-role": {
+      "person-role": {
         "links": {
-          "self": "http://0.0.0.0:5004/lettres/api/1.0/correspondents-having-roles/7/relationships/correspondent-role",
-          "related": "http://0.0.0.0:5004/lettres/api/1.0/correspondents-having-roles/7/correspondent-role"
+          "self": "http://0.0.0.0:5004/lettres/api/1.0/persons-having-roles/7/relationships/person-role",
+          "related": "http://0.0.0.0:5004/lettres/api/1.0/persons-having-roles/7/person-role"
         },
         "data": {
           "id": 8,
-          "type": "correspondent-role"
+          "type": "person-role"
         }
       },
       "document": {
         "links": {
-          "self": "http://0.0.0.0:5004/lettres/api/1.0/correspondents-having-roles/7/relationships/document",
-          "related": "http://0.0.0.0:5004/lettres/api/1.0/correspondents-having-roles/7/document"
+          "self": "http://0.0.0.0:5004/lettres/api/1.0/persons-having-roles/7/relationships/document",
+          "related": "http://0.0.0.0:5004/lettres/api/1.0/persons-having-roles/7/document"
         },
         "data": {
           "id": 9,
           "type": "document"
         }
       },
-      "correspondent": {
+      "person": {
         "links": {
-          "self": "http://0.0.0.0:5004/lettres/api/1.0/correspondents-having-roles/7/relationships/correspondent",
-          "related": "http://0.0.0.0:5004/lettres/api/1.0/correspondents-having-roles/7/correspondent"
+          "self": "http://0.0.0.0:5004/lettres/api/1.0/persons-having-roles/7/relationships/person",
+          "related": "http://0.0.0.0:5004/lettres/api/1.0/persons-having-roles/7/person"
         },
         "data": {
           "id": 5,
-          "type": "correspondent"
+          "type": "person"
         }
       }
     }
   },
   {
-    "type": "correspondent-has-role",
+    "type": "person-has-role",
     "id": 8,
     "attributes": {},
     "meta": {},
     "links": {
-      "self": "http://0.0.0.0:5004/lettres/api/1.0/correspondents-having-roles/8"
+      "self": "http://0.0.0.0:5004/lettres/api/1.0/persons-having-roles/8"
     },
     "relationships": {
-      "correspondent-role": {
+      "person-role": {
         "links": {
-          "self": "http://0.0.0.0:5004/lettres/api/1.0/correspondents-having-roles/8/relationships/correspondent-role",
-          "related": "http://0.0.0.0:5004/lettres/api/1.0/correspondents-having-roles/8/correspondent-role"
+          "self": "http://0.0.0.0:5004/lettres/api/1.0/persons-having-roles/8/relationships/person-role",
+          "related": "http://0.0.0.0:5004/lettres/api/1.0/persons-having-roles/8/person-role"
         },
         "data": {
           "id": 9,
-          "type": "correspondent-role"
+          "type": "person-role"
         }
       },
       "document": {
         "links": {
-          "self": "http://0.0.0.0:5004/lettres/api/1.0/correspondents-having-roles/8/relationships/document",
-          "related": "http://0.0.0.0:5004/lettres/api/1.0/correspondents-having-roles/8/document"
+          "self": "http://0.0.0.0:5004/lettres/api/1.0/persons-having-roles/8/relationships/document",
+          "related": "http://0.0.0.0:5004/lettres/api/1.0/persons-having-roles/8/document"
         },
         "data": {
           "id": 9,
           "type": "document"
         }
       },
-      "correspondent": {
+      "person": {
         "links": {
-          "self": "http://0.0.0.0:5004/lettres/api/1.0/correspondents-having-roles/8/relationships/correspondent",
-          "related": "http://0.0.0.0:5004/lettres/api/1.0/correspondents-having-roles/8/correspondent"
+          "self": "http://0.0.0.0:5004/lettres/api/1.0/persons-having-roles/8/relationships/person",
+          "related": "http://0.0.0.0:5004/lettres/api/1.0/persons-having-roles/8/person"
         },
         "data": {
           "id": 4,
-          "type": "correspondent"
+          "type": "person"
         }
       }
     }
@@ -316,8 +316,8 @@ const resultOk = [
   {
     relationId: 6,
     roleId: 12,
-    correspondentId: 10,
-    correspondent: {
+    personId: 10,
+    person: {
       "firstname": "Diane",
       "lastname": "Smith",
       "key": "Angel Edwards",
@@ -332,8 +332,8 @@ const resultOk = [
   {
     relationId: 7,
     roleId: 8,
-    correspondentId: 5,
-    correspondent: {
+    personId: 5,
+    person: {
       "firstname": "Carlos",
       "lastname": "Watson",
       "key": "Amanda Francis",
@@ -348,8 +348,8 @@ const resultOk = [
   {
     relationId: 8,
     roleId: 9,
-    correspondentId: 4,
-    correspondent: {
+    personId: 4,
+    person: {
       "firstname": "James",
       "lastname": "Taylor",
       "key": "Erin Carter",
@@ -363,10 +363,10 @@ const resultOk = [
   }
 ]
 
-describe('Correspondents helpers', () => {
+describe('Persons helpers', () => {
 
-  test('getCorrespondents', () => {
-    expect(getCorrespondents(includedIn)).toEqual(resultOk)
+  test('getPersons', () => {
+    expect(getPersons(includedIn)).toEqual(resultOk)
   })
 
   test('getInstitution', () => {

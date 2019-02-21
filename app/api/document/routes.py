@@ -11,20 +11,27 @@ def register_document_api_urls(app):
     registrar.register_patch_routes(Document, DocumentFacade, [api_require_roles("contributor")])
     registrar.register_delete_routes(Document, DocumentFacade, [api_require_roles("admin")])
 
-    for rel in ('notes', 'languages', 'witnesses', 'images',  'current-lock', 'changes',
-                'correspondents-having-roles', 'roles', 'correspondents', 'collections',
+    for rel in ('notes', 'languages', 'witnesses', 'images',  'current-lock', 'changes', 'collections',
+                'persons-having-roles', 'person-roles', 'persons',
+                'placenames-having-roles', 'placename-roles', 'placenames',
                 'prev-document', 'next-document'):
         registrar.register_relationship_get_route(DocumentFacade, rel)
 
     for rel in ('notes', 'languages', 'witnesses', 'collections', 'changes',
-                'correspondents-having-roles','next-document'):
+                'persons-having-roles', 'person-roles', 'persons',
+                'placenames-having-roles', 'placename-roles', 'placenames',
+                'next-document'):
         registrar.register_relationship_post_route(DocumentFacade, rel, [api_require_roles("contributor")])
 
     for rel in ('notes', 'languages', 'witnesses', 'collections',
-                'correspondents-having-roles', 'next-document'):
+                'persons-having-roles', 'person-roles', 'persons',
+                'placenames-having-roles', 'placename-roles', 'placenames',
+                'next-document'):
         registrar.register_relationship_patch_route(DocumentFacade, rel, [api_require_roles("contributor")])
 
     for rel in ('notes', 'languages', 'witnesses', 'collections',
-                'correspondents-having-roles','next-document'):
+                'persons-having-roles', 'person-roles', 'persons',
+                'placenames-having-roles', 'placename-roles', 'placenames',
+                'next-document'):
         registrar.register_relationship_delete_route(DocumentFacade, rel, [api_require_roles("contributor")])
 

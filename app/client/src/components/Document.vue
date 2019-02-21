@@ -7,7 +7,8 @@
       <div class="columns">
         <div class="column">
           <document-notice :editable="canEdit"/>
-          <document-correspondents :editable="canEdit"/>
+          <document-placenames :editable="canEdit"/>
+          <document-persons :editable="canEdit"/>
           <document-transcription :editable="canEdit"/>
         </div>
         <div class="column is-one-quarter">
@@ -28,14 +29,16 @@
     import LoadingIndicator from './ui/LoadingIndicator';
     import Changelog from './sections/Changelog';
     import DocumentNotice from './document/DocumentNotice';
-    import DocumentCorrespondents from './document/DocumentCorrespondents';
+    import DocumentPersons from './document/DocumentPersons';
     import DocumentTranscription from './document/DocumentTranscription';
     import DocumentTagBar from "./document/DocumentTagBar";
+    import DocumentPlacenames from "./document/DocumentPlacenames";
 
     export default {
 
         name: 'Document',
-        components: {Changelog, DocumentCorrespondents, DocumentNotice, DocumentTranscription, LoadingIndicator, DocumentTagBar},
+        components: {Changelog, DocumentPersons, DocumentPlacenames,
+            DocumentNotice, DocumentTranscription, LoadingIndicator, DocumentTagBar},
         props: {
             doc_id : {required: true, type: Number}
         },

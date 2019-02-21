@@ -1,0 +1,23 @@
+.person-list-form {
+
+  min-height: 280px;
+
+  &__separator {
+    padding: 18px;
+  }
+
+  .field-select-autocomplete__items, .fiseld-list-autocomplete__items {
+
+  }
+
+  .field-select-autocomplete__value {
+    height: unset;
+  }
+  .field-list-autocomplete__search {
+    padding: 0;
+  }
+
+  .modal-card {
+    min-width: 900px;
+  }
+}
