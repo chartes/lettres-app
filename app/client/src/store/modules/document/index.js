@@ -44,8 +44,8 @@ const mutations = {
     const newPreviewCard = {
       id: data.id,
       attributes: data.attributes,
-      persons: getPersons(included),
-      languages: getLanguages(included),
+      //persons: getPersons(included),
+      //languages: getLanguages(included),
       collections: getCollections(included),
       currentLock: getCurrentLock(included)
     };
@@ -125,8 +125,8 @@ const actions = {
   fetchPreview ({ commit }, id) {
     commit('LOADING_STATUS', true);
     const incs = [
-      'collections', 'persons', 'persons-having-roles',
-      'roles', 'witnesses', 'languages', 'current-lock'
+      'collections', 'witnesses', 'current-lock',
+      //'persons', 'persons-having-roles','roles', 'languages',
     ];
 
     const http = http_with_csrf_token();
