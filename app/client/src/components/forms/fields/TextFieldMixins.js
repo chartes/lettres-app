@@ -1,7 +1,10 @@
 import Vue from 'vue';
 
-const TextFieldMixins = {
+import IconPenEdit from '../../ui/icons/IconPenEdit';
+import IconSuccess from '../../ui/icons/IconSuccess';
 
+const TextFieldMixins = {
+  components: {IconSuccess, IconPenEdit},
   props: {
     name: { type: String, required: true },
     label: { type: String, required: true },
@@ -26,7 +29,7 @@ const TextFieldMixins = {
     enterEditMode () {
       this.editMode = true
       this.enterEditModeValue = this.value;
-      Vue.nextTick(()=>this.$refs.input.focus())
+      if (this.$refs.input && this.$refs.input.focus) Vue.nextTick(()=>this.$refs.input.focus())
     },
     exitEditMode (preventEmit = false) {
       if (!this.editMode) return;
@@ -54,6 +57,12 @@ const TextFieldMixins = {
   computed: {
     unknownClass () {
       return { 'field-text--unknown': !this.value }
+    },
+    editButtonIcon () {
+      if (this.status === 'success') {
+        return IconSuccess;
+      }
+      return IconPenEdit;
     }
   }
 

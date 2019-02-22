@@ -2,7 +2,16 @@
   <div class="document__attributes">
 
     <header class="document__attributes--title">
-      <h1 class="title" v-html="document.title"></h1>
+      <title-field-in-place
+              :tabulation-index="0"
+              label=""
+              name="title"
+              not-set="Non renseigné"
+              :initial-value="document.title"
+              :editable="editable"
+              :status="titleStatus"
+              v-on:changed="titleChanged"
+      />
     </header>
 
     <div class="columns is-multiline">
@@ -52,21 +61,24 @@
   import TextFieldInPlace from '../forms/fields/TextFieldInPlace';
   import MultiselectField from '../forms/fields/MultiselectField';
   import DateField from '../forms/fields/DateField';
+  import TitleField from '../forms/fields/TitleField';
+  import TitleFieldInPlace from '../forms/fields/TitleFieldInPlace';
   import IconBin from '../ui/icons/IconBin';
   import LaunchButton from '../forms/LaunchButton';
-  import PlacenameListForm from "../forms/PlacenameListForm";
 
   export default {
     name: 'DocumentAttributes',
-    components: {
-        TextFieldInPlace, DateField, MultiselectField,
-        LaunchButton, IconBin
-    },
+    components: {TitleFieldInPlace, TextFieldInPlace, DateField, MultiselectField, TextFieldInPlace },
     props: {
-        editable: {
-            type: Boolean,
-            default: false
-        },
+      editable: {
+        type: Boolean,
+        default: false
+      },
+    },
+    data() {
+      return {
+        titleStatus: 'normal'
+      }
     },
     methods: {
       fieldChanged (fieldProps) {
@@ -74,9 +86,28 @@
         data.attributes[fieldProps.name] = fieldProps.value;
         this.$store.dispatch('document/save', data)
       },
+      titleChanged (fieldProps) {
+        const data = { id: this.document.id, attributes: {} };
+        data.attributes[fieldProps.name] = fieldProps.value;
+        this.titleSetStatusNormal()
+        this.$store.dispatch('document/save', data).then(response => {
+          this.titleSetStatusSuccess()
+          setTimeout(this.titleSetStatusNormal, 3000)
+        }).catch(() => {
+          this.titleSetStatusError()
+          setTimeout(this.titleSetStatusNormal, 3000)
+        })
+      },
+      titleSetStatusNormal () {
+        this.titleStatus = 'normal'
+      },
+      titleSetStatusSuccess () {
+        this.titleStatus = 'success'
+      },
+      titleSetStatusError () {
+        this.titleStatus = 'error'
+      },
       languagesChanged (langs) {
-        console.log("languagesChanged", langs);
-
         const data = { id: this.document.id,
           relationships: {
             languages: {
@@ -100,7 +131,7 @@
       ...mapState({
         allLanguages: state => state.languages.languages
       }),
-      languagesConcat: function () {
+      languagesConcat () {
         return this.languages.map(lang => lang.label).join(', ')
       },
       languagesIds () {

@@ -35,6 +35,7 @@
 // Objects – class-based selectors which define undecorated design patterns,
 // for example media object known from OOCSS
 
+@import "objects/document-subsection";
 @import "objects/quill.lettres";
 @import "objects/quill.core";
 @import "objects/quill.icons";
@@ -55,7 +56,11 @@
 @import "components/loading";
 @import "components/note";
 @import "components/document.document-tag-bar";
+@import "components/document.argument";
 @import "components/document.attributes";
+@import "components/document.collections";
+@import "components/document.correspondents";
+@import "components/document.transcription";
 @import "components/document.witness-list";
 @import "components/document.person-form";
 @import "components/document.person-list-form";

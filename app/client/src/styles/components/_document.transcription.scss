@@ -1,0 +1,15 @@
+.document__transcription--title {
+  margin-bottom: 1em;
+
+  &::before {
+
+    content: '';
+    display: inline-block;
+    height: 1em;
+    width: 1em;
+    margin-right: .5em;
+    background: url(#{$image-path}/icons/document-transcription.svg) no-repeat 50% 50%;
+    vertical-align: top;
+
+  }
+}

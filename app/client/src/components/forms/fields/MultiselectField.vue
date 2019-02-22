@@ -1,6 +1,5 @@
 <template>
     <div class="field field-multiselect">
-        <field-label :label="label"/>
         <div class="field selected-list is-grouped is-grouped-multiline">
             <div class="control" v-for="item in items" :key="item[optionIdField]">
                 <div class="tags has-addons selected-item are-medium">
@@ -64,7 +63,7 @@
       ClickOutside
     },
     data () {
-      return { listVisible: true, items: [], ids: []}
+      return { listVisible: false, items: [], ids: []}
     },
     mounted () {
       this.updateAllItems();

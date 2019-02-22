@@ -11,8 +11,13 @@
     color: red;
   }
 
+  &__control {
+    margin-bottom: 3em;
+  }
+
   &__field {
     width: 100%;
+    margin-bottom: 3em;
     outline: none;
   }
 
@@ -25,7 +30,7 @@
     border-width: 0 0 1px 0;
     box-shadow: none;
     display: inline-flex;
-    height: 3.25em;
+    //height: 3.25em;
     justify-content: flex-start;
     line-height: 1.5;
     position: relative;

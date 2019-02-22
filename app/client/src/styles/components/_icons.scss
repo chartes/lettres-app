@@ -1,3 +1,4 @@
+$icon-default-color: #ccc;
 .icon {
 
   width: 1rem;
@@ -6,11 +7,11 @@
   box-sizing: initial;
 
   &__fill {
-    fill: #ccc;
+    fill: $icon-default-color;
   }
   &__line {
     fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:2px;
-    stroke: #ccc;
+    stroke: $icon-default-color;
   }
 
   &__add:hover {
@@ -19,8 +20,8 @@
     }
   }
   &__pen-edit:hover {
-    .icon__fill {
-      fill: $blue;
+    .icon__line {
+      stroke: $blue;
     }
   }
   &__arrow-down, &__add {
@@ -31,15 +32,41 @@
       }
     }
   }
-  &__save, &__success {
+  &__save {
     .icon__line {
       stroke: $white;
+    }
+  }
+  &__success {
+    .icon__line {
+      stroke: $success;
     }
   }
 }
 
 .icon__bin:hover {
-  .icon__fill {
-    fill: $red;
+  .icon__line {
+    stroke: $danger;
+  }
+}
+
+.field-text__icon, .field-date__icon {
+  &.icon:hover {
+    .icon__fill {
+      fill: $icon-default-color;
+    }
+    .icon__line {
+      stroke: $icon-default-color;
+    }
+  }
+}
+.button.is-success, .button.is-danger {
+  .icon {
+    .icon__fill {
+      fill: $white;
+    }
+    .icon__line {
+      stroke: $white;
+    }
   }
 }
