@@ -137,7 +137,15 @@ class JSONAPIRouteRegistrar(object):
                     continue
 
                 for criteria in request.args[filter_param].split(','):
-                    if not not_null_operator:
+                    criteria_upper = criteria.upper()
+                    if criteria_upper == 'TRUE' or criteria_upper == 'FALSE':
+                        new_criteria = "{table}.{field} is {criteria}".format(
+                            table=model.__tablename__,
+                            field=filter_fieldname,
+                            criteria=True if criteria_upper == 'TRUE' else False
+                        )
+                        print(text(new_criteria))
+                    elif not not_null_operator:
                         if criteria:
                             # filter[field]=value
                             new_criteria = "{table}.{field}{operator}'{criteria}'".format(

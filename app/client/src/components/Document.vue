@@ -33,6 +33,7 @@
     import DocumentTranscription from './document/DocumentTranscription';
     import DocumentTagBar from "./document/DocumentTagBar";
     import DocumentPlacenames from "./document/DocumentPlacenames";
+    import {baseAppURL} from "../modules/http-common";
 
     export default {
 
@@ -44,8 +45,11 @@
         },
         mounted () {
             this.$store.dispatch('user/fetchCurrent').then(response => {
-                this.$store.dispatch('document/fetch', this.doc_id).then(response => {
+                this.$store.dispatch('document/fetch', this.doc_id).then(r => {
                     this.computeCanEdit();
+                }).catch(e => {
+                    console.warn("should go to ", baseAppURL);
+                    window.location.replace(baseAppURL);
                 });
             });
         },

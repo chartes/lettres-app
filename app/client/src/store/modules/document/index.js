@@ -135,10 +135,10 @@ const actions = {
       commit('LOADING_STATUS', false)
     })
   },
-  fetchAll ({ commit }, {pageId, pageSize}) {
+  fetchAll ({ commit }, {pageId, pageSize, filters}) {
     commit('LOADING_STATUS', true);
     const http = http_with_csrf_token();
-    return http.get(`/documents?page[size]=${pageSize}&page[number]=${pageId}&without-relationships`)
+    return http.get(`/documents?${filters}&page[size]=${pageSize}&page[number]=${pageId}&without-relationships`)
       .then( (response) => {
       commit('UPDATE_ALL', response.data);
       commit('LOADING_STATUS', false);
@@ -165,7 +165,6 @@ const actions = {
     return http.patch(`/documents/${data.id}`, { data })
       .then(response => {
         commit('UPDATE_DOCUMENT_DATA', response.data.data);
-        //resolve(response.data)
         return response.data.data
       })
       .then( doc => {
@@ -195,6 +194,26 @@ const actions = {
           }, { root: true });
         })
       })
+  },
+
+  publish({commit, state}, docId) {
+    return this.dispatch('document/save', {
+        type: 'document',
+        id: docId,
+        attributes: {
+          'is-published' : true
+        }
+    });
+  },
+
+  unpublish({commit, state}, docId) {
+    return this.dispatch('document/save', {
+        type: 'document',
+        id: docId,
+        attributes: {
+          'is-published': false
+        }
+    });
   },
 
   addWitness ({commit, state}, witness) {

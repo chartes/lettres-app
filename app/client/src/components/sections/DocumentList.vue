@@ -4,7 +4,10 @@
     <pagination :current="currentPage" :end="nbPages" :size="pageSize" :action="goToDocPage">
       <ul id="preview-cards" >
         <li v-for="doc in documents" :key="doc.id">
-          <document-preview-card :doc_id="doc.id"></document-preview-card>
+          <document-preview-card
+              :doc_id="doc.id"
+              v-if="doc.attributes['is-published'] || current_user">
+          </document-preview-card>
         </li>
       </ul>
     </pagination>
@@ -34,7 +37,11 @@
     },
     methods: {
       fetchAll() {
-        this.$store.dispatch('document/fetchAll', {pageId: this.currentPage, pageSize: this.pageSize});
+        this.$store.dispatch('document/fetchAll', {
+            pageId: this.currentPage,
+            pageSize: this.pageSize,
+            filters: this.current_user ? '' : 'filter[is-published]=true'
+        });
       },
       goToDocPage(num){
           this.currentPage = num;
@@ -57,7 +64,7 @@
     },
     computed: {
       ...mapState('document', ['documents', 'links', 'documentLoading']),
-
+      ...mapState('user', ['current_user']),
       nbPages() {
         return parseInt(this.links.last ? getUrlParameter(this.links.last, "page%5Bnumber%5D") : 1);
       }
