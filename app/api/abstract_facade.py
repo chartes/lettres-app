@@ -1,7 +1,7 @@
 import pprint
-from flask import current_app
+from flask import current_app, request
 
-from app import db
+from app import db, api_bp
 
 
 class JSONAPIAbstractFacade(object):
@@ -332,17 +332,20 @@ class JSONAPIAbstractFacade(object):
             else:
                 rel_data = d
 
+        url_prefix = request.host_url[:-1] + current_app.api_url_registrar.url_prefix
         for doc in rel_data:
             facade = JSONAPIFacadeManager.get_facade_class(doc)
-            f_obj, kwargs, errors = facade.get_resource_facade("", id=doc.id)
+
+            f_obj, kwargs, errors = facade.get_resource_facade(url_prefix, id=doc.id)
             to_be_reindexed.extend(
-                f_obj.get_data_to_index_when_added()
+                f_obj.get_data_to_index_when_added(False)
             )
         return to_be_reindexed
 
     def add_to_index(self, propagate=False):
         from app.search import SearchIndexManager
         for data in self.get_data_to_index_when_added(propagate):
+            print("reindex:", data)
             SearchIndexManager.add_to_index(index=data["index"], id=data["id"], payload=data["payload"])
 
     def remove_from_index(self, propagate=False):

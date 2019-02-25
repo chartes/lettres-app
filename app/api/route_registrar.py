@@ -929,7 +929,7 @@ class JSONAPIRouteRegistrar(object):
                                          with_relationships_data=w_rel_data)
 
                     # reindex
-                    f_obj.reindex("insert")
+                    f_obj.reindex("insert", propagate=True)
 
                     # RESPOND 201 CREATED
                     if "links" in f_obj.resource and "self" in f_obj.resource["links"]:
@@ -1008,7 +1008,7 @@ class JSONAPIRouteRegistrar(object):
                                          with_relationships_data=w_rel_data)
 
                     # reindex
-                    f_obj.reindex("insert")
+                    f_obj.reindex("insert", propagate=True)
 
                     # RESPOND 200
                     if "links" in f_obj.resource and "self" in f_obj.resource["links"]:
@@ -1155,7 +1155,7 @@ class JSONAPIRouteRegistrar(object):
                                          with_relationships_data=True)
 
                     # reindex
-                    f_obj.reindex("update")
+                    f_obj.reindex("update", propagate=True)
 
                     # RESPOND 200
                     if "links" in f_obj.resource and "self" in f_obj.resource["links"]:
@@ -1241,7 +1241,7 @@ class JSONAPIRouteRegistrar(object):
                                          with_relationships_data=True)
 
                     # reindex
-                    f_obj.reindex("update")
+                    f_obj.reindex("update", propagate=True)
 
                     # RESPOND 200
                     if "links" in f_obj.resource and "self" in f_obj.resource["links"]:
@@ -1300,7 +1300,7 @@ class JSONAPIRouteRegistrar(object):
             # =====================
             f_obj = facade_class("", obj)
             # reindex
-            f_obj.reindex("delete")
+            f_obj.reindex("delete", propagate=True)
 
             errors = facade_class.delete_resource(obj)
             if errors is not None:

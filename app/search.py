@@ -1,3 +1,4 @@
+import elasticsearch
 import pprint
 from flask import current_app
 
@@ -57,7 +58,10 @@ class SearchIndexManager(object):
     @staticmethod
     def remove_from_index(index, id):
         #print("REMOVE_FROM_INDEX", index, id)
-        current_app.elasticsearch.delete(index=index, doc_type=index, id=id)
+        try:
+            current_app.elasticsearch.delete(index=index, doc_type=index, id=id)
+        except elasticsearch.exceptions.NotFoundError as e:
+            print("WARNING: resource already removed from index:", str(e))
 
     #@staticmethod
     #def reindex_resources(changes):

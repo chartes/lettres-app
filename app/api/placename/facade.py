@@ -121,7 +121,7 @@ class PlacenameFacade(JSONAPIAbstractChangeloggedFacade):
 
         if propagate:
             # reindex the docs without the resource
-            for data in self.get_data_to_index_when_added():
+            for data in self.get_data_to_index_when_added(propagate):
                 if data["payload"]["id"] != self.id and data["payload"]["type"] != self.TYPE:
                     data["payload"]["placenames"] = [l for l in data["payload"]["placenames"] if l.get("id") != self.id]
                     SearchIndexManager.add_to_index(index=data["index"], id=data["id"], payload=data["payload"])

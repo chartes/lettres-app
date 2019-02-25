@@ -254,9 +254,9 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
             ],
             "placenames": [
                 {
-                    "id": c_h_r.person.id,
-                    "label": c_h_r.person.label,
-                    "ref": c_h_r.person.ref
+                    "id": c_h_r.placename.id,
+                    "label": c_h_r.placename.label,
+                    "ref": c_h_r.placename.ref
                 }
                 for c_h_r in self.obj.placenames_having_roles
             ]
