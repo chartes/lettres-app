@@ -5,6 +5,15 @@ import {
 } from '../../../modules/document-helpers';
 import Vue from "vue";
 
+const TRANSLATION_MAPPING = {
+  'creation' : 'Date de création',
+  'creation-not-after' : 'Date de création (borne supérieure)',
+  'creation-label' : 'Date de création (étiquette)',
+  'is-published': 'Statut de publication',
+  'argument': 'Argument',
+  'transcription': 'Transcription'
+};
+
 const state = {
 
   documentLoading: true,
@@ -168,31 +177,19 @@ const actions = {
         return response.data.data
       })
       .then( doc => {
-        let desc = 'Modifications';
+        let msg = null;
         if (doc.attributes) {
-          desc = `Modification de ${Object.keys(modifiedData).join(', ')}`;
+
+          msg = `Modification de ${Object.keys(modifiedData).map( 
+              d => `'${TRANSLATION_MAPPING[d] ? TRANSLATION_MAPPING[d] : d}'`
+          ).join(', ')}`;
         }
-        const data = {
-          type: 'change',
-          attributes: {
-            'object-type': 'document',
-            'object-id': doc.id,
-            'description': desc,
-          },
-          relationships: {
-            document: {
-              data: {id: doc.id, type: 'document'}
-            },
-            user: {
-              data: {id: rootState.user.current_user.id, type: 'user'}
-            }
-          }
-        };
-        return http.post(`changes`, { data }).then(response => {
-          dispatch('changelog/fetchFullChangelog', {
-            filters: `filter[object-id]=${doc.id}&filter[object-type]=document`
-          }, { root: true });
-        })
+        return this.dispatch('changelog/trackChanges', {
+          objId : doc.id,
+          objType: 'document',
+          userId: rootState.user.current_user.id,
+          msg: msg
+        });
       })
   },
 

@@ -33,7 +33,7 @@
     import DocumentTranscription from './document/DocumentTranscription';
     import DocumentTagBar from "./document/DocumentTagBar";
     import DocumentPlacenames from "./document/DocumentPlacenames";
-    import {baseAppURL} from "../modules/http-common";
+    import {baseApiURL, baseAppURL} from "../modules/http-common";
 
     export default {
 
@@ -62,6 +62,13 @@
             ...mapState('document', ['document', 'documentLoading', 'documentsPreview']),
             ...mapState('user', ['current_user', 'isUserLoaded']),
             ...mapState('locks', ['lockOwner']),
+            
+            collectionURL() {
+               const baseUrl = window.location.origin
+                   ? window.location.origin + '/'
+                   : window.location.protocol + '/' + window.location.host;
+               return `${baseUrl}${baseApiURL.substr(1)}/iiif/documents/${this.doc_id}/collection/default`;
+            }
         },
         watch: {
             lockOwner() {

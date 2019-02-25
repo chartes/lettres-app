@@ -31,6 +31,30 @@ const mutations = {
 };
 
 const actions = {
+  trackChanges({ commit }, {objId, objType, userId, msg}) {
+    const data = {
+      type: 'change',
+      attributes: {
+        'object-type': objType,
+        'object-id': objId,
+        'description': msg ? msg : 'Modifications',
+      },
+      relationships: {
+        document: {
+          data: {id: objId, type: objType}
+        },
+        user: {
+          data: {id: userId, type: 'user'}
+        }
+      }
+    };
+    const http = http_with_csrf_token();
+    return http.post(`changes`, {data}).then(response => {
+      this.dispatch('changelog/fetchFullChangelog', {
+        filters: `filter[object-id]=${objId}&filter[object-type]=${objType}`
+      }, {root: true});
+    });
+  },
   fetchFullChangelog ({ commit }, {pageId, pageSize, filters}) {
     const http = http_with_csrf_token();
     if (pageId === undefined) {
