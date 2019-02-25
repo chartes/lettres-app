@@ -1,7 +1,7 @@
 from flask import current_app
 
 from app.api.abstract_facade import JSONAPIAbstractChangeloggedFacade
-from app.models import Document
+from app.models import Document, PersonRole
 
 
 class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
@@ -252,6 +252,22 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
                 }
                 for c_h_r in self.obj.persons_having_roles
             ],
+            "recipients": [
+                {
+                    "id": c_h_r.person.id,
+                    "label": c_h_r.person.label,
+                    "ref": c_h_r.person.ref
+                }
+                for c_h_r in self.obj.persons_having_roles if c_h_r.person_role.label == 'recipient'
+            ],
+            "senders": [
+                {
+                    "id": c_h_r.person.id,
+                    "label": c_h_r.person.label,
+                    "ref": c_h_r.person.ref
+                }
+                for c_h_r in self.obj.persons_having_roles if c_h_r.person_role.label == 'sender'
+            ],
             "placenames": [
                 {
                     "id": c_h_r.placename.id,
@@ -259,8 +275,29 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
                     "ref": c_h_r.placename.ref
                 }
                 for c_h_r in self.obj.placenames_having_roles
+            ],
+            "location-date-from": [
+                {
+                    "id": c_h_r.placename.id,
+                    "label": c_h_r.placename.label,
+                    "ref": c_h_r.placename.ref
+                }
+                for c_h_r in self.obj.placenames_having_roles if c_h_r.placename_role.label == 'location-date-from'
+            ],
+            "location-date-to": [
+                {
+                    "id": c_h_r.placename.id,
+                    "label": c_h_r.placename.label,
+                    "ref": c_h_r.placename.ref
+                }
+                for c_h_r in self.obj.placenames_having_roles if c_h_r.placename_role.label == 'location-date-to'
             ]
         }
+
+        # add shortcuts for special persons and placenames:
+
+
+
         return [{"id": _res["id"], "index": self.get_index_name(), "payload": payload}]
 
     def get_data_to_index_when_removed(self, propagate):

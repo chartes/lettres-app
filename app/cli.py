@@ -1,5 +1,6 @@
 import click
-import sqlalchemy
+import json
+import requests
 
 from app import create_app
 from app.api.collection.facade import CollectionFacade
@@ -21,6 +22,18 @@ def add_default_users(db):
     User.add_default_users()
 
 
+def load_elastic_conf():
+    url = '/'.join([app.config['ELASTICSEARCH_URL'], 'lettres__%s__document' % app.config['ENV']])
+
+    with open('elastic.%s.conf.json' % env, 'r') as f:
+        payload = json.load(f)
+        headers = {'Content-Type': 'application/json'}
+        res = requests.put(url, data=payload, headers=headers)
+
+        return res
+
+
+
 def make_cli():
     """ Creates a Command Line Interface for everydays tasks
 
@@ -32,6 +45,8 @@ def make_cli():
         """ Generates the client"""
         click.echo("Loading the application")
         global app
+        global env
+        env = config
         app = create_app(config)
 
     @click.command("db-create")
@@ -121,6 +136,10 @@ def make_cli():
 
         for name in indexes.split(","):
             if name in indexes_info:
+
+                if name == "documents":
+                    load_elastic_conf()
+
                 reindex_from_info(name, indexes_info[name])
             else:
                 print("Warning: index %s does not exist or is not declared in the cli" % name)

@@ -345,7 +345,6 @@ class JSONAPIAbstractFacade(object):
     def add_to_index(self, propagate=False):
         from app.search import SearchIndexManager
         for data in self.get_data_to_index_when_added(propagate):
-            print("reindex:", data)
             SearchIndexManager.add_to_index(index=data["index"], id=data["id"], payload=data["payload"])
 
     def remove_from_index(self, propagate=False):
