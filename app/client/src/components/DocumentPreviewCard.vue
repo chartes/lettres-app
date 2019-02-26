@@ -12,13 +12,8 @@
           </header>
 
           <div class="content" v-if="documentPreview">
-            
-             <div class="columns">
-               <div class="column is-three-quarters">
                  <h1 class="document-preview-card__title" v-html="titleContent"></h1>
                  <p class="document-preview-card__content" v-html="previewContent"></p>
-               </div>
-             </div>
           </div>
         </article>
     </div>

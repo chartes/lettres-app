@@ -54,7 +54,7 @@ module.exports = {
         }
       },
       {
-        test: /\.(png|jpg|gif)$/,
+        test: /\.(png|jpg|gif|ttf|eot|woff(2)?)$/,
         loader: 'file-loader',
         options: {
           name: '[name].[ext]?[hash]'
@@ -63,6 +63,10 @@ module.exports = {
       {
         test: /\.svg$/,
         loader: 'svg-inline-loader'
+      },
+      {
+        test: /\.styl$/,
+        loader: ['style-loader', 'css-loader', 'stylus-loader']
       }
     ]
   },

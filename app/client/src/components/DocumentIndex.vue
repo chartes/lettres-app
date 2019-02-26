@@ -3,7 +3,7 @@
     <section class="documents-index columns">
 
       <aside class="menu documents-index__collections column is-one-fifth">
-
+        <hello-world></hello-world>
         <p class="menu-label">
           Les collections
         </p>
@@ -59,6 +59,7 @@
 
 <script>
   import { mapState } from 'vuex';
+  import '../plugins/vuetify';
 
   import Tab from './ui/Tab';
   import Tabs from './ui/Tabs';
@@ -66,11 +67,12 @@
   import Changelog from './sections/Changelog';
   import Locks from './sections/Locks';
   import DocumentList from './sections/DocumentList';
+  import HelloWorld from "./HelloWorld";
 
   export default {
 
     name: 'DocumentIndex',
-    components: {DocumentList, Tab, Tabs, Changelog, Bookmarks, Locks},
+    components: {DocumentList, Tab, Tabs, Changelog, Bookmarks, Locks, HelloWorld},
     props: {
     },
     created () {

@@ -1,12 +1,12 @@
 <template>
-  <documentIndex/>
+  <home-page/>
 </template>
 
 <script>
-  import DocumentIndex from './components/DocumentIndex';
+  import HomePage from './components/HomePage';
   export default {
     props: [],
-    components: {DocumentIndex}
+    components: {HomePage}
   }
 </script>
 
