@@ -3,11 +3,11 @@
     "lettres__development__document": {
       "properties": {
         "creation": {
-          "type":   "date",
+          "type": "date",
           "format": "yyyy-MM-dd"
         },
         "creation-not-after": {
-          "type":   "date",
+          "type": "date",
           "format": "yyyy-MM-dd"
         }
       }

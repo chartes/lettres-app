@@ -3,11 +3,11 @@
     "lettres__production__document": {
       "properties": {
         "creation": {
-          "type":   "date",
+          "type": "date",
           "format": "yyyy-MM-dd"
         },
         "creation-not-after": {
-          "type":   "date",
+          "type": "date",
           "format": "yyyy-MM-dd"
         }
       }
@@ -17,30 +17,40 @@
     "analysis": {
       "filter": {
         "french_elision": {
-          "type":         "elision",
+          "type": "elision",
           "articles_case": true,
           "articles": [
-              "l", "m", "t", "qu", "n", "s",
-              "j", "d", "c", "jusqu", "quoiqu",
-              "lorsqu", "puisqu"
-            ]
+            "l",
+            "m",
+            "t",
+            "qu",
+            "n",
+            "s",
+            "j",
+            "d",
+            "c",
+            "jusqu",
+            "quoiqu",
+            "lorsqu",
+            "puisqu"
+          ]
         },
         "french_stop": {
-          "type":       "stop",
-          "stopwords":  "_french_"
+          "type": "stop",
+          "stopwords": "_french_"
         },
         "french_keywords": {
-          "type":       "keyword_marker",
-          "keywords":   []
+          "type": "keyword_marker",
+          "keywords": []
         },
         "french_stemmer": {
-          "type":       "stemmer",
-          "language":   "light_french"
+          "type": "stemmer",
+          "language": "light_french"
         }
       },
       "analyzer": {
         "rebuilt_french": {
-          "tokenizer":  "standard",
+          "tokenizer": "standard",
           "filter": [
             "french_elision",
             "lowercase",
