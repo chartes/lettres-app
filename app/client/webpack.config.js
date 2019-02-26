@@ -3,11 +3,12 @@ var webpack = require('webpack')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin');
 
 module.exports = {
   mode: 'development',
   entry: {
-    document: './src/document.js',
+    //document: './src/document.js',
     documentIndex: './src/documentIndex.js'
   },
   output: {
@@ -129,6 +130,7 @@ if (process.env.NODE_ENV === 'production') {
     new BundleAnalyzerPlugin({
       analyzerMode: 'static',
       openAnalyzer: false
-    })
+    }),
+    new VuetifyLoaderPlugin()
   ])
 }

@@ -1,13 +1,12 @@
-{# extends 'base.html' #}
+{% extends 'base.html' %}
 
 
 {% block head_scripts %}
-  <link href="https://fonts.googleapis.com/css?family=Material+Icons" rel="stylesheet">
-  <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+
 {% endblock head_scripts %}
 
 {% block content %}
- <div id="app"></div>
+<div id="app" data-document-id="{{ docId }}" data-searched-term="{{ search }}"></div>
 {% endblock content %}
 
 

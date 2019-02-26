@@ -9,8 +9,8 @@
         class="hidden-sm-and-down"
         type="text"
         placeholder="Catherine de Medicis"
-        v-model="value"
-        @keyup.enter="action(value)"
+        v-model="currentValue"
+        @keyup.enter="action(currentValue)"
     ></v-text-field>
   </div>
 </template>
@@ -20,6 +20,7 @@
         name: "search-box",
         props: {
             action: { required: true },
+            value: {type: String, default: ""},
             loading: {
                 type: Boolean,
                 default: false
@@ -27,7 +28,7 @@
         },
         data() {
             return {
-                value: null
+                currentValue: this.$props.value
             }
         },
         created() {

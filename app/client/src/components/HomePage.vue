@@ -57,6 +57,14 @@
           </v-list-tile>
         </template>
       </v-list>
+      
+      <v-container>
+        <v-layout >
+          <v-img  src="/lettres/static/images/logo-ecole-nationale-des-chartes-header.png"
+                  :max-height="260" :max-width="260">
+          </v-img>
+        </v-layout>
+      </v-container>
     </v-navigation-drawer>
     <v-toolbar
         :clipped-left="$vuetify.breakpoint.lgAndUp"
@@ -67,17 +75,20 @@
     >
       <v-toolbar-title style="width: 300px" class="ml-0 pl-3">
         <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
-        <span class="hidden-sm-and-down">Lettres</span>
+        <span class="hidden-sm-and-down"><v-btn flat href="/lettres/documents">Projet Lettres</v-btn></span>
       </v-toolbar-title>
 
-      <search-box id="search-box" :action="performSearch" :loading="documentLoading"/>
+      <search-box id="search-box" :action="performSearch" :value="searchedTerm" :loading="documentLoading"/>
       <v-spacer></v-spacer>
 
     </v-toolbar>
     <v-content>
       <v-container fluid fill-height>
         <v-layout>
-          <document-list :page-size="pageSize" :current-page="currentPage" :go-to-page="goToDocPage" :nb-pages="nbPages">
+          <document v-if="displayedDocId" :doc_id="displayedDocId">
+          
+          </document>
+          <document-list v-else :page-size="pageSize" :current-page="currentPage" :go-to-page="goToDocPage" :nb-pages="nbPages">
           
           </document-list>
         </v-layout>
@@ -93,15 +104,18 @@
     import SearchBox from "./ui/SearchBox";
     import {getUrlParameter} from "../modules/utils";
     import DocumentList from "./sections/DocumentList";
-
+    import Document from "./Document";
+    
     export default {
         name: 'HomePage',
-        components: {DocumentList, SearchBox},
+        components: {Document, DocumentList, SearchBox},
         props: {
-            source: String
+            searchedTerm: String,
+            docId: Number
         },
         created() {
             this.goToDocPage(parseInt(this.currentPage));
+            
             this.$store.dispatch('user/fetchCurrent').then(resp => {
                 this.loaded = true;
             });
@@ -111,40 +125,39 @@
                 currentPage: 1,
                 pageSize: 15,
                 loaded: false,
+                displayedDocId: this.$props.docId,
 
                 dialog: false,
                 drawer: null,
                 items: [
-                    { icon: 'contacts', text: 'Contacts'},
-                    {icon: 'history', text: 'Frequently contacted'},
-                    {icon: 'content_copy', text: 'Duplicates'},
+                    {icon: 'info', text: 'À propos'},
+
+                    {icon: 'content_copy', text: 'Parcourir les collections'},
+                    {icon: 'history', text: 'Recherches récentes'},
                     {
                         icon: 'keyboard_arrow_up',
                         'icon-alt': 'keyboard_arrow_down',
-                        text: 'Labels',
+                        text: 'Mon compte',
                         model: true,
                         children: [
-                            {icon: 'add', text: 'Create label'}
+                            {icon: 'content_copy',text: 'Mon profil'},
+                            {icon: 'content_copy',text: 'Mes favoris'},
+                            {icon: 'content_copy',text: 'Mon historique'},
+                            {icon: 'content_copy',text: 'Mes documents verouillés'},
                         ]
                     },
                     {
                         icon: 'keyboard_arrow_up',
                         'icon-alt': 'keyboard_arrow_down',
-                        text: 'More',
+                        text: 'Paramétrage',
                         model: false,
                         children: [
-                            {text: 'Import'},
-                            {text: 'Export'},
-                            {text: 'Print'},
-                            {text: 'Undo changes'},
-                            {text: 'Other contacts'}
+                            {icon: 'contacts', text: 'Contributeurs'},
+                            {icon: 'content_copy', text: 'Référentiels de données'},
+                            {icon: 'content_copy', text: 'Collections de documents'},
                         ]
                     },
-                    {icon: 'settings', text: 'Settings'},
-                    {icon: 'chat_bubble', text: 'Send feedback'},
-                    {icon: 'help', text: 'Help'},
-                    {icon: 'phonelink', text: 'App downloads'},
-                    {icon: 'keyboard', text: 'Go to the old version'}
+                    {icon: 'info', text: 'Documentation'}
                 ]
             }
         },
@@ -165,8 +178,8 @@
             },
             goToDocPage(num) {
                 this.currentPage = num;
-                if (document.getElementById("search-box") && document.getElementById("search-box").value) {
-                    this.performSearch(this.currentPage);
+                if (this.searchedTerm) {
+                    this.performSearch(this.searchedTerm, this.currentPage);
                 } else {
                     this.fetchAll();
                 }
@@ -174,6 +187,8 @@
             performSearch(searchedValue, numPage = 1) {
                 const term = searchedValue ? searchedValue : '';
                 if (searchedValue.length > 1) {
+                    this.displayedDocId = null;
+
                     this.$store.dispatch('document/fetchSearch', {
                         pageId: numPage,
                         pageSize: this.pageSize,
@@ -181,7 +196,7 @@
                     });
                     this.currentPage = numPage;
                 } else {
-                    document.getElementById("search-box").value = null;
+                    //document.getElementById("search-box").value = null;
                     this.goToDocPage(1);
                 }
             }

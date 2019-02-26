@@ -1,20 +1,14 @@
 <template>
-  <div class="document section">
+  <div class="document">
 
     <document-tag-bar v-if="isUserLoaded" :doc-id="doc_id"/>
 
     <article v-if="document && documentsPreview[doc_id]" class="document__content" >
-      <div class="columns">
-        <div class="column">
           <document-notice :editable="canEdit"/>
           <document-placenames :editable="canEdit"/>
           <document-persons :editable="canEdit"/>
           <document-transcription :editable="canEdit"/>
-        </div>
-        <div class="column is-one-quarter">
-
-        </div>
-      </div>
+   
       <div style="margin-left: 0;">
         <changelog v-if="current_user" v-bind:compact="true" :doc-id="doc_id" :currentUserOnly="false" page-size="10"/>
       </div>

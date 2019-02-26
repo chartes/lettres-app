@@ -1,11 +1,14 @@
 <template>
-  <home-page/>
+    <home-page :doc-id="docId" :searched-term="searchedTerm"/>
 </template>
 
 <script>
   import HomePage from './components/HomePage';
   export default {
-    props: [],
+      props: {
+          docId: {type: Number, default: null},
+          searchedTerm: {type: String, default: null},
+      },
     components: {HomePage}
   }
 </script>

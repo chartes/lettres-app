@@ -16,10 +16,10 @@
            :starts-on="isPublished"
     >
       <template #active>
-        <font-awesome-icon :icon="['fas', 'check-circle']"/>
+        <v-icon size="14">$vuetify.icons.active_check_circle</v-icon>
       </template>
       <template #inactive>
-        <font-awesome-icon :icon="['far', 'check-circle']"/>
+        <v-icon size="14">$vuetify.icons.inactive_check_circle</v-icon>
       </template>
     </badge>
   
@@ -35,10 +35,10 @@
            :starts-on="isBookmarked"
     >
       <template #active>
-        <font-awesome-icon :icon="['fas', 'bookmark']"/>
+        <v-icon size="14">$vuetify.icons.active_bookmark</v-icon>
       </template>
       <template #inactive>
-        <font-awesome-icon :icon="['far', 'bookmark']"/>
+        <v-icon size="14">$vuetify.icons.inactive_bookmark</v-icon>
       </template>
     </badge>
   
@@ -53,13 +53,13 @@
            :starts-on="lockOwner[docId]"
     >
       <template #active>
-        <font-awesome-icon :icon="['fas', 'lock']"/>
+        <v-icon size="14">$vuetify.icons.lock</v-icon>
       </template>
       <template #activeLabel>
         <span v-if="lockOwner[docId]" class="badge-label">{{lockOwner[docId].attributes.username}}</span>
       </template>
       <template #inactive>
-        <font-awesome-icon :icon="['fas', 'unlock']"/>
+        <v-icon size="14">$vuetify.icons.unlock</v-icon>
       </template>
     </badge>
   
