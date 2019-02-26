@@ -322,9 +322,9 @@ class JSONAPIAbstractFacade(object):
     def get_relationship_data_to_index(self, rel_name):
         from app.api.facade_manager import JSONAPIFacadeManager
         to_be_reindexed = []
-        db.session.refresh(self.obj)
-        d = getattr(self.obj, rel_name)
 
+        d = self.relationships[rel_name]['resource_getter']()
+        print(d)
         rel_data = []
         if d is not None:
             if not isinstance(d, list):
@@ -340,6 +340,8 @@ class JSONAPIAbstractFacade(object):
             to_be_reindexed.extend(
                 f_obj.get_data_to_index_when_added(False)
             )
+
+        print(to_be_reindexed)
         return to_be_reindexed
 
     def add_to_index(self, propagate=False):
