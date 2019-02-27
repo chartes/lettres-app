@@ -117,10 +117,9 @@
             docId: Number
         },
         created() {
-            this.goToDocPage(parseInt(this.currentPage));
-            
             this.$store.dispatch('user/fetchCurrent').then(resp => {
                 this.loaded = true;
+                this.goToDocPage(parseInt(this.currentPage));
             });
         },
         data: function () {
@@ -181,7 +180,7 @@
                 this.$store.dispatch('document/fetchAll', {
                     pageId: this.currentPage,
                     pageSize: this.pageSize,
-                    filters: this.current_user ? '' : 'filter[is-published]=true'
+                    filters: !!this.current_user ? '' : 'filter[is-published]=true'
                 }).then(r => {
 
                 });
@@ -206,7 +205,6 @@
                     });
                     this.currentPage = numPage;
                 } else {
-                    //document.getElementById("search-box").value = null;
                     this.goToDocPage(1);
                 }
             }
