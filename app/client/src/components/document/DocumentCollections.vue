@@ -1,6 +1,5 @@
 <template>
 
-
   <div class="document__collections" >
 
     <header class="collection-list__header">

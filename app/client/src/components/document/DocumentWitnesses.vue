@@ -47,12 +47,12 @@
   import IconPenEdit from '../ui/icons/IconPenEdit';
   import IconBin from '../ui/icons/IconBin';
   import WitnessForm from '../forms/WitnessForm';
-  import LauchButton from '../forms/LaunchButton';
+  import LaunchButton from '../forms/LaunchButton';
   import ErrorMessage from '../ui/ErrorMessage';
   import IconArrowDown from '../ui/icons/IconArrowDown';
   export default {
     name: 'DocumentWitnesses',
-    components: {ErrorMessage, LauchButton, WitnessForm, IconBin, IconPenEdit, IconArrowDown},
+    components: {ErrorMessage, LaunchButton, WitnessForm, IconBin, IconPenEdit, IconArrowDown},
     props: {
       editable: {
         type: Boolean,

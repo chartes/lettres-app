@@ -1,5 +1,5 @@
 <template>
-  <section class="document-persons section">
+  <section class="document-persons  ">
     <header class="document-persons__header">
       <h2 class="document-persons__title subtitle">Dates de lieu</h2>
     </header>

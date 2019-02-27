@@ -85,12 +85,15 @@
     <v-content>
       <v-container fluid fill-height>
         <v-layout>
-          <document v-if="displayedDocId" :doc_id="displayedDocId">
-          
-          </document>
-          <document-list v-else :page-size="pageSize" :current-page="currentPage" :go-to-page="goToDocPage" :nb-pages="nbPages">
-          
-          </document-list>
+          <document v-if="displayedDocId" :doc_id="displayedDocId"></document>
+          <div v-else>
+            <div v-if="documents">
+              <document-list :page-size="pageSize" :current-page="currentPage" :go-to-page="goToDocPage"
+                             :nb-pages="nbPages">
+  
+              </document-list>
+            </div>
+          </div>
         </v-layout>
       </v-container>
     </v-content>
@@ -168,17 +171,24 @@
                 return parseInt(this.links.last ? getUrlParameter(this.links.last, "page%5Bnumber%5D") : 1);
             }
         },
+        watch: {
+          documents(val) {
+          
+          }
+        },
         methods: {
             fetchAll() {
                 this.$store.dispatch('document/fetchAll', {
                     pageId: this.currentPage,
                     pageSize: this.pageSize,
                     filters: this.current_user ? '' : 'filter[is-published]=true'
+                }).then(r => {
+
                 });
             },
             goToDocPage(num) {
                 this.currentPage = num;
-                if (this.searchedTerm) {
+                if (this.searchedTerm && this.searchedTerm.length > 1) {
                     this.performSearch(this.searchedTerm, this.currentPage);
                 } else {
                     this.fetchAll();

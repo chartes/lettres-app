@@ -5,8 +5,8 @@
       <title-field-in-place
               :tabulation-index="0"
               label=""
-              name="title"
-              not-set="Non renseigné"
+              name="Adresse"
+              not-set="Non renseignée"
               :initial-value="document.title"
               :editable="editable"
               :status="titleStatus"
@@ -18,7 +18,7 @@
       <div class="column is-one-third">
         <date-field
                 :tabulation-index="0"
-                label="creation"
+                label="Date de rédaction"
                 name="creation"
                 not-set="Inconnue"
                 :initial-value="document['creation']"
@@ -28,7 +28,7 @@
       <div class="column is-one-third">
         <date-field
                 :tabulation-index="0"
-                label="creation-not-after"
+                label="Date de rédaction (rédigée avant le ...)"
                 name="creation-not-after"
                 :initial-value="document['creation-not-after']"
                 :editable="editable"
@@ -37,7 +37,7 @@
       <div class="column is-one-third">
         <text-field-in-place
                 :tabulation-index="0"
-                label="creation-label"
+                label="Date de rédaction (étiquette)"
                 name="creation-label"
                 not-set="Inconnue"
                 :initial-value="document['creation-label']"
@@ -47,7 +47,7 @@
       <div class="column">
         <multiselect-field
                 :editable="editable"
-                label="Langue(s)"
+                label="Langues"
                 :optionsList="allLanguages"
                 :selectedItems="languages"
                 :onChange="languagesChanged"/>

@@ -341,7 +341,7 @@ class JSONAPIAbstractFacade(object):
                 f_obj.get_data_to_index_when_added(False)
             )
 
-        print(to_be_reindexed)
+
         return to_be_reindexed
 
     def add_to_index(self, propagate=False):
