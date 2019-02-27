@@ -11,26 +11,21 @@
     <div class="witness-list__content">
       <ul class="witness-list__list">
         <li v-for="witness, index in list" class="witness-item">
-          <div class="witness-item__order" v-if="editable && list.length > 1">
-            <button
-                    v-if="index < list.length-1"
-                    class="witness-item__order-button"
-                    @click="reorderWitness(witness, 1)"
-            >
-              <icon-arrow-down/>
-            </button>
-            <button
-                    v-if="index > 0"
-                    class="witness-item__order-button witness-item__order-button-up"
-                    @click="reorderWitness(witness, -1)"
-            >
-              <icon-arrow-down class="is-upside-down"/>
-            </button>
-          </div>
+
           <div class="witness-item__content">
             <p class="witness-item__text" v-html="witness.content"></p>
-            <a v-if="editable" @click="openWitnessEdit(witness)" class="witness-item__edit"><icon-pen-edit/></a>
-            <a v-if="editable" @click="removeWitness(witness)" class="witness-item__delete"><icon-bin/></a>
+            <a v-if="editable && list.length > 1" @click="reorderWitness(witness, 1)">
+              <icon-arrow-down style="padding: 0"/>
+            </a>
+            <a v-if="editable && list.length > 1 && index > 0" @click="reorderWitness(witness, 1)">
+              <icon-arrow-down style="padding: 0" class="is-upside-down"/>
+            </a>
+            <a v-if="editable" @click="openWitnessEdit(witness)" class="witness-item__edit">
+              <icon-pen-edit/>
+            </a>
+            <a v-if="editable" @click="removeWitness(witness)" class="witness-item__delete">
+              <icon-bin/>
+            </a>
           </div>
         </li>
       </ul>

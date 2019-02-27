@@ -8,36 +8,41 @@
 
       <div class="document-persons__senders column">
 
-        <h3 class="document-persons__subtitle">Expéditeur</h3>
+        <h3 class="document-persons__subtitle">
+          Expéditeur
+          <a v-if="editable" class="tag" href="#" @click="openAddPerson('sender')">
+            <icon-add/>
+          </a>
+        </h3>
 
         <ul class="document-persons__senders-list" v-if="documentSender.length">
           <li v-for="c in documentSender" :key="c.person.id" class="person-item">
             <a :href="c.person.ref" target="_blank">
               {{ c.person.label }}
             </a>
-            <span class="tag">{{ c.role.label }}</span>
             <a v-if="editable" class="witness-item__delete" @click="unlinkPersonFromDoc(c)"><icon-bin/></a>
           </li>
         </ul>
 
         <div v-else>
           <p class="person-item"><em>Aucun expéditeur n'a été renseigné</em></p>
-          <p v-if="editable">
-            <lauch-button label="Sélectionner un expéditeur" @click="openAddPerson('sender')"/>
-          </p>
         </div>
 
       </div>
 
       <div class="document-persons__recipients column">
 
-        <h3 class="document-persons__subtitle">Destinataire{{ documentRecipients.length > 1 ? 's':'' }}</h3>
+        <h3 class="document-persons__subtitle">
+          Destinataire{{ documentRecipients.length > 1 ? 's':'' }}
+          <a v-if="editable" class="tag" href="#" @click="openAddPerson('recipient')">
+            <icon-add/>
+          </a>
+        </h3>
 
         <ul class="document-persons__recipients-list" v-if="documentRecipients.length">
           <li v-for="c in documentRecipients" :key="c.person.id" class="person-item">
             <a :href="c.person.ref" target="_blank">
               {{ c.person.label }}</a>
-            <span class="tag">{{ c.role.label }}</span>
             <a v-if="editable" class="person-item__delete" @click="unlinkPersonFromDoc(c)"><icon-bin/></a>
           </li>
         </ul>
@@ -45,13 +50,6 @@
         <div v-else>
           <p class="person-item"><em>Aucun destinataire n'a été renseigné</em></p>
         </div>
-
-        <div v-if="editable">
-          <p>
-            <lauch-button label="Ajouter un destinataire" @click="openAddPerson('recipient')"/>
-          </p>
-        </div>
-
 
       </div>
 
@@ -72,9 +70,10 @@
   import IconBin from '../ui/icons/IconBin';
   import PersonListForm from '../forms/PersonListForm';
   import LauchButton from '../forms/LaunchButton';
+  import IconAdd from "../ui/icons/IconAdd";
   export default {
     name: 'DocumentPersons',
-    components: {LauchButton, PersonListForm, IconBin},
+    components: {LauchButton, PersonListForm, IconBin, IconAdd},
     props: {
       editable: {
         type: Boolean,

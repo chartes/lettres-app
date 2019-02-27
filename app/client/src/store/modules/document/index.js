@@ -11,7 +11,8 @@ const TRANSLATION_MAPPING = {
   'creation-label' : 'Date de création (étiquette)',
   'is-published': 'Statut de publication',
   'argument': 'Argument',
-  'transcription': 'Transcription'
+  'transcription': 'Transcription',
+  'title': 'Adresse'
 };
 
 const state = {
@@ -243,7 +244,6 @@ const actions = {
         relationships
     };
 
-    console.warn(data, state.witnesses);
     const http = http_with_csrf_token();
     return http.post(`/witnesses?without-relationships`, {data})
       .then(response => {

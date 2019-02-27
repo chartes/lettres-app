@@ -4,17 +4,10 @@
     <document-tag-bar v-if="isUserLoaded" :doc-id="doc_id"/>
 
     <article v-if="document && documentsPreview[doc_id]" class="document__content" >
-      
+  
       <document-attributes :editable="canEdit" class="document__subsection"/>
-      
-        <div class="columns">
-          <div class="column">
-            <document-collections :editable="canEdit" />
-          </div>
-          <div class="column is-two-thirds">
-            <document-witnesses :editable="canEdit"  :list="witnesses"/>
-          </div>
-        </div>
+  
+      <document-witnesses :editable="canEdit" :list="witnesses"/>
         <div class="document__subsection"></div>
         <div class="columns">
           <div class="column">
@@ -26,6 +19,7 @@
         </div>
       
       <div class="document__subsection"></div>
+      <document-collections :editable="canEdit" class="document__subsection"/>
   
       <document-argument :editable="canEdit" class="document__subsection"/>
       <document-transcription :editable="canEdit"/>
