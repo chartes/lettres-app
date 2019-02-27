@@ -13,7 +13,8 @@ def index(doc_id=None):
 
     searched_term = request.args.get('search', '')
     if doc_id is not None and searched_term != '':
-        return redirect(url_for("app_bp.index", search=searched_term, docId=None))
+        pass
+        #return redirect(url_for("app_bp.index", search=searched_term, docId=None))
 
     resp = make_response(render_template("documents/document_index.html", docId=doc_id, search=searched_term))
     return refresh_token(user, resp)

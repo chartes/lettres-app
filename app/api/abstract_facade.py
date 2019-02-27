@@ -322,25 +322,19 @@ class JSONAPIAbstractFacade(object):
     def get_relationship_data_to_index(self, rel_name):
         from app.api.facade_manager import JSONAPIFacadeManager
         to_be_reindexed = []
-
-        d = self.relationships[rel_name]['resource_getter']()
-        print(d)
-        rel_data = []
-        if d is not None:
-            if not isinstance(d, list):
-                rel_data = [d]
-            else:
-                rel_data = d
-
         url_prefix = request.host_url[:-1] + current_app.api_url_registrar.url_prefix
-        for doc in rel_data:
-            facade = JSONAPIFacadeManager.get_facade_class(doc)
 
-            f_obj, kwargs, errors = facade.get_resource_facade(url_prefix, id=doc.id)
+        ri = self.relationships[rel_name]['resource_identifier_getter']()
+        if ri is not None:
+            ri = [ri] if not isinstance(ri, list) else ri
+
+        for resource_identifier in ri:
+            facade_class = JSONAPIFacadeManager.get_facade_class_from_facade_type(resource_identifier['type'])
+
+            f_obj, kwargs, errors = facade_class.get_resource_facade(url_prefix, id=resource_identifier['id'])
             to_be_reindexed.extend(
                 f_obj.get_data_to_index_when_added(False)
             )
-
 
         return to_be_reindexed
 

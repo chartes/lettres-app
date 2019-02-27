@@ -61,14 +61,11 @@
   import TextFieldInPlace from '../forms/fields/TextFieldInPlace';
   import MultiselectField from '../forms/fields/MultiselectField';
   import DateField from '../forms/fields/DateField';
-  import TitleField from '../forms/fields/TitleField';
   import TitleFieldInPlace from '../forms/fields/TitleFieldInPlace';
-  import IconBin from '../ui/icons/IconBin';
-  import LaunchButton from '../forms/LaunchButton';
 
   export default {
     name: 'DocumentAttributes',
-    components: {TitleFieldInPlace, TextFieldInPlace, DateField, MultiselectField, TextFieldInPlace },
+    components: {TitleFieldInPlace,  DateField, MultiselectField, TextFieldInPlace },
     props: {
       editable: {
         type: Boolean,

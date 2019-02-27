@@ -11,7 +11,7 @@
           <div class="column">
             <document-collections :editable="canEdit" />
           </div>
-          <div class="column ">
+          <div class="column is-two-thirds">
             <document-witnesses :editable="canEdit"  :list="witnesses"/>
           </div>
         </div>
@@ -75,6 +75,7 @@
                 this.$store.dispatch('document/fetch', this.doc_id).then(r => {
                     this.computeCanEdit();
                 }).catch(e => {
+                    console.warn(e);
                     console.warn("should go to ", baseAppURL);
                     window.location.replace(baseAppURL);
                 });

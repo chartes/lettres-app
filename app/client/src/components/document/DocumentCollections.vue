@@ -3,11 +3,15 @@
   <div class="document__collections" >
 
     <header class="collection-list__header">
-      <h2 class="collection-list__title subtitle">Collections</h2>
+      <h2 class="collection-list__title subtitle">
+        Collections
+        <a v-if="editable" class="tag" href="#" @click="openCollectionEdit">
+          <icon-add/>
+        </a>
+      </h2>
     </header>
 
     <div class="document__collections--content">
-
       <ul v-if="collections.length"
           v-for="collection in collections"
           class="collection-list__list"
@@ -25,10 +29,6 @@
       <div v-if="error" class="collection-list__error notification is-danger">
         {{error}}
       </div>
-
-      <p v-if="editable">
-        <launch-button label="Ajouter une collection" @click="openCollectionEdit"/>
-      </p>
 
     </div>
 
@@ -50,9 +50,10 @@
   import IconBin from '../ui/icons/IconBin';
   import CollectionListForm from '../forms/CollectionListForm';
   import LaunchButton from '../forms/LaunchButton';
+  import IconAdd from "../ui/icons/IconAdd";
   export default {
     name: 'DocumentCollections',
-    components: {LaunchButton, CollectionListForm, IconBin, IconPenEdit},
+    components: {LaunchButton, CollectionListForm, IconBin, IconPenEdit, IconAdd},
     props: {
       editable: {
         type: Boolean,

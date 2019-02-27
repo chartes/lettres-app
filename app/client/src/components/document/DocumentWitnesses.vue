@@ -1,7 +1,12 @@
 <template>
   <div class="witness-list">
     <header class="witness-list__header">
-      <h2 class="witness-list__title subtitle">Témoins</h2>
+      <h2 class="witness-list__title subtitle">
+        Témoins
+        <a v-if="editable" class="tag" href="#" @click="openNewWitnessEdit">
+          <icon-add/>
+        </a>
+      </h2>
     </header>
     <div class="witness-list__content">
       <ul class="witness-list__list">
@@ -23,21 +28,21 @@
             </button>
           </div>
           <div class="witness-item__content">
-            <p class="witness-item__text" v-html="witness.content"/>
+            <p class="witness-item__text" v-html="witness.content"></p>
             <a v-if="editable" @click="openWitnessEdit(witness)" class="witness-item__edit"><icon-pen-edit/></a>
             <a v-if="editable" @click="removeWitness(witness)" class="witness-item__delete"><icon-bin/></a>
           </div>
         </li>
       </ul>
-      <lauch-button v-if="editable" label="Ajouter un témoin" @click="openNewWitnessEdit"/>
+      
       <error-message :error="error"/>
     </div>
     <witness-form
-            v-if="editMode == 'new' || editMode == 'edit'"
-            :title="editMode == 'new' ? 'Nouveau témoin' : 'Éditer le témoin'"
+            v-if="editMode === 'new' || editMode === 'edit'"
+            :title="editMode === 'new' ? 'Nouveau témoin' : 'Éditer le témoin'"
             :witness="selectedWitness"
             :witnessId="selectedWitnessId"
-            :submit="editMode == 'new' ? addWitness : updateWitness"
+            :submit="editMode === 'new' ? addWitness : updateWitness"
             :cancel="closeWitnessEdit"
     />
   </div>
@@ -50,9 +55,11 @@
   import LaunchButton from '../forms/LaunchButton';
   import ErrorMessage from '../ui/ErrorMessage';
   import IconArrowDown from '../ui/icons/IconArrowDown';
+  import IconAdd from '../ui/icons/IconAdd';
+
   export default {
     name: 'DocumentWitnesses',
-    components: {ErrorMessage, LaunchButton, WitnessForm, IconBin, IconPenEdit, IconArrowDown},
+    components: {ErrorMessage, LaunchButton, WitnessForm, IconBin, IconPenEdit, IconArrowDown, IconAdd},
     props: {
       editable: {
         type: Boolean,

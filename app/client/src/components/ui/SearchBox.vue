@@ -16,8 +16,11 @@
 </template>
 
 <script>
+    import VTextField from "vuetify/lib/components/VTextField/VTextField";
+
     export default {
         name: "search-box",
+        components: {VTextField},
         props: {
             action: { required: true },
             value: {type: String, default: ""},

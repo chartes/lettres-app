@@ -214,10 +214,13 @@ const actions = {
   },
 
   addWitness ({commit, state}, witness) {
-    const witnessData = { ...witness }
+    witness.num = Math.max.apply(null, state.witnesses.map(w => w.num)) + 1;
+
+    const witnessData = { ...witness };
     const institutionId = witness.institution ? witness.institution.id : null;
-    delete(witnessData.id)
-    delete(witnessData.institution)
+    delete(witnessData.id);
+    delete(witnessData.institution);
+
     const relationships = {
       document: {
         data: {
@@ -238,8 +241,9 @@ const actions = {
         type: "witness",
         attributes: witnessData,
         relationships
-    }
+    };
 
+    console.warn(data, state.witnesses);
     const http = http_with_csrf_token();
     return http.post(`/witnesses?without-relationships`, {data})
       .then(response => {
