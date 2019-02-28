@@ -5,7 +5,7 @@
 
 
     <div class="container">
-        <form action="" method="POST" novalidate formnovalidate class="register-form" role="form">
+        <form action="{{url_for('user.register')}}" method="POST" novalidate formnovalidate class="register-form" role="form">
             {{ form.hidden_tag() }}
 
             <div class="message">
@@ -39,7 +39,7 @@
                     {{ render_submit_field(form.submit, tabindex=280) }}
                     <div>
                         {% if user_manager.USER_ENABLE_REGISTER %}
-                            <a href="{{ url_for('user.login') }}" tabindex='290'>
+                            <a href="{{ url_for('app_bp.user_action', action='login') }}" tabindex='290'>
                                 {% trans %}Already registered? Sign in.{% endtrans %}</a>
                         {% endif %}
                     </div>

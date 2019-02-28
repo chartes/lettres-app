@@ -5,7 +5,7 @@
 <div class="user-profile-container container">
 <h1 class="title">{%trans%}Change username{%endtrans%}</h1>
 
-<form action="" method="POST" class="form" role="form">
+<form action="{{url_for('user.change_username')}}" method="POST" class="form" role="form">
     {{ form.hidden_tag() }}
     {{ render_field(form.new_username, tabindex=10, class="input") }}
     {{ render_field(form.old_password, tabindex=20, class="input") }}
