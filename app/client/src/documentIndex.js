@@ -29,6 +29,7 @@ library.add(fasBookmark, farBookmark, faLock, faUnlock);
 library.add(fasCheckCircle, farCheckCircle);
 */
 
+import 'vuetify/dist/vuetify.min.css' // Ensure you are using css-loader
 
 Vue.use(Vuetify, {
   iconfont: 'fa',
