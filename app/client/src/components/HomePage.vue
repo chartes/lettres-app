@@ -80,18 +80,28 @@
 
       <search-box id="search-box" :action="performSearch" :value="searchedTerm" :loading="documentLoading"/>
       <v-spacer></v-spacer>
-
+  
+      <v-toolbar-items class="hidden-sm-and-down">
+        <v-btn v-if="!current_user" flat href="/lettres/users/login">Connexion</v-btn>
+        <v-btn v-else flat href="/lettres/users/logout">Déconnexion</v-btn>
+      </v-toolbar-items>
     </v-toolbar>
+    
+    
+    <!-- CONTENT -->
     <v-content>
       <v-container fluid fill-height>
         <v-layout>
-          <document v-if="displayedDocId" :doc_id="displayedDocId"></document>
+          <div v-if="userTemplate" v-html="userTemplate"> </div>
           <div v-else>
-            <div v-if="documents">
-              <document-list :page-size="pageSize" :current-page="currentPage" :go-to-page="goToDocPage"
-                             :nb-pages="nbPages">
-  
-              </document-list>
+            <document v-if="displayedDocId" :doc_id="displayedDocId"></document>
+            <div v-else>
+              <div v-if="documents">
+                <document-list :page-size="pageSize" :current-page="currentPage" :go-to-page="goToDocPage"
+                               :nb-pages="nbPages">
+      
+                </document-list>
+              </div>
             </div>
           </div>
         </v-layout>
@@ -114,6 +124,7 @@
         components: {Document, DocumentList, SearchBox},
         props: {
             searchedTerm: String,
+            userTemplate: String,
             docId: Number
         },
         created() {

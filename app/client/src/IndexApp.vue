@@ -1,5 +1,5 @@
 <template>
-    <home-page :doc-id="docId" :searched-term="searchedTerm"/>
+    <home-page :doc-id="docId" :searched-term="searchedTerm" :user-template="userTemplate"/>
 </template>
 
 <script>
@@ -8,6 +8,7 @@
       props: {
           docId: {type: Number, default: null},
           searchedTerm: {type: String, default: null},
+          userTemplate: {type: String, default: null},
       },
     components: {HomePage}
   }

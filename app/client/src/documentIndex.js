@@ -61,17 +61,20 @@ new Vue({
   store,
   data: {
     documentId: undefined,
-    searchedTerm: ''
+    searchedTerm: '',
+    userTemplate: undefined,
   },
   beforeMount: function () {
     this.documentId = parseInt(this.$el.dataset.documentId);
     this.searchedTerm = this.$el.dataset.searchedTerm;
+    this.userTemplate = this.$el.dataset.userTemplate;
   },
   render(h) {
     return h(App, {
       props: {
         docId: this.documentId,
-        searchedTerm: this.searchedTerm
+        searchedTerm: this.searchedTerm,
+        userTemplate: this.userTemplate
       }
     })
   }
