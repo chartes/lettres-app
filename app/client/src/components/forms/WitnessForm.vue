@@ -37,11 +37,11 @@
           </button>
         </select-autocomplete-field>
         <rich-text-editor
-                label="Contenu"
+                label="Témoin"
                 v-model="form.content"
         />
         <rich-text-editor
-                label="Classification mark"
+                label="Côte du témoin"
                 v-model="form['classification-mark']"
                 :formats="[['italic','superscript','note']]"
         />
@@ -61,7 +61,6 @@
 <script>
 
   import { mapState } from 'vuex';
-  import Vue from 'vue'
 
   import ModalForm from './ModalForm';
   import FieldLabel from './fields/FieldLabel';
@@ -94,7 +93,6 @@
       remove: { type: Function },
     },
     data() {
-      console.log("data", this.$props.witness)
       return {
         form: { ...this.$props.witness },
         loading: false,
@@ -143,7 +141,6 @@
     watch: {
       currentWitness (val) {
         this.form = { ...val }
-        console.log("watch currentWitness", this.form)
         this.loading = false
       }
     },

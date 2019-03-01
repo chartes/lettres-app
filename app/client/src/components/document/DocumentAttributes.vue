@@ -4,9 +4,9 @@
     <header class="document__attributes--title">
       <title-field-in-place
               :tabulation-index="0"
-              label="Adresse"
+              label="Titre"
               name="title"
-              not-set="Non renseignée"
+              not-set="Non renseigné"
               :initial-value="document.title"
               :editable="editable"
               :status="titleStatus"

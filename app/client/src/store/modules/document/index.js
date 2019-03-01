@@ -12,7 +12,7 @@ const TRANSLATION_MAPPING = {
   'is-published': 'Statut de publication',
   'argument': 'Argument',
   'transcription': 'Transcription',
-  'title': 'Adresse'
+  'title': 'Titre'
 };
 
 const state = {
@@ -128,15 +128,17 @@ const actions = {
 
     const http = http_with_csrf_token();
     return http.get(`documents/${id}?include=${incs.join(',')}`).then( response => {
-      commit('UPDATE_DOCUMENT', response.data);
+      commit('UPDATE_DOCUMENT', {
+        data: response.data.data,
+        included: response.data.included
+      });
       commit('LOADING_STATUS', false)
     })
   },
   fetchPreview ({ commit }, id) {
     commit('LOADING_STATUS', true);
     const incs = [
-      'collections', 'witnesses', 'current-lock',
-      //'persons', 'persons-having-roles','roles', 'languages',
+      'collections', 'witnesses', 'current-lock'
     ];
 
     const http = http_with_csrf_token();
@@ -308,7 +310,6 @@ const actions = {
     witnesses.splice(foundIndex, 1)
     witnesses.splice(foundIndex + dir, 0, found)
     witnesses = witnesses.map((w, index) => { w.num = index+1; return w})
-
     const changed = witnesses.filter((w, index) => {
       console.log(state.witnesses[index].id, w.id, 'add', state.witnesses[index].id !== w.id)
       return state.witnesses[index].id !== w.id

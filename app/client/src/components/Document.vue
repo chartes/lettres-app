@@ -1,34 +1,32 @@
 <template>
   <div class="document">
-
     <document-tag-bar v-if="isUserLoaded" :doc-id="doc_id"/>
-
+    
     <article v-if="document && documentsPreview[doc_id]" class="document__content" >
-  
       <document-attributes :editable="canEdit" class="document__subsection"/>
-  
+      
       <document-witnesses :editable="canEdit" :list="witnesses"/>
-        <div class="document__subsection"></div>
-        <div class="columns">
-          <div class="column">
-              <document-persons :editable="canEdit"/>
-            </div>
-            <div class="column ">
-              <document-placenames :editable="canEdit"/>
-            </div>
+      <div class="document__subsection"></div>
+      <div class="columns">
+        <div class="column">
+          <document-persons :editable="canEdit"/>
         </div>
+        <div class="column ">
+          <document-placenames :editable="canEdit"/>
+        </div>
+      </div>
       
       <div class="document__subsection"></div>
       <document-collections :editable="canEdit" class="document__subsection"/>
-  
+      
       <document-argument :editable="canEdit" class="document__subsection"/>
       <document-transcription :editable="canEdit"/>
-  
+      
       <div style="margin-left: 0;">
         <changelog v-if="current_user" v-bind:compact="true" :doc-id="doc_id" :currentUserOnly="false" page-size="10"/>
       </div>
     </article>
-
+    
     <loading-indicator :active="documentLoading" :full-page="true"/>
   </div>
 </template>
@@ -67,10 +65,13 @@
         mounted () {
             this.$store.dispatch('user/fetchCurrent').then(response => {
                 this.$store.dispatch('document/fetch', this.doc_id).then(r => {
+
+                    for (let w of this.witnesses) {
+               
+                    }
+                    
                     this.computeCanEdit();
                 }).catch(e => {
-                    console.warn(e);
-                    console.warn("should go to ", baseAppURL);
                     window.location.replace(baseAppURL);
                 });
             });
@@ -87,13 +88,14 @@
             ]),
             ...mapState('user', ['current_user', 'isUserLoaded']),
             ...mapState('locks', ['lockOwner']),
-            
+
             collectionURL() {
-               const baseUrl = window.location.origin
-                   ? window.location.origin + '/'
-                   : window.location.protocol + '/' + window.location.host;
-               return `${baseUrl}${baseApiURL.substr(1)}/iiif/documents/${this.doc_id}/collection/default`;
-            }
+                const baseUrl = window.location.origin
+                    ? window.location.origin + '/'
+                    : window.location.protocol + '/' + window.location.host;
+                return `${baseUrl}${baseApiURL.substr(1)}/iiif/documents/${this.doc_id}/collection/default`;
+            },
+
         },
         watch: {
             lockOwner() {
@@ -109,12 +111,12 @@
                     this.canEdit = false;
                     return;
                 }
-                
+
                 if (this.current_user.isAdmin) {
                     this.canEdit = true;
                     return;
                 }
-                
+
                 this.canEdit = (this.documentsPreview[this.doc_id].currentLock.id === null) || (this.lockOwner[this.doc_id] && this.lockOwner[this.doc_id].id === this.current_user.id);
             }
         }

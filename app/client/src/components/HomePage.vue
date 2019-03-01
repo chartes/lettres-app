@@ -1,5 +1,7 @@
 <template>
   <v-app id="inspire">
+    
+    <!-- NAVIGATION -->
     <v-navigation-drawer
         v-model="drawer"
         :clipped="$vuetify.breakpoint.lgAndUp"
@@ -66,6 +68,8 @@
         </v-layout>
       </v-container>
     </v-navigation-drawer>
+    
+    <!-- TOOLBAR -->
     <v-toolbar
         :clipped-left="$vuetify.breakpoint.lgAndUp"
         color="red darken-4"
@@ -94,7 +98,9 @@
         <v-layout>
           <div v-if="userTemplate" v-html="userTemplate"> </div>
           <div v-else>
-            <document v-if="displayedDocId" :doc_id="displayedDocId"></document>
+            <div v-if="displayedDocId">
+              <document :doc_id="displayedDocId"></document>
+            </div>
             <div v-else>
               <div v-if="documents">
                 <document-list :page-size="pageSize" :current-page="currentPage" :go-to-page="goToDocPage"
@@ -107,7 +113,34 @@
         </v-layout>
       </v-container>
     </v-content>
-   
+    
+    <div v-if="!!displayedDocId && document && document['iiif-collection-url'].length > 0">
+      <v-navigation-drawer  right  :mini-variant="!showIIIFViewer"
+                           class='mt-5 homepage__iiif-viewer' width="700" app>
+        <v-container>
+          <v-layout>
+            <div class="uv"
+                 data-locale="en-GB:English (GB),fr-FR:Français"
+                 :data-uri="document['iiif-collection-url']">
+            </div>
+          </v-layout>
+        </v-container>
+        <v-btn
+            absolute
+            fab
+            top right
+            fixed
+            @click="showIIIFViewer = !showIIIFViewer"
+            class="homepage__iiif-viewer__toggle-btn"
+        >
+          <v-icon  class="homepage__iiif-viewer__toggle-icon">
+            {{this.showIIIFViewer ? this.$vuetify.icons.hide : this.$vuetify.icons.show}}
+          </v-icon>
+        </v-btn>
+      </v-navigation-drawer>
+
+    </div>
+
   </v-app>
 </template>
 
@@ -130,7 +163,8 @@
         created() {
             this.$store.dispatch('user/fetchCurrent').then(resp => {
                 this.loaded = true;
-                this.goToDocPage(parseInt(this.currentPage));
+                if (!this.docId)
+                    this.goToDocPage(parseInt(this.currentPage));
             });
         },
         data: function () {
@@ -142,6 +176,7 @@
 
                 dialog: false,
                 drawer: null,
+                showIIIFViewer: false,
                 items: [
                     {icon: 'info', text: 'À propos'},
 
@@ -176,7 +211,7 @@
         },
         computed: {
             ...mapState('user', ['current_user']),
-            ...mapState('document', ['documents', 'links', 'documentLoading']),
+            ...mapState('document', ['documents', 'document', 'links', 'documentLoading']),
             nbPages() {
                 return parseInt(this.links.last ? getUrlParameter(this.links.last, "page%5Bnumber%5D") : 1);
             }

@@ -9,15 +9,19 @@
       </h2>
     </header>
     <div class="witness-list__content">
+      
       <ul class="witness-list__list">
         <li v-for="witness, index in list" class="witness-item">
 
           <div class="witness-item__content">
-            <p class="witness-item__text" v-html="witness.content"></p>
+            <span class="witness-item__text" v-html="witness.content"></span>
+            <span v-if="witness.status && witness.status.length > 0" class="tag">{{witness.status}}</span>
+            <span v-if="witness.tradition && witness.tradition.length > 0" class="tag">{{witness.tradition}}</span>
+            
             <a v-if="editable && list.length > 1" @click="reorderWitness(witness, 1)">
               <icon-arrow-down style="padding: 0"/>
             </a>
-            <a v-if="editable && list.length > 1 && index > 0" @click="reorderWitness(witness, 1)">
+            <a v-if="editable && list.length > 1 && index > 0" @click="reorderWitness(witness, -1)">
               <icon-arrow-down style="padding: 0" class="is-upside-down"/>
             </a>
             <a v-if="editable" @click="openWitnessEdit(witness)" class="witness-item__edit">
@@ -51,6 +55,7 @@
   import ErrorMessage from '../ui/ErrorMessage';
   import IconArrowDown from '../ui/icons/IconArrowDown';
   import IconAdd from '../ui/icons/IconAdd';
+  import {mapState} from 'vuex';
 
   export default {
     name: 'DocumentWitnesses',
@@ -73,7 +78,16 @@
         error: null
       }
     },
+    computed: {
+    },
+    mounted() {
+
+    } ,
+    watch: {
+
+    },
     methods: {
+      
       updateWitness (witness) {
         this.removeError()
         this.$store.dispatch('document/updateWitness', witness)

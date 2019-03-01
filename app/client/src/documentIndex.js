@@ -49,6 +49,9 @@ Vue.use(Vuetify, {
 
     'lock': 'fas fa-lock',
     'unlock': 'fas fa-unlock',
+
+    'show': 'fas fa-eye',
+    'hide': 'fas fa-eye-slash',
   }
 });
 
