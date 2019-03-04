@@ -53,7 +53,7 @@ class JSONAPIAbstractFacade(object):
         return "{prefix}__{env}__{index_name}".format(
             prefix=current_app.config.get("INDEX_PREFIX", ""),
             env=current_app.config.get("ENV"),
-            index_name=cls.TYPE
+            index_name=cls.TYPE_PLURAL
         )
 
     @property

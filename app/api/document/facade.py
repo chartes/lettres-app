@@ -229,17 +229,17 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
             }
 
     def get_data_to_index_when_added(self, propagate):
-        _res = self.resource
+        #_res = self.resource
         payload = {
-            "id": _res["id"],
-            "type": _res["type"],
+            "id": self.id,
+            "type": self.TYPE,
 
-            "creation": _res["attributes"]["creation"],
-            "creation-not-after": _res["attributes"]["creation-not-after"],
+            "creation": self.obj.creation,
+            "creation-not-after": self.obj.creation_not_after,
 
-            "title": _res["attributes"]["title"],
-            "argument": _res["attributes"]["argument"],
-            "transcription": _res["attributes"]["transcription"],
+            "title": self.obj.title,
+            "argument": self.obj.argument,
+            "transcription": self.obj.transcription,
 
             "witnesses": [{"id": w.id, "content": w.content} for w in self.obj.witnesses],
             "languages": [{"id": l.id, "code": l.code} for l in self.obj.languages],
@@ -293,12 +293,7 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
                 for c_h_r in self.obj.placenames_having_roles if c_h_r.placename_role.label == 'location-date-to'
             ]
         }
-
-        # add shortcuts for special persons and placenames:
-
-
-
-        return [{"id": _res["id"], "index": self.get_index_name(), "payload": payload}]
+        return [{"id": self.obj.id, "index": self.get_index_name(), "payload": payload}]
 
     def get_data_to_index_when_removed(self, propagate):
         print("GOING TO BE REMOVED FROM INDEX:", [{"id": self.obj.id, "index": self.get_index_name()}])
@@ -325,9 +320,7 @@ class DocumentSearchFacade(DocumentFacade):
                 "creation": self.obj.creation,
                 "creation-not-after": self.obj.creation_not_after,
                 "creation-label": self.obj.creation_label,
-                "transcription": self.obj.transcription,
-
-                "is-published": self.obj.is_published is not None,
+                "transcription": self.obj.transcription
             },
             "meta": self.meta,
             "links": {

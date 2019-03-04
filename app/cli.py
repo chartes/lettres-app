@@ -1,5 +1,6 @@
 import click
 import json
+import pprint
 import requests
 
 from app import create_app
@@ -22,16 +23,26 @@ def add_default_users(db):
     User.add_default_users()
 
 
-def load_elastic_conf():
-    url = '/'.join([app.config['ELASTICSEARCH_URL'], 'lettres__%s__document' % app.config['ENV']])
+def load_elastic_conf(conf_name, index_name):
+    url = '/'.join([app.config['ELASTICSEARCH_URL'], index_name])
+    res = None
+    try:
+        res = requests.delete(url)
 
-    with open('elastic.%s.conf.json' % env, 'r') as f:
-        payload = json.load(f)
-        headers = {'Content-Type': 'application/json'}
-        res = requests.put(url, data=payload, headers=headers)
+        with open('elasticsearch/_settings.conf.json', 'r') as _settings:
+            settings = json.load(_settings)
 
-        return res
+            with open('elasticsearch/%s.conf.json' % conf_name, 'r') as f:
+                payload = json.load(f)
+                payload["settings"] = settings
+                res = requests.put(url, json=payload)
+                assert str(res.status_code).startswith("20")
 
+    except FileNotFoundError as e:
+        print("no conf...", flush=True, end=" ")
+    except Exception as e:
+        print(res.text, str(e), flush=True, end=" ")
+        raise e
 
 
 def make_cli():
@@ -119,27 +130,28 @@ def make_cli():
         def reindex_from_info(name, info):
 
             with app.app_context():
+
                 prefix = "{host}{api_prefix}".format(host=host, api_prefix=app.config["API_URL_PREFIX"])
                 print("Reindexing %s... " % name, end="", flush=True)
 
                 index_name = info["facade"].get_index_name()
-                app.elasticsearch.indices.delete(index=index_name, ignore=[400, 404])  # remove all records
 
-                for obj in info["model"].query.all():
-                    f_obj = info["facade"](prefix, obj)
-                    f_obj.reindex("insert", propagate=False)
+                try:
+                    load_elastic_conf(name, index_name)
 
-                print("ok")
+                    for obj in info["model"].query.all():
+                        f_obj = info["facade"](prefix, obj)
+                        f_obj.reindex("insert", propagate=False)
+
+                    print("OK")
+                except Exception as e:
+                    print("NOT OK!  ", str(e))
 
         if indexes == "all": # reindex every index configured above
             indexes = ",".join(indexes_info.keys())
 
         for name in indexes.split(","):
             if name in indexes_info:
-
-                if name == "documents":
-                    load_elastic_conf()
-
                 reindex_from_info(name, indexes_info[name])
             else:
                 print("Warning: index %s does not exist or is not declared in the cli" % name)

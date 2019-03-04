@@ -68,7 +68,7 @@ const actions = {
   search({commit}, what) {
     console.log('user search', what);
     commit('SEARCH_RESULTS', {users: [], included: []});
-    http.get(`/search?query=*${what}*&index=lettres__${process.env.NODE_ENV}__user&include=roles`).then(response => {
+    http.get(`/search?query=*${what}*&index=lettres__${process.env.NODE_ENV}__users&include=roles`).then(response => {
       commit('SEARCH_RESULTS', {users: response.data.data, included: response.data.included});
     });
   }

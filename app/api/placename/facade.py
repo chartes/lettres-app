@@ -104,16 +104,14 @@ class PlacenameFacade(JSONAPIAbstractChangeloggedFacade):
         payload = {
             "id": _res["id"],
             "type": _res["type"],
-
-            "label": _res["attributes"]["label"],
-            "description": _res["attributes"]["description"],
-            "ref": _res["attributes"]["ref"],
+            "label": _res["attributes"]["label"]
         }
         placename_data = [{"id": _res["id"], "index": self.get_index_name(), "payload": payload}]
         if not propagate:
             return placename_data
         else:
-            return placename_data + self.get_relationship_data_to_index(rel_name="documents")
+            return placename_data + self.get_relationship_data_to_index(rel_name="documents") + self.get_relationship_data_to_index(
+                rel_name="roles-within-documents")
 
     def remove_from_index(self, propagate):
         from app.search import SearchIndexManager

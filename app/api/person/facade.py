@@ -103,16 +103,14 @@ class PersonFacade(JSONAPIAbstractChangeloggedFacade):
         payload = {
             "id": _res["id"],
             "type": _res["type"],
-
             "label": _res["attributes"]["label"],
-            "description": _res["attributes"]["description"],
-            "ref": _res["attributes"]["ref"],
         }
         person_data = [{"id": _res["id"], "index": self.get_index_name(), "payload": payload}]
         if not propagate:
             return person_data
         else:
-            return person_data + self.get_relationship_data_to_index(rel_name="documents")
+            return person_data + self.get_relationship_data_to_index(rel_name="documents") + self.get_relationship_data_to_index(
+                rel_name="roles-within-documents")
 
     def remove_from_index(self, propagate):
         from app.search import SearchIndexManager
