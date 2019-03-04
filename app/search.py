@@ -2,13 +2,13 @@ import elasticsearch
 import pprint
 from flask import current_app
 
-from app import db
-
 
 class SearchIndexManager(object):
 
     @staticmethod
-    def query_index(index, query, fields=None, page=None, per_page=None):
+    def query_index(index, query, sort_criteriae=None, page=None, per_page=None):
+        if sort_criteriae is None:
+            sort_criteriae = []
         if hasattr(current_app, 'elasticsearch'):
             body = {
                 'query': {
@@ -17,6 +17,10 @@ class SearchIndexManager(object):
                         # 'fields': ['collections'] if fields is None or len(fields) == 0 else fields
                     }
                 },
+                "sort": [
+                  #  {"creation": {"order": "desc"}}
+                  *sort_criteriae
+                ]
             }
 
             if per_page is not None:

@@ -212,9 +212,9 @@ class JSONAPIRouteRegistrar(object):
             objs_query = objs_query.order_by(sort_order(*sort_criteriae))
         return objs_query
 
-    def search(self, index, query, num_page, page_size):
+    def search(self, index, query, sort_criteriae, num_page, page_size):
         # query the search engine
-        results, total = SearchIndexManager.query_index(index=index, query=query, page=num_page, per_page=page_size)
+        results, total = SearchIndexManager.query_index(index=index, query=query, sort_criteriae=sort_criteriae, page=num_page, per_page=page_size)
 
         if total == 0:
             return {}, 0
@@ -270,8 +270,20 @@ class JSONAPIRouteRegistrar(object):
                 page_size = int(current_app.config["SEARCH_RESULT_PER_PAGE"])
 
             # Search, retrieve, filter, sort and paginate objs
+            sort_criteriae = None
+            if "sort" in request.args:
+                sort_criteriae = []
+                for criteria in request.args["sort"].split(','):
+                    if criteria.startswith('-'):
+                        sort_order = "desc"
+                        criteria = criteria[1:]
+                    else:
+                        sort_order = "asc"
+                    criteria = criteria.replace("-", "_")
+                    sort_criteriae.append({criteria: {"order": sort_order}})
+
             try:
-                res, count = self.search(index=index, query=query, num_page=num_page, page_size=page_size)
+                res, count = self.search(index=index, query=query, sort_criteriae=sort_criteriae, num_page=num_page, page_size=page_size)
             except Exception as e:
                 return JSONAPIResponseFactory.make_errors_response({
                     "status": 403,
