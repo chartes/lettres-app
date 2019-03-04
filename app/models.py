@@ -93,8 +93,12 @@ class Collection(db.Model, ChangesMixin):
     )
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    parent_id = db.Column(db.Integer, db.ForeignKey('collection.id'))
+
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.String(400))
+
+    parent = db.relationship("Collection", backref=db.backref('children', remote_side=id), uselist=False)
 
 
 class Note(db.Model, ChangesMixin):
