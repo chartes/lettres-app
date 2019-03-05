@@ -1,6 +1,6 @@
 import pprint
 from elasticsearch import Elasticsearch
-from flask import Flask, Blueprint, url_for
+from flask import Flask, Blueprint, url_for, render_template
 from flask.json import jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, set_access_cookies, create_access_token
@@ -190,6 +190,20 @@ def create_app(config_name="dev"):
 
     from app import models
     from app import routes
+
+    @app.errorhandler(404)
+    def handle_page_not_found(e):
+        title = "Page non trouvée"
+        content = "Le contenu que vous cherchez n'existe pas à cette adresse"
+        template = render_template('errors/generic.html', title=title, content=content)
+        return render_template('documents/document_index.html', userTemplate=template), 404
+
+    @app.errorhandler(500)
+    def handle_bad_request(e):
+        title = "Erreur serveur"
+        content = "Erreur interne du serveur."
+        template = render_template('errors/generic.html', title=title, content=content)
+        return render_template('documents/document_index.html', userTemplate=template), 500
 
     # =====================================
     # register api routes
