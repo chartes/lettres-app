@@ -1,5 +1,5 @@
 <template>
-  <div class="document">
+  <div v-if="!isLoading" class="document">
     <document-tag-bar v-if="isUserLoaded" :doc-id="doc_id"/>
     
     <article v-if="document && documentsPreview[doc_id]" class="document__content" >
@@ -63,14 +63,11 @@
             doc_id : {required: true, type: Number}
         },
         mounted () {
+            this.isLoading = true;
             this.$store.dispatch('user/fetchCurrent').then(response => {
                 this.$store.dispatch('document/fetch', this.doc_id).then(r => {
-
-                    for (let w of this.witnesses) {
-               
-                    }
-                    
                     this.computeCanEdit();
+                    this.isLoading = false;
                 }).catch(e => {
                     window.location.replace(baseAppURL);
                 });
@@ -78,7 +75,8 @@
         },
         data() {
             return {
-                canEdit: false
+                canEdit: false,
+                isLoading: true
             }
         },
         computed: {

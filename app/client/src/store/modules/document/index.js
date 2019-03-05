@@ -340,7 +340,12 @@ const actions = {
   removePlacename({commit}, relationId) {
     commit('REMOVE_PLACENAME', relationId)
   },
-
+  setIsLoading({commit}) {
+    commit('LOADING_STATUS', true);
+  },
+  unsetIsLoading({commit}) {
+    commit('LOADING_STATUS', false);
+  },
   addCollection ({commit, state}, collection) {
 
     const data = { data: [ { id : collection.id, type: "collection" }, ] }
@@ -353,7 +358,7 @@ const actions = {
       })
   },
   removeCollection ({commit, state}, collection) {
-    const data = { data: { id : collection.id, type: "collection" } }
+    const data = { data: { id : collection.id, type: "collection" } };
     const http = http_with_csrf_token();
     return http.delete(`/documents/${state.document.id}/relationships/collections?without-relationships`, {data})
       .then(response => {

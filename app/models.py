@@ -98,7 +98,14 @@ class Collection(db.Model, ChangesMixin):
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.String(400))
 
-    parent = db.relationship("Collection", backref=db.backref('children', remote_side=id), uselist=False)
+    children = db.relationship("Collection", backref=db.backref('parent', remote_side=id))
+
+    @property
+    def parents(self):
+        if self.parent is None:
+            return []
+        else:
+            return [self.parent] + self.parent.parents
 
 
 class Note(db.Model, ChangesMixin):
