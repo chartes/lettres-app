@@ -9,15 +9,19 @@
           <icon-add/>
         </a>
       </h2>
+      <h3 v-if="collectionsHierarchies.length > 0" >
+        Ce document fait partie des collections suivantes :
+      </h3>
     </header>
     
+
     <div class="document__collections--content">
         <span  v-for="hierarchy in collectionsHierarchies" :key="hierarchy.id">
           <v-layout row>
             <v-flex shrink pa-1>
               <v-breadcrumbs tag="span" :items="hierarchy" divider=">">
                 <template v-slot:item="props">
-                  <a>{{ props.item.title}}</a>
+                  <a :href="`/lettres/collections/${props.item.id}`">{{ props.item.title}}</a>
                 </template>
               </v-breadcrumbs>
             </v-flex>
