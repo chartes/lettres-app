@@ -63,7 +63,8 @@
 @import "components/document.witness-list";
 @import "components/document.person-form";
 @import "components/document.person-list-form";
-@import "components/_homepage.iiif-viewer";
+@import "components/document.iiif-viewer";
+@import "components/collection.collection-list";
 @import "components/lock";
 
 // Utilities / trumps – utilities and helper classes

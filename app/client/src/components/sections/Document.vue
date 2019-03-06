@@ -33,17 +33,17 @@
 
 <script>
     import { mapState } from 'vuex'
-    import LoadingIndicator from './ui/LoadingIndicator';
-    import Changelog from './sections/Changelog';
-    import DocumentPersons from './document/DocumentPersons';
-    import DocumentTranscription from './document/DocumentTranscription';
-    import DocumentTagBar from "./document/DocumentTagBar";
-    import DocumentPlacenames from "./document/DocumentPlacenames";
-    import {baseApiURL, baseAppURL} from "../modules/http-common";
-    import DocumentArgument from "./document/DocumentArgument";
-    import DocumentWitnesses from "./document/DocumentWitnesses";
-    import DocumentCollections from "./document/DocumentCollections";
-    import DocumentAttributes from "./document/DocumentAttributes";
+    import LoadingIndicator from '../ui/LoadingIndicator';
+    import Changelog from './Changelog';
+    import DocumentPersons from '../document/DocumentPersons';
+    import DocumentTranscription from '../document/DocumentTranscription';
+    import DocumentTagBar from "../document/DocumentTagBar";
+    import DocumentPlacenames from "../document/DocumentPlacenames";
+    import {baseApiURL, baseAppURL} from "../../modules/http-common";
+    import DocumentArgument from "../document/DocumentArgument";
+    import DocumentWitnesses from "../document/DocumentWitnesses";
+    import DocumentCollections from "../document/DocumentCollections";
+    import DocumentAttributes from "../document/DocumentAttributes";
 
     export default {
 

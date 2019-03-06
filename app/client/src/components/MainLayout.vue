@@ -25,6 +25,7 @@
               :prepend-icon="item.model ? item.icon : item['icon-alt']"
               append-icon=""
           >
+            <!-- menu head-->
             <v-list-tile slot="activator">
               <v-list-tile-content>
                 <v-list-tile-title>
@@ -32,6 +33,8 @@
                 </v-list-tile-title>
               </v-list-tile-content>
             </v-list-tile>
+
+            <!-- menu children-->
             <v-list-tile
                 v-for="(child, i) in item.children"
                 :key="i"
@@ -47,7 +50,9 @@
               </v-list-tile-content>
             </v-list-tile>
           </v-list-group>
-          <v-list-tile v-else :key="item.text" @click="">
+  
+          <!-- root items-->
+          <v-list-tile v-else :key="item.text" @click="item.action ? item.action() : null">
             <v-list-tile-action>
               <v-icon>{{ item.icon }}</v-icon>
             </v-list-tile-action>
@@ -94,7 +99,7 @@
     
     <!-- CONTENT -->
     <v-content v-if="loaded">
-      <v-container fluid fill-height>
+      <v-container fluid fill-height :class="section === 'collections' ? 'collection-list-container' : ''">
         <!-- TEMPLATE -->
         <v-layout v-if="section === 'template'">
           
@@ -119,6 +124,7 @@
         <!-- COLLECTIONS -->
         <v-layout v-else-if="section === 'collections'">
           <div v-if="template" v-html="template"></div>
+          <collection-list v-else-if="!collectionId"></collection-list>
         </v-layout>
         <!-- ERRORS -->
         <v-layout v-else-if="section === 'errors'">
@@ -163,11 +169,13 @@
     import SearchBox from "./ui/SearchBox";
     import {getUrlParameter} from "../modules/utils";
     import DocumentList from "./sections/DocumentList";
-    import Document from "./Document";
+    import CollectionList from "./sections/CollectionList";
+    import Document from "./sections/Document";
+    import {baseAppURL} from "../modules/http-common";
     
     export default {
         name: 'MainLayout',
-        components: {Document, DocumentList, SearchBox},
+        components: {Document, DocumentList, CollectionList, SearchBox},
         props: {
             section: String,
             data: Object
@@ -184,10 +192,12 @@
                 currentPage: 1,
                 pageSize: 15,
                 loaded: false,
-                displayedDocId: this.$props.data.docId,
+                
                 template: this.$props.data.template,
-                docId: this.$props.data.docId,
                 searchedTerm: this.$props.data.searchedTerm,
+                docId: this.$props.data.docId,
+                displayedDocId: this.$props.data.docId,
+                collectionId: this.$props.data.collectionId,
       
                 dialog: false,
                 drawer: null,
@@ -195,8 +205,9 @@
                 items: [
                     {icon: 'info', text: 'À propos'},
 
-                    {icon: 'content_copy', text: 'Parcourir les collections'},
+                    {icon: 'search', text: 'Parcourir les documents', action: () => this.goToPage(baseAppURL)},
                     {icon: 'history', text: 'Recherches récentes'},
+                    {icon: 'search', text: 'Parcourir les collections', action: () => this.goToPage(`${baseAppURL}/collections`)},
                     {
                         icon: 'keyboard_arrow_up',
                         'icon-alt': 'keyboard_arrow_down',
@@ -232,6 +243,9 @@
             }
         },
         methods: {
+            goToPage(url) {
+                window.location.replace(url);
+            },
             fetchAll() {
                 this.$store.dispatch('document/fetchAll', {
                     pageId: this.currentPage,
@@ -267,7 +281,3 @@
         }
     }
 </script>
-
-<style scoped>
-
-</style>

@@ -28,7 +28,6 @@
   },
   "devDependencies": {
     "@fortawesome/fontawesome-free": "^5.7.2",
-    "@mdi/font": "^3.5.95",
     "@vue/test-utils": "^1.0.0-beta.25",
     "babel-core": "^6.26.3",
     "babel-jest": "^24.1.0",
