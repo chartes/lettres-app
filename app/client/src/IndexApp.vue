@@ -1,14 +1,26 @@
 <template>
-    <home-page :doc-id="docId" :searched-term="searchedTerm" :user-template="userTemplate"/>
+    <home-page v-if="section === 'documents'"
+               :section="section"
+               :template="template"
+               :doc-id="docId"
+               :searched-term="searchedTerm"/>
+    <home-page v-else-if="section === 'collections'"
+               :section="section"
+               :template="template"/>
+    <home-page v-else-if="section === 'errors'"
+               :section="section"
+               :template="template"/>
 </template>
 
 <script>
   import HomePage from './components/HomePage';
   export default {
       props: {
+          section: {type: String, default: null},
+          template: {type: String, default: null},
+    
           docId: {type: Number, default: null},
           searchedTerm: {type: String, default: null},
-          userTemplate: {type: String, default: null},
       },
     components: {HomePage}
   }

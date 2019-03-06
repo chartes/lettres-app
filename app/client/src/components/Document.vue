@@ -69,7 +69,8 @@
                     this.computeCanEdit();
                     this.isLoading = false;
                 }).catch(e => {
-                    window.location.replace(baseAppURL);
+                    console.warn("ERROR", e);
+                    //window.location.replace(baseAppURL);
                 });
             });
         },
@@ -98,6 +99,9 @@
         watch: {
             lockOwner() {
                 this.computeCanEdit();
+            },
+            documentsPreview() {
+                this.computeCanEdit();
             }
         },
         methods: {
@@ -114,8 +118,7 @@
                     this.canEdit = true;
                     return;
                 }
-
-                this.canEdit = (this.documentsPreview[this.doc_id].currentLock.id === null) || (this.lockOwner[this.doc_id] && this.lockOwner[this.doc_id].id === this.current_user.id);
+                this.canEdit = (this.documentsPreview[this.doc_id] && this.documentsPreview[this.doc_id].currentLock.id === null) || (this.lockOwner[this.doc_id] && this.lockOwner[this.doc_id].id === this.current_user.id);
             }
         }
     }

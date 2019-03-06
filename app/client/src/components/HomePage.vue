@@ -95,8 +95,9 @@
     <!-- CONTENT -->
     <v-content>
       <v-container fluid fill-height>
-        <v-layout>
-          <div v-if="userTemplate" v-html="userTemplate"> </div>
+        <!-- DOCUMENTS -->
+        <v-layout v-if="section === 'documents'">
+          <div v-if="template" v-html="template"> </div>
           <div v-else>
             <div v-if="displayedDocId">
               <document :doc_id="displayedDocId"></document>
@@ -105,11 +106,18 @@
               <div v-if="documents">
                 <document-list :page-size="pageSize" :current-page="currentPage" :go-to-page="goToDocPage"
                                :nb-pages="nbPages">
-      
                 </document-list>
               </div>
             </div>
           </div>
+        </v-layout>
+        <!-- COLLECTIONS -->
+        <v-layout v-else-if="section === 'collections'">
+          <div v-if="template" v-html="template"></div>
+        </v-layout>
+        <!-- ERRORS -->
+        <v-layout v-else-if="section === 'errors'">
+          <div v-if="template" v-html="template"></div>
         </v-layout>
       </v-container>
     </v-content>
@@ -156,9 +164,11 @@
         name: 'HomePage',
         components: {Document, DocumentList, SearchBox},
         props: {
-            searchedTerm: String,
-            userTemplate: String,
-            docId: Number
+            section: String,
+            template: String,
+
+            docId: Number,
+            searchedTerm: String
         },
         created() {
             this.$store.dispatch('user/fetchCurrent').then(resp => {

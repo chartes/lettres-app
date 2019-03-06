@@ -45,7 +45,7 @@
     
     <collection-list-form
         v-if="editMode"
-        title="Ajouter une collection"
+        title="Ajouter le document à une collection"
         :submit="updateCollection"
         :cancel="closeCollectionEdit"
     />

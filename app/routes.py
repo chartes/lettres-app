@@ -16,7 +16,10 @@ def index(doc_id=None):
     if doc_id is not None and searched_term != '':
         return redirect(url_for("app_bp.index", search=searched_term, docId=None))
 
-    resp = make_response(render_template("documents/document_index.html", docId=doc_id, search=searched_term))
+    resp = make_response(render_template("app/homepage.html",
+                                         section="documents",
+                                         docId=doc_id,
+                                         search=searched_term))
     return refresh_token(user, resp)
 
 
@@ -38,7 +41,7 @@ def user_action(action):
         print("VIEW NOT FOUND:", action, 'user.%s' % action.replace("-", '_'))
         return redirect(url_for("app_bp.index"))
 
-    resp = make_response(render_template("documents/document_index.html", userTemplate=action_template))
+    resp = make_response(render_template("app/homepage.html", section="documents", template=action_template))
     return refresh_token(user, resp)
 
 
@@ -48,7 +51,7 @@ def login():
     if user.is_authenticated:
         return redirect(url_for("app_bp.index"))
     login_template = current_app.user_manager.login_view()
-    resp = make_response(render_template("documents/document_index.html", userTemplate=login_template))
+    resp = make_response(render_template("app/homepage.html", template=login_template))
     return refresh_token(user, resp)
 
 

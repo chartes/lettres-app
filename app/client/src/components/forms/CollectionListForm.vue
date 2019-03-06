@@ -8,7 +8,16 @@
           :submitting="false"
   >
     <div class="collection-list-form">
-
+      
+      <article v-if="current_user.isAdmin" class="message">
+        <div class="message-body">
+          <p>
+            Pour créer une nouvelle collection ou en modifier une existante, utilisez plutôt la
+            <a href="/lettres/collections">page de gestion des collections</a>
+          </p>
+        </div>
+      </article>
+      
       <list-autocomplete-field
         search-placeholder="Rechercher une collection"
         v-model="form"
@@ -77,8 +86,9 @@
     computed: {
 
       ...mapState('collections', ['collectionsSearchResults']),
+      ...mapState('user', ['current_user']),
 
-      hasCancelAction () {
+        hasCancelAction () {
         return this.cancel ? this.cancelAction : null
       },
       validForm () {

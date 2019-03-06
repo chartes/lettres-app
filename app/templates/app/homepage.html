@@ -2,14 +2,17 @@
 
 
 {% block head_scripts %}
+  {% if docId %}
     <script type="text/javascript" id="embedUV" src="http://universalviewer.io/vendor/uv/lib/embed.js"></script>
+  {% endif %}
 {% endblock head_scripts %}
 
 {% block content %}
 <div id="app"
+     data-section="{{section}}"
+     data-template="{{ template }}"
      data-document-id="{{ docId }}"
-     data-searched-term="{{ search }}"
-     data-user-template="{{ userTemplate }}">
+     data-searched-term="{{ search }}">
 </div>
 {% endblock content %}
 

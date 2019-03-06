@@ -386,7 +386,6 @@ const getters = {
   },
 
   locationDateFrom(state) {
-    console.warn(state.placenames);
     return state.placenames.filter(corr => {
       if (!corr.role) return false;
       console.warn(corr.role.label);

@@ -65,19 +65,23 @@ new Vue({
   data: {
     documentId: undefined,
     searchedTerm: '',
-    userTemplate: undefined,
+    template: undefined,
   },
   beforeMount: function () {
+    this.section = this.$el.dataset.section;
+    this.template = this.$el.dataset.template;
+
     this.documentId = parseInt(this.$el.dataset.documentId);
     this.searchedTerm = this.$el.dataset.searchedTerm;
-    this.userTemplate = this.$el.dataset.userTemplate;
   },
   render(h) {
     return h(App, {
       props: {
+        section: this.section,
+        template: this.template,
+
         docId: this.documentId,
         searchedTerm: this.searchedTerm,
-        userTemplate: this.userTemplate
       }
     })
   }
