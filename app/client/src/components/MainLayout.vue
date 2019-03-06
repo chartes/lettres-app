@@ -93,10 +93,15 @@
     
     
     <!-- CONTENT -->
-    <v-content>
+    <v-content v-if="loaded">
       <v-container fluid fill-height>
+        <!-- TEMPLATE -->
+        <v-layout v-if="section === 'template'">
+          
+          <div v-if="template" v-html="template"></div>
+        </v-layout>
         <!-- DOCUMENTS -->
-        <v-layout v-if="section === 'documents'">
+        <v-layout v-else-if="section === 'documents'">
           <div v-if="template" v-html="template"> </div>
           <div v-else>
             <div v-if="displayedDocId">
@@ -161,14 +166,11 @@
     import Document from "./Document";
     
     export default {
-        name: 'HomePage',
+        name: 'MainLayout',
         components: {Document, DocumentList, SearchBox},
         props: {
             section: String,
-            template: String,
-
-            docId: Number,
-            searchedTerm: String
+            data: Object
         },
         created() {
             this.$store.dispatch('user/fetchCurrent').then(resp => {
@@ -182,8 +184,11 @@
                 currentPage: 1,
                 pageSize: 15,
                 loaded: false,
-                displayedDocId: this.$props.docId,
-
+                displayedDocId: this.$props.data.docId,
+                template: this.$props.data.template,
+                docId: this.$props.data.docId,
+                searchedTerm: this.$props.data.searchedTerm,
+      
                 dialog: false,
                 drawer: null,
                 showIIIFViewer: false,
@@ -225,11 +230,6 @@
             nbPages() {
                 return parseInt(this.links.last ? getUrlParameter(this.links.last, "page%5Bnumber%5D") : 1);
             }
-        },
-        watch: {
-          documents(val) {
-          
-          }
         },
         methods: {
             fetchAll() {

@@ -1,4 +1,4 @@
-import werkzeug
+import json
 from flask import render_template, make_response, request, redirect, url_for, current_app, abort
 from flask_login import current_user
 
@@ -15,15 +15,18 @@ def index(doc_id=None):
 
     searched_term = request.args.get('search', '')
     if doc_id is not None and searched_term != '':
-        return redirect(url_for("app_bp.index", search=searched_term, docId=None))
+        return redirect(url_for("app_bp.index", section="documents", data=json.dumps({
+            'docId': None, 'searchedTerm': searched_term
+        })))
 
     if doc_id is not None and not Document.query.filter(Document.id == doc_id).first():
         abort(status=404)
 
-    resp = make_response(render_template("app/homepage.html",
+    resp = make_response(render_template("app/main.html",
                                          section="documents",
-                                         docId=doc_id,
-                                         search=searched_term))
+                                         data=json.dumps({
+                                             'docId': doc_id, 'searchedTerm': searched_term
+                                         })))
     return refresh_token(user, resp)
 
 
@@ -45,7 +48,9 @@ def user_action(action):
         print("VIEW NOT FOUND:", action, 'user.%s' % action.replace("-", '_'))
         return redirect(url_for("app_bp.index"))
 
-    resp = make_response(render_template("app/homepage.html", section="documents", template=action_template))
+    resp = make_response(render_template("app/main.html",
+                                         section="template",
+                                         data=json.dumps({'template': action_template})))
     return refresh_token(user, resp)
 
 
@@ -55,7 +60,9 @@ def login():
     if user.is_authenticated:
         return redirect(url_for("app_bp.index"))
     login_template = current_app.user_manager.login_view()
-    resp = make_response(render_template("app/homepage.html", template=login_template))
+    resp = make_response(render_template("app/main.html",
+                                         section="template",
+                                         data=json.dumps({'template': login_template})))
     return refresh_token(user, resp)
 
 
@@ -76,7 +83,7 @@ def collections(collection_id=None):
     if collection_id is not None and not Collection.query.filter(Collection.id == collection_id).first():
         abort(status=404)
 
-    resp = make_response(render_template("app/homepage.html",
+    resp = make_response(render_template("app/main.html",
                                          section="collections",
-                                         data={collection_id: collection_id}))
+                                         data=json.dumps({'collectionId': collection_id})))
     return refresh_token(user, resp)

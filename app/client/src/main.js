@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import App from './IndexApp.vue';
+import App from './App.vue';
 
 import store from './store';
 import Vuetify from "vuetify";
@@ -63,25 +63,18 @@ new Vue({
   el: '#app',
   store,
   data: {
-    documentId: undefined,
-    searchedTerm: '',
-    template: undefined,
+    section: undefined,
+    data : {}
   },
   beforeMount: function () {
     this.section = this.$el.dataset.section;
-    this.template = this.$el.dataset.template;
-
-    this.documentId = parseInt(this.$el.dataset.documentId);
-    this.searchedTerm = this.$el.dataset.searchedTerm;
+    this.data = JSON.parse(this.$el.dataset.data);
   },
   render(h) {
     return h(App, {
       props: {
         section: this.section,
-        template: this.template,
-
-        docId: this.documentId,
-        searchedTerm: this.searchedTerm,
+        data: this.data,
       }
     })
   }

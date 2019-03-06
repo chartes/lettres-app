@@ -14,7 +14,7 @@
 </template>
 
 <script>
-  import DocumentPreviewCard from '../DocumentPreviewCard';
+  import DocumentPreviewCard from '../document/DocumentPreviewCard';
   import Pagination from '../ui/Pagination';
   import { mapState } from 'vuex';
 

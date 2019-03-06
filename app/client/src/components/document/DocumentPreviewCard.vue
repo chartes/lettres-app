@@ -21,10 +21,10 @@
 
 <script>
   import { mapState } from 'vuex'
-  import LoadingIndicator from './ui/LoadingIndicator';
-  import DocumentAttributes from './document/DocumentAttributes';
-  import {baseAppURL} from '../modules/http-common';
-  import DocumentTagBar from "./document/DocumentTagBar";
+  import LoadingIndicator from '../ui/LoadingIndicator';
+  import DocumentAttributes from './DocumentAttributes';
+  import {baseAppURL} from '../../modules/http-common';
+  import DocumentTagBar from "./DocumentTagBar";
 
   export default {
 

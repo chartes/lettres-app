@@ -8,7 +8,7 @@ const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin');
 module.exports = {
   mode: 'development',
   entry: {
-    documentIndex: './src/documentIndex.js'
+    main: './src/main.js'
   },
   output: {
     path: path.resolve(__dirname, '../static/js'),
