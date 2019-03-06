@@ -1,20 +1,24 @@
 import werkzeug
-from flask import render_template, make_response, request, redirect, url_for, current_app
+from flask import render_template, make_response, request, redirect, url_for, current_app, abort
 from flask_login import current_user
 
 from app import app_bp
 from app.api.routes import refresh_token, pprint
+from app.models import Collection, Document
 
 
 @app_bp.route("/")
 @app_bp.route("/documents")
-@app_bp.route("/documents/<doc_id>")
+@app_bp.route("/documents/<int:doc_id>")
 def index(doc_id=None):
     user = current_user
 
     searched_term = request.args.get('search', '')
     if doc_id is not None and searched_term != '':
         return redirect(url_for("app_bp.index", search=searched_term, docId=None))
+
+    if doc_id is not None and not Document.query.filter(Document.id == doc_id).first():
+        abort(status=404)
 
     resp = make_response(render_template("app/homepage.html",
                                          section="documents",
@@ -64,15 +68,15 @@ def logout():
     return redirect(url_for('app_bp.index'))
 
 
+@app_bp.route("/collections")
+@app_bp.route("/collections/<int:collection_id>")
+def collections(collection_id=None):
+    user = current_user
 
+    if collection_id is not None and not Collection.query.filter(Collection.id == collection_id).first():
+        abort(status=404)
 
-
-@app_bp.route("/documentation")
-def documentation():
-    return render_template("docs/docs.html")
-
-
-@app_bp.route("/about")
-def about():
-    return render_template("docs/about.html")
-
+    resp = make_response(render_template("app/homepage.html",
+                                         section="collections",
+                                         data={collection_id: collection_id}))
+    return refresh_token(user, resp)
