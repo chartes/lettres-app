@@ -138,7 +138,8 @@
                            class='mt-5 homepage__iiif-viewer' width="700" app>
         <v-container>
           <v-layout>
-            <div class="uv"
+
+            <div class="uv" style="width: 200px; height: 400px;"
                  data-locale="en-GB:English (GB),fr-FR:Français"
                  :data-uri="document['iiif-collection-url']">
             </div>
@@ -186,6 +187,8 @@
                 if (!this.docId)
                     this.goToDocPage(parseInt(this.currentPage));
             });
+        },
+        mounted() {
         },
         data: function () {
             return {

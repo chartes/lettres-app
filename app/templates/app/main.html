@@ -1,14 +1,13 @@
 {% extends 'base.html' %}
 
-
 {% block head_scripts %}
-  {% if docId %}
+  {% if section == 'documents' and data|get_value('docId')  %}
     <script type="text/javascript" id="embedUV" src="http://universalviewer.io/vendor/uv/lib/embed.js"></script>
   {% endif %}
 {% endblock head_scripts %}
 
 {% block content %}
-<div id="app" data-section="{{section}}"  data-data="{{ data }}"></div>
+    <div id="app" data-section="{{section}}"  data-data="{{ data }}"></div>
 {% endblock content %}
 
 {% block scripts %}
