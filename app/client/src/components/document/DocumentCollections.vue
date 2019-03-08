@@ -55,7 +55,7 @@
 </template>
 
 <script>
-    import { mapState } from 'vuex';
+    import { mapState, mapGetters } from 'vuex';
     import IconPenEdit from '../ui/icons/IconPenEdit';
     import IconBin from '../ui/icons/IconBin';
     import CollectionListForm from '../forms/CollectionListForm';
@@ -79,8 +79,10 @@
                 collectionsHierarchies: []
             }
         },
-        mounted() {
-            this.fetchCollectionsWithParents();
+        created() {
+            this.$store.dispatch('collections/fetchAll').then(r => {
+                this.refreshHierarchies();
+            })
         },
         methods: {
             updateCollection (collection) {
@@ -110,40 +112,34 @@
             closeCollectionEdit () {
                 this.editMode = false
             },
-            fetchCollectionsWithParents() {
-                this.$store.dispatch('document/setIsLoading').then(r => {
-                    this.$store.dispatch('collections/reset').then(r => {
-                        const promises = this.collections.map(c => this.$store.dispatch('collections/fetchOne', c.id));
-                        Promise.all(promises).then(r => {
-                            this.$store.dispatch('document/unsetIsLoading');
-                        });
-                    });
-                });
-            },
-            computeCollectionsHierarchies() {
-                this.collectionsHierarchies = Object.values(this.collectionsWithParents).map(
-                    c => {
-                        let hierarchy = c.parents.slice().reverse().map(p => {
-                            return {id: p.id, title: p.title}
-                        });
-                        hierarchy.push({id: c.id, title: c.attributes.title});
-                        return hierarchy;
+            refreshHierarchies() {
+                this.collectionsHierarchies = this.collections.map(c => {
+                    let node = this.searchWithinTree(c.id);
+                    let h;
+                    if (node.parents) {
+                      h = node.parents.slice().reverse();
+                      h.push(c);
+                    } else {
+                      h = [c];
                     }
-                );
+                    return h;
+                });
+
+                this.collectionsHierarchies.sort(function (a, b) {
+                    if ( a.length === b.length) return 0;
+                    return a.length > b.length ? 1 : -1;
+                });
             }
         },
         watch: {
             collections() {
-                this.fetchCollectionsWithParents();
+                this.refreshHierarchies();
             },
-            collectionsWithParents() {
-                this.computeCollectionsHierarchies();
-            }
         },
         computed: {
             ...mapState('document', ['collections']),
-            ...mapState('collections', ['collectionsWithParents']),
-
+            ...mapState('collections', ['allCollectionsWithParents', 'fullHierarchy']),
+            ...mapGetters('collections', ['searchWithinTree']),
 
         },
     }

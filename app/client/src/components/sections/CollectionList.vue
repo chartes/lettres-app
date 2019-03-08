@@ -117,7 +117,7 @@
         },
         computed: {
             ...mapState('user', ['current_user']),
-            ...mapState('collections', ['allCollectionsWithParents', 'fullHierarchy']),
+            ...mapState('collections', ['fullHierarchy']),
 
             filter() {
                 return this.caseSensitive

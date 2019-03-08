@@ -1,15 +1,12 @@
 import {http} from '../../../modules/http-common';
-import Vue from "vue";
 import {getIncludedRelation} from "../../../modules/document-helpers";
 
 const state = {
 
   collectionsSearchResults: [],
-  collectionsWithParents: {},
 
   allCollectionsWithParents: [],
   fullHierarchy: []
-
 };
 
 function buildTree(collections, parent, depth) {
@@ -25,14 +22,33 @@ function buildTree(collections, parent, depth) {
   });
 }
 
+function searchId(tree, id) {
+    if (!tree){
+      return null;
+    }
+    else if (tree.id === id) {
+      return tree;
+    }
+    else {
+      if (tree.children) {
+        for (let child of tree.children) {
+          const found = searchId(child, id);
+          if (!!found) {
+            return found;
+          }
+        }
+      }
+      return null;
+    }
+}
+
+
 const mutations = {
 
   RESET(state) {
     state.collectionsWithParents = {};
   },
-  FETCH_ONE(state, data) {
-    Vue.set(state.collectionsWithParents, data.collection.id, {...data.collection, parents: data.parents});
-  },
+
   FETCH_ALL(state, {data, included}) {
 
     const collections = data.map( c => {
@@ -44,7 +60,7 @@ const mutations = {
         parents: getIncludedRelation(c, included, "parents")
       }
     });
-
+    console.warn("building full hierarchy");
     // build full hierarchy tree
     state.allCollectionsWithParents = collections;
     state.fullHierarchy = [];
@@ -62,21 +78,12 @@ const actions = {
     commit('RESET');
   },
 
-  fetchOne({ commit}, collectionId) {
-    commit('SEARCH_RESULTS', [])
-    http.get(`/collections/${collectionId}?include=parents&without-relationships`).then(response => {
-      const parents = response.data.included.map(p => {
-        return {id: p.id, ...p.attributes}
-      });
-      commit('FETCH_ONE', {collection: response.data.data, parents: parents})
-    });
-  },
-
   fetchAll({commit}) {
-    http.get(`/collections?include=parents`).then(response => {
+    return http.get(`/collections?include=parents`).then(response => {
       commit('FETCH_ALL', {data: response.data.data, included: response.data.included})
     });
   },
+
   search ({ commit }, what) {
     console.log('collection search', what)
     commit('SEARCH_RESULTS', [])
@@ -88,10 +95,12 @@ const actions = {
 
 };
 
+
+
 const getters = {
-
-
-
+  searchWithinTree: (state) => (id) => {
+    return !state.fullHierarchy ? null : searchId(state.fullHierarchy[0], id);
+  }
 };
 
 const collectionsModule = {
@@ -100,6 +109,6 @@ const collectionsModule = {
   mutations,
   actions,
   getters
-}
+};
 
 export default collectionsModule;
