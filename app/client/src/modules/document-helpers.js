@@ -60,12 +60,11 @@ const getPersons = function (included) {
   },
 
   getWitnesses = function (included) {
-    return  included.filter(item => item.type === 'witness')
-      .map(wit => { return { id: wit.id, ...wit.attributes }})
-      .map((wit, index) => {
-        wit.num = index + 1
-        return wit
-      })
+      return included.filter(item => item.type === 'witness')
+        .map(wit => {
+            return {id: wit.id, ...wit.attributes}
+        })
+        .sort((a, b) => (a.num > b.num) ? 1 : ((b.num > a.num) ? -1 : 0));
   },
 
   getCollections = function (included) {

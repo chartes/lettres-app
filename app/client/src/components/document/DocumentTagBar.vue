@@ -1,25 +1,44 @@
 <template>
-  <span v-if="documentsPreview[docId]" class="tags has-addons">
+  <span v-if="documentsPreview[docId]" class="tags has-addons document-tag-bar">
     <a :href="`${baseUrl}/documents/${docId}`"
        class="tag document-preview-card__doc-tag">
       <span>Document {{docId}}</span>
     </a>
   
     <!--
+      Published
+    -->
+    <badge v-if="current_user && isPublished !== null"
+           classesActive="is-published tag"
+           classesInactive="tag"
+           :action-when-on="publishDocument"
+           :action-when-off="unpublishDocument"
+           :starts-on="isPublished"
+    >
+      <template #active>
+        <v-icon size="14">$vuetify.icons.active_check_circle</v-icon>
+      </template>
+      <template #inactive>
+        <v-icon size="14">$vuetify.icons.inactive_check_circle</v-icon>
+      </template>
+    </badge>
+  
+    
+    <!--
       Bookmark
     -->
     <badge v-if="current_user && isBookmarked !== null"
-           classesActive="red-bookmark tag"
-           classesInactive="red-bookmark tag"
+           classesActive="is-bookmarked tag"
+           classesInactive="tag"
            :action-when-on="addBookmark"
            :action-when-off="removeBookmark"
            :starts-on="isBookmarked"
     >
       <template #active>
-        <font-awesome-icon :icon="['fas', 'bookmark']"/>
+        <v-icon size="14">$vuetify.icons.active_bookmark</v-icon>
       </template>
       <template #inactive>
-        <font-awesome-icon :icon="['far', 'bookmark']"/>
+        <v-icon size="14">$vuetify.icons.inactive_bookmark</v-icon>
       </template>
     </badge>
   
@@ -27,20 +46,20 @@
       Lock
     -->
     <badge v-if="current_user"
-           classesActive="tag is-warning"
+           classesActive="is-locked tag"
            classesInactive="tag"
            :action-when-on="startLockEditor"
            :action-when-off="startLockEditor"
            :starts-on="lockOwner[docId]"
     >
       <template #active>
-        <font-awesome-icon :icon="['fas', 'lock']"/>
+        <v-icon size="14">$vuetify.icons.lock</v-icon>
       </template>
       <template #activeLabel>
         <span v-if="lockOwner[docId]" class="badge-label">{{lockOwner[docId].attributes.username}}</span>
       </template>
       <template #inactive>
-        <font-awesome-icon :icon="['fas', 'unlock']"/>
+        <v-icon size="14">$vuetify.icons.unlock</v-icon>
       </template>
     </badge>
   
@@ -50,11 +69,13 @@
                :cancel="stopLockEditor"
                :submit="stopLockEditor"
     />
+  
+
   </span>
 </template>
 
 <script>
-    import { mapState } from 'vuex'
+    import {mapState} from 'vuex'
     import Badge from "../ui/Badge";
     import {baseAppURL} from '../../modules/http-common';
     import http_with_csrf_token from "../../modules/http-common";
@@ -64,7 +85,7 @@
         name: 'DocumentTagBar',
         components: {Badge, LockForm},
         props: {
-            docId : {required: true, type: Number},
+            docId: {required: true, type: Number},
         },
         computed: {
             ...mapState('user', ['current_user']),
@@ -79,14 +100,12 @@
                 baseUrl: baseAppURL,
 
                 isBookmarked: null,
+                isPublished: null,
+
                 lockEditMode: false,
             }
         },
-        watch: {
-          current_user(val) {
-       
-          }
-        },
+        watch: {},
         methods: {
             addBookmark() {
                 return this.$store.dispatch('bookmarks/postUserBookmark', {
@@ -106,16 +125,32 @@
                     return Promise.resolve(false);
                 })
             },
+            publishDocument() {
+                return this.$store.dispatch('document/publish', this.docId,
+                ).then(resp => {
+                    this.isPublished = true;
+                    return Promise.resolve(true);
+                })
+            },
+            unpublishDocument() {
+                return this.$store.dispatch('document/unpublish', this.docId,
+                ).then(resp => {
+                    this.isPublished = false;
+                    return Promise.resolve(false);
+                })
+            },
             fetchPreviewCard() {
                 this.$store.dispatch('document/fetchPreview', this.docId).then(() => {
                     /* fetch lock user info*/
-                    if (this.current_user){
+                    if (this.current_user) {
                         /* isBookmarked */
                         const http = http_with_csrf_token();
                         http.get(`/users/${this.current_user.id}/relationships/bookmarks`).then(response => {
                             this.isBookmarked = response.data.data.filter(d => d.id === this.docId).length > 0;
                         });
-                        
+                        /* isPublished */
+                        this.isPublished = this.documentsPreview[this.docId].attributes['is-published'];
+
                         const lockId = this.documentsPreview[this.docId].currentLock.id;
                         if (lockId) {
                             this.fetchLockOwner(lockId);
@@ -138,17 +173,3 @@
         },
     }
 </script>
-
-<style scoped>
-  .red-bookmark {
-    color: #9C1A1C;
-  }
-  
-  .document-preview-card__doc-tag {
-    float: left;
-    margin-right: 20px;
-  }
-  .badge-label{
-    margin-left: 4px;
-  }
-</style>

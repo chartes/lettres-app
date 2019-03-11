@@ -1,7 +1,7 @@
 import pprint
-from flask import current_app
+from flask import current_app, request
 
-from app import db
+from app import db, api_bp
 
 
 class JSONAPIAbstractFacade(object):
@@ -53,7 +53,7 @@ class JSONAPIAbstractFacade(object):
         return "{prefix}__{env}__{index_name}".format(
             prefix=current_app.config.get("INDEX_PREFIX", ""),
             env=current_app.config.get("ENV"),
-            index_name=cls.TYPE
+            index_name=cls.TYPE_PLURAL
         )
 
     @property
@@ -322,22 +322,20 @@ class JSONAPIAbstractFacade(object):
     def get_relationship_data_to_index(self, rel_name):
         from app.api.facade_manager import JSONAPIFacadeManager
         to_be_reindexed = []
-        db.session.refresh(self.obj)
-        d = getattr(self.obj, rel_name)
+        url_prefix = request.host_url[:-1] + current_app.api_url_registrar.url_prefix
 
-        rel_data = []
-        if d is not None:
-            if not isinstance(d, list):
-                rel_data = [d]
-            else:
-                rel_data = d
+        ri = self.relationships[rel_name]['resource_identifier_getter']()
+        if ri is not None:
+            ri = [ri] if not isinstance(ri, list) else ri
 
-        for doc in rel_data:
-            facade = JSONAPIFacadeManager.get_facade_class(doc)
-            f_obj, kwargs, errors = facade.get_resource_facade("", id=doc.id)
+        for resource_identifier in ri:
+            facade_class = JSONAPIFacadeManager.get_facade_class_from_facade_type(resource_identifier['type'])
+
+            f_obj, kwargs, errors = facade_class.get_resource_facade(url_prefix, id=resource_identifier['id'])
             to_be_reindexed.extend(
-                f_obj.get_data_to_index_when_added()
+                f_obj.get_data_to_index_when_added(False)
             )
+
         return to_be_reindexed
 
     def add_to_index(self, propagate=False):

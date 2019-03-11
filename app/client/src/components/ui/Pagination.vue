@@ -1,25 +1,41 @@
 <template>
     <div>
         <div class="container pagination buttons are-normal" v-if="topWidget && end > 1">
-            <span class="icon pagination__button button"  @click="performAction(start)"><i class="fas fa-step-backward"></i></span>
-            <span class="icon pagination__button button"  @click="performAction(currentPage-1)"><i class="fas fa-chevron-left"></i></span>
+            <span class="icon pagination__button button"  @click="performAction(start)">
+                <v-icon small>$vuetify.icons.firststep</v-icon>
+            </span>
+            <span class="icon pagination__button button"  @click="performAction(currentPage-1)">
+                <v-icon small>$vuetify.icons.previousstep</v-icon>
+            </span>
             <span class="pagination__button__input-box">
                 <input class="input" style="width: 60px; height: 24px" v-model="currentPage" @change="performAction(currentPage)"/>
                 <span>/ {{end}}</span>
             </span>
-            <span class="icon pagination__button button"  @click="performAction(currentPage+1)"><i class="fas fa-chevron-right"></i></span>
-            <span class="icon pagination__button button" @click="performAction(end)"><i class="fas fa-step-forward"></i></span>
+            <span class="icon pagination__button button"  @click="performAction(currentPage+1)">
+                <v-icon small>$vuetify.icons.nextstep</v-icon>
+            </span>
+            <span class="icon pagination__button button" @click="performAction(end)">
+                <v-icon small>$vuetify.icons.laststep</v-icon>
+            </span>
         </div>
         <slot></slot>
         <div class="container pagination buttons are-normal" v-if="bottomWidget && end > 1">
-            <span class="icon pagination__button button"  @click="performAction(start)"><i class="fas fa-step-backward"></i></span>
-            <span class="icon pagination__button button"  @click="performAction(currentPage-1)"><i class="fas fa-chevron-left"></i></span>
+            <span class="icon pagination__button button"  @click="performAction(start)">
+                <v-icon small>$vuetify.icons.firststep</v-icon>
+            </span>
+            <span class="icon pagination__button button"  @click="performAction(currentPage-1)">
+                <v-icon small>$vuetify.icons.previousstep</v-icon>
+            </span>
             <span class="pagination__button__input-box">
                 <input class="input" style="width: 60px; height: 24px" v-model="currentPage" @change="performAction(currentPage)"/>
                 <span>/ {{end}}</span>
             </span>
-            <span class="icon pagination__button button"  @click="performAction(currentPage+1)"><i class="fas fa-chevron-right"></i></span>
-            <span class="icon pagination__button button" @click="performAction(end)"><i class="fas fa-step-forward"></i></span>
+            <span class="icon pagination__button button"  @click="performAction(currentPage+1)">
+                <v-icon small>$vuetify.icons.nextstep</v-icon>
+            </span>
+            <span class="icon pagination__button button" @click="performAction(end)">
+                <v-icon small>$vuetify.icons.laststep</v-icon>
+            </span>
         </div>
     </div>
 </template>
@@ -54,18 +70,16 @@
     }  ,
     methods: {
        performAction(num) {
-           if (this.currentPage !== num) {
-               if (!parseInt(num)) {
-                   num = 1;
-               }
-               if (num > this.end) {
-                   num = this.end;
-               } else if (num < this.start) {
-                   num = this.start;
-               }
-               this.currentPage = num;
-               this.action(this.currentPage);
-           }
+          if (!parseInt(num)) {
+              num = 1;
+          }
+          if (num > this.end) {
+              num = this.end;
+          } else if (num < this.start) {
+              num = this.start;
+          }
+          this.currentPage = num;
+          this.action(this.currentPage);
        },
     }
   }

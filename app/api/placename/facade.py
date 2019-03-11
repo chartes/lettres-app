@@ -104,16 +104,14 @@ class PlacenameFacade(JSONAPIAbstractChangeloggedFacade):
         payload = {
             "id": _res["id"],
             "type": _res["type"],
-
-            "label": _res["attributes"]["label"],
-            "description": _res["attributes"]["description"],
-            "ref": _res["attributes"]["ref"],
+            "label": _res["attributes"]["label"]
         }
         placename_data = [{"id": _res["id"], "index": self.get_index_name(), "payload": payload}]
         if not propagate:
             return placename_data
         else:
-            return placename_data + self.get_relationship_data_to_index(rel_name="documents")
+            return placename_data + self.get_relationship_data_to_index(rel_name="documents") + self.get_relationship_data_to_index(
+                rel_name="roles-within-documents")
 
     def remove_from_index(self, propagate):
         from app.search import SearchIndexManager
@@ -121,7 +119,7 @@ class PlacenameFacade(JSONAPIAbstractChangeloggedFacade):
 
         if propagate:
             # reindex the docs without the resource
-            for data in self.get_data_to_index_when_added():
+            for data in self.get_data_to_index_when_added(propagate):
                 if data["payload"]["id"] != self.id and data["payload"]["type"] != self.TYPE:
                     data["payload"]["placenames"] = [l for l in data["payload"]["placenames"] if l.get("id") != self.id]
                     SearchIndexManager.add_to_index(index=data["index"], id=data["id"], payload=data["payload"])

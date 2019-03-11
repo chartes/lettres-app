@@ -1,58 +1,46 @@
 <template>
-    <div class="search-container">
-       <div class="field has-addons">
-         <div class="control">
-           <input id="search-box" class="input search-container__search-box" type="text"
-                  placeholder="Catherine de Medicis"
-                  @keyup.enter="action()">
-         </div>
-         <div class="control" v-on:click="action()">
-           <button :class="myClasses"><i class="fas fa-search"></i></button>
-         </div>
-       </div>
-    </div>
+  <div class="search-container">
+    <v-text-field
+        flat
+        solo-inverted
+        hide-details
+        prepend-inner-icon="search"
+        label="Search"
+        class="hidden-sm-and-down"
+        type="text"
+        placeholder="Catherine de Medicis"
+        v-model="currentValue"
+        @keyup.enter="action(currentValue)"
+    ></v-text-field>
+  </div>
 </template>
 
 <script>
-  export default {
-    name: "search-box",
-    props: {
-      action: { required: true } ,
-      loading: {
-        type: Boolean,
-        default: false
-      },
-    },
-    data() {
-      return {
-      }
-    },
-    created() {
-    },
-    computed: {
-      myClasses () {
-        let classes = ['button search-container__search-box__submit-btn'];
-        if (this.loading) classes.push('is-loading');
-        return classes.join(' ')
-      }
+
+    export default {
+        name: "search-box",
+        components: {},
+        props: {
+            action: { required: true },
+            value: {type: String, default: ""},
+            loading: {
+                type: Boolean,
+                default: false
+            },
+        },
+        data() {
+            return {
+                currentValue: this.$props.value
+            }
+        },
+        created() {
+        
+        }
     }
-  }
 </script>
 
 <style scoped>
-  .search-container__search-box {
-    padding-left: 1em !important;
-
-    margin-bottom: 50px;
-  }
-  .search-container__search-box__submit-btn {
-    color: #962D3E;
-    background: whitesmoke ;
-  }
-  .search-container__search-box__submit-btn:hover {
-    color: #348899 ;
-  }
-  .search-container .control {
-     width: 400px;
+  .search-container {
+    width: 400px;
   }
 </style>

@@ -3,11 +3,11 @@ var webpack = require('webpack')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin');
 
 module.exports = {
   mode: 'development',
   entry: {
-    document: './src/document.js',
     documentIndex: './src/documentIndex.js'
   },
   output: {
@@ -54,7 +54,7 @@ module.exports = {
         }
       },
       {
-        test: /\.(png|jpg|gif)$/,
+        test: /\.(png|jpg|gif|ttf|eot|woff(2)?)$/,
         loader: 'file-loader',
         options: {
           name: '[name].[ext]?[hash]'
@@ -63,6 +63,10 @@ module.exports = {
       {
         test: /\.svg$/,
         loader: 'svg-inline-loader'
+      },
+      {
+        test: /\.styl$/,
+        loader: ['style-loader', 'css-loader', 'stylus-loader']
       }
     ]
   },
@@ -114,7 +118,7 @@ if (process.env.NODE_ENV === 'production') {
   module.exports.devtool = '#source-map';
   // http://vue-loader.vuejs.org/en/workflow/production.html
   module.exports.plugins = (module.exports.plugins || []).concat([
-    new webpack.DefinePlugin({
+      new webpack.DefinePlugin({
       'process.env': {
         NODE_ENV: '"production"'
       }
@@ -125,6 +129,7 @@ if (process.env.NODE_ENV === 'production') {
     new BundleAnalyzerPlugin({
       analyzerMode: 'static',
       openAnalyzer: false
-    })
+    }),
+    //new VuetifyLoaderPlugin()
   ])
 }

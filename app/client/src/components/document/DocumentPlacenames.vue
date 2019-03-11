@@ -1,21 +1,25 @@
 <template>
-  <section class="document-placenames document__subsection">
-    <header class="document-placenames__header">
-      <h2 class="document-placenames__title subtitle">Dates de lieu</h2>
+  <section class="document-persons  ">
+    <header class="document-persons__header">
+      <h2 class="document-persons__title subtitle">Dates de lieu</h2>
     </header>
     
     <div class="columns">
       
       <div class="document-placenames__senders column">
         
-        <h3 class="document-placenames__subtitle document-placenames__subtitle--send">Expédition</h3>
-        
+        <h3 class="document-persons__subtitle">
+          Expédition
+          <a v-if="editable" class="tag" href="#" @click="openAddPlacename('location-date-from')">
+            <icon-add/>
+          </a>
+        </h3>
+
         <ul class="document-placenames__senders-list" v-if="locationDateFrom.length">
           <li v-for="c in locationDateFrom" :key="c.placename.id" class="placename-item">
             <a :href="c.placename.ref" target="_blank">
               {{ c.placename.label }}
             </a>
-            <span class="tag">{{ c.role.label }}</span>
             <a v-if="editable" class="witness-item__delete" @click="unlinkPlacenameFromDoc(c)">
               <icon-bin/>
             </a>
@@ -24,22 +28,24 @@
         
         <div v-else>
           <p class="placename-item"><em>Aucune date de lieu n'a été renseignée</em></p>
-          <p v-if="editable">
-            <lauch-button if="userCanEdit" label="Sélectionner une date de lieu" @click="openAddPlacename('location-date-from')"/>
-          </p>
         </div>
       
       </div>
       
       <div class="document-placenames__recipients column">
         
-        <h3 class="document-placenames__subtitle document-placenames__subtitle--recieve">Destination{{ locationDateTo.length > 1 ? 's':'' }}</h3>
-        
+        <h3 class="document-persons__subtitle">
+          Destination{{ locationDateTo.length > 1 ? 's':'' }}
+          <a v-if="editable && locationDateTo.length === 0" class="tag" href="#"
+             @click="openAddPlacename('location-date-to')">
+            <icon-add/>
+          </a>
+        </h3>
+
         <ul class="document-placenames__recipients-list" v-if="locationDateTo.length">
           <li v-for="c in locationDateTo" :key="c.placename.id" class="placename-item">
             <a :href="c.placename.ref" target="_blank">
               {{ c.placename.label }}</a>
-            <span class="tag">{{ c.role.label }}</span>
             <a v-if="editable" class="placename-item__delete" @click="unlinkPlacenameFromDoc(c)">
               <icon-bin/>
             </a>
@@ -49,13 +55,6 @@
         <div v-else>
           <p class="placename-item"><em>Aucune date de lieu n'a été renseignée</em></p>
         </div>
-        
-        <div v-if="editable && locationDateTo.length === 0 ">
-          <p>
-            <lauch-button label="Sélectionner une destination" @click="openAddPlacename('location-date-to')"/>
-          </p>
-        </div>
-      
       
       </div>
       
@@ -76,10 +75,11 @@
     import IconBin from '../ui/icons/IconBin';
     import PlacenameListForm from '../forms/PlacenameListForm';
     import LauchButton from '../forms/LaunchButton';
+    import IconAdd from "../ui/icons/IconAdd";
 
     export default {
         name: 'DocumentPlacenames',
-        components: {LauchButton, PlacenameListForm, IconBin},
+        components: {LauchButton, PlacenameListForm, IconBin, IconAdd},
         props: {
             editable: {
                 type: Boolean,

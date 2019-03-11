@@ -1,0 +1,41 @@
+
+.document-tag-bar {
+
+    font-weight: 400 !important;
+
+    i {
+        color: inherit !important;
+    }
+
+    .is-bookmarked {
+        color: #9C1A1C;
+    }
+    
+    .is-bookmarked::after {
+        padding-left: 4px;
+        content: "favoris";
+        color: unset;
+    }
+    
+    .is-published {
+        color: #0066cc;
+    }
+    
+    .is-published::after {
+        padding-left: 4px;
+        content: "publié";
+    }
+    
+    .is-locked {
+        color: #D39C00;
+    }
+    
+    .is-locked::after {
+        padding-left: 4px;
+    }
+    
+    .badge-label {
+        margin-left: 2px;
+    }
+}
+

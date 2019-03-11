@@ -31,13 +31,37 @@ const mutations = {
 };
 
 const actions = {
+  trackChanges({ commit }, {objId, objType, userId, msg}) {
+    const data = {
+      type: 'change',
+      attributes: {
+        'object-type': objType,
+        'object-id': objId,
+        'description': msg ? msg : 'Modifications',
+      },
+      relationships: {
+        document: {
+          data: {id: objId, type: objType}
+        },
+        user: {
+          data: {id: userId, type: 'user'}
+        }
+      }
+    };
+    const http = http_with_csrf_token();
+    return http.post(`changes`, {data}).then(response => {
+      this.dispatch('changelog/fetchFullChangelog', {
+        filters: `filter[object-id]=${objId}&filter[object-type]=${objType}`
+      }, {root: true});
+    });
+  },
   fetchFullChangelog ({ commit }, {pageId, pageSize, filters}) {
     const http = http_with_csrf_token();
     if (pageId === undefined) {
-      pageId = this.state.changelog.pageId;
+      pageId = this.state.changelog.pageId ? this.state.changelog.pageId : 1;
     }
     if (pageSize === undefined) {
-      pageSize = this.state.changelog.pageSize;
+      pageSize = this.state.changelog.pageSize ? this.state.changelog.pageSize: 10;
     }
     return http.get(`changes?include=user&sort=-event-date&page[size]=${pageSize}&page[number]=${pageId}${filters ? '&'+filters : ''}`)
       .then( response => {

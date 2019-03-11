@@ -14,52 +14,16 @@
     <link href="https://fonts.googleapis.com/css?family=Bitter" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Oxygen" rel="stylesheet">
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css">
-    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css">
+
     {% block head_scripts %}
     {% endblock head_scripts %}
 </head>
 <body>
 
-{% macro render_active_navbar_item(endpoint, label,  icon_cls='', active='') %}
-  {% if request.endpoint == endpoint or active == endpoint %}
-    <a class='navbar-item is-active {{cls}}' href="{{url_for(endpoint)}}">
-  {% else %}
-    <a class='navbar-item  {{cls}}' href="{{url_for(endpoint)}}">
-  {% endif %}
-  {% if icon_cls|length > 0 %}
-      <i class="{{icon_cls}}"></i>
-      <span style="margin-right: 12px;">
-      {{label}}
-      </span>
-  {% else %}
-      {{label}}
-  {% endif %}
-    </a>
-{% endmacro %}
-
 {% block hero %}
-    <section class="red-hero">
-    </section>
-    <section class="hero">
-        <div class="hero-head">
-             <div id="navbar" >
-                <nav class="navbar-menu">
-                     {{ render_active_navbar_item('app_bp.index', 'Les collections') }}
-                     {{ render_active_navbar_item('app_bp.documentation', 'Documentation') }}
-                     {{ render_active_navbar_item('app_bp.about', 'À propos') }}
-                     <div class="navbar-end">
-                        {% if current_user.is_anonymous %}
-                          {{ render_active_navbar_item('user.login', 'Connexion', icon_cls='fas fa-sign-in-alt') }}
-                        {% else %}
-                          {{ render_active_navbar_item('user.edit_user_profile', current_user.username, icon_cls='fas fa-user-alt') }}
-                          {{ render_active_navbar_item('user.logout', 'Déconnexion', icon_cls='fas fa-sign-out-alt') }}
-                        {% endif %}
-                    </div>
-                </nav>
-             </div>
-        </div>
-    </section>
+
 {% endblock %}
 
 {% block flash_messages %}
@@ -85,17 +49,7 @@
 {% endblock %}
 
 {% block footer %}
-<footer class="footer">
-  <div class="content has-text-centered">
-        <aside>
-            <a  href="{{ url_for('app_bp.index') }}">
-                 <img src="{{ url_for('app_bp.static', filename='images/logo-ecole-nationale-des-chartes-header.png') }}"
-                      alt="École Nationale des Chartes - PSL">
-            </a>
-        </aside>
-    </div>
-  </div>
-</footer>
+
 {% endblock %}
 
 {% block scripts %}

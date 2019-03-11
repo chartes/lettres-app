@@ -99,3 +99,12 @@ class JSONAPIFacadeManager(object):
         except KeyError as e:
             print("Facade %s %s unknown" % (obj.__class__.__tablename__, facade_type))
             return None
+
+    @staticmethod
+    def get_facade_class_from_facade_type(type, facade_type="default"):
+        type = type.replace("-", "_")
+        try:
+            return JSONAPIFacadeManager.FACADES[type][facade_type]
+        except KeyError as e:
+            print("Facade %s %s unknown" % (type, facade_type))
+            return None

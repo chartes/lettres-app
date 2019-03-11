@@ -296,6 +296,9 @@ class User(db.Model, UserMixin):
             "roles": [r.name for r in self.roles]
         }
 
+    def is_admin(self):
+        return 'admin' in [r.name for r in self.roles]
+
 
 class UserRole(db.Model):
     """ Rôle des utilisateurs (administrateur ou contributeur) """

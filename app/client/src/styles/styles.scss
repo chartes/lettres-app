@@ -40,8 +40,7 @@
 @import "objects/quill.core";
 @import "objects/quill.icons";
 @import "objects/editor";
-
-
+@import "objects/error-page";
 // Components – specific UI components.
 // This is where majority of our work takes place
 // and our UI components are often composed of Objects and Components
@@ -55,6 +54,7 @@
 @import "components/icons";
 @import "components/loading";
 @import "components/note";
+@import "components/document.document-tag-bar";
 @import "components/document.argument";
 @import "components/document.attributes";
 @import "components/document.collections";
@@ -65,6 +65,7 @@
 @import "components/document.witness-list";
 @import "components/document.person-form";
 @import "components/document.person-list-form";
+@import "components/_homepage.iiif-viewer";
 @import "components/lock";
 
 // Utilities / trumps – utilities and helper classes

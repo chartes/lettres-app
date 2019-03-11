@@ -5,6 +5,16 @@ import {
 } from '../../../modules/document-helpers';
 import Vue from "vue";
 
+const TRANSLATION_MAPPING = {
+  'creation' : 'Date de création',
+  'creation-not-after' : 'Date de création (borne supérieure)',
+  'creation-label' : 'Date de création (étiquette)',
+  'is-published': 'Statut de publication',
+  'argument': 'Argument',
+  'transcription': 'Transcription',
+  'title': 'Titre'
+};
+
 const state = {
 
   documentLoading: true,
@@ -52,7 +62,7 @@ const mutations = {
     Vue.set(state.documentsPreview, data.id, newPreviewCard);
   },
   UPDATE_ALL (state, payload) {
-    console.log('UPDATE_ALL');
+    console.log('UPDATE_ALL', payload.data);
     state.documents = payload.data;
     state.links = payload.links;
     state.totalCount = payload.meta["total-count"];
@@ -130,15 +140,17 @@ const actions = {
 
     const http = http_with_csrf_token();
     return http.get(`documents/${id}?include=${incs.join(',')}`).then( response => {
-      commit('UPDATE_DOCUMENT', response.data);
+      commit('UPDATE_DOCUMENT', {
+        data: response.data.data,
+        included: response.data.included
+      });
       commit('LOADING_STATUS', false)
     })
   },
   fetchPreview ({ commit }, id) {
     commit('LOADING_STATUS', true);
     const incs = [
-      'collections', 'witnesses', 'current-lock',
-      //'persons', 'persons-having-roles','roles', 'languages',
+      'collections', 'witnesses', 'current-lock'
     ];
 
     const http = http_with_csrf_token();
@@ -147,10 +159,10 @@ const actions = {
       commit('LOADING_STATUS', false)
     })
   },
-  fetchAll ({ commit }, {pageId, pageSize}) {
+  fetchAll ({ commit }, {pageId, pageSize, filters}) {
     commit('LOADING_STATUS', true);
     const http = http_with_csrf_token();
-    return http.get(`/documents?page[size]=${pageSize}&page[number]=${pageId}&without-relationships`)
+    return http.get(`/documents?${filters}&page[size]=${pageSize}&page[number]=${pageId}&without-relationships`)
       .then( (response) => {
       commit('UPDATE_ALL', response.data);
       commit('LOADING_STATUS', false);
@@ -159,7 +171,7 @@ const actions = {
   fetchSearch ({ commit }, {pageId, pageSize, query}) {
     commit('LOADING_STATUS', true);
 
-    const index = `lettres__${process.env.NODE_ENV}__document`;
+    const index = `lettres__${process.env.NODE_ENV}__documents`;
     const incs = ['collections', 'persons', 'persons-having-roles', 'roles', 'witnesses', 'languages'];
     const http = http_with_csrf_token();
     return http.get(`/search?query=${query}&index=${index}&include=${incs.join(',')}&without-relationships&page[size]=${pageSize}&page[number]=${pageId}`)
@@ -177,43 +189,53 @@ const actions = {
     return http.patch(`/documents/${data.id}`, { data })
       .then(response => {
         commit('UPDATE_DOCUMENT_DATA', response.data.data);
-        //resolve(response.data)
         return response.data.data
       })
       .then( doc => {
-        let desc = 'Modifications';
+        let msg = null;
         if (doc.attributes) {
-          desc = `Modification de ${Object.keys(modifiedData).join(', ')}`;
+
+          msg = `Modification de ${Object.keys(modifiedData).map( 
+              d => `'${TRANSLATION_MAPPING[d] ? TRANSLATION_MAPPING[d] : d}'`
+          ).join(', ')}`;
         }
-        const data = {
-          type: 'change',
-          attributes: {
-            'object-type': 'document',
-            'object-id': doc.id,
-            'description': desc,
-          },
-          relationships: {
-            document: {
-              data: {id: doc.id, type: 'document'}
-            },
-            user: {
-              data: {id: rootState.user.current_user.id, type: 'user'}
-            }
-          }
-        };
-        return http.post(`changes`, { data }).then(response => {
-          dispatch('changelog/fetchFullChangelog', {
-            filters: `filter[object-id]=${doc.id}&filter[object-type]=document`
-          }, { root: true });
-        })
+        return this.dispatch('changelog/trackChanges', {
+          objId : doc.id,
+          objType: 'document',
+          userId: rootState.user.current_user.id,
+          msg: msg
+        });
       })
   },
 
+  publish({commit, state}, docId) {
+    return this.dispatch('document/save', {
+        type: 'document',
+        id: docId,
+        attributes: {
+          'is-published' : true
+        }
+    });
+  },
+
+  unpublish({commit, state}, docId) {
+    return this.dispatch('document/save', {
+        type: 'document',
+        id: docId,
+        attributes: {
+          'is-published': false
+        }
+    });
+  },
+
   addWitness ({commit, state}, witness) {
-    const witnessData = { ...witness }
+    witness.num = Math.max.apply(null, state.witnesses.map(w => w.num)) + 1;
+
+    const witnessData = { ...witness };
     const institutionId = witness.institution ? witness.institution.id : null;
-    delete(witnessData.id)
-    delete(witnessData.institution)
+    delete(witnessData.id);
+    delete(witnessData.institution);
+
     const relationships = {
       document: {
         data: {
@@ -234,7 +256,7 @@ const actions = {
         type: "witness",
         attributes: witnessData,
         relationships
-    }
+    };
 
     const http = http_with_csrf_token();
     return http.post(`/witnesses?without-relationships`, {data})
@@ -300,7 +322,6 @@ const actions = {
     witnesses.splice(foundIndex, 1)
     witnesses.splice(foundIndex + dir, 0, found)
     witnesses = witnesses.map((w, index) => { w.num = index+1; return w})
-
     const changed = witnesses.filter((w, index) => {
       console.log(state.witnesses[index].id, w.id, 'add', state.witnesses[index].id !== w.id)
       return state.witnesses[index].id !== w.id

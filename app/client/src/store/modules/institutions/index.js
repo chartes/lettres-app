@@ -13,7 +13,7 @@ const state = {
 const mutations = {
 
   UPDATE (state, payload) {
-    state.languages = payload;
+    state.institutions = payload;
   },
   UPDATE_ONE (state, payload) {
     state.currentInstitution = payload;
@@ -31,16 +31,28 @@ const mutations = {
 const actions = {
 
   fetch ({ commit }) {
-    commit('UPDATE', [])
-    http.get(`/institutions?without-relationships`).then( response => {
-      const institutions = response.data.data.map(inst => { return { id: inst.id, ...inst.attributes}});
+    commit('UPDATE', []);
+    http.get(`/institutions?include=witnesses&without-relationships`).then( response => {
+      const institutions = response.data.data.map(inst => {
+        return {
+          id: inst.id,
+          witnesses: response.data.included.map(w => {return {id: w.id, ...w.attributes}}),
+          ...inst.attributes,
+        }
+      });
       commit('UPDATE', institutions)
     });
   },
   fetchOne ({ commit }, id) {
     console.log('institution fetchOne', id)
-    http.get(`/institution/${id}?without-relationships`).then( response => {
-      const institution = { id: response.data.data.id, ...response.data.data.attributes };
+    http.get(`/institution/${id}?include=witnesses&without-relationships`).then( response => {
+      const institution = {
+        id: response.data.data.id,
+        witnesses: response.data.included.map(w => {
+          return {id: w.id, ...w.attributes}
+        }),
+        ...response.data.data.attributes
+      };
       console.log('institution fetchOne', institution)
       commit('UPDATE_ONE', institution)
     })
@@ -67,7 +79,7 @@ const actions = {
   search ({ commit }, what) {
     console.log('institution search', what)
     commit('SEARCH_RESULTS', [])
-    http.get(`/search?query=*${what}*&index=lettres__${process.env.NODE_ENV}__institution&without-relationships`).then( response => {
+    http.get(`/search?query=*${what}*&index=lettres__${process.env.NODE_ENV}__institutions&without-relationships`).then( response => {
       const institutions = response.data.data.map(inst => { return { id: inst.id, ...inst.attributes}});
       commit('SEARCH_RESULTS', institutions)
     });
@@ -76,7 +88,6 @@ const actions = {
 };
 
 const getters = {
-
 
 
 };

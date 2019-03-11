@@ -79,15 +79,16 @@ class WitnessFacade(JSONAPIAbstractChangeloggedFacade):
         })
 
     def get_data_to_index_when_added(self, propagate):
-        _res = self.resource
+        #_res = self.resource
         payload = {
-            "id": _res["id"],
-            "type": _res["type"],
+            "id": self.id,
+            "type": self.TYPE,
 
-            "content": _res["attributes"]["content"],
-            "classification_mark": _res["attributes"]["classification-mark"],
+            "tradition": self.obj.tradition,
+            "content": self.obj.content,
+            "classification_mark": self.obj.classification_mark,
         }
-        witnesses_data = [{"id": _res["id"], "index": self.get_index_name(), "payload": payload}]
+        witnesses_data = [{"id": self.obj.id, "index": self.get_index_name(), "payload": payload}]
         if not propagate:
             return witnesses_data
         else:
@@ -100,7 +101,7 @@ class WitnessFacade(JSONAPIAbstractChangeloggedFacade):
 
         if propagate:
             # reindex the docs without the resource
-            for data in self.get_data_to_index_when_added():
+            for data in self.get_data_to_index_when_added(propagate):
                 if data["payload"]["id"] != self.id and data["payload"]["type"] != self.TYPE:
                     data["payload"]["witnesses"] = [l for l in data["payload"]["witnesses"] if l.get("id") != self.id]
                     SearchIndexManager.add_to_index(index=data["index"], id=data["id"], payload=data["payload"])

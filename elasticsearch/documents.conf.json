@@ -1,0 +1,41 @@
+{
+  "mappings": {
+    "_doc": {
+      "properties": {
+        "creation": {
+          "type": "text"
+        },
+        "creation-not-after": {
+          "type": "text"
+        },
+        "title": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 32766
+            }
+          }
+        },
+        "argument": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 32766
+            }
+          }
+        },
+        "transcription": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 32766
+            }
+          }
+        }
+      }
+    }
+  }
+}

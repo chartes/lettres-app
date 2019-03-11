@@ -137,7 +137,15 @@ class JSONAPIRouteRegistrar(object):
                     continue
 
                 for criteria in request.args[filter_param].split(','):
-                    if not not_null_operator:
+                    criteria_upper = criteria.upper()
+                    if criteria_upper == 'TRUE' or criteria_upper == 'FALSE':
+                        new_criteria = "{table}.{field} is {criteria}".format(
+                            table=model.__tablename__,
+                            field=filter_fieldname,
+                            criteria=True if criteria_upper == 'TRUE' else False
+                        )
+                        print(text(new_criteria))
+                    elif not not_null_operator:
                         if criteria:
                             # filter[field]=value
                             new_criteria = "{table}.{field}{operator}'{criteria}'".format(
@@ -204,9 +212,9 @@ class JSONAPIRouteRegistrar(object):
             objs_query = objs_query.order_by(sort_order(*sort_criteriae))
         return objs_query
 
-    def search(self, index, query, num_page, page_size):
+    def search(self, index, query, sort_criteriae, num_page, page_size):
         # query the search engine
-        results, total = SearchIndexManager.query_index(index=index, query=query, page=num_page, per_page=page_size)
+        results, total = SearchIndexManager.query_index(index=index, query=query, sort_criteriae=sort_criteriae, page=num_page, per_page=page_size)
 
         if total == 0:
             return {}, 0
@@ -262,8 +270,20 @@ class JSONAPIRouteRegistrar(object):
                 page_size = int(current_app.config["SEARCH_RESULT_PER_PAGE"])
 
             # Search, retrieve, filter, sort and paginate objs
+            sort_criteriae = None
+            if "sort" in request.args:
+                sort_criteriae = []
+                for criteria in request.args["sort"].split(','):
+                    if criteria.startswith('-'):
+                        sort_order = "desc"
+                        criteria = criteria[1:]
+                    else:
+                        sort_order = "asc"
+                    criteria = criteria.replace("-", "_")
+                    sort_criteriae.append({criteria: {"order": sort_order}})
+
             try:
-                res, count = self.search(index=index, query=query, num_page=num_page, page_size=page_size)
+                res, count = self.search(index=index, query=query, sort_criteriae=sort_criteriae, num_page=num_page, page_size=page_size)
             except Exception as e:
                 return JSONAPIResponseFactory.make_errors_response({
                     "status": 403,
@@ -921,7 +941,7 @@ class JSONAPIRouteRegistrar(object):
                                          with_relationships_data=w_rel_data)
 
                     # reindex
-                    f_obj.reindex("insert")
+                    f_obj.reindex("insert", propagate=True)
 
                     # RESPOND 201 CREATED
                     if "links" in f_obj.resource and "self" in f_obj.resource["links"]:
@@ -1000,7 +1020,7 @@ class JSONAPIRouteRegistrar(object):
                                          with_relationships_data=w_rel_data)
 
                     # reindex
-                    f_obj.reindex("insert")
+                    f_obj.reindex("insert", propagate=True)
 
                     # RESPOND 200
                     if "links" in f_obj.resource and "self" in f_obj.resource["links"]:
@@ -1147,7 +1167,7 @@ class JSONAPIRouteRegistrar(object):
                                          with_relationships_data=True)
 
                     # reindex
-                    f_obj.reindex("update")
+                    f_obj.reindex("update", propagate=True)
 
                     # RESPOND 200
                     if "links" in f_obj.resource and "self" in f_obj.resource["links"]:
@@ -1233,7 +1253,7 @@ class JSONAPIRouteRegistrar(object):
                                          with_relationships_data=True)
 
                     # reindex
-                    f_obj.reindex("update")
+                    f_obj.reindex("update", propagate=True)
 
                     # RESPOND 200
                     if "links" in f_obj.resource and "self" in f_obj.resource["links"]:
@@ -1292,7 +1312,7 @@ class JSONAPIRouteRegistrar(object):
             # =====================
             f_obj = facade_class("", obj)
             # reindex
-            f_obj.reindex("delete")
+            f_obj.reindex("delete", propagate=True)
 
             errors = facade_class.delete_resource(obj)
             if errors is not None:

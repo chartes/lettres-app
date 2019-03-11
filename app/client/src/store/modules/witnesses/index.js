@@ -14,6 +14,7 @@ const state = {
 const mutations = {
 
   UPDATE_ONE (state, payload) {
+    console.log("UPDATE CURRENT WITNESS");
     state.currentWitness = payload;
   }
 
@@ -22,13 +23,14 @@ const mutations = {
 const actions = {
 
   fetchOne ({ commit }, id) {
-    http.get(`/witnesses/${id}?include=institution`).then( response => {
+    return http.get(`/witnesses/${id}?include=institution`).then( response => {
       const witness = {
         id: response.data.data.id,
         ...response.data.data.attributes,
         institution: getInstitution(response.data.included)
       };
-      commit('UPDATE_ONE', witness)
+      commit('UPDATE_ONE', witness);
+      return witness;
     });
   },
 

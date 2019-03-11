@@ -1,12 +1,16 @@
 <template>
-  <documentIndex/>
+    <home-page :doc-id="docId" :searched-term="searchedTerm" :user-template="userTemplate"/>
 </template>
 
 <script>
-  import DocumentIndex from './components/DocumentIndex';
+  import HomePage from './components/HomePage';
   export default {
-    props: [],
-    components: {DocumentIndex}
+      props: {
+          docId: {type: Number, default: null},
+          searchedTerm: {type: String, default: null},
+          userTemplate: {type: String, default: null},
+      },
+    components: {HomePage}
   }
 </script>
 
