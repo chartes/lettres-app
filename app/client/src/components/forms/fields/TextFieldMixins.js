@@ -36,7 +36,7 @@ const TextFieldMixins = {
       this.editMode = false
 
       if (this.valueChanged && !preventEmit) {
-        this.$emit('changed', { value: this.value, name: this.name, oldValue: this.initialValue })
+        this.$emit('changed', { value: this.value === '' ? null : this.value, name: this.name, oldValue: this.initialValue })
       }
       this.valueChanged = false
     },
