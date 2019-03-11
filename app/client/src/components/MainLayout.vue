@@ -252,7 +252,7 @@
                 this.$store.dispatch('document/fetchAll', {
                     pageId: this.currentPage,
                     pageSize: this.pageSize,
-                    filters: !!this.current_user ? '' : 'filter[is-published]=true'
+                    filters: !!this.current_user ? '' : 'filter[is-published]=1'
                 }).then(r => {
 
                 });
