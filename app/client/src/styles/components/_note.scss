@@ -1,13 +1,22 @@
 .document__content {
 
 
-  counter-reset: notes-count 1;
+  counter-reset: notes-count 0;
 
   a.note {
-
+    position: relative;
     counter-increment: notes-count;
+    margin: 0 .125em;
+    pointer-events: bounding-box;
     &::after {
-      //content: counter(notes-count);
+      visibility: visible;
+      position: absolute;
+      top: 0;
+      left: 0;
+      content: '';
+      background: rgba(0,0,0,.5);
+      z-index: 1;
+      pointer-events: bounding-box;
 
     }
   }

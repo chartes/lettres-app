@@ -1,11 +1,13 @@
 <template>
-    <button
-            class="button is-small"
-            :class="{'selected': selected}"
-            :disabled="!active" @click="callback(format)"
-            v-html="iconSvg"
+    <div class="control">
+        <button
+                class="button is-small"
+                :class="{'selected': selected}"
+                :disabled="!active" @click="callback(format)"
+                v-html="iconSvg"
 
-    />
+        />
+    </div>
 </template>
 
 <script>

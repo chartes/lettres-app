@@ -73,9 +73,11 @@ var EditorNotesMixin = {
       this.editor.focus();
     },
     newNoteChoiceOpen() {
+      console.log("newNoteChoiceOpen")
       this.defineNewNote = true;
     },
     newNoteChoiceClose() {
+      console.log("newNoteChoiceClose")
       this.defineNewNote = false;
     },
 

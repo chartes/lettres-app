@@ -7,7 +7,7 @@
     <div class="editor-area">
       <div class="editor-controls" ref="controls">
 
-        <div v-for="group, gindex in formats" :key="gindex" class="editor-controls-group">
+        <div v-for="group, gindex in formats" :key="gindex" class="editor-controls-group field has-addons">
           <editor-button
                   v-for="format in group"
                   :active="formatCallbacks[format].active"
@@ -41,6 +41,14 @@
                 :cancel="newNoteChoiceClose"
         />
       </div>
+      <note-form
+              v-if="noteEditMode == 'new' || noteEditMode == 'edit'"
+              :title="noteEditMode == 'new' ? 'nouvelle note' : 'Éditer la note'"
+              :note="currentNote"
+              :noteId="selectedNoteId"
+              :submit="updateNote"
+              :cancel="closeNoteEdit"
+      />
       <textfield-form
               v-if="formTextfield"
               :title="formTextfield.title"
@@ -49,6 +57,7 @@
               :submit="submitTextfieldForm"
               :cancel="cancelTextfieldForm"/>
 
+    <pre style="white-space: normal">{{value}}</pre>
     </div>
 
   </div>
@@ -68,6 +77,7 @@
   import Quill, { getNewQuill } from '../../../modules/quill/LettresQuill';
   import { getNewDelta } from '../../../modules/quill/DeltaUtils';
   import _isEmpty from 'lodash/isEmpty';
+  import NoteForm from '../NoteForm';
 
   const wrapPattern = /^<p>(.*)<\/p>$/im;
   let formatCallbacks = {}
@@ -83,6 +93,7 @@
     },
     mixins: [EditorNotesMixins],
     components: {
+      NoteForm,
       FieldLabel,
       NewNoteActions,
       NoteActions,
@@ -266,6 +277,16 @@
 
       insertNote () {
         this.insertEmbed('note', true)
+      },
+      updateNote(note) {
+        const isNewNote = this.noteEditMode === 'new';
+        const action = isNewNote ? 'notes/add' : 'notes/update';
+        this.$store.dispatch('document/addNote', note).then(newNote =>{
+          console.log(newNote)
+          this.editor.format('note', newNote.id);
+          this.selectedNoteId = newNote.id;
+          this.closeNoteEdit();
+        })
       },
       insertPageBreak () {
         this.insertEmbed('page', true)

@@ -1,16 +1,16 @@
 <template>
-  <section class="document-persons section">
-    <header class="document-persons__header">
-      <h2 class="document-persons__title subtitle">Dates de lieu</h2>
+  <section class="document-placenames document__subsection">
+    <header class="document-placenames__header">
+      <h2 class="document-placenames__title subtitle">Dates de lieu</h2>
     </header>
     
     <div class="columns">
       
-      <div class="document-persons__senders column">
+      <div class="document-placenames__senders column">
         
-        <h3 class="document-persons__subtitle">Expédition</h3>
+        <h3 class="document-placenames__subtitle document-placenames__subtitle--send">Expédition</h3>
         
-        <ul class="document-persons__senders-list" v-if="locationDateFrom.length">
+        <ul class="document-placenames__senders-list" v-if="locationDateFrom.length">
           <li v-for="c in locationDateFrom" :key="c.placename.id" class="placename-item">
             <a :href="c.placename.ref" target="_blank">
               {{ c.placename.label }}
@@ -31,11 +31,11 @@
       
       </div>
       
-      <div class="document-persons__recipients column">
+      <div class="document-placenames__recipients column">
         
-        <h3 class="document-persons__subtitle">Destination{{ locationDateTo.length > 1 ? 's':'' }}</h3>
+        <h3 class="document-placenames__subtitle document-placenames__subtitle--recieve">Destination{{ locationDateTo.length > 1 ? 's':'' }}</h3>
         
-        <ul class="document-persons__recipients-list" v-if="locationDateTo.length">
+        <ul class="document-placenames__recipients-list" v-if="locationDateTo.length">
           <li v-for="c in locationDateTo" :key="c.placename.id" class="placename-item">
             <a :href="c.placename.ref" target="_blank">
               {{ c.placename.label }}</a>

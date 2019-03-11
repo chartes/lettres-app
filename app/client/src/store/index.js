@@ -12,6 +12,7 @@ import changelog from './modules/changelog';
 import locks from './modules/locks';
 import witnesses from './modules/witnesses';
 import bookmarks from './modules/bookmarks';
+import notes from './modules/notes';
 
 Vue.use(Vuex);
 
@@ -27,6 +28,7 @@ export default new Vuex.Store({
       changelog,
       locks,
       witnesses,
-      bookmarks
+      bookmarks,
+      notes,
     }
 });

@@ -1,0 +1,73 @@
+.note-list {
+
+  margin: 2rem 0;
+  padding-top: 2rem;
+  border-top: solid 1px #ccc;
+  color: grey;
+
+  &__header {
+    margin-bottom: 1em;
+  }
+}
+.note-item {
+
+  $action-w: rem-calc(24);
+
+  margin-bottom: .5em;
+  display: flex;
+  align-items: center;
+
+  &__text {
+    display: inline;
+    font-size: 85%;
+  }
+  &__edit, &__delete {
+    display: inline-block;
+    vertical-align: middle;
+    height: 24px;
+  }
+
+  &__order {
+    margin-right: .5em;
+    width: $action-w * 2;
+    flex: 0 0 $action-w * 2;
+  }
+  &__order-button {
+    display: block;
+    border: none;
+    width: $action-w;
+    height: $action-w;
+    padding: 0;
+    float: left;
+    &:focus {
+      outline: none;
+    }
+  }
+  &__order-button-up {
+
+    float: right;
+  }
+
+  &--editable {
+
+    &:hover {
+      background: #fcfcfc;
+    }
+    .note-item__text {
+      //flex: 1 0 100%;
+      margin-right: .5em;
+      padding-right: .5em;
+      border-right: 1px solid #eee;
+    }
+  }
+
+
+  .icon {
+    width: 1em;
+    height: 1em;
+  }
+  .line {
+    stroke: white;
+  }
+
+}
