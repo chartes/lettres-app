@@ -135,11 +135,11 @@
     
     <div v-if="!!displayedDocId && document && document['iiif-collection-url'].length > 0">
       <v-navigation-drawer  right  :mini-variant="!showIIIFViewer"
-                           class='mt-5 homepage__iiif-viewer' width="700" app>
+                           class='mt-5 homepage__iiif-viewer' width="768px" app>
         <v-container>
           <v-layout>
 
-            <div class="uv" style="width: 200px; height: 400px;"
+            <div class="uv"
                  data-locale="en-GB:English (GB),fr-FR:Français"
                  :data-uri="document['iiif-collection-url']">
             </div>
@@ -231,7 +231,6 @@
                         children: [
                             {icon: 'contacts', text: 'Contributeurs'},
                             {icon: 'content_copy', text: 'Référentiels de données'},
-                            {icon: 'content_copy', text: 'Collections de documents'},
                         ]
                     },
                     {icon: 'info', text: 'Documentation'}
