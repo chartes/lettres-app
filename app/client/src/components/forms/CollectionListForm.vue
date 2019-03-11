@@ -13,7 +13,7 @@
         <div class="message-body">
           <p>
             Pour créer une nouvelle collection ou en modifier une existante, utilisez plutôt la
-            <a href="/lettres/collections">page de gestion des collections</a>
+            <a href="/lettres/collections" target="_blank">page de gestion des collections</a>
           </p>
         </div>
       </article>

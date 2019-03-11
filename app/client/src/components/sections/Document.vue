@@ -62,10 +62,17 @@
         props: {
             doc_id : {required: true, type: Number}
         },
+        created () {
+            const uvLayout = document.getElementById('uv-layout');
+            const uv = document.getElementById('uv');
+            console.warn(uvLayout, uv);
+            uvLayout.appendChild(uv);
+        },
         mounted () {
             this.isLoading = true;
             this.$store.dispatch('user/fetchCurrent').then(response => {
                 this.$store.dispatch('document/fetch', this.doc_id).then(r => {
+                    
                     this.computeCanEdit();
                     this.isLoading = false;
                 }).catch(e => {

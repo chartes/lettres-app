@@ -195,14 +195,14 @@ def create_app(config_name="dev"):
         title = "Page non trouvée"
         content = "Le contenu que vous cherchez n'existe pas à cette adresse"
         template = render_template('errors/generic.html', title=title, content=content)
-        return render_template('app/main.html', section="errors", template=template), 404
+        return render_template('app/main.html', section="errors", data=json.dumps({'template': template})), 404
 
     @app.errorhandler(500)
     def handle_bad_request(e):
         title = "Erreur serveur"
         content = "Erreur interne du serveur."
         template = render_template('errors/generic.html', title=title, content=content)
-        return render_template('app/main.html', section="errors", template=template), 500
+        return render_template('app/main.html', section="errors", data=json.dumps({'template': template})), 500
 
     # =====================================
     # register api routes

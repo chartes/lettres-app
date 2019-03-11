@@ -1,5 +1,5 @@
 <template>
-  <v-card fill-height>
+  <v-container class="collection-list-container" fluid>
     <v-toolbar
         card
         color="grey lighten-3"
@@ -8,8 +8,7 @@
     </v-toolbar>
     
     <v-layout>
-      <v-flex>
-        <v-card-text>
+      <v-flex xs6>
           <v-treeview
               v-model="tree"
               :load-children="fetch"
@@ -18,7 +17,6 @@
               activatable
               active-class="grey lighten-4 red--text"
               selected-color="red"
-              open-on-click
               open-all
               selectable
               :transition="true"
@@ -27,67 +25,31 @@
               off-icon="far fa-check-square"
           >
             <template v-slot:prepend="{ item, active, value, open, selected }">
-              [ {{active}} & {{value}} & {{open}} & {{selected}}]
-              <v-icon>fa fa-check-circle</v-icon>
+              {{active}} & {{selected}}
+              <v-icon style="font-size:20px">far fa-check-square</v-icon>
             </template>
           </v-treeview>
-        </v-card-text>
       </v-flex>
       
       <v-divider vertical></v-divider>
       
-      <v-flex
-          xs12
-          md6
-      >
-        <v-card-text>
-          <div
-              v-if="selections.length === 0"
-              class="title font-weight-light grey--text pa-3 text-xs-center"
-          >
-            Sélectionnez une collection
+      <v-flex xs6>
+          <div v-if="selections.length === 0" class="title font-weight-light grey--text pa-3 text-xs-center">
+            Sélectionnez une collection pour afficher ses documents
           </div>
           
-          <v-scroll-x-transition
-              group
-              hide-on-leave
-          >
-            <v-chip
+          <v-scroll-x-transition group hide-on-leave>
+            <div class="tag"
                 v-for="(selection, i) in selections"
                 :key="i"
-                color="grey"
-                dark
-                small
             >
-              <v-icon left small>mdi-beer</v-icon>
               {{ selection.title }}
-            </v-chip>
+            </div>
           </v-scroll-x-transition>
-        </v-card-text>
       </v-flex>
     </v-layout>
     <v-divider></v-divider>
-  
-    <v-card-actions>
-      <v-btn
-          flat
-          @click="tree = []"
-      >
-        Reset
-      </v-btn>
-    
-      <v-spacer></v-spacer>
-    
-      <v-btn
-          class="white--text"
-          color="green darken-1"
-          depressed
-      >
-        Save
-        <v-icon right>mdi-content-save</v-icon>
-      </v-btn>
-    </v-card-actions>
-  </v-card>
+  </v-container>
 </template>
 
 <script>
@@ -102,7 +64,8 @@
         data () {
             return {
                 isLoading: false,
-                tree: []
+                tree: [],
+                checkboxes: []
             }
         },
         created() {
@@ -117,7 +80,7 @@
         },
         computed: {
             ...mapState('user', ['current_user']),
-            ...mapState('collections', ['fullHierarchy']),
+            ...mapState('collections', ['fullHierarchy', 'allCollectionsWithParents']),
 
             filter() {
                 return this.caseSensitive
@@ -135,20 +98,16 @@
                 const selections = [];
                 for (const leaf of this.tree) {
                     const collection = this.allCollectionsWithParents.find(collection => {
-                        console.log(collection, leaf, collection.id === leaf);
                         return collection.id === leaf
                     });
                     if (!collection) continue;
                     selections.push(collection)
                 }
                 return selections
-            },
-            shouldShowTree() {
-                return this.collection.length > 0 && !this.isLoading
             }
         },
         watch: {
-            breweries(val) {
+            selections() {
             
             }
         },

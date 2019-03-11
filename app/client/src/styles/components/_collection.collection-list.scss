@@ -1,12 +1,10 @@
 
 .collection-list-container {
   padding: 0;
+  margin: 0;
   width: 100%;
+  height: 100%;
 
-  .v-card {
-    width: 100%;
-    height: 100%;
-  }
 
   i.v-treeview-node__toggle {
     font-size: 2em !important;

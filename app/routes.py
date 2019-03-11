@@ -30,6 +30,20 @@ def index(doc_id=None):
     return refresh_token(user, resp)
 
 
+@app_bp.route("/collections")
+@app_bp.route("/collections/<int:collection_id>")
+def collections(collection_id=None):
+    user = current_user
+
+    if collection_id is not None and not Collection.query.filter(Collection.id == collection_id).first():
+        abort(status=404)
+
+    resp = make_response(render_template("app/main.html",
+                                         section="collections",
+                                         data=json.dumps({'collectionId': collection_id})))
+    return refresh_token(user, resp)
+
+
 @app_bp.route("/users/<action>")
 def user_action(action):
     user = current_user
@@ -74,16 +88,3 @@ def logout():
     current_app.user_manager.logout_view()
     return redirect(url_for('app_bp.index'))
 
-
-@app_bp.route("/collections")
-@app_bp.route("/collections/<int:collection_id>")
-def collections(collection_id=None):
-    user = current_user
-
-    if collection_id is not None and not Collection.query.filter(Collection.id == collection_id).first():
-        abort(status=404)
-
-    resp = make_response(render_template("app/main.html",
-                                         section="collections",
-                                         data=json.dumps({'collectionId': collection_id})))
-    return refresh_token(user, resp)

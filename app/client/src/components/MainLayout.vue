@@ -102,7 +102,6 @@
       <v-container fluid fill-height :class="section === 'collections' ? 'collection-list-container' : ''">
         <!-- TEMPLATE -->
         <v-layout v-if="section === 'template'">
-          
           <div v-if="template" v-html="template"></div>
         </v-layout>
         <!-- DOCUMENTS -->
@@ -133,16 +132,12 @@
       </v-container>
     </v-content>
     
-    <div v-if="!!displayedDocId && document && document['iiif-collection-url'].length > 0">
-      <v-navigation-drawer  right  :mini-variant="!showIIIFViewer"
+    <div>
+      <v-navigation-drawer right  :mini-variant="!showIIIFViewer"
                            class='mt-5 homepage__iiif-viewer' width="768px" app>
         <v-container>
-          <v-layout>
-
-            <div class="uv"
-                 data-locale="en-GB:English (GB),fr-FR:Français"
-                 :data-uri="document['iiif-collection-url']">
-            </div>
+          <v-layout id="uv-layout">
+            <!-- MOVE THE UV HERE WHEN THE VUE IS MOUNTED-->
           </v-layout>
         </v-container>
         <v-btn

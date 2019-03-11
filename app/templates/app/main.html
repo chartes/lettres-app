@@ -6,6 +6,11 @@
 
 {% block content %}
     <div id="app" data-section="{{section}}"  data-data="{{ data }}"></div>
+    {% if section == 'documents' and data|get_value('docId')  %}
+    <div class="uv" id="uv"
+         data-locale="en-GB:English (GB),fr-FR:Français"
+         data-uri="{{ request.host_url[:-1] }}{{ url_for('api_bp.get_collection', api_version=1.0, doc_id=data|get_value('docId')) }}"></div>
+    {% endif %}
 {% endblock content %}
 
 {% block scripts %}
