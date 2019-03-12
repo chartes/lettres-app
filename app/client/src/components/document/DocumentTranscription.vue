@@ -8,11 +8,16 @@
     <rich-text-editor
             v-if="editable"
             v-model="transcriptionContent"
-    />
+    >
+      <editor-save-button
+              :doc-id="document.id"
+              name="transcription"
+              :value="transcriptionContent"/>
+    </rich-text-editor>
     <div v-else class="document__transcription--content" v-html="transcriptionContent"></div>
 
     <ol v-if="notesContent.length" class="note-list notes">
-       <li  v-for="(note, index) in notesContent" :key="note.id">
+       <li  v-for="note in notesContent" :key="note.id">
          <div class="note-item" :class="noteItemClass">
            <div class="note-item__text" v-html="note.content"></div>
            <a v-if="editable" @click="openNoteEdit(note)" class="note-item__edit"><icon-pen-edit/></a>
@@ -40,19 +45,16 @@
 <script>
 
   import { mapState } from 'vuex'
-  import DocumentAttributes from './DocumentAttributes';
-  import TranscriptionEditor from '../forms/fields/TranscriptionEditor';
   import IconBin from '../ui/icons/IconBin';
   import IconPenEdit from '../ui/icons/IconPenEdit';
   import ModalConfirmNoteDelete from '../forms/ModalConfirmNoteDelete';
   import RichTextEditor from '../forms/fields/RichTextEditor';
   import NoteForm from '../forms/NoteForm';
+  import EditorSaveButton from '../forms/fields/EditorSaveButton';
 
   export default {
     name: 'DocumentTranscription',
-    components: {
-      NoteForm,
-      RichTextEditor, ModalConfirmNoteDelete, IconPenEdit, IconBin, TranscriptionEditor, DocumentAttributes},
+    components: {EditorSaveButton, NoteForm, RichTextEditor, ModalConfirmNoteDelete, IconPenEdit, IconBin },
     props: {
       editable: {
         type: Boolean,
@@ -60,14 +62,17 @@
       },
     },
     data () {
+      console.log('data')
       return {
+        transcriptionContent: '',
         noteId: null,
         noteEdit: false,
         noteEditId: false,
+        notesContent: []
       }
     },
-    created() {
-      this.transcriptionContent = this.document.transcription;
+    mounted() {
+      this.transcriptionContent = this.document.transcription || ''
       this.notesContent = this.notes;
     },
     methods: {

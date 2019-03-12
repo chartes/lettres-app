@@ -62,7 +62,6 @@ const EditorMixin = {
         this.setRangeBound(range);
         let formats = this.editor.getFormat(range.index, range.length);
         this.updateButtons(formats);
-        console.log("onSelection", range, formats)
         if (!!formats.note) {
           this.onNoteSelected(formats.note, range);
           this.buttons.note = false;
@@ -182,7 +181,6 @@ const EditorMixin = {
         label: 'Référence'
       });
     }
-
 
   },
 

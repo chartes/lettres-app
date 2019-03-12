@@ -57,7 +57,7 @@
               :submit="submitTextfieldForm"
               :cancel="cancelTextfieldForm"/>
 
-    <pre style="white-space: normal">{{value}}</pre>
+    <pre v-if="debug" style="white-space: normal">{{value}}</pre>
     </div>
 
   </div>
@@ -105,6 +105,7 @@
     },
     data() {
       return {
+        debug: false,
         editor: null,
         editorElement: null,
         editorContentElement: null,
@@ -242,7 +243,7 @@
           this.setRangeBound(range);
           let formats = this.editor.getFormat(range.index, range.length);
           this.updateButtons(formats);
-          //console.log("onSelection", range, formats)
+          console.log("onSelection", range, formats)
           if (!!formats.note) {
             this.onNoteSelected(formats.note, range);
             this.buttons.note = false;
@@ -279,10 +280,8 @@
         this.insertEmbed('note', true)
       },
       updateNote(note) {
-        const isNewNote = this.noteEditMode === 'new';
-        const action = isNewNote ? 'notes/add' : 'notes/update';
         this.$store.dispatch('document/addNote', note).then(newNote =>{
-          console.log(newNote)
+          console.log('updateNote added', newNote)
           this.editor.format('note', newNote.id);
           this.selectedNoteId = newNote.id;
           this.closeNoteEdit();
@@ -359,6 +358,19 @@
 
       /**************
        *
+       * LINK METHODS
+       */
+
+      displayLinkForm() {
+        this.displayTextfieldForm ({
+          format: 'link',
+          title: '<i class="fas fa-map-marker-alt"></i> Insérer un lien',
+          label: 'URL du lien'
+        });
+      },
+
+      /**************
+       *
        * PERSON METHODS
        */
 
@@ -406,7 +418,7 @@
         return {
           note: { cb: this.newNoteChoiceOpen, active: this.isNoteButtonActive },
           page: { cb: this.simpleFormat, active: this.editorHasFocus },
-          link: { cb: this.simpleFormat, active: this.editorHasFocus },
+          link: { cb: this.displayLinkForm, active: this.editorHasFocus },
           bold: { cb: this.simpleFormat, active: this.editorHasFocus },
           italic: { cb: this.simpleFormat, active: this.editorHasFocus },
           superscript: { cb: this.simpleFormat, active: this.editorHasFocus },
@@ -424,6 +436,7 @@
         return `top:${top}px;left:${left}px`;
       },
       isNoteButtonActive () {
+        console.log("isNoteButtonActive", this.editorHasFocus, this.buttons.note, this.editorHasFocus && this.buttons.note)
         const cond = this.editorHasFocus && this.buttons.note;
         return cond;
       },
