@@ -14,5 +14,19 @@
     font-size: 1.2em !important;
   }
 
+  &__checkbox {
+
+  }
+
+  &__tabs {
+    background-color: white;
+  }
+
+  &__tab:hover {
+   background-color: #505050;
+    a {
+      color: white;
+    }
+  }
 }
 

@@ -83,7 +83,9 @@
         fixed
     >
       <v-toolbar-title style="width: 300px" class="ml-0 pl-3">
-        <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
+        <v-toolbar-side-icon @click.stop="drawer = !drawer">
+          <v-icon>fas fa-bars</v-icon>
+        </v-toolbar-side-icon>
         <span class="hidden-sm-and-down"><v-btn flat href="/lettres/documents">Projet Lettres</v-btn></span>
       </v-toolbar-title>
 
@@ -133,7 +135,7 @@
     </v-content>
     
     <div>
-      <v-navigation-drawer right  :mini-variant="!showIIIFViewer"
+      <v-navigation-drawer right  :mini-variant="!showIIIFViewer" v-if="docId"
                            class='mt-5 homepage__iiif-viewer' width="768px" app>
         <v-container>
           <v-layout id="uv-layout">
