@@ -59,6 +59,20 @@
               :remove="removeTextfieldForm"
       />
 
+      <person-list-form
+              v-if="formPerson"
+              title="Sélectionner une personne"
+              :submit="submitPersonForm"
+              :cancel="closePersonForm"
+      />
+      <placename-list-form
+              v-if="formLocation"
+              title="Sélectionner un lieu"
+              :submit="submitLocationForm"
+              :cancel="closeLocationForm"
+              :remove="removeLocationForm"
+      />
+
     <pre v-if="debug" style="white-space: normal">{{value}}</pre>
     </div>
 
@@ -80,6 +94,8 @@
   import { getNewDelta } from '../../../modules/quill/DeltaUtils';
   import _isEmpty from 'lodash/isEmpty';
   import NoteForm from '../NoteForm';
+  import PersonListForm from '../PersonListForm';
+  import PlacenameListForm from '../PlacenameListForm';
 
   const wrapPattern = /^<p>(.*)<\/p>$/im;
   let formatCallbacks = {}
@@ -95,6 +111,8 @@
     },
     mixins: [EditorNotesMixins],
     components: {
+      PlacenameListForm,
+      PersonListForm,
       NoteForm,
       FieldLabel,
       NewNoteActions,
@@ -114,6 +132,8 @@
         editorHasFocus: false,
         currentSelection: null,
         formTextfield: null,
+        formPerson: null,
+        formLocation: null,
         actionsPositions: {
           top: 0, left: 0, right: 0, bottom: 0
         },
@@ -172,8 +192,6 @@
       getEditorHTML () {
         return this.editorContentElement.innerHTML;
       },
-
-
 
       /**************
        *
@@ -355,11 +373,23 @@
        */
 
       displayLocationForm() {
-        this.displayTextfieldForm ({
-          format: 'location',
-          title: '<i class="fas fa-map-marker-alt"></i> Identifier un lieu',
-          label: 'Nom du lieu'
-        });
+        this.formLocation = true
+      },
+      closeLocationForm() {
+        this.formLocation = false
+      },
+      submitLocationForm(loc) {
+        this.editor.format('location', loc.id);
+        this.closeLocationForm();
+        let formats = this.editor.getFormat();
+        this.updateButtons(formats)
+      },
+      removeLocationForm() {
+        console.log("removeLocationForm")
+        this.editor.format('location', false);
+        this.closeLocationForm();
+        let formats = this.editor.getFormat();
+        this.updateButtons(formats)
       },
 
       /**************
@@ -381,11 +411,13 @@
        */
 
       displayPersonForm() {
-        this.displayTextfieldForm ({
-          format: 'person',
-          title: '<i class="fas fa-user"></i> Identifier une personne',
-          label: 'Nom de la personne'
-        });
+        this.formPerson = true
+      },
+      closePersonForm() {
+        this.formPerson = false
+      },
+      submitPersonForm() {
+
       },
 
       /**************

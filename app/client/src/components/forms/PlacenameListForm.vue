@@ -3,7 +3,7 @@
   <modal-form class="person-list-form"
           :title="title"
           :cancel="cancelAction"
-          :remove="remove"
+          :remove="remove ? removeAction : null"
           :valid="validForm"
           :submitting="false"
   >
@@ -85,6 +85,7 @@
       },
 
       submitAction () {
+        console.log('submitAction', this.form)
         this.$props.submit(this.form);
       },
       cancelAction () {
@@ -92,7 +93,7 @@
         this.$props.cancel();
       },
       removeAction () {
-        this.$props.cancel();
+        this.$props.remove();
       },
 
       openNewPlacenameForm () {

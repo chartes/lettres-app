@@ -163,8 +163,6 @@
     },
     watch: {
       items: function (val, oldValue) {
-        console.log('watch autocomplete items', val)
-        // actually compare them
         if (!!val || val.length !== oldValue.length) {
           this.results = val;
           this.isLoading = false;
