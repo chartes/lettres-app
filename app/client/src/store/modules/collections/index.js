@@ -60,7 +60,6 @@ const mutations = {
         parents: getIncludedRelation(c, included, "parents")
       }
     });
-    console.warn("building full hierarchy");
     // build full hierarchy tree
     state.allCollectionsWithParents = collections;
     state.fullHierarchy = [];

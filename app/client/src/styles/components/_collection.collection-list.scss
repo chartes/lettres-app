@@ -5,6 +5,7 @@
   width: 100%;
   height: 100%;
 
+  background-color: whitesmoke;
 
   i.v-treeview-node__toggle {
     font-size: 2em !important;
@@ -15,7 +16,7 @@
   }
 
   &__checkbox {
-
+    font-size: 20px;
   }
 
   &__tabs {
@@ -23,9 +24,25 @@
   }
 
   &__tab:hover {
-   background-color: #505050;
+   background-color: #F5F5F5;
     a {
-      color: white;
+      color: black;
+    }
+  }
+
+  .v-treeview-node__label {
+   font-size: 14px;
+  }
+
+  &____treeview-container {
+    background-color: whitesmoke;
+  }
+  &__search {
+    height: 64px;
+    background-color: #F5F5F5 !important;
+    margin-bottom: 20px;
+    .v-input__control {
+      min-height: unset;
     }
   }
 }

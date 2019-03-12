@@ -101,6 +101,14 @@ class Collection(db.Model, ChangesMixin):
     children = db.relationship("Collection", backref=db.backref('parent', remote_side=id))
 
     @property
+    def documents_including_children(self):
+        docs = []
+        for c in self.children:
+            docs += c.documents_including_children
+        docs += self.documents
+        return docs
+
+    @property
     def parents(self):
         if self.parent is None:
             return []

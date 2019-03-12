@@ -11,6 +11,8 @@ def register_collection_role_api_urls(app):
     registrar.register_delete_routes(Collection, CollectionFacade)
 
     registrar.register_relationship_get_route(CollectionFacade, 'parents')
+    registrar.register_relationship_get_route(CollectionFacade, 'documents-including-children')
+
     registrar.register_relationship_get_route(CollectionFacade, 'documents')
     registrar.register_relationship_post_route(CollectionFacade, 'documents')
     registrar.register_relationship_patch_route(CollectionFacade, 'documents')

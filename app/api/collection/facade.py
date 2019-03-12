@@ -73,6 +73,12 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
                 "resource_identifier_getter": self.get_related_resource_identifiers(DocumentFacade, "documents", to_many=True),
                 "resource_getter": self.get_related_resources(DocumentFacade, "documents", to_many=True),
             },
+            "documents-including-children": {
+                "links": self._get_links(rel_name="documents-including-children"),
+                "resource_identifier_getter": self.get_related_resource_identifiers(DocumentFacade, "documents_including_children",
+                                                                                    to_many=True),
+                "resource_getter": self.get_related_resources(DocumentFacade, "documents_including_children", to_many=True),
+            },
             "parents": {
                 "links": self._get_links(rel_name="parents"),
                 "resource_identifier_getter": self.get_parents_resource_identifiers,

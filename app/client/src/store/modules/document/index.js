@@ -62,7 +62,7 @@ const mutations = {
     Vue.set(state.documentsPreview, data.id, newPreviewCard);
   },
   UPDATE_ALL (state, payload) {
-    console.log('UPDATE_ALL', payload.data);
+    console.log('UPDATE_ALL', payload);
     state.documents = payload.data;
     state.links = payload.links;
     state.totalCount = payload.meta["total-count"];
