@@ -55,7 +55,9 @@
               :label="formTextfield.label"
               :value="formTextfield.value"
               :submit="submitTextfieldForm"
-              :cancel="cancelTextfieldForm"/>
+              :cancel="cancelTextfieldForm"
+              :remove="removeTextfieldForm"
+      />
 
     <pre v-if="debug" style="white-space: normal">{{value}}</pre>
     </div>
@@ -327,6 +329,10 @@
       cancelTextfieldForm () {
         this.formTextfield = null;
       },
+      removeTextfieldForm () {
+        this.editor.format(this.formTextfield.format, false);
+        this.formTextfield = null;
+      },
       submitTextfieldForm (data) {
         this.editor.format(this.formTextfield.format, data);
         this.cancelTextfieldForm();
@@ -364,7 +370,7 @@
       displayLinkForm() {
         this.displayTextfieldForm ({
           format: 'link',
-          title: '<i class="fas fa-map-marker-alt"></i> Insérer un lien',
+          title: '<i class="fas fa-link"></i> Insérer un lien',
           label: 'URL du lien'
         });
       },
