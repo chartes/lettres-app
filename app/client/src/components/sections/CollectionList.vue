@@ -2,7 +2,7 @@
   <v-container class="collection-list-container" grid-list-md fluid fill-height>
     
     <v-layout row wrap>
-      <v-flex xs4>
+      <v-flex xs3>
         <v-sheet class="pa-3 collection-list-container__search">
           <v-text-field
               v-model="search"
@@ -16,13 +16,16 @@
           <v-treeview
               v-model="tree"
               :items="items"
+              item-text="title"
               :search="search"
               :filter="filter"
-              item-text="title"
+              selectable
               selected-color="red"
+              :activatable="true"
+              :active.sync="activeTreeItem"
+              active-class="grey lighten-4 red--text"
               :open="open"
               :open-all="true"
-              selectable
               :transition="true"
               expand-icon="arrow_drop_down"
               on-icon="fa fa-check-square"
@@ -36,9 +39,9 @@
           </v-treeview>
         </div>
       </v-flex>
-      <v-flex xs8 v-if="selections && selections.length > 0" class="collection-list-container__tabs">
+      <v-flex xs9 v-if="selections && selections.length > 0" class="collection-list-container__tabs">
         <v-tabs
-            v-model="active"
+            v-model="activeTab"
             height="64"
             slider-color="red"
             next-icon="$vuetify.icons.nextstep"
@@ -57,8 +60,9 @@
               :key="i"
           >
             <v-card flat fill-height>
-              <v-card-text v-if="active === i">
-                {{ selection.description }}
+              <v-card-text v-if="activeTab === i">
+                <p>{{ selection.description }}</p>
+                <v-divider></v-divider>
                 <document-list :page-size="pageSize" :current-page="currentPage" :go-to-page="goToDocPage"
                                :nb-pages="nbPages">
                 </document-list>
@@ -87,7 +91,8 @@
             return {
                 tree: [],
                 checkboxes: [],
-                active: null,
+                activeTab: null,
+                activeTreeItem: null,
                 drawer: null,
                 search: null,
                 caseSensitive: false,
@@ -146,13 +151,20 @@
                 return selections
             },
             selectedCollection(){
-                return this.active !== null && this.selections[this.active] ? this.selections[this.active].id : null;
+                return this.activeTab !== null && this.selections[this.active] ? this.selections[this.activeTab].id : null;
             },
             
         },
         watch: {
+            activeTreeItem(val) {
+              if (val && val.length > 0) {
+                  this.tree = [val[0]]
+              } else {
+                  this.tree = [];
+              }
+            },
             selections(val) {
-                this.active = null;
+                this.activeTab = null;
             },
             selectedCollection(val) {
                 if (val) {

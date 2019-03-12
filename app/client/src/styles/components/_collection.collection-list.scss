@@ -34,6 +34,10 @@
    font-size: 14px;
   }
 
+  .v-treeview-node:hover {
+    cursor: pointer;
+  }
+
   &____treeview-container {
     background-color: whitesmoke;
   }
