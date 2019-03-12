@@ -11,27 +11,19 @@
     <div class="witness-list__content">
       
       <ul class="witness-list__list">
-        <li v-for="witness, index in list" class="witness-item">
 
-          <div class="witness-item__content">
-            <span class="witness-item__text" v-html="witness.content"></span>
-            <span v-if="witness.status && witness.status.length > 0" class="tag">{{witness.status}}</span>
-            <span v-if="witness.tradition && witness.tradition.length > 0" class="tag">{{witness.tradition}}</span>
-            
-            <a v-if="editable && list.length > 1" @click="reorderWitness(witness, 1)">
-              <icon-arrow-down style="padding: 0"/>
-            </a>
-            <a v-if="editable && list.length > 1 && index > 0" @click="reorderWitness(witness, -1)">
-              <icon-arrow-down style="padding: 0" class="is-upside-down"/>
-            </a>
-            <a v-if="editable" @click="openWitnessEdit(witness)" class="witness-item__edit">
-              <icon-pen-edit/>
-            </a>
-            <a v-if="editable" @click="removeWitness(witness)" class="witness-item__delete">
-              <icon-bin/>
-            </a>
-          </div>
-        </li>
+        <witness-item
+                v-for="witness, index in list"
+                :editable="editable"
+                :list-index="index"
+                :list-length="list.length"
+                :witness="witness"
+                :edit-action="openWitnessEdit"
+                :reorder-action="reorderWitness"
+                :delete-action="removeWitness"
+                :key="index"
+        />
+
       </ul>
       
       <error-message :error="error"/>
@@ -56,10 +48,11 @@
   import IconArrowDown from '../ui/icons/IconArrowDown';
   import IconAdd from '../ui/icons/IconAdd';
   import {mapState} from 'vuex';
+  import WitnessItem from './witnesses/WitnessItem';
 
   export default {
     name: 'DocumentWitnesses',
-    components: {ErrorMessage, LaunchButton, WitnessForm, IconBin, IconPenEdit, IconArrowDown, IconAdd},
+    components: {WitnessItem, ErrorMessage, LaunchButton, WitnessForm, IconAdd},
     props: {
       editable: {
         type: Boolean,

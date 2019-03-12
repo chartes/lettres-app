@@ -12,7 +12,6 @@
     counter-increment: notes-count;
     margin: 0 .125em;
     pointer-events: bounding-box;
-    color: red;
     &::after {
       visibility: visible;
       position: absolute;

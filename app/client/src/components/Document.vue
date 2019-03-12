@@ -98,9 +98,9 @@
 
         },
         watch: {
-            lockOwner() {
-                this.computeCanEdit();
-            }
+          lockOwner() {
+            this.computeCanEdit();
+          }
         },
         methods: {
             computeCanEdit() {

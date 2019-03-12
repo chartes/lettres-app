@@ -1,9 +1,10 @@
-import http_with_csrf_token from '../../../modules/http-common';
+import http_with_csrf_token, {http} from '../../../modules/http-common';
 import {
   getPersons, getLanguages, getWitnesses,
   getNotes, getCollections, getCurrentLock,  getPlacenames
 } from '../../../modules/document-helpers';
-import Vue from "vue";
+import Vue from 'vue';
+import {getInstitution} from '../witnesses'
 
 const TRANSLATION_MAPPING = {
   'creation' : 'Date de création',
@@ -97,6 +98,12 @@ const mutations = {
     let wit = state.witnesses.find(w => w.id === payload.id)
     const index = state.witnesses.indexOf(wit)
     wit = { ...payload }
+    state.witnesses.splice(index, 1, wit)
+  },
+  UPDATE_WITNESS_INSTITUTION (state, { witnessId, institution }) {
+    let wit = state.witnesses.find(w => w.id === witnessId)
+    const index = state.witnesses.indexOf(wit)
+    wit = { ...wit, institution }
     state.witnesses.splice(index, 1, wit)
   },
   REMOVE_WITNESS (state, payload) {
@@ -228,6 +235,16 @@ const actions = {
     });
   },
 
+  fetchWitnessInstitution ({ commit }, witnessId) {
+    return http.get(`/witnesses/${witnessId}?include=institution`).then( response => {
+
+
+      const institution = getInstitution(response.data.included)
+      if (institution.id === null) return null;
+      commit('UPDATE_WITNESS_INSTITUTION', { witnessId, institution })
+      return institution;
+    });
+  },
   addWitness ({commit, state}, witness) {
     witness.num = Math.max.apply(null, state.witnesses.map(w => w.num)) + 1;
 
@@ -432,7 +449,6 @@ const getters = {
   },
 
   locationDateFrom(state) {
-    console.warn(state.placenames);
     return state.placenames.filter(corr => {
       if (!corr.role) return false;
       console.warn(corr.role.label);

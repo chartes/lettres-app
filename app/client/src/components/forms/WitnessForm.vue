@@ -124,7 +124,6 @@
       },
 
       submitInstitutionForm (inst) {
-        console.log('submitInstitutionForm', inst)
         this.institutionError = null;
         this.$store.dispatch('institutions/addOne', inst)
           .then (response => {
@@ -159,7 +158,6 @@
         return traditions;
       },
       isValid () {
-        console.log("isValid", !!this.form.content && this.form.content.length >= 1 && this.form.content !== '<p><br></p>')
         return this.form.content && this.form.content.length >= 1 && this.form.content !== '<p><br></p>'
       }
 
