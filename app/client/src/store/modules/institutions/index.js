@@ -73,6 +73,7 @@ const actions = {
       const institution = { id: response.data.data.id, ...response.data.data.attributes };
       console.log('institution fetchOne', institution)
       commit('ADD_ONE', institution)
+      return institution
     })
   },
 
