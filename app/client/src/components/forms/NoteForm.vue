@@ -52,7 +52,8 @@
     },
     computed: {
         isValid () {
-            return this.form.content && this.form.content.length > 1
+          console.log("isValid", this.form.content)
+            return !!this.form && !!this.form.content && this.form.content.length > 1
         }
     }
   }
