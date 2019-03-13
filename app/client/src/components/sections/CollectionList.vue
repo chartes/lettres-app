@@ -16,7 +16,7 @@
           <v-treeview
               v-model="tree"
               :items="items"
-              item-text="title"
+              item-text="titleWithCount"
               :search="search"
               :filter="filter"
               selectable
@@ -77,7 +77,7 @@
 </template>
 
 <script>
-    import { mapState } from 'vuex';
+    import { mapState} from 'vuex';
     import DocumentList from "./DocumentList";
     import {getUrlParameter} from "../../modules/utils";
 
@@ -92,7 +92,7 @@
                 tree: [],
                 checkboxes: [],
                 activeTab: null,
-                activeTreeItem: null,
+                activeTreeItem: [],
                 drawer: null,
                 search: null,
                 caseSensitive: false,
@@ -105,12 +105,15 @@
         created() {
             this.$store.dispatch('user/fetchCurrent').then(resp => {
                 this.$store.dispatch('collections/fetchAll').then(resp => {
-                   this.open =  this.allCollectionsWithParents.map( c => c.id);
+                   if (this.allCollectionsWithParents) {
+                       this.open = this.allCollectionsWithParents.map(c => c.id);
+                   }
                 });
             });
         },
         methods: {
             fetchSearch() {
+                console.warn("FETCH SEARCH")
                 this.$store.dispatch('document/fetchSearch', {
                     pageId: this.currentPage,
                     pageSize: this.pageSize,
@@ -151,7 +154,8 @@
                 return selections
             },
             selectedCollection(){
-                return this.activeTab !== null && this.selections[this.active] ? this.selections[this.activeTab].id : null;
+                console.warn("activetab", this.activeTab, this.selections, this.selections[this.activeTab]);
+                return this.activeTab !== null && this.selections[this.activeTab] ? this.selections[this.activeTab].id : null;
             },
             
         },
@@ -166,8 +170,8 @@
             selections(val) {
                 this.activeTab = null;
             },
-            selectedCollection(val) {
-                if (val) {
+            activeTab(val) {
+                if (val !== null) {
                     this.goToDocPage(1);
                 }
             }

@@ -42,6 +42,11 @@ function searchId(tree, id) {
     }
 }
 
+function countDocuments(collectionId) {
+  return http.get(`/collections/${collectionId}/relationships/documents`).then(response => {
+    return response.data.meta['total-count'];
+  })
+}
 
 const mutations = {
 
@@ -50,20 +55,30 @@ const mutations = {
   },
 
   FETCH_ALL(state, {data, included}) {
-
-    const collections = data.map( c => {
+    let countPromises = [];
+    let collections = data.map( c => {
+      countPromises.push(countDocuments(c.id));
       return {
         id: c.id,
-        title: c.attributes.title,
+        title: `${c.attributes.title}`,
         description: c.attributes.description,
+        //documentCount: count,
         //documents: getIncludedRelation(c, included, "documents"),
-        parents: getIncludedRelation(c, included, "parents")
+        parents: getIncludedRelation(c, included, "parents"),
       }
     });
-    // build full hierarchy tree
-    state.allCollectionsWithParents = collections;
-    state.fullHierarchy = [];
-    state.fullHierarchy = buildTree(collections, null, 0);
+
+    Promise.all(countPromises).then(counts =>{
+      collections.map( c => {
+        c.documentCount = counts.shift();
+        c.titleWithCount = `${c.title} (${c.documentCount})`;
+      });
+      // build full hierarchy tree
+      state.allCollectionsWithParents = collections;
+      state.fullHierarchy = [];
+      state.fullHierarchy = buildTree(collections, null, 0);
+    });
+
   },
   SEARCH_RESULTS (state, payload) {
     state.collectionsSearchResults = payload;
