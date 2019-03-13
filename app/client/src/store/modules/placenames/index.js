@@ -37,7 +37,7 @@ const actions = {
 
     search({commit}, what) {
         commit('SEARCH_RESULTS', [])
-        http.get(`/search?query=*${what}*&index=lettres__${process.env.NODE_ENV}__placename&without-relationships`)
+        http.get(`/search?query=*${what}*&index=lettres__${process.env.NODE_ENV}__placenames&without-relationships`)
             .then(response => {
                 const placenames = response.data.data.map(inst => {
                     return {id: inst.id, ...inst.attributes}

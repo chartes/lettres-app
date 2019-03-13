@@ -14,7 +14,7 @@ class LocationBlot extends Inline {
 
   static create(data) {
     let node = super.create();
-    node.setAttribute('href', data);
+    node.setAttribute('id', data);
     return node;
   }
 
@@ -27,7 +27,7 @@ class LocationBlot extends Inline {
 
   format(name, data) {
     if (name === 'location' && data) {
-      this.domNode.setAttribute('href', data);
+      this.domNode.setAttribute('id', data);
     } else {
       super.format(name, data);
     }

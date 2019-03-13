@@ -44,7 +44,6 @@ const actions = {
     });
   },
   fetchOne ({ commit }, id) {
-    console.log('institution fetchOne', id)
     http.get(`/institution/${id}?include=witnesses&without-relationships`).then( response => {
       const institution = {
         id: response.data.data.id,
@@ -59,8 +58,6 @@ const actions = {
   },
 
   addOne ({commit}, institution) {
-    console.log('institution addOne', institution)
-
     const institutionData = {
       data: {
         type: 'institution',
@@ -71,8 +68,8 @@ const actions = {
     const http = http_with_csrf_token();
     return http.post(`/institutions`, institutionData).then( response => {
       const institution = { id: response.data.data.id, ...response.data.data.attributes };
-      console.log('institution fetchOne', institution)
       commit('ADD_ONE', institution)
+      return institution
     })
   },
 

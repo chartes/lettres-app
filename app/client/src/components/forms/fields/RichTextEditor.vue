@@ -7,7 +7,7 @@
     <div class="editor-area">
       <div class="editor-controls" ref="controls">
 
-        <div v-for="group, gindex in formats" :key="gindex" class="editor-controls-group">
+        <div v-for="group, gindex in formats" :key="gindex" class="editor-controls-group field has-addons">
           <editor-button
                   v-for="format in group"
                   :active="formatCallbacks[format].active"
@@ -41,14 +41,39 @@
                 :cancel="newNoteChoiceClose"
         />
       </div>
+      <note-form
+              v-if="noteEditMode == 'new' || noteEditMode == 'edit'"
+              :title="noteEditMode == 'new' ? 'nouvelle note' : 'Éditer la note'"
+              :note="currentNote"
+              :noteId="selectedNoteId"
+              :submit="updateNote"
+              :cancel="closeNoteEdit"
+      />
       <textfield-form
               v-if="formTextfield"
               :title="formTextfield.title"
               :label="formTextfield.label"
               :value="formTextfield.value"
               :submit="submitTextfieldForm"
-              :cancel="cancelTextfieldForm"/>
+              :cancel="cancelTextfieldForm"
+              :remove="removeTextfieldForm"
+      />
 
+      <person-list-form
+              v-if="formPerson"
+              title="Sélectionner une personne"
+              :submit="submitPersonForm"
+              :cancel="closePersonForm"
+      />
+      <placename-list-form
+              v-if="formLocation"
+              title="Sélectionner un lieu"
+              :submit="submitLocationForm"
+              :cancel="closeLocationForm"
+              :remove="removeLocationForm"
+      />
+
+    <pre v-if="debug" style="white-space: normal">{{value}}</pre>
     </div>
 
   </div>
@@ -68,6 +93,9 @@
   import Quill, { getNewQuill } from '../../../modules/quill/LettresQuill';
   import { getNewDelta } from '../../../modules/quill/DeltaUtils';
   import _isEmpty from 'lodash/isEmpty';
+  import NoteForm from '../NoteForm';
+  import PersonListForm from '../PersonListForm';
+  import PlacenameListForm from '../PlacenameListForm';
 
   const wrapPattern = /^<p>(.*)<\/p>$/im;
   let formatCallbacks = {}
@@ -83,6 +111,9 @@
     },
     mixins: [EditorNotesMixins],
     components: {
+      PlacenameListForm,
+      PersonListForm,
+      NoteForm,
       FieldLabel,
       NewNoteActions,
       NoteActions,
@@ -94,12 +125,15 @@
     },
     data() {
       return {
+        debug: false,
         editor: null,
         editorElement: null,
         editorContentElement: null,
         editorHasFocus: false,
         currentSelection: null,
         formTextfield: null,
+        formPerson: null,
+        formLocation: null,
         actionsPositions: {
           top: 0, left: 0, right: 0, bottom: 0
         },
@@ -158,8 +192,6 @@
       getEditorHTML () {
         return this.editorContentElement.innerHTML;
       },
-
-
 
       /**************
        *
@@ -231,7 +263,7 @@
           this.setRangeBound(range);
           let formats = this.editor.getFormat(range.index, range.length);
           this.updateButtons(formats);
-          //console.log("onSelection", range, formats)
+          console.log("onSelection", range, formats)
           if (!!formats.note) {
             this.onNoteSelected(formats.note, range);
             this.buttons.note = false;
@@ -266,6 +298,14 @@
 
       insertNote () {
         this.insertEmbed('note', true)
+      },
+      updateNote(note) {
+        this.$store.dispatch('document/addNote', note).then(newNote =>{
+          console.log('updateNote added', newNote)
+          this.editor.format('note', newNote.id);
+          this.selectedNoteId = newNote.id;
+          this.closeNoteEdit();
+        })
       },
       insertPageBreak () {
         this.insertEmbed('page', true)
@@ -307,6 +347,10 @@
       cancelTextfieldForm () {
         this.formTextfield = null;
       },
+      removeTextfieldForm () {
+        this.editor.format(this.formTextfield.format, false);
+        this.formTextfield = null;
+      },
       submitTextfieldForm (data) {
         this.editor.format(this.formTextfield.format, data);
         this.cancelTextfieldForm();
@@ -329,10 +373,35 @@
        */
 
       displayLocationForm() {
+        this.formLocation = true
+      },
+      closeLocationForm() {
+        this.formLocation = false
+      },
+      submitLocationForm(loc) {
+        this.editor.format('location', loc.id);
+        this.closeLocationForm();
+        let formats = this.editor.getFormat();
+        this.updateButtons(formats)
+      },
+      removeLocationForm() {
+        console.log("removeLocationForm")
+        this.editor.format('location', false);
+        this.closeLocationForm();
+        let formats = this.editor.getFormat();
+        this.updateButtons(formats)
+      },
+
+      /**************
+       *
+       * LINK METHODS
+       */
+
+      displayLinkForm() {
         this.displayTextfieldForm ({
-          format: 'location',
-          title: '<i class="fas fa-map-marker-alt"></i> Identifier un lieu',
-          label: 'Nom du lieu'
+          format: 'link',
+          title: '<i class="fas fa-link"></i> Insérer un lien',
+          label: 'URL du lien'
         });
       },
 
@@ -342,11 +411,13 @@
        */
 
       displayPersonForm() {
-        this.displayTextfieldForm ({
-          format: 'person',
-          title: '<i class="fas fa-user"></i> Identifier une personne',
-          label: 'Nom de la personne'
-        });
+        this.formPerson = true
+      },
+      closePersonForm() {
+        this.formPerson = false
+      },
+      submitPersonForm() {
+
       },
 
       /**************
@@ -385,7 +456,7 @@
         return {
           note: { cb: this.newNoteChoiceOpen, active: this.isNoteButtonActive },
           page: { cb: this.simpleFormat, active: this.editorHasFocus },
-          link: { cb: this.simpleFormat, active: this.editorHasFocus },
+          link: { cb: this.displayLinkForm, active: this.editorHasFocus },
           bold: { cb: this.simpleFormat, active: this.editorHasFocus },
           italic: { cb: this.simpleFormat, active: this.editorHasFocus },
           superscript: { cb: this.simpleFormat, active: this.editorHasFocus },
@@ -403,6 +474,7 @@
         return `top:${top}px;left:${left}px`;
       },
       isNoteButtonActive () {
+        console.log("isNoteButtonActive", this.editorHasFocus, this.buttons.note, this.editorHasFocus && this.buttons.note)
         const cond = this.editorHasFocus && this.buttons.note;
         return cond;
       },

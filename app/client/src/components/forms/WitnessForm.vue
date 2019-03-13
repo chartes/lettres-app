@@ -28,7 +28,7 @@
                 :items="institutionsSearchResults"
                 :is-async="true"
                 @search="searchInstitution"
-                label-key="ref"
+                label-key="name"
         >
           <button
                   class="button is-outlined is-link"
@@ -124,12 +124,16 @@
       },
 
       submitInstitutionForm (inst) {
-        console.log('submitInstitutionForm', inst)
         this.institutionError = null;
-        this.$store.dispatch('institutions/addOne', inst).catch(error => {
-          console.log(error)
-          this.institutionError = error.toString()
-        })
+        this.$store.dispatch('institutions/addOne', inst)
+          .then (response => {
+            this.form.institution = response
+            this.closeInstitutionForm()
+          })
+          .catch(error => {
+            console.log(error)
+            this.institutionError = error.toString()
+          })
       },
       openInstitutionForm () {
         this.institutionForm = true
@@ -154,7 +158,6 @@
         return traditions;
       },
       isValid () {
-        console.log("isValid", !!this.form.content && this.form.content.length >= 1 && this.form.content !== '<p><br></p>')
         return this.form.content && this.form.content.length >= 1 && this.form.content !== '<p><br></p>'
       }
 

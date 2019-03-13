@@ -1,9 +1,10 @@
-import http_with_csrf_token from '../../../modules/http-common';
+import http_with_csrf_token, {http} from '../../../modules/http-common';
 import {
   getPersons, getLanguages, getWitnesses,
   getNotes, getCollections, getCurrentLock,  getPlacenames
 } from '../../../modules/document-helpers';
-import Vue from "vue";
+import Vue from 'vue';
+import {getInstitution} from '../witnesses'
 
 const TRANSLATION_MAPPING = {
   'creation' : 'Date de création',
@@ -78,6 +79,18 @@ const mutations = {
     state.collections = [ ...state.collections, payload ]
   },
 
+  UPDATE_NOTE (state, payload) {
+    let no = state.notes.find(n => n.id === payload.id)
+    const index = state.notes.indexOf(no)
+    no = { ...payload }
+    state.notes.splice(index, 1, no)
+  },
+  ADD_NOTE (state, payload) {
+    const exists = state.notes.find(coll => coll.id === payload.id)
+    if (exists) return;
+    state.notes = [ ...state.notes, payload ]
+  },
+
   ADD_WITNESS (state, payload) {
     state.witnesses = [ ...state.witnesses, payload ]
   },
@@ -85,6 +98,12 @@ const mutations = {
     let wit = state.witnesses.find(w => w.id === payload.id)
     const index = state.witnesses.indexOf(wit)
     wit = { ...payload }
+    state.witnesses.splice(index, 1, wit)
+  },
+  UPDATE_WITNESS_INSTITUTION (state, { witnessId, institution }) {
+    let wit = state.witnesses.find(w => w.id === witnessId)
+    const index = state.witnesses.indexOf(wit)
+    wit = { ...wit, institution }
     state.witnesses.splice(index, 1, wit)
   },
   REMOVE_WITNESS (state, payload) {
@@ -216,6 +235,16 @@ const actions = {
     });
   },
 
+  fetchWitnessInstitution ({ commit }, witnessId) {
+    return http.get(`/witnesses/${witnessId}?include=institution`).then( response => {
+
+
+      const institution = getInstitution(response.data.included)
+      if (institution.id === null) return null;
+      commit('UPDATE_WITNESS_INSTITUTION', { witnessId, institution })
+      return institution;
+    });
+  },
   addWitness ({commit, state}, witness) {
     witness.num = Math.max.apply(null, state.witnesses.map(w => w.num)) + 1;
 
@@ -334,6 +363,7 @@ const actions = {
   removePerson ({commit}, relationId) {
     commit('REMOVE_PERSON', relationId)
   },
+
   addPlacename({commit}, placename) {
     commit('ADD_PLACENAME', placename)
   },
@@ -365,7 +395,45 @@ const actions = {
         commit('REMOVE_COLLECTION', collection);
         return true
       })
-  }
+  },
+
+  addNote ({commit, state}, note) {
+    console.log('store updateNote', note)
+    const data = {
+      type: 'note',
+      attributes: { content: note.content },
+      relationships: {
+        document: {
+          data : [{ type: "document", id: state.document.id }]
+        }
+      }
+    }
+    const http = http_with_csrf_token();
+    return http.post(`notes?without-relationships`, {data})
+      .then(response => {
+        console.log('response', note.content)
+        note.id = response.data.data.id
+        commit('ADD_NOTE', note);
+        return note;
+      })
+  },
+  updateNote ({commit, state}, note) {
+    console.log('store updateNote', note)
+    const data = {
+      id: note.id,
+      type: 'note',
+      attributes: { content: note.content }
+    }
+    const http = http_with_csrf_token();
+    return http.patch(`notes/${note.id}?without-relationships`, {data})
+      .then(response => {
+        console.log('response', note.content)
+        commit('UPDATE_NOTE', note);
+      })
+  },
+  removeNote ({commit, state}, noteId) {
+    return noteId
+  },
 
 
 };

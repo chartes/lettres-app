@@ -6,7 +6,7 @@
 
     <div class="columns">
 
-      <div class="document-persons__senders column">
+      <div class="document-correspondents__senders column">
 
         <h3 class="document-persons__subtitle">
           Expéditeur
@@ -15,8 +15,8 @@
           </a>
         </h3>
 
-        <ul class="document-persons__senders-list" v-if="documentSender.length">
-          <li v-for="c in documentSender" :key="c.person.id" class="person-item">
+        <ul class="document-correspondents__senders-list" v-if="documentSender.length">
+          <li v-for="c in documentSender" :key="c.person.id" class="correspondent-item">
             <a :href="c.person.ref" target="_blank">
               {{ c.person.label }}
             </a>
@@ -30,7 +30,7 @@
 
       </div>
 
-      <div class="document-persons__recipients column">
+      <div class="document-correspondents__recipients column">
 
         <h3 class="document-persons__subtitle">
           Destinataire{{ documentRecipients.length > 1 ? 's':'' }}
@@ -39,8 +39,8 @@
           </a>
         </h3>
 
-        <ul class="document-persons__recipients-list" v-if="documentRecipients.length">
-          <li v-for="c in documentRecipients" :key="c.person.id" class="person-item">
+        <ul class="document-correspondents__recipients-list" v-if="documentRecipients.length">
+          <li v-for="c in documentRecipients" :key="c.person.id" class="correspondent-item">
             <a :href="c.person.ref" target="_blank">
               {{ c.person.label }}</a>
             <a v-if="editable" class="person-item__delete" @click="unlinkPersonFromDoc(c)"><icon-bin/></a>
@@ -48,7 +48,7 @@
         </ul>
 
         <div v-else>
-          <p class="person-item"><em>Aucun destinataire n'a été renseigné</em></p>
+          <p class="correspondent-item"><em>Aucun destinataire n'a été renseigné</em></p>
         </div>
 
       </div>

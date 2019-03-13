@@ -1,6 +1,6 @@
 import {http} from '../../../modules/http-common';
 
-const getInstitution = function (included) {
+export const getInstitution = function (included) {
   let found = included.find(item => item.type === 'institution');
   return found ? { id: found.id, ...found.attributes} : {id: null}
 };

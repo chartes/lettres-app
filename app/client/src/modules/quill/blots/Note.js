@@ -33,7 +33,7 @@ class NoteBlot extends Parchment.Embed {
 
 }
 NoteBlot.blotName = 'note';
-NoteBlot.tagName = 'a';
+NoteBlot.tagName = 'div';
 NoteBlot.className = 'note';
 
 export default NoteBlot;

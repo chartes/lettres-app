@@ -127,13 +127,7 @@
       ...mapState('document', ['document', 'languages']),
       ...mapState({
         allLanguages: state => state.languages.languages
-      }),
-      languagesConcat () {
-        return this.languages.map(lang => lang.label).join(', ')
-      },
-      languagesIds () {
-        return this.languages.map(lang => lang.id)
-      }
+      })
     }
   }
 </script>

@@ -6,7 +6,7 @@
     
     <div class="columns">
       
-      <div class="document-persons__senders column">
+      <div class="document-placenames__senders column">
         
         <h3 class="document-persons__subtitle">
           Expédition
@@ -14,8 +14,8 @@
             <icon-add/>
           </a>
         </h3>
-        
-        <ul class="document-persons__senders-list" v-if="locationDateFrom.length">
+
+        <ul class="document-placenames__senders-list" v-if="locationDateFrom.length">
           <li v-for="c in locationDateFrom" :key="c.placename.id" class="placename-item">
             <a :href="c.placename.ref" target="_blank">
               {{ c.placename.label }}
@@ -32,7 +32,7 @@
       
       </div>
       
-      <div class="document-persons__recipients column">
+      <div class="document-placenames__recipients column">
         
         <h3 class="document-persons__subtitle">
           Destination{{ locationDateTo.length > 1 ? 's':'' }}
@@ -41,8 +41,8 @@
             <icon-add/>
           </a>
         </h3>
-        
-        <ul class="document-persons__recipients-list" v-if="locationDateTo.length">
+
+        <ul class="document-placenames__recipients-list" v-if="locationDateTo.length">
           <li v-for="c in locationDateTo" :key="c.placename.id" class="placename-item">
             <a :href="c.placename.ref" target="_blank">
               {{ c.placename.label }}</a>

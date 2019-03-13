@@ -12,7 +12,7 @@ var EditorNotesMixin = {
   methods: {
 
     onNoteSelected (note, range) {
-     //console.log("onNoteSelected", note, range.index, range.length)
+     console.log("onNoteSelected", note, range.index, range.length)
 
       if (!range.length) return;
       this.selectedNoteId = note;
@@ -73,9 +73,11 @@ var EditorNotesMixin = {
       this.editor.focus();
     },
     newNoteChoiceOpen() {
+      console.log("newNoteChoiceOpen")
       this.defineNewNote = true;
     },
     newNoteChoiceClose() {
+      console.log("newNoteChoiceClose")
       this.defineNewNote = false;
     },
 
