@@ -105,9 +105,7 @@
         created() {
             this.$store.dispatch('user/fetchCurrent').then(resp => {
                 this.$store.dispatch('collections/fetchAll').then(resp => {
-                   if (this.allCollectionsWithParents) {
-                       this.open = this.allCollectionsWithParents.map(c => c.id);
-                   }
+                
                 });
             });
         },
@@ -160,6 +158,11 @@
             
         },
         watch: {
+            allCollectionsWithParents(val) {
+                if (val !== null) {
+                    this.open = val.map(c => c.id);
+                }
+            },
             activeTreeItem(val) {
               if (val && val.length > 0) {
                   this.tree = [val[0]]
