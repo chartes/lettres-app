@@ -44,6 +44,27 @@ def collections(collection_id=None):
     return refresh_token(user, resp)
 
 
+@app_bp.route("/verrous")
+def locks():
+    user = current_user
+    resp = make_response(render_template("app/main.html", section="locks",  data=json.dumps({})))
+    return refresh_token(user, resp)
+
+
+@app_bp.route("/favoris")
+def bookmarks():
+    user = current_user
+    resp = make_response(render_template("app/main.html", section="bookmarks", data=json.dumps({})))
+    return refresh_token(user, resp)
+
+
+@app_bp.route("/historique")
+def changelog():
+    user = current_user
+    resp = make_response(render_template("app/main.html", section="changelog", data=json.dumps({})))
+    return refresh_token(user, resp)
+
+
 @app_bp.route("/users/<action>")
 def user_action(action):
     user = current_user

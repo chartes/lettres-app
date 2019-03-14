@@ -65,7 +65,6 @@
         created () {
             const uvLayout = document.getElementById('uv-layout');
             const uv = document.getElementById('uv');
-            console.warn(uvLayout, uv);
             uvLayout.appendChild(uv);
         },
         mounted () {

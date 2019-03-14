@@ -26,8 +26,8 @@
               append-icon=""
           >
             <!-- menu head-->
-            <v-list-tile slot="activator">
-              <v-list-tile-content>
+            <v-list-tile slot="activator" @click="item.action ? item.action() : null">
+              <v-list-tile-content :class="menuItemClasses(item)">
                 <v-list-tile-title>
                   {{ item.text }}
                 </v-list-tile-title>
@@ -38,12 +38,12 @@
             <v-list-tile
                 v-for="(child, i) in item.children"
                 :key="i"
-                @click=""
+                @click="child.action ? child.action() : null"
             >
               <v-list-tile-action v-if="child.icon">
                 <v-icon>{{ child.icon }}</v-icon>
               </v-list-tile-action>
-              <v-list-tile-content>
+              <v-list-tile-content :class="menuItemClasses(child)">
                 <v-list-tile-title>
                   {{ child.text }}
                 </v-list-tile-title>
@@ -56,7 +56,7 @@
             <v-list-tile-action>
               <v-icon>{{ item.icon }}</v-icon>
             </v-list-tile-action>
-            <v-list-tile-content>
+            <v-list-tile-content :class="menuItemClasses(item)">
               <v-list-tile-title>
                 {{ item.text }}
               </v-list-tile-title>
@@ -64,14 +64,24 @@
           </v-list-tile>
         </template>
       </v-list>
-      
-      <v-container>
-        <v-layout >
-          <v-img  src="/lettres/static/images/logo-ecole-nationale-des-chartes-header.png"
-                  :max-height="260" :max-width="260">
-          </v-img>
+  
+      <v-container grid-list-md text-xs-center class="main-layout__sponsors">
+        <v-layout row wrap>
+          <v-flex xs12>
+            <a href="http://www.cths.fr">
+            <img src="/lettres/static/images/Comité_des_travaux_historiques_et_scientifiques_logo.svg"
+                   alt="cths" width="90"/>
+            </a>
+          </v-flex>
+          <v-flex xs12>
+            <a href="http://www.chartes.psl.eu">
+              <img src="/lettres/static/images/logo-ecole-nationale-des-chartes-header.png"
+                   alt="chartes" width="210"/>
+            </a>
+          </v-flex>
         </v-layout>
       </v-container>
+      
     </v-navigation-drawer>
     
     <!-- TOOLBAR -->
@@ -127,6 +137,21 @@
           <div v-if="template" v-html="template"></div>
           <collection-list v-else-if="!collectionId"></collection-list>
         </v-layout>
+        <!-- LOCKS -->
+        <v-layout v-else-if="section === 'locks'">
+          <div v-if="template" v-html="template"></div>
+          <locks :compact="false" pageSize="40"></locks>
+        </v-layout>
+        <!-- BOOKMARKS -->
+        <v-layout v-else-if="section === 'bookmarks'">
+          <div v-if="template" v-html="template"></div>
+          <bookmarks pageSize="40"></bookmarks>
+        </v-layout>
+        <!-- CHANGELOG -->
+        <v-layout v-else-if="section === 'changelog'">
+          <div v-if="template" v-html="template"></div>
+          <changelog pageSize="40"></changelog>
+        </v-layout>
         <!-- ERRORS -->
         <v-layout v-else-if="section === 'errors'">
           <div v-if="template" v-html="template"></div>
@@ -170,10 +195,13 @@
     import CollectionList from "./sections/CollectionList";
     import Document from "./sections/Document";
     import {baseAppURL} from "../modules/http-common";
+    import Locks from "./sections/Locks";
+    import Bookmarks from "./sections/Bookmarks";
+    import Changelog from "./sections/Changelog";
     
     export default {
         name: 'MainLayout',
-        components: {Document, DocumentList, CollectionList, SearchBox},
+        components: {Document, DocumentList, CollectionList, SearchBox, Locks, Bookmarks, Changelog},
         props: {
             section: String,
             data: Object
@@ -183,9 +211,19 @@
                 this.loaded = true;
                 if (!this.docId)
                     this.goToDocPage(parseInt(this.currentPage));
+                
+                if (!this.current_user){
+                    //remove sections from the menu
+                    this.items.splice(this.findMenuItem('last_searches'), 1)
+                    this.items.splice(this.findMenuItem('account'), 1);
+                    this.items.splice(this.findMenuItem('params'), 1);
+                }
             });
         },
         mounted() {
+            const selected = this.highlightMenuItem(this.items, this.section);
+            console.warn(this.section, selected);
+
         },
         data: function () {
             return {
@@ -203,21 +241,26 @@
                 drawer: null,
                 showIIIFViewer: false,
                 items: [
-                    {icon: 'info', text: 'À propos'},
-
-                    {icon: 'search', text: 'Parcourir les documents', action: () => this.goToPage(baseAppURL)},
-                    {icon: 'history', text: 'Recherches récentes'},
-                    {icon: 'search', text: 'Parcourir les collections', action: () => this.goToPage(`${baseAppURL}/collections`)},
+                    {name: 'documents', icon: 'search', text: 'Parcourir les documents',
+                        action: () => this.goToPage(baseAppURL)},
+                    {name: 'last_searches', icon: 'history', text: 'Recherches récentes',
+                        action: () => this.goToPage(`${baseAppURL}/recherches-recentes`)},
+                    {name: 'collections', icon: 'search', text: 'Parcourir les collections',
+                        action: () => this.goToPage(`${baseAppURL}/collections`)},
                     {
                         icon: 'keyboard_arrow_up',
                         'icon-alt': 'keyboard_arrow_down',
                         text: 'Mon compte',
                         model: true,
+                        name: 'account',
                         children: [
-                            {icon: 'content_copy',text: 'Mon profil'},
-                            {icon: 'content_copy',text: 'Mes favoris'},
-                            {icon: 'content_copy',text: 'Mon historique'},
-                            {icon: 'content_copy',text: 'Mes documents verouillés'},
+                            {name: 'profile', icon: 'content_copy',text: 'Mon profil'},
+                            {name: 'bookmarks', icon: 'content_copy',text: 'Mes favoris',
+                                action: () => this.goToPage(`${baseAppURL}/favoris`)},
+                            {name: 'changelog', icon: 'content_copy',text: 'Mon historique',
+                                action: () => this.goToPage(`${baseAppURL}/historique`)},
+                            {name: 'locks', icon: 'content_copy',text: 'Mes documents verouillés',
+                                action: () => this.goToPage(`${baseAppURL}/verrous`)},
                         ]
                     },
                     {
@@ -225,12 +268,16 @@
                         'icon-alt': 'keyboard_arrow_down',
                         text: 'Paramétrage',
                         model: false,
+                        name: 'params',
                         children: [
-                            {icon: 'contacts', text: 'Contributeurs'},
-                            {icon: 'content_copy', text: 'Référentiels de données'},
+                            {name: 'users', icon: 'contacts', text: 'Contributeurs',
+                                action: () => this.goToPage(`${baseAppURL}/contributeurs`)},
+                            {name: 'refs', icon: 'content_copy', text: 'Référentiels de données',
+                                action: () => this.goToPage(`${baseAppURL}/referentiels`)},
                         ]
                     },
-                    {icon: 'info', text: 'Documentation'}
+                    {name: 'about', icon: 'info', text: 'À propos', action: () => this.goToPage(`${baseAppURL}/a-propos`)},
+                    {icon: 'info', text: 'Documentation', action: () => this.goToPage(`${baseAppURL}/documentation`)}
                 ]
             }
         },
@@ -276,7 +323,35 @@
                 } else {
                     this.goToDocPage(1);
                 }
+            },
+            highlightMenuItem(items, name) {
+                for (let item of items) {
+                    if (item.name === name) {
+                        item.selected = true;
+                        return true;
+                    } else if (item.children) {
+                        return this.highlightMenuItem(item.children, name);
+                    }
+                }
+                return false;
+            },
+            findMenuItem(name) {
+                let i = 0;
+                for (let item of this.items) {
+                    if (item.name === name)
+                        return i;
+                    i += 1;
+                }
+                return null;
+            },
+            menuItemClasses(item) {
+                if (item.selected) {
+                    return "red--text";
+                } else {
+                    return "";
+                }
             }
         }
+        
     }
 </script>

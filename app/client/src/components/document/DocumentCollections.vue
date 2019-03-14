@@ -116,7 +116,7 @@
                 this.collectionsHierarchies = this.collections.map(c => {
                     let node = this.searchWithinTree(c.id);
                     let h;
-                    if (node.parents) {
+                    if (node !== null && node.parents) {
                       h = node.parents.slice().reverse();
                       h.push(c);
                     } else {
@@ -132,9 +132,12 @@
             }
         },
         watch: {
-            collections() {
+            collections(val) {
                 this.refreshHierarchies();
             },
+            fullHierarchy(val) {
+                this.refreshHierarchies();
+            }
         },
         computed: {
             ...mapState('document', ['collections']),

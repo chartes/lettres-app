@@ -60,7 +60,7 @@
               :key="i"
           >
             <v-card flat fill-height>
-              <v-card-text v-if="activeTab === i">
+              <v-card-text>
                 <p>{{ selection.description }}</p>
                 <v-divider></v-divider>
                 <document-list :page-size="pageSize" :current-page="currentPage" :go-to-page="goToDocPage"
