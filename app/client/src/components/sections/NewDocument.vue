@@ -64,7 +64,6 @@
                 };
                 return this.$store.dispatch('document/initializeDummyDocument', defaultData).then(r => {
                     const dummyDocId = this.getDummyDocument().data.id;
-                    console.warn('dummy;', dummyDocId);
                     return this.$store.dispatch('document/fetch', dummyDocId).then(r => {
                         this.isLoading = false;
                     })

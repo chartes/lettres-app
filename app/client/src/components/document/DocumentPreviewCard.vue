@@ -60,7 +60,7 @@
               this.documentPreview = this.documentsPreview[this.doc_id];
 
               this.titleContent = this.documentPreview.attributes.title;
-              this.previewContent = this.documentPreview.attributes.argument ? this.documentPreview.attributes.argument : this.documentPreview.attributes.transcription;
+              this.previewContent = this.documentPreview.attributes.transcription ? this.documentPreview.attributes.transcription : this.documentPreview.attributes.argument;
           }
       }
 

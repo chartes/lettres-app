@@ -56,7 +56,12 @@
             },
             submit() {
                 this.opened = false;
-                console.log("dummy doc must be transform into proper doc:", this.document);
+                console.warn("submitting", this.document);
+                this.$store.dispatch('document/add').then(r => {
+                    console.log("new document added !", r.data);
+                }).catch(e => {
+                    console.error("new document not added !", e);
+                });
             }
         },
         computed: {

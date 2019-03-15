@@ -221,7 +221,7 @@ const actions = {
   save ({ commit, rootGetters, rootState, dispatch }, data) {
     const modifiedData = data.attributes || data.relationships;
     console.log('document/save', data)
-    data.type = 'document'
+    data.type = 'document';
     const http = http_with_csrf_token();
     return http.patch(`/documents/${data.id}`, { data })
       .then(response => {
@@ -246,6 +246,34 @@ const actions = {
         }
 
       })
+  },
+
+  add({commit, state}) {
+    const attributes = JSON.parse(JSON.stringify(state.document));
+    delete(attributes.id);
+    delete(attributes['iiif-collection-url']);
+    delete(attributes['iiif-thumbnail-url']);
+    const newDocument = {
+      data: {
+        type : 'document',
+        attributes: {
+          ...attributes
+        },
+        relationships: {
+          collections: {
+            data: state.collections.map(c => {return {id: c.id, type: 'collection'}})
+          }
+        }
+      }
+    };
+
+    console.warn('posting', newDocument);
+    const http = http_with_csrf_token();
+    return http.post(`/documents`, newDocument)
+        .then(response => {
+          commit('UPDATE_DOCUMENT_DATA', response.data.data);
+          return response.data.data
+        })
   },
 
   publish({commit, state}, docId) {
