@@ -1,5 +1,5 @@
 <template>
-  <div >
+  <div v-if="documents && documents.length > 0">
     <pagination :current="currentPage" :end="nbPages" :size="pageSize" :action="goToPage">
       <ul id="preview-cards" >
         <li v-for="doc in documents" :key="doc.id">

@@ -23,19 +23,19 @@
               selected-color="red"
               :activatable="true"
               :active.sync="activeTreeItem"
-              active-class="grey lighten-4 red--text"
-              :open="open"
-              :open-all="true"
-              :transition="true"
-              expand-icon="arrow_drop_down"
-              on-icon="fa fa-check-square"
-              off-icon="far fa-check-square">
-            <!--
-                       <template v-slot:prepend="{ item, active, value, open, selected }">
-                        {{active}} & {{selected}}
-              <v-icon class="collection-list-container__checkbox">far fa-check-square</v-icon>
-            </template>
-             -->
+            active-class="grey lighten-4 red--text"
+            :open="open"
+            :open-all="true"
+            :transition="true"
+            expand-icon="arrow_drop_down"
+            on-icon="fa fa-check-square"
+            off-icon="far fa-check-square">
+          <!--
+                     <template v-slot:prepend="{ item, active, value, open, selected }">
+                      {{active}} & {{selected}}
+            <v-icon class="collection-list-container__checkbox">far fa-check-square</v-icon>
+          </template>
+           -->
           </v-treeview>
         </div>
       </v-flex>
@@ -55,14 +55,20 @@
           >
             {{ selection.title }}
           </v-tab>
-          <v-tab-item
+          <v-tab-item :transition="false" :reverse-transition="false"
               v-for="(selection, i) in selections"
               :key="i"
           >
             <v-card flat fill-height>
               <v-card-text>
-                <p>{{ selection.description }}</p>
+                <v-card-actions>
+                  <p>{{ selection.description }}</p>
+                  <v-spacer vertical></v-spacer>
+                </v-card-actions>
+                
                 <v-divider></v-divider>
+                <add-document-button :key="selectedCollection" v-if="current_user"></add-document-button>
+  
                 <document-list :page-size="pageSize" :current-page="currentPage" :go-to-page="goToDocPage"
                                :nb-pages="nbPages">
                 </document-list>
@@ -80,10 +86,12 @@
     import { mapState} from 'vuex';
     import DocumentList from "./DocumentList";
     import {getUrlParameter} from "../../modules/utils";
+    import * as _ from "lodash";
+    import AddDocumentButton from "../forms/AddDocumentButton";
 
     export default {
         name: "collection-list",
-        components: {DocumentList},
+        components: {DocumentList, AddDocumentButton},
         props: {
 
         },
@@ -91,33 +99,34 @@
             return {
                 tree: [],
                 checkboxes: [],
-                activeTab: null,
+                activeTab: 0,
                 activeTreeItem: [],
-                drawer: null,
                 search: null,
                 caseSensitive: false,
                 open: [],
-                
+
                 currentPage: 1,
-                pageSize: 15,
+                pageSize: 10,
             }
         },
         created() {
             this.$store.dispatch('user/fetchCurrent').then(resp => {
                 this.$store.dispatch('collections/fetchAll').then(resp => {
-                
+
                 });
             });
         },
         methods: {
             fetchSearch() {
-                console.warn("FETCH SEARCH")
-                this.$store.dispatch('document/fetchSearch', {
-                    pageId: this.currentPage,
-                    pageSize: this.pageSize,
-                    query: `collections.id:${this.selectedCollection}`,
-                    filters: `sort=id${this.current_user ? '' : '&filter[is-published]=1'}`
-                })
+                if (this.selectedCollection !== null){
+                    console.warn("FETCH SEARCH")
+                    this.$store.dispatch('document/fetchSearch', {
+                        pageId: this.currentPage,
+                        pageSize: this.pageSize,
+                        query: this.query,
+                        filters: `sort=id`
+                    })
+                }
             },
             goToDocPage(num) {
                 this.currentPage = num;
@@ -128,7 +137,15 @@
             ...mapState('user', ['current_user']),
             ...mapState('collections', ['fullHierarchy', 'allCollectionsWithParents',]),
             ...mapState('document', ['documents', 'links']),
-
+            query() {
+                const collectionFilter = `collections.id:${this.selectedCollection}`;
+                const publishedFilfer =  `${this.current_user ? '' : 'is-published:true'}`;
+                if (publishedFilfer.length > 0) {
+                    return `(${collectionFilter} AND ${publishedFilfer})`
+                } else {
+                    return collectionFilter;
+                }
+            },
             filter() {
                 return this.caseSensitive
                     ? (item, search, textKey) => item[textKey].indexOf(search) > -1
@@ -152,10 +169,9 @@
                 return selections
             },
             selectedCollection(){
-                console.warn("activetab", this.activeTab, this.selections, this.selections[this.activeTab]);
                 return this.activeTab !== null && this.selections[this.activeTab] ? this.selections[this.activeTab].id : null;
             },
-            
+
         },
         watch: {
             allCollectionsWithParents(val) {
@@ -164,18 +180,27 @@
                 }
             },
             activeTreeItem(val) {
-              if (val && val.length > 0) {
-                  this.tree = [val[0]]
-              } else {
-                  this.tree = [];
-              }
+                if (val && val.length > 0) {
+                    this.tree = [val[0]]
+                } else {
+                    this.tree = [];
+                }
             },
             selections(val) {
-                this.activeTab = null;
+                //this.goToDocPage(1);
             },
-            activeTab(val) {
-                if (val !== null) {
+            activeTab(val, oldVal) {
+                if (val !== oldVal) {
+                    console.log("activeTab", val);
                     this.goToDocPage(1);
+                }
+            },
+            tree(val, oldVal) {
+                console.log("tree", val, oldVal, this.activeTreeItem);
+                if ((val && val.length === 1) || val[val.length-1] === this.activeTreeItem[0]) {
+                    if (!_.isEqual(_.sortBy(val), _.sortBy(oldVal))) {
+                        this.goToDocPage(1);
+                    }
                 }
             }
         },

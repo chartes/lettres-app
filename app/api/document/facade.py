@@ -234,6 +234,8 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
             "id": self.id,
             "type": self.TYPE,
 
+            "is-published": False if self.obj.is_published is None else self.obj.is_published,
+
             "creation": self.obj.creation,
             "creation-not-after": self.obj.creation_not_after,
 

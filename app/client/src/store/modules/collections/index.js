@@ -60,7 +60,7 @@ const mutations = {
       countPromises.push(countDocuments(c.id));
       return {
         id: c.id,
-        title: `${c.attributes.title}`,
+        title: c.attributes.title,
         description: c.attributes.description,
         //documentCount: count,
         //documents: getIncludedRelation(c, included, "documents"),
@@ -71,7 +71,7 @@ const mutations = {
     Promise.all(countPromises).then(counts =>{
       collections.map( c => {
         c.documentCount = counts.shift();
-        c.titleWithCount = `${c.title} (${c.documentCount})`;
+        c.titleWithCount = c.parents.length === 0 ? c.title : `${c.title} (${c.documentCount})`;
       });
       // build full hierarchy tree
       state.allCollectionsWithParents = collections;

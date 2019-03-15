@@ -118,12 +118,14 @@
         </v-layout>
         <!-- DOCUMENTS -->
         <v-layout v-else-if="section === 'documents'">
+          <!-- SINGLE DOCUMENT -->
           <div v-if="template" v-html="template"> </div>
           <div v-else>
             <div v-if="displayedDocId">
               <document :doc_id="displayedDocId"></document>
             </div>
             <div v-else>
+              <!-- DOCUMENT LIST -->
               <div v-if="documents">
                 <document-list :page-size="pageSize" :current-page="currentPage" :go-to-page="goToDocPage"
                                :nb-pages="nbPages">
@@ -209,10 +211,10 @@
         created() {
             this.$store.dispatch('user/fetchCurrent').then(resp => {
                 this.loaded = true;
-                if (!this.docId)
+                if (this.docId !== undefined)
                     this.goToDocPage(parseInt(this.currentPage));
                 
-                if (!this.current_user){
+                if (this.current_user === null){
                     //remove sections from the menu
                     this.items.splice(this.findMenuItem('last_searches'), 1)
                     this.items.splice(this.findMenuItem('account'), 1);

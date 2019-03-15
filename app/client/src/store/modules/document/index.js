@@ -50,13 +50,13 @@ const mutations = {
     state.document = { ...data.attributes, id: data.id};
   },
   UPDATE_DOCUMENT_PREVIEW (state, {data, included}) {
-    console.log('UPDATE_DOCUMENT_PREVIEW');
+    //console.log('UPDATE_DOCUMENT_PREVIEW');
     const newPreviewCard = {
       id: data.id,
       attributes: data.attributes,
       //persons: getPersons(included),
       //languages: getLanguages(included),
-      collections: getCollections(included),
+      //collections: getCollections(included),
       currentLock: getCurrentLock(included)
     };
     Vue.set(state.documentsPreview, data.id, newPreviewCard);
@@ -138,7 +138,8 @@ const actions = {
   fetchPreview ({ commit }, id) {
     commit('LOADING_STATUS', true);
     const incs = [
-      'collections', 'witnesses', 'current-lock'
+      //'collections',
+      'witnesses', 'current-lock'
     ];
 
     const http = http_with_csrf_token();
