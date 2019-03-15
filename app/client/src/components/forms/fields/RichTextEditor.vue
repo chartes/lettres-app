@@ -25,40 +25,22 @@
 
       <div class="editor-container">
         <div class="quill-editor" :class="{ 'single-line': !multiline }" ref="editor" spellcheck="false"></div>
-        <note-actions
-                v-show="selectedNoteId && editorHasFocus"
-                refs="noteActions"
-                :style="actionsPosition"
-                :newNote="setNoteEditModeNew"
-                :edit="setNoteEditModeEdit"
-                :updateLink="setNoteEditModeList"
-                :unlink="unlinkNote"
-                :delete="setNoteEditModeDelete"/>
-        <new-note-actions
-                v-if="defineNewNote"
-                :modeNew="setNoteEditModeNew"
-                :modeLink="setNoteEditModeList"
-                :cancel="newNoteChoiceClose"
-        />
       </div>
       <note-form
-              v-if="noteEditMode == 'new' || noteEditMode == 'edit'"
-              :title="noteEditMode == 'new' ? 'nouvelle note' : 'Éditer la note'"
-              :note="currentNote"
-              :noteId="selectedNoteId"
-              :submit="updateNote"
-              :cancel="closeNoteEdit"
+              v-if="formNote"
+              title="Nouvelle note"
+              :submit="submitNoteForm"
+              :cancel="closeNoteForm"
       />
       <textfield-form
               v-if="formTextfield"
               :title="formTextfield.title"
               :label="formTextfield.label"
               :value="formTextfield.value"
-              :submit="submitTextfieldForm"
-              :cancel="cancelTextfieldForm"
+              :submit="customSubmitTextfieldForm || submitTextfieldForm"
+              :cancel="closeTextfieldForm"
               :remove="removeTextfieldForm"
       />
-
       <person-list-form
               v-if="formPerson"
               title="Sélectionner une personne"
@@ -84,10 +66,7 @@
   import Vue from 'vue';
   import ClickOutside from 'vue-click-outside';
   import EditorButton from './EditorButton.vue';
-  import EditorNotesMixins from '../editor/EditorNotesMixins'
   import TextfieldForm from '../TextfieldForm';
-  import NoteActions from '../editor/NoteActions';
-  import NewNoteActions from '../editor/NewNoteActions';
   import FieldLabel from './FieldLabel';
 
   import Quill, { getNewQuill } from '../../../modules/quill/LettresQuill';
@@ -109,14 +88,12 @@
       enabled: { type: Boolean, default: true },
       formats: { type: Array, default: () => [['note','page','link'],['bold','italic','superscript','underline','del'],['person','location','cite']] },
     },
-    mixins: [EditorNotesMixins],
+    //mixins: [EditorNotesMixins],
     components: {
       PlacenameListForm,
       PersonListForm,
       NoteForm,
       FieldLabel,
-      NewNoteActions,
-      NoteActions,
       TextfieldForm,
       EditorButton,
     },
@@ -134,11 +111,13 @@
         formTextfield: null,
         formPerson: null,
         formLocation: null,
+        formNote: null,
         actionsPositions: {
           top: 0, left: 0, right: 0, bottom: 0
         },
         editorInited: false,
         delta: null,
+        customSubmitTextfieldForm: null,
         buttons: {}
       }
     },
@@ -209,9 +188,7 @@
       },
 
       updateContent () {
-        //console.log("updateContent")
         this.delta = this.editor.getContents().ops;
-
       },
 
       /**************
@@ -228,7 +205,6 @@
         const test = wrapPattern.test(newValue)
         newValue = test ? newValue : `<p>${newValue}</p>`;
         return newValue
-
       },
 
       preventLineBreaks (delta) {
@@ -263,14 +239,6 @@
           this.setRangeBound(range);
           let formats = this.editor.getFormat(range.index, range.length);
           this.updateButtons(formats);
-          console.log("onSelection", range, formats)
-          if (!!formats.note) {
-            this.onNoteSelected(formats.note, range);
-            this.buttons.note = false;
-          } else {
-            this.selectedNoteId = null;
-            this.buttons.note = true;
-          }
         }
       },
       onSingleKeyup (evt) {
@@ -296,25 +264,16 @@
         this.updateButtons(formats);
       },
 
-      insertNote () {
-        this.insertEmbed('note', true)
-      },
-      updateNote(note) {
-        this.$store.dispatch('document/addNote', note).then(newNote =>{
-          console.log('updateNote added', newNote)
-          this.editor.format('note', newNote.id);
-          this.selectedNoteId = newNote.id;
-          this.closeNoteEdit();
-        })
-      },
-      insertPageBreak () {
-        this.insertEmbed('page', true)
+      insertPageBreak (pageNum) {
+        this.insertEmbed('page', pageNum)
       },
       insertEmbed (formatName, value) {
+        console.log('insertEmbed', formatName, value)
         let format = {}
         format[formatName] = value;
         let range = this.editor.getSelection(true);
-        this.editor.updateContents(getNewDelta().retain(range.index).delete(range.length).insert(format), Quill.sources.USER);
+        this.editor.insertEmbed(range.index, formatName, value, Quill.sources.SILENT)
+       // this.editor.updateContents(getNewDelta().retain(range.index).delete(range.length).insert(format), Quill.sources.USER);
         this.editor.setSelection(range.index + 1, Quill.sources.SILENT);
       },
 
@@ -336,6 +295,33 @@
 
       /**************
        *
+       * NOTES METHODS
+       */
+
+      displayNoteForm() {
+        console.log('displayNoteForm')
+        this.formNote = true
+      },
+      closeNoteForm() {
+        this.formNote = false
+      },
+      submitNoteForm(note) {
+        console.log('submitNoteForm', note)
+        this.insertEmbed('note', note.id)
+        this.closeLocationForm();
+        let formats = this.editor.getFormat();
+        this.updateButtons(formats)
+      },
+      removeNoteForm() {
+        console.log("Note")
+        this.editor.format('location', false);
+        this.closeLocationForm();
+        let formats = this.editor.getFormat();
+        this.updateButtons(formats)
+      },
+
+      /**************
+       *
        * TEXTFIELD FORM METHODS
        */
 
@@ -344,8 +330,9 @@
         formData.value = format[formData.format];
         this.formTextfield = formData;
       },
-      cancelTextfieldForm () {
+      closeTextfieldForm () {
         this.formTextfield = null;
+        this.customSubmitTextfieldForm = null;
       },
       removeTextfieldForm () {
         this.editor.format(this.formTextfield.format, false);
@@ -353,7 +340,7 @@
       },
       submitTextfieldForm (data) {
         this.editor.format(this.formTextfield.format, data);
-        this.cancelTextfieldForm();
+        this.closeTextfieldForm();
         let formats = this.editor.getFormat();
         this.updateButtons(formats)
       },
@@ -362,7 +349,7 @@
         const formatName = this.formTextfield.format;
         const selection = this.editor.getSelection();
         this.editor.format(formatName, '');
-        this.cancelTextfieldForm();
+        this.closeTextfieldForm();
         let formats = this.editor.getFormat(selection.index, selection.length);
         this.updateButtons(formats);
       },
@@ -407,6 +394,28 @@
 
       /**************
        *
+       * PAGE BREAK METHODS
+       */
+
+      displayPageBreakForm () {
+        this.customSubmitTextfieldForm = this.submitPageBreakForm;
+        this.displayTextfieldForm ({
+          format: 'link',
+          title: '<i class="fas fa-page"></i> Insérer un saut de page',
+          label: 'Numéro de page'
+        });
+
+      },
+      submitPageBreakForm (pageNum) {
+        console.log("submitPageBreakForm", pageNum)
+        this.insertEmbed('page', {pageNum})
+        this.closeTextfieldForm();
+        let formats = this.editor.getFormat();
+        this.updateButtons(formats)
+      },
+
+      /**************
+       *
        * PERSON METHODS
        */
 
@@ -416,13 +425,16 @@
       closePersonForm() {
         this.formPerson = false
       },
-      submitPersonForm() {
-
+      submitPersonForm(pers) {
+        this.editor.format('person', pers.id);
+        this.closePersonForm();
+        let formats = this.editor.getFormat();
+        this.updateButtons(formats)
       },
 
       /**************
        *
-       * PERSON METHODS
+       * CITE METHODS
        */
 
       displayCiteForm() {
@@ -454,8 +466,8 @@
     computed: {
       formatCallbacks() {
         return {
-          note: { cb: this.newNoteChoiceOpen, active: this.isNoteButtonActive },
-          page: { cb: this.simpleFormat, active: this.editorHasFocus },
+          note: { cb: this.displayNoteForm, active: this.isNoteButtonActive },
+          page: { cb: this.displayPageBreakForm, active: this.editorHasFocus },
           link: { cb: this.displayLinkForm, active: this.editorHasFocus },
           bold: { cb: this.simpleFormat, active: this.editorHasFocus },
           italic: { cb: this.simpleFormat, active: this.editorHasFocus },
@@ -474,8 +486,11 @@
         return `top:${top}px;left:${left}px`;
       },
       isNoteButtonActive () {
-        console.log("isNoteButtonActive", this.editorHasFocus, this.buttons.note, this.editorHasFocus && this.buttons.note)
-        const cond = this.editorHasFocus && this.buttons.note;
+        if (!this.editor) return;
+        const selection = this.editor.getSelection();
+        const cond = this.editorHasFocus
+          //&& this.buttons.note
+          && !selection.length;
         return cond;
       },
       slotNotEmpty () {

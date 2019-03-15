@@ -28,6 +28,7 @@ var EditorNotesMixin = {
       this.closeNoteEdit();
     },
     updateNote(note) {
+      console.log('updateNote', note)
       const isNewNote = this.noteEditMode === 'new';
       const action = isNewNote ? 'notes/add' : 'notes/update';
       this.$store.dispatch(action, note).then(()=>{
@@ -67,10 +68,10 @@ var EditorNotesMixin = {
       this.currentNote = this.$store.getters['notes/getNoteById'](this.selectedNoteId)
     },
     closeNoteEdit() {
-     //console.log("closeNoteEdit")
+      console.log("closeNoteEdit")
       this.noteEditMode = null;
-      this.currentNote = null;
-      this.editor.focus();
+      //this.currentNote = null;
+      //this.editor.focus();
     },
     newNoteChoiceOpen() {
       console.log("newNoteChoiceOpen")
