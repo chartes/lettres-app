@@ -14,7 +14,7 @@
         </v-sheet>
         <div class="collection-list-container__treeview-container">
           <v-treeview
-              v-model="tree"
+              v-model="treeviewModel"
               :items="items"
               item-text="titleWithCount"
               :search="search"
@@ -30,12 +30,6 @@
             expand-icon="arrow_drop_down"
             on-icon="fa fa-check-square"
             off-icon="far fa-check-square">
-          <!--
-                     <template v-slot:prepend="{ item, active, value, open, selected }">
-                      {{active}} & {{selected}}
-            <v-icon class="collection-list-container__checkbox">far fa-check-square</v-icon>
-          </template>
-           -->
           </v-treeview>
         </div>
       </v-flex>
@@ -61,13 +55,14 @@
           >
             <v-card flat fill-height>
               <v-card-text>
-                <v-card-actions>
-                  <p>{{ selection.description }}</p>
-                  <v-spacer vertical></v-spacer>
-                </v-card-actions>
+                
+                <p>{{ selection.description }}</p>
                 
                 <v-divider></v-divider>
-                <add-document-button :key="selectedCollection" v-if="current_user"></add-document-button>
+                <add-document-button v-if="current_user"
+                                     :key="selectedCollection"
+                                     :collection="searchWithinTree(selectedCollection)"
+                ></add-document-button>
   
                 <document-list :page-size="pageSize" :current-page="currentPage" :go-to-page="goToDocPage"
                                :nb-pages="nbPages">
@@ -83,7 +78,7 @@
 </template>
 
 <script>
-    import { mapState} from 'vuex';
+    import { mapState, mapGetters} from 'vuex';
     import DocumentList from "./DocumentList";
     import {getUrlParameter} from "../../modules/utils";
     import * as _ from "lodash";
@@ -97,7 +92,7 @@
         },
         data () {
             return {
-                tree: [],
+                treeviewModel: [],
                 checkboxes: [],
                 activeTab: 0,
                 activeTreeItem: [],
@@ -119,7 +114,6 @@
         methods: {
             fetchSearch() {
                 if (this.selectedCollection !== null){
-                    console.warn("FETCH SEARCH")
                     this.$store.dispatch('document/fetchSearch', {
                         pageId: this.currentPage,
                         pageSize: this.pageSize,
@@ -137,6 +131,8 @@
             ...mapState('user', ['current_user']),
             ...mapState('collections', ['fullHierarchy', 'allCollectionsWithParents',]),
             ...mapState('document', ['documents', 'links']),
+            ...mapGetters('collections', ['searchWithinTree']),
+            
             query() {
                 const collectionFilter = `collections.id:${this.selectedCollection}`;
                 const publishedFilfer =  `${this.current_user ? '' : 'is-published:true'}`;
@@ -159,7 +155,7 @@
             },
             selections() {
                 const selections = [];
-                for (const leaf of this.tree) {
+                for (const leaf of this.treeviewModel) {
                     const collection = this.allCollectionsWithParents.find(collection => {
                         return collection.id === leaf
                     });
@@ -181,9 +177,9 @@
             },
             activeTreeItem(val) {
                 if (val && val.length > 0) {
-                    this.tree = [val[0]]
+                    this.treeviewModel = [val[0]]
                 } else {
-                    this.tree = [];
+                    this.treeviewModel = [];
                 }
             },
             selections(val) {
@@ -195,8 +191,7 @@
                     this.goToDocPage(1);
                 }
             },
-            tree(val, oldVal) {
-                console.log("tree", val, oldVal, this.activeTreeItem);
+            treeviewModel(val, oldVal) {
                 if ((val && val.length === 1) || val[val.length-1] === this.activeTreeItem[0]) {
                     if (!_.isEqual(_.sortBy(val), _.sortBy(oldVal))) {
                         this.goToDocPage(1);

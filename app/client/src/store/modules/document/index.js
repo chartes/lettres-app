@@ -33,6 +33,33 @@ const state = {
   totalCount: 0,
 };
 
+function makeDummyDocument(data) {
+  let DUMMY_DOCUMENT = {
+    data: {
+      id: -1,
+      type: 'document',
+      attributes: {
+        title: 'Ceci est le titre du nouveau document. Éditez-le !',
+      },
+    }
+  };
+  if (data) {
+    if (data.attributes) {
+      DUMMY_DOCUMENT.data.attributes = {
+        ...DUMMY_DOCUMENT.data.attributes,
+        ...data.attributes
+      }
+    }
+    if (data.relationships) {
+      DUMMY_DOCUMENT.data.relationships = {
+        ...DUMMY_DOCUMENT.data.relationships,
+        ...data.relationships
+      }
+    }
+  }
+  return DUMMY_DOCUMENT;
+}
+
 const mutations = {
 
   UPDATE_DOCUMENT (state, {data, included}) {
@@ -202,19 +229,22 @@ const actions = {
         return response.data.data
       })
       .then( doc => {
-        let msg = null;
-        if (doc.attributes) {
 
-          msg = `Modification de ${Object.keys(modifiedData).map( 
-              d => `'${TRANSLATION_MAPPING[d] ? TRANSLATION_MAPPING[d] : d}'`
-          ).join(', ')}`;
+        if (doc.id !== makeDummyDocument().data.id) {
+          let msg = null;
+          if (doc.attributes) {
+            msg = `Modification de ${Object.keys(modifiedData).map(
+                d => `'${TRANSLATION_MAPPING[d] ? TRANSLATION_MAPPING[d] : d}'`
+            ).join(', ')}`;
+          }
+          return this.dispatch('changelog/trackChanges', {
+            objId: doc.id,
+            objType: 'document',
+            userId: rootState.user.current_user.id,
+            msg: msg
+          });
         }
-        return this.dispatch('changelog/trackChanges', {
-          objId : doc.id,
-          objType: 'document',
-          userId: rootState.user.current_user.id,
-          msg: msg
-        });
+
       })
   },
 
@@ -438,6 +468,22 @@ const actions = {
     return noteId
   },
 
+  initializeDummyDocument({commit, state}, defaultData) {
+    const dummy = makeDummyDocument(defaultData);
+    const data = {data: {id: dummy.data.id, type: dummy.data.type}};
+    const http = http_with_csrf_token();
+    return http.delete(`/documents/${dummy.data.id}`, {data})
+        .then(response => {
+          return http.post(`/documents`, dummy).then(r => {
+            console.log("dummy doc initialized");
+          });
+        }).catch(e => {
+          return http.post(`/documents`, dummy).then(r => {
+            console.log("dummy doc initialized");
+          });
+        });
+  }
+
 
 };
 
@@ -469,7 +515,10 @@ const getters = {
       return corr.role.label === 'location-date-to'
     })
   },
-
+  getDummyDocument: (state) => (data) => {
+    // this dummy document is used as a base when creating a new document
+    return makeDummyDocument(data);
+  }
 };
 
 const documentModule = {

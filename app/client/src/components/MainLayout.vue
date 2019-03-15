@@ -224,8 +224,6 @@
         },
         mounted() {
             const selected = this.highlightMenuItem(this.items, this.section);
-            console.warn(this.section, selected);
-
         },
         data: function () {
             return {

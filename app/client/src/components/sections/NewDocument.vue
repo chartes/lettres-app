@@ -1,43 +1,47 @@
 <template>
   <div v-if="!isLoading" class="document">
     <article class="document__content">
-      <document-attributes :editable="true" :edit-attributes="false" class="document__subsection"/>
-      <document-witnesses :editable="true" :list="witnesses"/>
+      <document-attributes :editable="canEdit"  class="document__subsection"/>
+      <small class="blue--text">Ajoutez au moins un témoin pour valider la création de ce document</small>
+      <document-witnesses :editable="canEdit" :list="witnesses"/>
+      <div class="document__subsection"></div>
+      <document-collections :editable="canEdit" :refetch="false" class="document__subsection"/>
+      <document-argument :editable="canEdit" class="document__subsection"/>
+      <document-transcription :editable="canEdit"/>
     </article>
     <loading-indicator :active="documentLoading" :full-page="true"/>
   </div>
 </template>
 
 <script>
-    import {mapState} from 'vuex'
+    import {mapState, mapGetters} from 'vuex'
     import LoadingIndicator from '../ui/LoadingIndicator';
-    import Changelog from './Changelog';
-    import DocumentPersons from '../document/DocumentPersons';
-    import DocumentTranscription from '../document/DocumentTranscription';
-    import DocumentTagBar from "../document/DocumentTagBar";
-    import DocumentPlacenames from "../document/DocumentPlacenames";
-    import {baseApiURL, baseAppURL} from "../../modules/http-common";
-    import DocumentArgument from "../document/DocumentArgument";
     import DocumentWitnesses from "../document/DocumentWitnesses";
-    import DocumentCollections from "../document/DocumentCollections";
     import DocumentAttributes from "../document/DocumentAttributes";
+    import DocumentPersons from "../document/DocumentPersons";
+    import DocumentPlacenames from "../document/DocumentPlacenames";
+    import DocumentArgument from "../document/DocumentArgument";
+    import DocumentTranscription from "../document/DocumentTranscription";
+    import DocumentCollections from "../document/DocumentCollections";
 
     export default {
 
         name: 'NewDocument',
         components: {
-            Changelog,
             DocumentPersons,
-            DocumentPlacenames, DocumentArgument,
+            DocumentPlacenames,
+            DocumentArgument,
             DocumentTranscription,
             LoadingIndicator,
-            DocumentTagBar,
             DocumentCollections,
             DocumentWitnesses,
             DocumentAttributes
         },
         props: {
-        
+            defaultCollection: {
+                required: true,
+                type: Object
+            }
         },
         created() {
             /*
@@ -49,38 +53,44 @@
         mounted() {
             this.isLoading = true;
             this.$store.dispatch('user/fetchCurrent').then(response => {
-                
-                this.$store.dispatch('document/fetch', this.docId).then(r => {
-                    this.isLoading = false;
+                const defaultData = {
+                    relationships: {
+                        collections: {
+                            data: [
+                                {type:"collection", id: this.defaultCollection.id}
+                            ]
+                        }
+                    }
+                };
+                return this.$store.dispatch('document/initializeDummyDocument', defaultData).then(r => {
+                    const dummyDocId = this.getDummyDocument().data.id;
+                    console.warn('dummy;', dummyDocId);
+                    return this.$store.dispatch('document/fetch', dummyDocId).then(r => {
+                        this.isLoading = false;
+                    })
                 }).catch(e => {
                     console.warn("ERROR", e);
-                    //window.location.replace(baseAppURL);
                 });
-            });
+            })
         },
         data() {
             return {
-                docId: -1,
+                canEdit: true,
                 isLoading: true
             }
         },
         computed: {
-            ...mapState('document', ['document', 'documentLoading', 'witnesses']),
-            ...mapState('user', ['current_user', 'isUserLoaded']),
-
-            collectionURL() {
-                const baseUrl = window.location.origin
-                    ? window.location.origin + '/'
-                    : window.location.protocol + '/' + window.location.host;
-                return `${baseUrl}${baseApiURL.substr(1)}/iiif/documents/${this.docId}/collection/default`;
-            },
-
+            ...mapState('document', [
+                'document', 'documentLoading', 'collections', 'witnesses'
+            ]),
+            ...mapState('user', ['current_user']),
+            ...mapGetters('document', ['getDummyDocument']),
         },
         watch: {
-        
+    
         },
         methods: {
-        
+    
         }
     }
 </script>

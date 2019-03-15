@@ -79,14 +79,13 @@ class WitnessFacade(JSONAPIAbstractChangeloggedFacade):
         })
 
     def get_data_to_index_when_added(self, propagate):
-        #_res = self.resource
         payload = {
             "id": self.id,
             "type": self.TYPE,
 
             "tradition": self.obj.tradition,
             "content": self.obj.content,
-            "classification_mark": self.obj.classification_mark,
+            "classification-mark": self.obj.classification_mark,
         }
         witnesses_data = [{"id": self.obj.id, "index": self.get_index_name(), "payload": payload}]
         if not propagate:

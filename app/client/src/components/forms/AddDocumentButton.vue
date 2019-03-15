@@ -2,17 +2,16 @@
   <div>
     <v-btn @click="opened = true" :disabled="opened">
       <v-icon small left>fas fa-plus</v-icon>
-      Ajouter un nouveau document
+      Ajouter un nouveau document à la collection
     </v-btn>
     <v-slide-y-transition>
     <v-card flat v-if="opened" trans>
       <v-card-text >
         <v-container fluid>
           <v-layout wrap>
-            <new-document></new-document>
+            <new-document :defaultCollection="collection"></new-document>
           </v-layout>
         </v-container>
-        <small class="blue--text">* champ obligatoire</small>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -35,6 +34,10 @@
           NewDocument
         },
         props: {
+            collection: {
+                required: true,
+                type: Object
+            }
         },
         data() {
             return {
@@ -53,9 +56,11 @@
             },
             submit() {
                 this.opened = false;
+                console.log("dummy doc must be transform into proper doc:", this.document);
             }
         },
         computed: {
+            ...mapState('document', ['document', 'documentLoading', 'witnesses']),
 
         }
     }

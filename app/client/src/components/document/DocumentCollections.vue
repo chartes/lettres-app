@@ -68,6 +68,10 @@
             editable: {
                 type: Boolean,
                 default: false
+            },
+            refetch: {
+                type: Boolean,
+                default: true
             }
         },
         data() {
@@ -80,9 +84,13 @@
             }
         },
         created() {
-            this.$store.dispatch('collections/fetchAll').then(r => {
+            if (this.refetch) {
+                this.$store.dispatch('collections/fetchAll').then(r => {
+                    this.refreshHierarchies();
+                });
+            } else {
                 this.refreshHierarchies();
-            })
+            }
         },
         methods: {
             updateCollection (collection) {
