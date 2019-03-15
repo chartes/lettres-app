@@ -43,7 +43,7 @@
               <field-text
                   label="Lier la personne à un identifiant de référence"
                   :placeholder="form.ref ? form.ref.label : 'ex: https://data.bnf.fr/ark:/12148/cb123351707'"
-                  v-model="form.ref ? form.ref.uriForDisplay : form.ref"
+                  v-model="form.ref && form.ref.uriForDisplay ? form.ref.uriForDisplay : form.ref"
               />
             </div>
           </div>
@@ -92,7 +92,7 @@
     methods: {
   
       submitAction () {
-        this.form.ref = `${this.form.ref.uriForDisplay}`;
+        this.form.ref = this.form.ref && this.form.ref.uriForDisplay ? this.form.ref.uriForDisplay : this.form.ref;
         this.$props.submit(this.form);
       },
       cancelAction () {

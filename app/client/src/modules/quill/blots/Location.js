@@ -2,7 +2,7 @@
  Lieu
  Blot : inline
  TEI : placeName/@ref
- HTML5 : a[@class="placeName"]/@href
+ HTML5 : a[@class="placeName"]/@id
  Utilisation : transcription, traduction, commentaire
 */
 
@@ -14,12 +14,12 @@ class LocationBlot extends Inline {
 
   static create(data) {
     let node = super.create();
-    node.setAttribute('href', data);
+    node.setAttribute('id', data);
     return node;
   }
 
   static formats(domNode) {
-    let ref = domNode.getAttribute('href');
+    let ref = domNode.getAttribute('id');
     return ref || true;
   }
 
@@ -27,7 +27,7 @@ class LocationBlot extends Inline {
 
   format(name, data) {
     if (name === 'location' && data) {
-      this.domNode.setAttribute('href', data);
+      this.domNode.setAttribute('id', data);
     } else {
       super.format(name, data);
     }
