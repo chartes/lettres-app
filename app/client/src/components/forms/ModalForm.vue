@@ -36,7 +36,6 @@
     },
     mounted () {
       document.addEventListener('keyup', this.onKeyUp)
-      console.log("mounted", this.remove)
     },
     methods: {
       onKeyUp (e) {

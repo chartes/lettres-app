@@ -53,12 +53,10 @@ const actions = {
         });
     },
     fetchRoles({commit}) {
-        console.log('fetchRoles')
         http.get(`/placename-roles?without-relationships`).then(response => {
             const roles = response.data.data.map(r => {
                 return {id: r.id, ...r.attributes,}
             })
-            console.log('fetchRoles', response.data.data, roles)
             commit('UPDATE_ROLES', roles)
         });
     },

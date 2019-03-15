@@ -1,25 +1,34 @@
-import Parchment from 'parchment';
-//import { sanitize } from '../formats/link';
 
+
+import Parchment from 'parchment';
+import Quill from 'quill/quill';
+
+const Embed  = Quill.import('blots/embed')
 const ATTRIBUTES = [
   'href',
 ];
 
+const getPageNum = txt => {
+  const re = /\[p\. (.*)\]/.exec(txt)
+  if (re[1]) return re[1]
+  return ''
+}
+
 class PageBlot extends Parchment.Embed {
 
   static create(value) {
-
     if (typeof value !== 'object') return;
     let node = super.create();
     node.setAttribute('href', this.sanitize(value.href));
-    node.innerText = value.pageNum
+    node.setAttribute('contenteditable', false);
+    node.innerText = `[p. ${value.pageNum}]`
     return node;
   }
 
   static formats(domNode) {
     return {
       href: domNode.getAttribute('href'),
-      pageNum: domNode.innerText
+      pageNum: getPageNum(domNode.innerText)
     }
   }
 
@@ -36,7 +45,7 @@ class PageBlot extends Parchment.Embed {
   static value(domNode) {
     return {
       href: domNode.getAttribute('href'),
-      pageNum: domNode.innerText
+      pageNum: getPageNum(domNode.innerText)
     }
   }
 
@@ -58,54 +67,3 @@ PageBlot.className = 'pb';
 
 
 export default PageBlot;
-
-/*
-import Parchment from 'parchment';
-
-class PageBlot extends Parchment.Embed {
-
-  static create(data) {
-    let node = super.create();
-    console.log("PageBlot.create", node, data)
-    //node.text = data.page
-    node.setAttribute('href', data);
-    console.log("   => create", node)
-    return node;
-  }
-
-  static formats(domNode) {
-    console.log("PageBlot.formats", domNode.getAttribute('href'), domNode.text)
-
-    let format = {
-      href: domNode.getAttribute('href'),
-      //page: domNode.text
-    };
-    console.log("   format =>", format)
-    return format || {};
-  }
-
-
-
-  format(name, data) {
-    console.log("page format()", name, data)
-    if (name === 'page' && data) {
-      //this.domNode.text = data.page
-      this.domNode.setAttribute('href', data);
-    } else {
-      super.format(name, data);
-    }
-  }
-
-  formats() {
-    let formats = super.formats();
-    formats['page'] = PageBlot.formats(this.domNode);
-    console.log("page formats()", formats, this.domNode)
-    return formats;
-  }
-}
-PageBlot.blotName = 'page';
-PageBlot.tagName = 'a';
-PageBlot.className = 'pb';
-
-export default PageBlot;
-*/
