@@ -5,27 +5,47 @@
 */
 
 import Parchment from 'parchment';
+import Quill from 'quill/quill';
+
+const Embed  = Quill.import('blots/embed')
+
+const ATTRIBUTES = [
+  'href',
+];
+
+const getNoteId = domNode => { //domNode.getAttribute('href')//.substring(1)
+  return domNode.getAttribute('href')
+  const re = /^#(.*)$/.exec(domNode.getAttribute('href'))
+  if (re[1]) return parseInt(re[1])
+  return ''
+}
 
 class NoteBlot extends Parchment.Embed {
 
   static create(value) {
     let node = super.create();
-    node.setAttribute('href', '#'+value);
+    node.setAttribute('href', '#' + value);
+    node.setAttribute('contenteditable', false);
     node.innerText = '[note]'
     return node;
   }
 
   static formats(domNode) {
-    return { note: domNode.getAttribute('href').substring(1) }
+    return getNoteId(domNode)
   }
 
   static value(domNode) {
-    return domNode.getAttribute('href').substring(1)
+    return getNoteId(domNode)
   }
 
   format(name, value) {
-    if (name === 'note' && value) {
-      this.domNode.setAttribute('href', '#' + value);
+    return;
+    if (ATTRIBUTES.indexOf(name) > -1) {
+      if (value) {
+        this.domNode.setAttribute(name, value);
+      } else {
+        this.domNode.removeAttribute(name);
+      }
     } else {
       super.format(name, value);
     }
@@ -33,7 +53,7 @@ class NoteBlot extends Parchment.Embed {
 
 }
 NoteBlot.blotName = 'note';
-NoteBlot.tagName = 'div';
+NoteBlot.tagName = 'a';
 NoteBlot.className = 'note';
 
 export default NoteBlot;

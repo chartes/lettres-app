@@ -407,14 +407,14 @@ const actions = {
       attributes: { content: note.content },
       relationships: {
         document: {
-          data : [{ type: "document", id: state.document.id }]
+          data : [{ type: 'document', id: state.document.id }]
         }
       }
     }
     const http = http_with_csrf_token();
     return http.post(`notes?without-relationships`, {data})
       .then(response => {
-        console.log('response', note.content)
+        console.log('response', response.data)
         note.id = response.data.data.id
         commit('ADD_NOTE', note);
         return note;

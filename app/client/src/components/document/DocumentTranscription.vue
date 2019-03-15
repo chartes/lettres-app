@@ -62,7 +62,6 @@
       },
     },
     data () {
-      console.log('data')
       return {
         transcriptionContent: '',
         noteId: null,

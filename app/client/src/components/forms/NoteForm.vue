@@ -26,13 +26,17 @@
     components: { LoadingIndicator, ModalForm,
         //RichTextEditor: () => import('./fields/RichTextEditor')
     },
-    props: ['title', 'noteId', 'note', 'cancel', 'submit'],
+    props: {
+      title: { type: String },
+      cancel: { type: Function },
+      submit: { type: Function },
+    },
     beforeCreate: function () {
       this.$options.components.RichTextEditor = require('./fields/RichTextEditor').default
     },
     data() {
       return {
-        form: Object.assign({}, this.note),
+        form: {},
         textLength: 0,
         loading: false,
       }
@@ -40,10 +44,13 @@
     methods: {
 
       submitAction () {
-        if (!this.noteId) {
-          this.loading = true;
-        }
-        this.submit(this.form)
+
+        console.log('NoteForm submitAction', this.form)
+        this.loading = true;
+        this.$store.dispatch('document/addNote', this.form).then( note => {
+          console.log('added note', note)
+          this.submit(note)
+        })
 
       },
       cancelAction () {
@@ -51,10 +58,9 @@
       }
     },
     computed: {
-        isValid () {
-          console.log("isValid", this.form.content)
-            return !!this.form && !!this.form.content && this.form.content.length > 1
-        }
+      isValid () {
+        return !!this.form && !!this.form.content && this.form.content.length > 1
+      }
     }
   }
 </script>

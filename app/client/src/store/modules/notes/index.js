@@ -22,18 +22,14 @@ const mutations = {
 const actions = {
 
   add ({ commit, getters, rootState }, newNote) {
-    const config = { auth: { username: rootState.user.authToken, password: undefined }};
-    const newNotes = {
-      data: [{
-        "username": rootState.user.currentUser.username,
-        "type_id": newNote.type_id,
-        "content": newNote.content
-      }]
-    };
-    return axios.post(`/adele/api/1.0/notes`, newNotes, config)
+    console.log("note add =>", newNote)
+    const http = http_with_csrf_token();
+    return http.post(`/notes`, { data: {...newNote}, type: 'note'})
       .then( response => {
+        console.log("note add =>", response.data)
         const note = response.data.data[0];
         commit('NEW', note);
+        return note
       })
   },
   update ({ commit, getters, rootState }, note) {

@@ -22,7 +22,6 @@ function addUserToData(data, included) {
 
 const mutations = {
   UPDATE_FULL_CHANGELOG (state, {changes, included, links, pageId, pageSize}) {
-    console.log("UPDATE_FULL_CHANGELOG", changes, included, pageId, pageSize);
     state.fullChangelog = addUserToData(changes, included);
     state.links = links;
     state.pageId = pageId;
