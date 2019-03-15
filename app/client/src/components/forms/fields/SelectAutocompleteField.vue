@@ -163,6 +163,7 @@
     },
     watch: {
       items: function (val, oldValue) {
+        // actually compare the
         if (!!val || val.length !== oldValue.length) {
           this.results = val;
           this.isLoading = false;
