@@ -22,3 +22,9 @@
   display: flex;
   margin-bottom: .5em;
 }
+
+.document__collections {
+  .v-breadcrumbs {
+    padding: 0 !important;
+  }
+}

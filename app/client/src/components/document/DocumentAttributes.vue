@@ -14,7 +14,7 @@
       />
     </header>
 
-    <div class="columns is-multiline">
+    <div class="columns is-multiline" v-if="editAttributes">
       <div class="column is-one-third">
         <date-field
                 :tabulation-index="0"
@@ -71,6 +71,9 @@
         type: Boolean,
         default: false
       },
+      editAttributes: {
+          type: Boolean, default: true
+      }
     },
     data() {
       return {

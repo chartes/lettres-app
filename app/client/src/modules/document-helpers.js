@@ -82,8 +82,14 @@ const getPersons = function (included) {
   getSimpleRelation = function (propName, included) {
     let found = included.find(item => item.type === propName);
     return found ? { id: found.id, ...found.attributes} : {id: null}
-  };
+  },
 
+  getIncludedRelation = function (data, included, relName) {
+    return data.relationships[relName].data.map(r => {
+        let found = included.find(item => item.type === r.type && item.id === r.id);
+        return found ? {id: found.id, ...found.attributes} : null;
+    })
+  };
 
 
 export  {
@@ -95,5 +101,7 @@ export  {
   getWitnesses,
   getNotes,
   getCollections,
-  getCurrentLock
+  getCurrentLock,
+
+  getIncludedRelation
 }

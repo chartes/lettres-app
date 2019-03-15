@@ -1,5 +1,5 @@
 <template>
-   <section>
+   <section v-if="current_user">
       <header>
          <h2 class="section__title subtitle">Historique des modifications</h2>
       </header>
@@ -72,13 +72,15 @@
       }
     },
     created() {
-      if (this.docId !== undefined) {
-        this.filterDoc(this.docId);
-      }
-      if (this.currentUserOnly && !this.current_user.isAdmin) {
-        this.filterUsername(this.current_user.username);
-      }
-      this.applyFilters();
+      this.$store.dispatch('user/fetchCurrent').then(resp => {
+          if (this.docId !== undefined) {
+              this.filterDoc(this.docId);
+          }
+          if (this.currentUserOnly && !this.current_user.isAdmin) {
+              this.filterUsername(this.current_user.username);
+          }
+          this.applyFilters();
+      });
     },
     computed: {
       ...mapState('user', ['current_user']),
@@ -149,7 +151,6 @@
     color: #962D3E;
   }
   td a:hover span{
-    background: #EBEBEB;
     color: #348899 ;
   }
 </style>

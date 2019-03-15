@@ -3,15 +3,15 @@
     "@type": "sc:Collection",
     "@context": "http://iiif.io/api/presentation/2/context.json",
     "label": "collection",
-    "attribution": "\u00c9cole nationale des chartes",
+    "attribution": "Comité des travaux historiques et scientifiques (CTHS)",
     "license": "http://rightsstatements.org/vocab/NoC-NC/1.0/",
-    "logo": "http://193.48.42.68/loris/logos/logo-enc.png/full/full/0/default.png",
+    "logo": "http://cths.fr/images/logo-enc.png",
     "related": "",
     "description": "",
     "metadata": [
         {
             "label": "Manifest Provider",
-            "value": "\u00c9cole nationale des chartes"
+            "value": "Comité des travaux historiques et scientifiques (CTHS)"
         }
     ],
     "manifests": [

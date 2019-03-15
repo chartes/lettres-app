@@ -1,22 +1,67 @@
-import werkzeug
-from flask import render_template, make_response, request, redirect, url_for, current_app
+import json
+from flask import render_template, make_response, request, redirect, url_for, current_app, abort
 from flask_login import current_user
 
 from app import app_bp
 from app.api.routes import refresh_token, pprint
+from app.models import Collection, Document
 
 
 @app_bp.route("/")
 @app_bp.route("/documents")
-@app_bp.route("/documents/<doc_id>")
+@app_bp.route("/documents/<int:doc_id>")
 def index(doc_id=None):
     user = current_user
 
     searched_term = request.args.get('search', '')
     if doc_id is not None and searched_term != '':
-        return redirect(url_for("app_bp.index", search=searched_term, docId=None))
+        return redirect(url_for("app_bp.index", section="documents", data=json.dumps({
+            'docId': None, 'searchedTerm': searched_term
+        })))
 
-    resp = make_response(render_template("documents/document_index.html", docId=doc_id, search=searched_term))
+    if doc_id is not None and not Document.query.filter(Document.id == doc_id).first():
+        abort(status=404)
+
+    resp = make_response(render_template("app/main.html",
+                                         section="documents",
+                                         data=json.dumps({
+                                             'docId': doc_id, 'searchedTerm': searched_term
+                                         })))
+    return refresh_token(user, resp)
+
+
+@app_bp.route("/collections")
+@app_bp.route("/collections/<int:collection_id>")
+def collections(collection_id=None):
+    user = current_user
+
+    if collection_id is not None and not Collection.query.filter(Collection.id == collection_id).first():
+        abort(status=404)
+
+    resp = make_response(render_template("app/main.html",
+                                         section="collections",
+                                         data=json.dumps({'collectionId': collection_id})))
+    return refresh_token(user, resp)
+
+
+@app_bp.route("/verrous")
+def locks():
+    user = current_user
+    resp = make_response(render_template("app/main.html", section="locks",  data=json.dumps({})))
+    return refresh_token(user, resp)
+
+
+@app_bp.route("/favoris")
+def bookmarks():
+    user = current_user
+    resp = make_response(render_template("app/main.html", section="bookmarks", data=json.dumps({})))
+    return refresh_token(user, resp)
+
+
+@app_bp.route("/historique")
+def changelog():
+    user = current_user
+    resp = make_response(render_template("app/main.html", section="changelog", data=json.dumps({})))
     return refresh_token(user, resp)
 
 
@@ -38,7 +83,9 @@ def user_action(action):
         print("VIEW NOT FOUND:", action, 'user.%s' % action.replace("-", '_'))
         return redirect(url_for("app_bp.index"))
 
-    resp = make_response(render_template("documents/document_index.html", userTemplate=action_template))
+    resp = make_response(render_template("app/main.html",
+                                         section="template",
+                                         data=json.dumps({'template': action_template})))
     return refresh_token(user, resp)
 
 
@@ -48,7 +95,9 @@ def login():
     if user.is_authenticated:
         return redirect(url_for("app_bp.index"))
     login_template = current_app.user_manager.login_view()
-    resp = make_response(render_template("documents/document_index.html", userTemplate=login_template))
+    resp = make_response(render_template("app/main.html",
+                                         section="template",
+                                         data=json.dumps({'template': login_template})))
     return refresh_token(user, resp)
 
 
@@ -59,17 +108,4 @@ def logout():
         return redirect(url_for("app_bp.index"))
     current_app.user_manager.logout_view()
     return redirect(url_for('app_bp.index'))
-
-
-
-
-
-@app_bp.route("/documentation")
-def documentation():
-    return render_template("docs/docs.html")
-
-
-@app_bp.route("/about")
-def about():
-    return render_template("docs/about.html")
 

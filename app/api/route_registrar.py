@@ -1,18 +1,15 @@
 import time
 
 import json
-import pprint
 import urllib
 import sys
 
 from math import ceil
-from collections import OrderedDict
+from collections import OrderedDict, Iterable
 
 from flask import request, current_app
-from flask_login import current_user
-from flask_user.decorators import _is_logged_in_with_confirmed_email
-from functools import wraps
-from sqlalchemy import func, desc, asc, column, union, text
+
+from sqlalchemy import func, desc, asc, column, text
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.sql.operators import ColumnOperators
 
@@ -126,7 +123,7 @@ class JSONAPIRouteRegistrar(object):
                    for f in request.args.keys() if f.startswith('filter[') and f.endswith(']')]
         if len(filters) > 0:
             for filter_param, filter_fieldname in filters:
-                filter_fieldname = filter_fieldname.replace("-", "_")
+                filter_fieldname = filter_fieldname.replace("-", "_").replace('#', '')
 
                 not_null_operator = filter_fieldname.startswith("!")
                 if not_null_operator:
@@ -750,8 +747,8 @@ class JSONAPIRouteRegistrar(object):
                 links = {
                     "self": request.url
                 }
-
                 try:
+
                     # if request has pagination parameters
                     # add links to the top-level object
                     if 'page[number]' in request.args or 'page[size]' in request.args:
@@ -1160,6 +1157,7 @@ class JSONAPIRouteRegistrar(object):
                 #  Update the resource from its facade
                 # =====================================
                 resource, e = facade_class.update_resource(obj, facade_class.TYPE, attributes, related_resources)
+
                 if e is None:
                     url_prefix = request.host_url[:-1] + self.url_prefix
 

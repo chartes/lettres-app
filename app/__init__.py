@@ -1,12 +1,11 @@
-import pprint
+import json
 from elasticsearch import Elasticsearch
 from flask import Flask, Blueprint, url_for, render_template
-from flask.json import jsonify
 from flask_cors import CORS
-from flask_jwt_extended import JWTManager, set_access_cookies, create_access_token
+from flask_jwt_extended import JWTManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_user import UserManager
-from sqlalchemy import event, inspect
+from sqlalchemy import event
 from sqlalchemy.engine import Engine
 
 from dotenv import load_dotenv
@@ -196,14 +195,14 @@ def create_app(config_name="dev"):
         title = "Page non trouvée"
         content = "Le contenu que vous cherchez n'existe pas à cette adresse"
         template = render_template('errors/generic.html', title=title, content=content)
-        return render_template('documents/document_index.html', userTemplate=template), 404
+        return render_template('app/main.html', section="errors", data=json.dumps({'template': template})), 404
 
     @app.errorhandler(500)
     def handle_bad_request(e):
         title = "Erreur serveur"
         content = "Erreur interne du serveur."
         template = render_template('errors/generic.html', title=title, content=content)
-        return render_template('documents/document_index.html', userTemplate=template), 500
+        return render_template('app/main.html', section="errors", data=json.dumps({'template': template})), 500
 
     # =====================================
     # register api routes
@@ -257,5 +256,9 @@ def create_app(config_name="dev"):
 
     app.register_blueprint(app_bp)
     app.register_blueprint(api_bp)
+
+    def get_value(value, key):
+        return json.loads(value).get(key)
+    app.jinja_env.filters['get_value'] = get_value
 
     return app

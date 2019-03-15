@@ -26,6 +26,21 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
             errors = []
         return e, kwargs, errors
 
+    def get_parents_resource_identifiers(self):
+        parents = self.obj.parents
+        return [] if parents is None else [
+            CollectionFacade.make_resource_identifier(parent.id, CollectionFacade.TYPE)
+            for parent in parents
+        ]
+
+    def get_parents_resources(self):
+        parents = self.obj.parents
+        return [] if parents is None else [
+            CollectionFacade(self.url_prefix, parent, self.with_relationships_links,
+                             self.with_relationships_data).resource
+            for parent in parents
+        ]
+
     @property
     def resource(self):
         resource = {
@@ -58,6 +73,17 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
                 "resource_identifier_getter": self.get_related_resource_identifiers(DocumentFacade, "documents", to_many=True),
                 "resource_getter": self.get_related_resources(DocumentFacade, "documents", to_many=True),
             },
+            "documents-including-children": {
+                "links": self._get_links(rel_name="documents-including-children"),
+                "resource_identifier_getter": self.get_related_resource_identifiers(DocumentFacade, "documents_including_children",
+                                                                                    to_many=True),
+                "resource_getter": self.get_related_resources(DocumentFacade, "documents_including_children", to_many=True),
+            },
+            "parents": {
+                "links": self._get_links(rel_name="parents"),
+                "resource_identifier_getter": self.get_parents_resource_identifiers,
+                "resource_getter": self.get_parents_resources,
+            }
         })
 
     def get_data_to_index_when_added(self, propagate):

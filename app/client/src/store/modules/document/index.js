@@ -51,19 +51,19 @@ const mutations = {
     state.document = { ...data.attributes, id: data.id};
   },
   UPDATE_DOCUMENT_PREVIEW (state, {data, included}) {
-    console.log('UPDATE_DOCUMENT_PREVIEW');
+    //console.log('UPDATE_DOCUMENT_PREVIEW');
     const newPreviewCard = {
       id: data.id,
       attributes: data.attributes,
       //persons: getPersons(included),
       //languages: getLanguages(included),
-      collections: getCollections(included),
+      //collections: getCollections(included),
       currentLock: getCurrentLock(included)
     };
     Vue.set(state.documentsPreview, data.id, newPreviewCard);
   },
   UPDATE_ALL (state, payload) {
-    console.log('UPDATE_ALL', payload.data);
+    console.log('UPDATE_ALL', payload);
     state.documents = payload.data;
     state.links = payload.links;
     state.totalCount = payload.meta["total-count"];
@@ -157,7 +157,8 @@ const actions = {
   fetchPreview ({ commit }, id) {
     commit('LOADING_STATUS', true);
     const incs = [
-      'collections', 'witnesses', 'current-lock'
+      //'collections',
+      'witnesses', 'current-lock'
     ];
 
     const http = http_with_csrf_token();
@@ -175,13 +176,15 @@ const actions = {
       commit('LOADING_STATUS', false);
     })
   },
-  fetchSearch ({ commit }, {pageId, pageSize, query}) {
+  fetchSearch ({ commit }, {pageId, pageSize, query, filters}) {
     commit('LOADING_STATUS', true);
 
     const index = `lettres__${process.env.NODE_ENV}__documents`;
     const incs = ['collections', 'persons', 'persons-having-roles', 'roles', 'witnesses', 'languages'];
     const http = http_with_csrf_token();
-    return http.get(`/search?query=${query}&index=${index}&include=${incs.join(',')}&without-relationships&page[size]=${pageSize}&page[number]=${pageId}`)
+    if (filters)
+      filters = '&' + filters;
+    return http.get(`/search?query=${query}&index=${index}&include=${incs.join(',')}&without-relationships&page[size]=${pageSize}&page[number]=${pageId}${filters}`)
       .then( (response) => {
       commit('UPDATE_ALL', response.data);
       commit('LOADING_STATUS', false);
@@ -370,7 +373,12 @@ const actions = {
   removePlacename({commit}, relationId) {
     commit('REMOVE_PLACENAME', relationId)
   },
-
+  setIsLoading({commit}) {
+    commit('LOADING_STATUS', true);
+  },
+  unsetIsLoading({commit}) {
+    commit('LOADING_STATUS', false);
+  },
   addCollection ({commit, state}, collection) {
 
     const data = { data: [ { id : collection.id, type: "collection" }, ] }
@@ -383,7 +391,7 @@ const actions = {
       })
   },
   removeCollection ({commit, state}, collection) {
-    const data = { data: { id : collection.id, type: "collection" } }
+    const data = { data: { id : collection.id, type: "collection" } };
     const http = http_with_csrf_token();
     return http.delete(`/documents/${state.document.id}/relationships/collections?without-relationships`, {data})
       .then(response => {

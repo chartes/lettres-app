@@ -1,11 +1,11 @@
 <template>
-  <div>
+  <div v-if="documents && documents.length > 0">
     <pagination :current="currentPage" :end="nbPages" :size="pageSize" :action="goToPage">
       <ul id="preview-cards" >
         <li v-for="doc in documents" :key="doc.id">
           <document-preview-card
               :doc_id="doc.id"
-              v-if="doc.attributes['is-published'] || current_user">
+              v-if="(doc.attributes['is-published'] && doc.attributes['is-published'] === true) || current_user">
           </document-preview-card>
         </li>
       </ul>
@@ -14,7 +14,7 @@
 </template>
 
 <script>
-  import DocumentPreviewCard from '../DocumentPreviewCard';
+  import DocumentPreviewCard from '../document/DocumentPreviewCard';
   import Pagination from '../ui/Pagination';
   import { mapState } from 'vuex';
 
