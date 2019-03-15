@@ -1,28 +1,28 @@
 <template>
-
+  
   <div class="field rich-text-editor">
-
+    
     <field-label v-if="!!label" :label="label"/>
-
+    
     <div class="editor-area">
       <div class="editor-controls" ref="controls">
-
+        
         <div v-for="group, gindex in formats" :key="gindex" class="editor-controls-group field has-addons">
           <editor-button
-                  v-for="format in group"
-                  :active="formatCallbacks[format].active"
-                  :callback="formatCallbacks[format].cb"
-                  :selected="buttons[format]"
-                  :format="format"
-                  :key="format"
+              v-for="format in group"
+              :active="formatCallbacks[format].active"
+              :callback="formatCallbacks[format].cb"
+              :selected="buttons[format]"
+              :format="format"
+              :key="format"
           />
         </div>
         <div class="editor-controls-group is-additional" v-if="slotNotEmpty">
           <slot></slot>
         </div>
-
+      
       </div>
-
+      
       <div class="editor-container">
         <div class="quill-editor" :class="{ 'single-line': !multiline }" ref="editor" spellcheck="false"></div>
       </div>
@@ -42,27 +42,30 @@
               :remove="removeTextfieldForm"
       />
       <person-list-form
-              v-if="formPerson"
-              title="Sélectionner une personne"
-              :submit="submitPersonForm"
-              :cancel="closePersonForm"
+          v-if="formPerson"
+          title="Sélectionner une personne"
+          :submit="submitPersonForm"
+          :cancel="closePersonForm"
+          :remove="removePersonForm"
       />
       <placename-list-form
-              v-if="formLocation"
-              title="Sélectionner un lieu"
-              :submit="submitLocationForm"
-              :cancel="closeLocationForm"
-              :remove="removeLocationForm"
+          v-if="formLocation"
+          title="Sélectionner un lieu"
+          :submit="submitLocationForm"
+          :cancel="closeLocationForm"
+          :remove="removeLocationForm"
       />
+      
+      <pre v-if="debug" style="white-space: normal">{{value}}</pre>
 
-    <pre v-if="debug" style="white-space: normal">{{value}}</pre>
     </div>
-
+  
   </div>
 
 </template>
 
 <script>
+<<<<<<< HEAD
   import Vue from 'vue';
   import ClickOutside from 'vue-click-outside';
   import EditorButton from './EditorButton.vue';

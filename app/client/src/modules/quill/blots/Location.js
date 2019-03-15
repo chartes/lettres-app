@@ -2,7 +2,7 @@
  Lieu
  Blot : inline
  TEI : placeName/@ref
- HTML5 : a[@class="placeName"]/@href
+ HTML5 : a[@class="placeName"]/@id
  Utilisation : transcription, traduction, commentaire
 */
 
@@ -19,7 +19,7 @@ class LocationBlot extends Inline {
   }
 
   static formats(domNode) {
-    let ref = domNode.getAttribute('href');
+    let ref = domNode.getAttribute('id');
     return ref || true;
   }
 
