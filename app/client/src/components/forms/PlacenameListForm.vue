@@ -85,6 +85,7 @@
       },
 
       submitAction () {
+        console.log('submitAction', this.form)
         this.$props.submit(this.form);
       },
       cancelAction () {

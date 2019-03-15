@@ -65,7 +65,6 @@
           :submit="submitPersonForm"
           :cancel="closePersonForm"
           :remove="removePersonForm"
-
       />
       <placename-list-form
           v-if="formLocation"
@@ -76,6 +75,7 @@
       />
       
       <pre v-if="debug" style="white-space: normal">{{value}}</pre>
+
     </div>
   
   </div>
