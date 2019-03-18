@@ -26,10 +26,9 @@
               </v-breadcrumbs>
             </v-flex>
             <v-flex pa-1 :fill-height="true" :align-baseline="true">
-              <a v-if="editable" @click="removeCollection(hierarchy[hierarchy.length-1])" class="collection-item__delete">
+              <a v-if="editable && collectionsHierarchies.length > 1" @click="removeCollection(hierarchy[hierarchy.length-1])" class="collection-item__delete">
                 <icon-bin/>
               </a>
-
             </v-flex>
           </v-layout>
         </span>
