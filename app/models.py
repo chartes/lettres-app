@@ -137,7 +137,7 @@ class Witness(db.Model, ChangesMixin):
     document_id = db.Column(db.Integer, db.ForeignKey('document.id', ondelete='CASCADE'), nullable=False, index=True)
     num = db.Column(db.Integer, nullable=False, server_default='1')  # ordre d'importance du témoin
     content = db.Column(db.String, nullable=False, index=True)
-    tradition = db.Column('tradition', Enum(*TRADITION_VALUES), index=True)
+    tradition = db.Column('tradition', Enum(*TRADITION_VALUES), index=True, default=None)
     status = db.Column('status', Enum(*WITNESS_STATUS_VALUES), index=True)
     institution_id = db.Column(db.Integer, db.ForeignKey('institution.id'))
     classification_mark = db.Column(db.String(100))
