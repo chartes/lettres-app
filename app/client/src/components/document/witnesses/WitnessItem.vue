@@ -17,7 +17,7 @@
       <a v-if="editable" @click="editAction(me)" class="witness-item__edit">
         <icon-pen-edit/>
       </a>
-      <a v-if="editable" @click="deleteAction(me)" class="witness-item__delete">
+      <a v-if="editable && canBeRemoved" @click="deleteAction(me)" class="witness-item__delete">
         <icon-bin/>
       </a>
     </div>
@@ -35,6 +35,7 @@
     components: {IconArrowDown, IconBin, IconPenEdit},
     props: {
       editable: { type: Boolean, default: false },
+      canBeRemoved: {type: Boolean, default: true},
       listIndex: { type: Number, default: 0 },
       listLength: { type: Number, default: 0 },
       witness: { type: Object, default: () => { return {} } },

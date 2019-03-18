@@ -155,7 +155,7 @@ const mutations = {
   },
   ADD_PLACENAME(state, payload) {
     state.placenames = [...state.placenames, payload]
-  },
+  }
 };
 
 const actions = {
@@ -496,22 +496,15 @@ const actions = {
     return noteId
   },
 
-  initializeDummyDocument({commit, state}, defaultData) {
-    const dummy = makeDummyDocument(defaultData);
-    const data = {data: {id: dummy.data.id, type: dummy.data.type}};
+  initializeDummyDocument({commit, state, rootState}, defaultData) {
     const http = http_with_csrf_token();
-    return http.delete(`/documents/${dummy.data.id}`, {data})
-        .then(response => {
-          return http.post(`/documents`, dummy).then(r => {
-            console.log("dummy doc initialized");
-          });
-        }).catch(e => {
-          return http.post(`/documents`, dummy).then(r => {
-            console.log("dummy doc initialized");
-          });
-        });
+    const collId = defaultData.relationships.collections.data[0].id;
+    return http.get(`collections/${collId}`).then(r => {
+      const collection = r.data.data;
+      const dummy = makeDummyDocument(defaultData);
+      commit('UPDATE_DOCUMENT', {data: dummy.data, included: [collection]});
+    });
   }
-
 
 };
 
