@@ -7,9 +7,11 @@
     <v-slide-y-transition>
     <v-card flat v-show="opened" trans>
       <v-card-text >
+        <v-card-title>
+          <span class="title">Témoin de base du document</span>
+        </v-card-title>
         <v-container fluid>
           <v-layout wrap>
-  
             <loading-indicator :active="loading"/>
             <div class="location-form textinput-form" v-if="!loading">
               <form @submit.prevent="">

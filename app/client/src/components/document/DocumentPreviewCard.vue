@@ -1,9 +1,15 @@
 <template>
     <div class="document-preview-card">
         <aside class="document-preview-card__thumbnail" v-if="documentPreview">
-            <a :href="`${baseUrl}/documents/${documentPreview.id}`">
+           <a :href="`${baseUrl}/documents/${documentPreview.id}`">
                 <img v-if='documentPreview.attributes["iiif-thumbnail-url"]'
                      :src='documentPreview.attributes["iiif-thumbnail-url"]'/>
+                <div v-else class="document-preview-card__alt-thumbnail">
+                  <v-icon style="width:100%; height: 100%; margin: auto">
+                    far fa-file-alt
+                  </v-icon>
+                </div>
+
            </a>
         </aside>
         <article>
@@ -12,7 +18,9 @@
           </header>
 
           <div class="content" v-if="documentPreview">
+            <a :href="`${baseUrl}/documents/${documentPreview.id}`">
                  <h1 class="document-preview-card__title" v-html="titleContent"></h1>
+            </a>
                  <p class="document-preview-card__content" v-html="previewContent"></p>
           </div>
         </article>
@@ -96,6 +104,14 @@
     color: #3273dc;
   }
 
+  .document-preview-card__alt-thumbnail  {
+    width: 128px;
+    height: 170px;
+  }
+
+  .document-preview-card__alt-thumbnail i {
+    font-size: 64px;
+  }
 
     /* styles for '...' */
   .document-preview-card__content {
