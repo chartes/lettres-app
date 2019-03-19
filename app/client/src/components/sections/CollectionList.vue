@@ -19,7 +19,7 @@
               item-text="titleWithCount"
               :search="search"
               :filter="filter"
-              selectable
+              :selectable="false"
               selected-color="red"
               :activatable="true"
               :active.sync="activeTreeItem"
@@ -181,6 +181,7 @@
                 } else {
                     this.treeviewModel = [];
                 }
+                this.activeTab = 0;
             },
             selections(val) {
                 //this.goToDocPage(1);

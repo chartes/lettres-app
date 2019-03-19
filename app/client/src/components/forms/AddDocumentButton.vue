@@ -13,33 +13,42 @@
         <v-container fluid>
           <v-layout wrap>
             <loading-indicator :active="loading"/>
-            <div class="location-form textinput-form" v-if="!loading">
+            <div class="witness-form textinput-form" v-if="!loading">
               <form @submit.prevent="">
       
-                <field-select
-                    label="Statut"
-                    :options="statusesList"
-                    v-model="witness.status"
-                />
-                <field-select
-                    label="Tradition"
-                    :options="traditionsList"
-                    v-model="witness.tradition"
-                />
-                <select-autocomplete-field
-                    label="Institution"
-                    v-model="witness.institution"
-                    :items="institutionsSearchResults"
-                    :is-async="true"
-                    @search="searchInstitution"
-                    label-key="name"
-                >
-                  <button
-                      class="button is-outlined is-link"
-                      @click="openInstitutionForm">
-                    Ajouter une institution
-                  </button>
-                </select-autocomplete-field>
+                <div class="columns">
+                  <div class="column">
+                  <field-select
+                      label="Statut"
+                      :options="statusesList"
+                      v-model="witness.status"
+                  />
+                  </div>
+                  <div class="column">
+                  <field-select
+                      label="Tradition"
+                      :options="traditionsList"
+                      v-model="witness.tradition"
+                  />
+                  </div>
+                    <div class="column">
+                  <select-autocomplete-field
+                      label="Institution"
+                      v-model="witness.institution"
+                      :items="institutionsSearchResults"
+                      :is-async="true"
+                      @search="searchInstitution"
+                      label-key="name"
+                  >
+                    <button
+                        class="button is-outlined is-link"
+                        @click="openInstitutionForm">
+                      Ajouter une institution
+                    </button>
+                  </select-autocomplete-field>
+                    </div>
+                </div>
+
                 <rich-text-editor
                     label="Témoin"
                     v-model="witness.content"
@@ -100,10 +109,7 @@
             collection: {
                 required: true,
                 type: Object
-            },
-
-            title: {type: String, default: ''},
-            label: {type: String, default: ''},
+            }
         },
         data() {
             return {
@@ -150,20 +156,7 @@
                         console.warn("ERROR", e);
                     });
                 })
-        
-                /*
-                this.$store.dispatch('document/add').then(r => {
-                    console.log("new document added !", r.data);
-                    
-                    console.log("must create the doc")
-                    console.log("then the witness")
-                    console.log("then redirect to edit page")
-                }).catch(e => {
-                    console.error("new document not added !", e);
-                });
-                */
             },
-
 
             searchInstitution(search) {
                 this.$store.dispatch('institutions/search', search)
