@@ -142,7 +142,7 @@
 
       initEditor(editorElement, initialContent) {
 
-        //console.log("initEditor", editorElement, initialContent)
+        console.log("initEditor", initialContent)
 
         editorElement.innerHTML = this.sanitize(initialContent);
         this.editor = getNewQuill(editorElement);
@@ -201,6 +201,7 @@
 
       sanitize (val) {
         let newValue = val || '';
+        newValue = newValue.replace(/\n/gmi, '')
         if (!this.multiline) {
           newValue = newValue.replace(/<(br)?(\/)?(p)?>/gi, '');
         }
