@@ -93,8 +93,27 @@ class Collection(db.Model, ChangesMixin):
     )
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    parent_id = db.Column(db.Integer, db.ForeignKey('collection.id'))
+
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.String(400))
+
+    children = db.relationship("Collection", backref=db.backref('parent', remote_side=id))
+
+    @property
+    def documents_including_children(self):
+        docs = []
+        for c in self.children:
+            docs += c.documents_including_children
+        docs += self.documents
+        return docs
+
+    @property
+    def parents(self):
+        if self.parent is None:
+            return []
+        else:
+            return [self.parent] + self.parent.parents
 
 
 class Note(db.Model, ChangesMixin):
@@ -118,7 +137,7 @@ class Witness(db.Model, ChangesMixin):
     document_id = db.Column(db.Integer, db.ForeignKey('document.id', ondelete='CASCADE'), nullable=False, index=True)
     num = db.Column(db.Integer, nullable=False, server_default='1')  # ordre d'importance du témoin
     content = db.Column(db.String, nullable=False, index=True)
-    tradition = db.Column('tradition', Enum(*TRADITION_VALUES), index=True)
+    tradition = db.Column('tradition', Enum(*TRADITION_VALUES), index=True, default=None)
     status = db.Column('status', Enum(*WITNESS_STATUS_VALUES), index=True)
     institution_id = db.Column(db.Integer, db.ForeignKey('institution.id'))
     classification_mark = db.Column(db.String(100))

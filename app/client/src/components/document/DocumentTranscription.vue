@@ -1,5 +1,5 @@
 <template>
-  <div v-if="document.transcription.length  || editable> 0" class="document__transcription document__subsection">
+  <div v-if="editable" class="document__transcription document__subsection">
     <br/>
     <header class="title">
       <h2 class="document__transcription--title subtitle">Transcription</h2>

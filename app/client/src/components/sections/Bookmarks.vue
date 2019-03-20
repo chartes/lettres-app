@@ -1,10 +1,10 @@
 <template>
-   <section>
+   <section v-if="current_user">
       <header>
          <h2 class="section__title subtitle">Mes documents favoris</h2>
       </header>
-
-      <pagination :current="currentPage" :end="nbPages" :size="pageSize" :action="goToBookmarkPage">
+    
+      <pagination v-if="userBookmarks && userBookmarks.length > 0" :current="currentPage" :end="nbPages" :size="pageSize" :action="goToBookmarkPage">
           <table class="table is-narrow is-bordered is-striped is-hoverable container" >
             <thead>
               <tr>
@@ -34,6 +34,7 @@
              </tbody>
           </table>
       </pagination>
+     <p v-else><i>Vous n'avez aucun document mis en favoris.</i></p>
 
    </section>
 </template>
@@ -62,7 +63,9 @@
       }
     },
     created() {
-      this.applyFilters();
+      this.$store.dispatch('user/fetchCurrent').then(resp => {
+        this.applyFilters();
+      });
     },
     computed: {
       ...mapState('user', ['current_user']),
@@ -84,6 +87,8 @@
            return new Promise((resolve) => {resolve(_f.join('&'))});
        },
        applyFilters() {
+           if (!this.current_user)
+               return;
            return this.computeFilters().then(filters => {
              this.$store.dispatch('bookmarks/fetchUserBookmarks', {
                userId: this.current_user.id,

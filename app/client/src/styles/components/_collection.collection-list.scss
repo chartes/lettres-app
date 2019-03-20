@@ -1,0 +1,63 @@
+
+.collection-list-container {
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+
+  background-color: whitesmoke;
+
+  i.v-treeview-node__toggle {
+    font-size: 2em !important;
+  }
+
+  i.v-treeview-node__checkbox {
+    font-size: 1.2em !important;
+  }
+
+  &__checkbox {
+    font-size: 20px;
+  }
+
+  &__tabs {
+    background-color: white;
+  }
+
+  &__tab:hover {
+   background-color: #F5F5F5;
+    a {
+      color: black;
+    }
+  }
+
+  &__tab {
+    &__toolbar {
+      margin-bottom: 30px;
+
+      .v-icon {
+        color: #2b2b2b !important;
+      }
+    }
+  }
+
+  .v-treeview-node__label {
+   font-size: 14px;
+  }
+
+  .v-treeview-node:hover {
+    cursor: pointer;
+  }
+
+  &____treeview-container {
+    background-color: whitesmoke;
+  }
+  &__search {
+    height: 64px;
+    background-color: #F5F5F5 !important;
+    margin-bottom: 20px;
+    .v-input__control {
+      min-height: unset;
+    }
+  }
+}
+

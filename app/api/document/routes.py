@@ -8,9 +8,9 @@ def register_document_api_urls(app):
     registrar = app.api_url_registrar
 
     registrar.register_get_routes(Document, DocumentFacade, [manage_publication_status()])
-    registrar.register_post_routes(Document, DocumentFacade, [api_require_roles("admin")])
+    registrar.register_post_routes(Document, DocumentFacade, [api_require_roles("contributor")])
     registrar.register_patch_routes(Document, DocumentFacade, [api_require_roles("contributor")])
-    registrar.register_delete_routes(Document, DocumentFacade, [api_require_roles("admin")])
+    registrar.register_delete_routes(Document, DocumentFacade, [api_require_roles("contributor")])
 
     for rel in ('notes', 'languages', 'witnesses', 'images',  'current-lock', 'changes', 'collections',
                 'persons-having-roles', 'person-roles', 'persons',

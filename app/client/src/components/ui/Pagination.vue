@@ -86,6 +86,9 @@
 </script>
 
 <style scoped>
+    .pagination {
+        width: unset;
+    }
     .pagination, .icon, input {
        justify-content: center;
        color: #4a4a4a;

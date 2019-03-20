@@ -87,13 +87,17 @@ class JSONAPIAbstractFacade(object):
         :param related_resources:
         :return:
         """
-        #print("POSTING RESOURCE:", model, obj_id, attributes, related_resources)
+        print("POSTING RESOURCE:", model, obj_id, attributes, related_resources)
+        sanitized_attr = {}
         for att in attributes.keys():
-            attributes[att.replace("-", "_")] = attributes.pop(att)
+            if '-' in att:
+                sanitized_attr[att.replace("-", "_")] = attributes[att]
+            else:
+                sanitized_attr[att] = attributes[att]
 
-        attributes["id"] = obj_id
-        #print("  setting attr", attributes)
-        resource = model(**attributes)
+        sanitized_attr["id"] = obj_id
+        print("  setting attr", sanitized_attr)
+        resource = model(**sanitized_attr)
 
         # set related resources
         for rel_name, rel_data in related_resources.items():

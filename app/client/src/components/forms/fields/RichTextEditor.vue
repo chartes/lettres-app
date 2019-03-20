@@ -65,7 +65,7 @@
 </template>
 
 <script>
-<<<<<<< HEAD
+
   import Vue from 'vue';
   import ClickOutside from 'vue-click-outside';
   import EditorButton from './EditorButton.vue';

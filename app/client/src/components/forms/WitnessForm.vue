@@ -9,33 +9,42 @@
           :submitting="false"
   >
     <loading-indicator :active="loading"/>
-    <div class="location-form textinput-form" v-if="!loading">
+    <div class="witness-form textinput-form" v-if="!loading">
       <form @submit.prevent="">
-
-        <field-select
+  
+        <div class="columns">
+          <div class="column">
+            <field-select
                 label="Statut"
                 :options="statusesList"
                 v-model="form.status"
-        />
-        <field-select
+            />
+          </div>
+          <div class="column">
+            <field-select
                 label="Tradition"
                 :options="traditionsList"
                 v-model="form.tradition"
-        />
-        <select-autocomplete-field
+            />
+          </div>
+          <div class="column">
+            <select-autocomplete-field
                 label="Institution"
                 v-model="form.institution"
                 :items="institutionsSearchResults"
                 :is-async="true"
                 @search="searchInstitution"
                 label-key="name"
-        >
-          <button
+            >
+              <button
                   class="button is-outlined is-link"
                   @click="openInstitutionForm">
-            Ajouter une institution
-          </button>
-        </select-autocomplete-field>
+                Ajouter une institution
+              </button>
+            </select-autocomplete-field>
+          </div>
+        </div>
+        
         <rich-text-editor
                 label="Témoin"
                 v-model="form.content"

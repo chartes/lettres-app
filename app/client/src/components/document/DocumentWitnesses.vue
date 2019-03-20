@@ -15,6 +15,7 @@
         <witness-item
                 v-for="witness, index in list"
                 :editable="editable"
+                :can-be-removed="list.length > 1"
                 :list-index="index"
                 :list-length="list.length"
                 :witness="witness"

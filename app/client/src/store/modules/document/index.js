@@ -33,6 +33,33 @@ const state = {
   totalCount: 0,
 };
 
+function makeDummyDocument(data) {
+  let DUMMY_DOCUMENT = {
+    data: {
+      id: -1,
+      type: 'document',
+      attributes: {
+        title: 'Ceci est le titre du nouveau document. Éditez-le !',
+      },
+    }
+  };
+  if (data) {
+    if (data.attributes) {
+      DUMMY_DOCUMENT.data.attributes = {
+        ...DUMMY_DOCUMENT.data.attributes,
+        ...data.attributes
+      }
+    }
+    if (data.relationships) {
+      DUMMY_DOCUMENT.data.relationships = {
+        ...DUMMY_DOCUMENT.data.relationships,
+        ...data.relationships
+      }
+    }
+  }
+  return DUMMY_DOCUMENT;
+}
+
 const mutations = {
 
   UPDATE_DOCUMENT (state, {data, included}) {
@@ -51,19 +78,19 @@ const mutations = {
     state.document = { ...data.attributes, id: data.id};
   },
   UPDATE_DOCUMENT_PREVIEW (state, {data, included}) {
-    console.log('UPDATE_DOCUMENT_PREVIEW');
+    //console.log('UPDATE_DOCUMENT_PREVIEW');
     const newPreviewCard = {
       id: data.id,
       attributes: data.attributes,
       //persons: getPersons(included),
       //languages: getLanguages(included),
-      collections: getCollections(included),
+      //collections: getCollections(included),
       currentLock: getCurrentLock(included)
     };
     Vue.set(state.documentsPreview, data.id, newPreviewCard);
   },
   UPDATE_ALL (state, payload) {
-    console.log('UPDATE_ALL', payload.data);
+    console.log('UPDATE_ALL', payload);
     state.documents = payload.data;
     state.links = payload.links;
     state.totalCount = payload.meta["total-count"];
@@ -128,7 +155,7 @@ const mutations = {
   },
   ADD_PLACENAME(state, payload) {
     state.placenames = [...state.placenames, payload]
-  },
+  }
 };
 
 const actions = {
@@ -157,7 +184,8 @@ const actions = {
   fetchPreview ({ commit }, id) {
     commit('LOADING_STATUS', true);
     const incs = [
-      'collections', 'witnesses', 'current-lock'
+      //'collections',
+      'witnesses', 'current-lock'
     ];
 
     const http = http_with_csrf_token();
@@ -175,13 +203,15 @@ const actions = {
       commit('LOADING_STATUS', false);
     })
   },
-  fetchSearch ({ commit }, {pageId, pageSize, query}) {
+  fetchSearch ({ commit }, {pageId, pageSize, query, filters}) {
     commit('LOADING_STATUS', true);
 
     const index = `lettres__${process.env.NODE_ENV}__documents`;
     const incs = ['collections', 'persons', 'persons-having-roles', 'roles', 'witnesses', 'languages'];
     const http = http_with_csrf_token();
-    return http.get(`/search?query=${query}&index=${index}&include=${incs.join(',')}&without-relationships&page[size]=${pageSize}&page[number]=${pageId}`)
+    if (filters)
+      filters = '&' + filters;
+    return http.get(`/search?query=${query}&index=${index}&include=${incs.join(',')}&without-relationships&page[size]=${pageSize}&page[number]=${pageId}${filters}`)
       .then( (response) => {
       commit('UPDATE_ALL', response.data);
       commit('LOADING_STATUS', false);
@@ -191,7 +221,7 @@ const actions = {
   save ({ commit, rootGetters, rootState, dispatch }, data) {
     const modifiedData = data.attributes || data.relationships;
     console.log('document/save', data)
-    data.type = 'document'
+    data.type = 'document';
     const http = http_with_csrf_token();
     return http.patch(`/documents/${data.id}`, { data })
       .then(response => {
@@ -199,20 +229,51 @@ const actions = {
         return response.data.data
       })
       .then( doc => {
-        let msg = null;
-        if (doc.attributes) {
 
-          msg = `Modification de ${Object.keys(modifiedData).map( 
-              d => `'${TRANSLATION_MAPPING[d] ? TRANSLATION_MAPPING[d] : d}'`
-          ).join(', ')}`;
+        if (doc.id !== makeDummyDocument().data.id) {
+          let msg = null;
+          if (doc.attributes) {
+            msg = `Modification de ${Object.keys(modifiedData).map(
+                d => `'${TRANSLATION_MAPPING[d] ? TRANSLATION_MAPPING[d] : d}'`
+            ).join(', ')}`;
+          }
+          return this.dispatch('changelog/trackChanges', {
+            objId: doc.id,
+            objType: 'document',
+            userId: rootState.user.current_user.id,
+            msg: msg
+          });
         }
-        return this.dispatch('changelog/trackChanges', {
-          objId : doc.id,
-          objType: 'document',
-          userId: rootState.user.current_user.id,
-          msg: msg
-        });
+
       })
+  },
+
+  add({commit, state}) {
+    const attributes = JSON.parse(JSON.stringify(state.document));
+    delete(attributes.id);
+    delete(attributes['iiif-collection-url']);
+    delete(attributes['iiif-thumbnail-url']);
+    const newDocument = {
+      data: {
+        type : 'document',
+        attributes: {
+          ...attributes
+        },
+        relationships: {
+          collections: {
+            data: state.collections.map(c => {return {id: c.id, type: 'collection'}})
+          }
+        }
+      }
+    };
+
+    console.warn('posting', newDocument);
+    const http = http_with_csrf_token();
+    return http.post(`/documents`, newDocument)
+        .then(response => {
+          commit('UPDATE_DOCUMENT_DATA', response.data.data);
+          return response.data.data
+        })
   },
 
   publish({commit, state}, docId) {
@@ -369,7 +430,12 @@ const actions = {
   removePlacename({commit}, relationId) {
     commit('REMOVE_PLACENAME', relationId)
   },
-
+  setIsLoading({commit}) {
+    commit('LOADING_STATUS', true);
+  },
+  unsetIsLoading({commit}) {
+    commit('LOADING_STATUS', false);
+  },
   addCollection ({commit, state}, collection) {
 
     const data = { data: [ { id : collection.id, type: "collection" }, ] }
@@ -382,7 +448,7 @@ const actions = {
       })
   },
   removeCollection ({commit, state}, collection) {
-    const data = { data: { id : collection.id, type: "collection" } }
+    const data = { data: { id : collection.id, type: "collection" } };
     const http = http_with_csrf_token();
     return http.delete(`/documents/${state.document.id}/relationships/collections?without-relationships`, {data})
       .then(response => {
@@ -429,6 +495,15 @@ const actions = {
     return noteId
   },
 
+  initializeDummyDocument({commit, state, rootState}, defaultData) {
+    const http = http_with_csrf_token();
+    const collId = defaultData.relationships.collections.data[0].id;
+    return http.get(`collections/${collId}`).then(r => {
+      const collection = r.data.data;
+      const dummy = makeDummyDocument(defaultData);
+      commit('UPDATE_DOCUMENT', {data: dummy.data, included: [collection]});
+    });
+  }
 
 };
 
@@ -460,7 +535,10 @@ const getters = {
       return corr.role.label === 'location-date-to'
     })
   },
-
+  getDummyDocument: (state) => (data) => {
+    // this dummy document is used as a base when creating a new document
+    return makeDummyDocument(data);
+  }
 };
 
 const documentModule = {

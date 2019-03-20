@@ -149,7 +149,7 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
                 "creation-label": self.obj.creation_label,
                 "transcription": self.obj.transcription,
 
-                "is-published": self.obj.is_published is not None,
+                "is-published": False if self.obj.is_published is None else self.obj.is_published,
 
                 "iiif-collection-url": self.get_iiif_collection_url(),
                 "iiif-thumbnail-url": self.get_iiif_thumbnail()
@@ -233,6 +233,8 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
         payload = {
             "id": self.id,
             "type": self.TYPE,
+
+            "is-published": False if self.obj.is_published is None else self.obj.is_published,
 
             "creation": self.obj.creation,
             "creation-not-after": self.obj.creation_not_after,
@@ -320,7 +322,8 @@ class DocumentSearchFacade(DocumentFacade):
                 "creation": self.obj.creation,
                 "creation-not-after": self.obj.creation_not_after,
                 "creation-label": self.obj.creation_label,
-                "transcription": self.obj.transcription
+                "transcription": self.obj.transcription,
+                "is-published": False if self.obj.is_published is None else self.obj.is_published,
             },
             "meta": self.meta,
             "links": {
