@@ -116,19 +116,21 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
         ]
     
     def get_iiif_collection_url(self):
-        if self.obj.witnesses:
-            url = "{doc_url}/collection/default".format(doc_url=self.self_link)
-            _s = url.rindex(self.TYPE)
-            return "{0}iiif/{1}".format(url[0:_s], url[_s:])
-        else:
-            return None
+        return 'http://{0}/collections/lettres/document{1}.json'.format(current_app.config['SFTP_IIIF_HOST'], self.obj.id)
+        #
+        #if self.obj.witnesses:
+        #    url = "{doc_url}/collection/default".format(doc_url=self.self_link)
+        #    _s = url.rindex(self.TYPE)
+        #    return "{0}iiif/{1}".format(url[0:_s], url[_s:])
+        #else:
+        #    return None
 
     def get_iiif_thumbnail(self):
         for w in self.obj.witnesses:
             canvas_ids = [img.canvas_id for img in w.images]
             if canvas_ids:
                 from app.api.witness.facade import WitnessFacade
-                f_obj, errors, kwargs = WitnessFacade.get_facade(self.url_prefix, w)
+                f_obj, errors, kwargs = WitnessFacade.get_facade('', w)
                 manifest_url = f_obj.get_iiif_manifest_url()
                 if manifest_url:
                     canvases = current_app.manifest_factory.fetch_canvas(manifest_url, canvas_ids, cache=True)
@@ -159,6 +161,7 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
                 "self": self.self_link
             }
         }
+
         if self.with_relationships_links:
             resource["relationships"] = self.get_exposed_relationships()
         return resource

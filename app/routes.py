@@ -1,8 +1,9 @@
 import json
 from flask import render_template, make_response, request, redirect, url_for, current_app, abort
 from flask_login import current_user
+from requests import Response
 
-from app import app_bp
+from app import app_bp, api_bp
 from app.api.routes import refresh_token, pprint
 from app.models import Collection, Document
 
@@ -108,4 +109,15 @@ def logout():
         return redirect(url_for("app_bp.index"))
     current_app.user_manager.logout_view()
     return redirect(url_for('app_bp.index'))
+
+
+@app_bp.route("/iiif/editor/witnesses/<witness_id>")
+def iiif_editor(witness_id):
+    user = current_user
+    if not user.is_authenticated:
+        return redirect(url_for("app_bp.index"))
+
+    return render_template("manifest_editor.html", witness_id=witness_id)
+
+
 

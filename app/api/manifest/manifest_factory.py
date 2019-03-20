@@ -1,7 +1,11 @@
 import datetime
 import json
 import requests
-from flask import current_app, request
+from flask import current_app
+from operator import attrgetter
+
+from app.api.document.facade import DocumentFacade
+from app.api.witness.facade import WitnessFacade
 
 
 class ManifestFactory(object):
@@ -13,7 +17,7 @@ class ManifestFactory(object):
 
     }
 
-    CACHE_DURATION = 60 * 60 * 2  # cache manifests (in seconds)
+    CACHE_DURATION = 60 * 60      # cache manifests (in seconds)
     CACHE_ENTRY_MAX = 150         # how many manifests to cache
 
     def __init__(self):
@@ -22,16 +26,16 @@ class ManifestFactory(object):
         with open(ManifestFactory.COLLECTION_TEMPLATE_FILENAME, 'r') as f:
             self.collection_template = json.load(f)
 
-    def make_collection(self, collection_url, doc):
+    def make_collection(self, doc):
+        f_obj, errors, kwargs = DocumentFacade.get_facade('', doc)
+        collection_url = f_obj.get_iiif_collection_url()
+
         collection = dict(self.collection_template)
 
-        from app.api.witness.facade import WitnessFacade
-
         manifest_urls = []
-        url_prefix = request.host_url[:-1] + current_app.config["API_URL_PREFIX"]
 
-        for witness in doc.witnesses:
-            f_obj, errors, kwargs = WitnessFacade.get_facade(url_prefix, witness)
+        for witness in sorted(doc.witnesses, key=attrgetter('num')):
+            f_obj, errors, kwargs = WitnessFacade.get_facade('', witness)
             manifest_url = f_obj.get_iiif_manifest_url()
             if manifest_url is not None and (manifest_url, witness) not in manifest_urls:
                 manifest_urls.append((manifest_url, witness))
@@ -46,25 +50,29 @@ class ManifestFactory(object):
             }
             collection["manifests"].append(manifest)
 
-        return collection
+        return collection, collection_url
 
-    def make_manifest(self, manifest_url, witness):
+    def make_manifest(self, host, witness):
+        f_obj, errors, kwargs = WitnessFacade.get_facade('', witness)
+        manifest_url = f_obj.get_iiif_manifest_url()
+
         manifest = dict(self.manifest_template)
 
         # ==== manifest @id
         manifest["@id"] = manifest_url
         # ==== manifest related
-        manifest["related"] = manifest_url.split("/witnesses")[0] + "/documents/%s" % witness.document_id
-        manifest["related"] = manifest["related"].replace("iiif/", "")
+        manifest["related"] = host + "/documents/%s" % witness.document_id
 
         # === manifest label
         manifest["label"] = witness.content
 
         # ==== sequence @id
-        seq = manifest_url.replace("/manifest", "/sequence/normal")
+        seq = manifest_url + "/sequence/normal"
         manifest["sequences"][0]["@id"] = seq
 
         # ==== canvases
+        if witness.images is None:
+            witness.images = []
         ordered_images = [i for i in witness.images]
         ordered_images.sort(key=lambda i: i.order_num)
         # group images by manifest url
@@ -72,8 +80,8 @@ class ManifestFactory(object):
         for img in ordered_images:
 
             # /!\ maybe tied to the manifest url naming scheme in Gallica
-            url = img.canvas_id.rsplit("/", maxsplit=2)[0]
-            orig_manifest_url = "{url}/manifest.json".format(url=url)
+            #url = img.canvas_id.rsplit("/", maxsplit=2)[0]
+            orig_manifest_url = "{url}/manifest.json".format(url=img.canvas_id)
 
             if orig_manifest_url not in grouped_images:
                 grouped_images[orig_manifest_url] = []
@@ -89,7 +97,7 @@ class ManifestFactory(object):
 
         manifest["sequences"][0]["canvases"] = canvases
 
-        return manifest
+        return manifest, manifest_url
 
     @classmethod
     def _fetch(cls, manifest_url):
@@ -102,7 +110,11 @@ class ManifestFactory(object):
     @classmethod
     def _get_from_cache(cls, manifest_url):
         if manifest_url not in cls.CACHED_MANIFESTS.keys():
-            manifest = cls._fetch(manifest_url)
+            try:
+                manifest = cls._fetch(manifest_url)
+            except Exception as e:
+                print("cannot get manifest", manifest_url)
+                manifest = {}
             # CACHE 10 MANIFESTS MAX
             if len(cls.CACHED_MANIFESTS.keys()) >= cls.CACHE_ENTRY_MAX:
                 l = [(dt, url) for url, (_, dt) in cls.CACHED_MANIFESTS.items()]

@@ -7,19 +7,24 @@
       <span v-if="me.status && me.status.length > 0" class="tag">{{me.status}}</span>
       <span v-if="me.tradition && me.tradition.length > 0" class="tag">{{me.tradition}}</span>
       <span v-if="me.institution" class="tag">{{me.institution.name}}</span>
+      <span v-if="editable">
+        <a v-if=" listLength > 1" @click="reorderAction(me, 1)">
+          <icon-arrow-down style="padding: 0"/>
+        </a>
+        <a v-if="listLength > 1 && listIndex > 0" @click="reorderAction(me, -1)">
+          <icon-arrow-down style="padding: 0" class="is-upside-down"/>
+        </a>
+        <a @click="editAction(me)" class="witness-item__edit">
+          <icon-pen-edit/>
+        </a>
+        <a v-if="canBeRemoved" @click="deleteAction(me)" class="witness-item__delete">
+          <icon-bin/>
+        </a>
+        <a  :href="editManifest" target="_blank">
+          <v-icon small>fas fa-eye</v-icon>
+        </a>
+      </span>
 
-      <a v-if="editable && listLength > 1" @click="reorderAction(me, 1)">
-        <icon-arrow-down style="padding: 0"/>
-      </a>
-      <a v-if="editable && listLength > 1 && listIndex > 0" @click="reorderAction(me, -1)">
-        <icon-arrow-down style="padding: 0" class="is-upside-down"/>
-      </a>
-      <a v-if="editable" @click="editAction(me)" class="witness-item__edit">
-        <icon-pen-edit/>
-      </a>
-      <a v-if="editable && canBeRemoved" @click="deleteAction(me)" class="witness-item__delete">
-        <icon-bin/>
-      </a>
     </div>
   </li>
 
@@ -55,6 +60,11 @@
       witness (newValue) {
         this.me = {...newValue}
       }
+    },
+    computed: {
+        editManifest() {
+            return `/lettres/iiif/editor/witnesses/${this.me.id}`;
+        }
     }
   }
 </script>

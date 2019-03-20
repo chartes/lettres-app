@@ -1,3 +1,5 @@
+from flask import current_app
+
 from app.api.abstract_facade import JSONAPIAbstractChangeloggedFacade
 from app.models import Witness
 
@@ -26,12 +28,13 @@ class WitnessFacade(JSONAPIAbstractChangeloggedFacade):
         return e, kwargs, errors
 
     def get_iiif_manifest_url(self):
-        if self.obj.images:
-            url = "{witness_url}/manifest".format(witness_url=self.self_link)
-            _s = url.rindex(self.TYPE)
-            return "{0}iiif/{1}".format(url[0:_s], url[_s:])
-        else:
-            return None
+        return 'http://{0}/manifests/lettres/manifest{1}.json'.format(current_app.config['SFTP_IIIF_HOST'], self.obj.id)
+        #if self.obj.images:
+        #    url = "{witness_url}/manifest".format(witness_url=self.self_link)
+        #    _s = url.rindex(self.TYPE)
+        #    return "{0}iiif/{1}".format(url[0:_s], url[_s:])
+        #else:
+        #    return None
 
     @property
     def resource(self):
