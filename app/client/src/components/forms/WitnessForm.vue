@@ -113,6 +113,7 @@
       },
 
       submitAction () {
+        if (this.form.institution && this.form.institution.id === null) this.form.institution = null
         this.$props.submit(this.form);
       },
       cancelAction () {

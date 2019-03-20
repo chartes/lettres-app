@@ -315,7 +315,6 @@ const actions = {
     const http = http_with_csrf_token();
     return http.patch(`witnesses/${witness.id}?without-relationships`, {data})
       .then(response => {
-        console.log('response', response)
         commit('UPDATE_WITNESS', witness);
       })
   },

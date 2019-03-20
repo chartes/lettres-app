@@ -71,14 +71,6 @@
         error: null
       }
     },
-    computed: {
-    },
-    mounted() {
-
-    } ,
-    watch: {
-
-    },
     methods: {
       
       updateWitness (witness) {
@@ -98,7 +90,7 @@
             this.closeWitnessEdit()
           })
           .catch(error => {
-            console.log('error', error)
+            console.error('error', error)
           })
       },
       removeWitness (witness) {
@@ -108,12 +100,11 @@
             this.closeWitnessEdit()
           })
           .catch(error => {
-            console.log('error', error)
+            console.error('error', error)
           })
       },
       reorderWitness (witness, dir) {
-        console.log('reorderWitness', witness, dir)
-        this.$store.dispatch('document/reorderWitnesses', {witness, dir})
+        this.$store.dispatch('document/reorderWitnesses', { witness, dir })
 
       },
 
