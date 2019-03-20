@@ -123,6 +123,7 @@
 
       submitAction () {
         if (this.form.institution && this.form.institution.id === null) this.form.institution = null
+        if (this.form.tradition === '') this.form.tradition = null
         this.$props.submit(this.form);
       },
       cancelAction () {

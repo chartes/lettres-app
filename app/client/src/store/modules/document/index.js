@@ -339,7 +339,6 @@ const actions = {
     const http = http_with_csrf_token();
     return http.post(`/witnesses?without-relationships`, {data})
       .then(response => {
-        console.log('response', response)
         witness.id = response.data.data.id;
         commit('ADD_WITNESS', witness);
       })

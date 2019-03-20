@@ -11,7 +11,7 @@
                             :value="opt.id"
                             :selected="opt.id === value"
                             v-html="opt.label"
-                    />
+                    ></option>
                 </select>
             </span>
         </p>
@@ -37,9 +37,14 @@
         //val: this.$props.value || this.$props.options[0].id
       }
     },
+    mounted () {
+      console.log("SelectField mounted", this.$refs.field.value)
+      this.updateValue()
+    },
     methods: {
       updateValue () {
-          this.$emit('input', this.$refs.field.value)
+        console.log("SelectField updateValue", this.$refs.field.value)
+        this.$emit('input', this.$refs.field.value)
       },
     },
     computed: {
