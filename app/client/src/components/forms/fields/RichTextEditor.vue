@@ -311,7 +311,6 @@
         this.formNote = true
       },
       closeNoteForm() {
-        console.log('closeNoteForm', this.editor.history)
         this.formNote = false
       },
       submitNoteForm(note) {

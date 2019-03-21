@@ -115,6 +115,7 @@ const mutations = {
   ADD_NOTE (state, payload) {
     const exists = state.notes.find(coll => coll.id === payload.id)
     if (exists) return;
+    const before = state.notes.length;
     state.notes = [ ...state.notes, payload ]
   },
 
@@ -488,6 +489,7 @@ const actions = {
       .then(response => {
         console.log('response', note.content)
         commit('UPDATE_NOTE', note);
+        return note;
       })
   },
   removeNote ({commit, state}, noteId) {

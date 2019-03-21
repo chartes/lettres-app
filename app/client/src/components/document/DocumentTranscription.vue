@@ -16,8 +16,8 @@
     </rich-text-editor>
     <div v-else class="document__transcription--content" v-html="transcriptionContent"></div>
 
-    <ol v-if="notesContent.length" class="note-list notes">
-       <li  v-for="note in notesContent" :key="note.id">
+    <ol v-if="notes.length" class="note-list notes">
+       <li  v-for="note in notes" :key="note.id">
          <div class="note-item" :class="noteItemClass">
            <div class="note-item__text" v-html="note.content"></div>
            <a v-if="editable" @click="openNoteEdit(note)" class="note-item__edit"><icon-pen-edit/></a>
@@ -67,12 +67,10 @@
         noteId: null,
         noteEdit: false,
         noteEditId: false,
-        notesContent: []
       }
     },
     mounted() {
       this.transcriptionContent = this.document.transcription || ''
-      this.notesContent = this.notes;
     },
     methods: {
       confirmNoteDelete (noteId) {
@@ -88,11 +86,9 @@
           })
       },
       cancelNoteDelete () {
-        console.log("cancelNoteDelete")
         this.noteId = false
       },
       updateNote (note) {
-        console.log("updateNote", note)
         this.$store.dispatch('document/updateNote', note)
           .then(() => {
             this.closeNoteEdit()
@@ -102,11 +98,9 @@
           })
       },
       openNoteEdit (note) {
-        console.log("openNoteEdit", note)
         this.noteEdit = note;
       },
       closeNoteEdit () {
-        console.log("closeNoteEdit")
         this.noteEdit = false;
       },
 
