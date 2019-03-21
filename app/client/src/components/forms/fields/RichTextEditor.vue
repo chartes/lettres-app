@@ -233,9 +233,13 @@
        */
 
       onTextChange (delta, oldDelta, source) {
-        //console.log('onTextChange', delta.ops)
         if (!this.multiline){
           this.preventLineBreaks(delta)
+        }
+        return;
+        if (delta.ops.length > 1 && delta.ops[1].delete) {
+          const diff = this.editor.getContents().diff(oldDelta).ops
+          console.log(' diff', diff, diff.length > 1 && diff[1].insert && diff[1].insert.note)
         }
       },
       onSelection (range) {
@@ -276,7 +280,7 @@
         let format = {}
         format[formatName] = value;
         let range = this.editor.getSelection(true);
-        this.editor.insertEmbed(range.index, formatName, value, Quill.sources.SILENT)
+        this.editor.insertEmbed(range.index, formatName, value, Quill.sources.USER)
        // this.editor.updateContents(getNewDelta().retain(range.index).delete(range.length).insert(format), Quill.sources.USER);
         this.editor.setSelection(range.index + 1, Quill.sources.SILENT);
       },
@@ -307,12 +311,13 @@
         this.formNote = true
       },
       closeNoteForm() {
+        console.log('closeNoteForm', this.editor.history)
         this.formNote = false
       },
       submitNoteForm(note) {
         console.log('submitNoteForm', note)
         this.insertEmbed('note', note.id)
-        this.closeLocationForm();
+        this.closeNoteForm();
         let formats = this.editor.getFormat();
         this.updateButtons(formats)
       },
