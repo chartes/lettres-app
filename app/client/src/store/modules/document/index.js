@@ -211,6 +211,9 @@ const actions = {
     const http = http_with_csrf_token();
     if (filters)
       filters = '&' + filters;
+    else {
+      filters = '';
+    }
     return http.get(`/search?query=${query}&index=${index}&include=${incs.join(',')}&without-relationships&page[size]=${pageSize}&page[number]=${pageId}${filters}`)
       .then( (response) => {
       commit('UPDATE_ALL', response.data);

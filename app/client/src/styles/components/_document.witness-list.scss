@@ -72,6 +72,19 @@
  min-width: 860px !important;
 }
 
-.witness-item__text {
-  display: inline-block;
+
+.witness-item {
+  &__iiif-logo {
+    width: 17px;
+    display: inline-block;
+    filter: grayscale(100%) brightness(250%) contrast(30%);
+  }
+
+  &__iiif-logo:hover {
+    filter: unset;
+  }
+
+  &__text {
+    display: inline-block;
+  }
 }

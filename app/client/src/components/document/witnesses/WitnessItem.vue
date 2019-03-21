@@ -17,11 +17,11 @@
         <a @click="editAction(me)" class="witness-item__edit">
           <icon-pen-edit/>
         </a>
+        <a :href="editManifest" target="_blank">
+          <v-img src="/static/images/logo-iiif-34x30.png" class="witness-item__iiif-logo"></v-img>
+        </a>
         <a v-if="canBeRemoved" @click="deleteAction(me)" class="witness-item__delete">
           <icon-bin/>
-        </a>
-        <a  :href="editManifest" target="_blank">
-          <v-icon small>fas fa-eye</v-icon>
         </a>
       </span>
 

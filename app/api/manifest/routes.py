@@ -55,19 +55,13 @@ HEADERS = {"Access-Control-Allow-Origin": "*",
 def get_collection(api_version, doc_id):
     document = Document.query.filter(Document.id == doc_id).first()
     if document:
-        if document.witnesses and len(document.witnesses) > 0:
-            manifest = current_app.manifest_factory.make_collection(request.url, document)
-            response = Response(
-                json.dumps(manifest, indent=2, ensure_ascii=False),
-                content_type=CONTENT_TYPE,
-                headers=HEADERS,
-            )
-            return response, 200
-        else:
-            return JSONAPIResponseFactory.make_errors_response(
-                {"status": 404, "title": "Document %s does not have any witnesses" % doc_id}, status=404
-            )
-
+        collection, collection_url = current_app.manifest_factory.make_collection(document)
+        response = Response(
+            json.dumps(collection, indent=2, ensure_ascii=False),
+            content_type=CONTENT_TYPE,
+            headers=HEADERS,
+        )
+        return response, 200
     else:
         return JSONAPIResponseFactory.make_errors_response(
                {"status": 404, "title": "Document %s does not exist" % doc_id}, status=404
@@ -82,6 +76,18 @@ def iiif_editor_manifest(api_version, manifest_id=None):
         manifest_id = request.referrer.rsplit('/', maxsplit=1)[-1]
 
     if request.method == 'POST':
+
+        #tmp_filename = os.path.join(current_app.config.get('LOCAL_TMP_FOLDER'), "manifest{0}.json".format(manifest_id.id))
+        #print(tmp_filename, manifest_url, end="... ", flush=False)
+        #with open(tmp_filename, 'w') as f:
+        #    f.write(json.dumps(manifest))
+        #    f.flush()
+        #    if upload:
+        #        upload_manifest(tmp_filename)
+        #        print('uploaded', end="... ", flush=True)
+        #    print('OK')
+
+
         data = {
             "uri": "http://localhost:5004/lettres/api/1.0/iiif/witnesses/%s/manifest" % manifest_id
         }

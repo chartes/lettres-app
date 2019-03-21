@@ -17,8 +17,8 @@ class ManifestFactory(object):
 
     }
 
-    CACHE_DURATION = 60 * 60      # cache manifests (in seconds)
-    CACHE_ENTRY_MAX = 150         # how many manifests to cache
+    CACHE_DURATION = 60*60      # cache manifests (in seconds)
+    CACHE_ENTRY_MAX = 150    # how many manifests to cache
 
     def __init__(self):
         with open(ManifestFactory.MANIFEST_TEMPLATE_FILENAME, 'r') as f:
@@ -92,7 +92,7 @@ class ManifestFactory(object):
         canvases = []
         fetch_canvas = current_app.manifest_factory.fetch_canvas
         for orig_manifest_url, canvas_ids in grouped_images.items():
-            new_canvases = fetch_canvas(orig_manifest_url, canvas_ids, cache=True)
+            new_canvases = fetch_canvas(orig_manifest_url, canvas_ids, cache=False)
             canvases.extend(new_canvases)
 
         manifest["sequences"][0]["canvases"] = canvases
