@@ -89,7 +89,19 @@ const getPersons = function (included) {
         let found = included.find(item => item.type === r.type && item.id === r.id);
         return found ? {id: found.id, ...found.attributes} : null;
     })
-  };
+  },
+
+  removeContentEditableAttributesFromString = function (str) {
+    return str.replace(/ contenteditable="false"/mgi, '')
+  },
+  removeContentEditableAttributesFromObject = function (attributesObject) {
+    if (!attributesObject) return;
+    Object.keys(attributesObject).forEach(k => {
+      if (typeof attributesObject[k] === 'string') {
+        attributesObject[k] = removeContentEditableAttributesFromString(attributesObject[k])
+      }
+    })
+  }
 
 
 export  {
@@ -103,5 +115,8 @@ export  {
   getCollections,
   getCurrentLock,
 
-  getIncludedRelation
+  getIncludedRelation,
+
+  removeContentEditableAttributesFromString,
+  removeContentEditableAttributesFromObject
 }

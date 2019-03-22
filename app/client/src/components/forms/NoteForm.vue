@@ -10,7 +10,7 @@
         <rich-text-editor
                 :formats="[['bold','italic','superscript','underline','del'],['link','person','location','cite']]"
                 v-model="form.content"
-        />
+        ></rich-text-editor>
     </div>
   </modal-form>
 
@@ -30,6 +30,7 @@
       title: { type: String },
       cancel: { type: Function },
       submit: { type: Function },
+      note: { type: Object, default: () => {} },
     },
     beforeCreate: function () {
       this.$options.components.RichTextEditor = require('./fields/RichTextEditor').default
@@ -41,14 +42,15 @@
         loading: false,
       }
     },
+    mounted () {
+      this.form = { ...this.$props.note }
+    },
     methods: {
 
       submitAction () {
-
-        console.log('NoteForm submitAction', this.form)
         this.loading = true;
-        this.$store.dispatch('document/addNote', this.form).then( note => {
-          console.log('added note', note)
+        const action = this.note && this.note.id ? 'document/updateNote' : 'document/addNote'
+        this.$store.dispatch(action, this.form).then( note => {
           this.submit(note)
         })
 

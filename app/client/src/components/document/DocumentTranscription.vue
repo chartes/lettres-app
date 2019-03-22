@@ -16,8 +16,8 @@
     </rich-text-editor>
     <div v-else class="document__transcription--content" v-html="transcriptionContent"></div>
 
-    <ol v-if="notesContent.length" class="note-list notes">
-       <li  v-for="note in notesContent" :key="note.id">
+    <ol v-if="notes.length" class="note-list notes">
+       <li  v-for="note in notes" :key="note.id">
          <div class="note-item" :class="noteItemClass">
            <div class="note-item__text" v-html="note.content"></div>
            <a v-if="editable" @click="openNoteEdit(note)" class="note-item__edit"><icon-pen-edit/></a>
@@ -45,6 +45,7 @@
 <script>
 
   import { mapState } from 'vuex'
+  import { removeContentEditableAttributesFromString, removeContentEditableAttributesFromObject } from '../../modules/document-helpers';
   import IconBin from '../ui/icons/IconBin';
   import IconPenEdit from '../ui/icons/IconPenEdit';
   import ModalConfirmNoteDelete from '../forms/ModalConfirmNoteDelete';
@@ -67,32 +68,24 @@
         noteId: null,
         noteEdit: false,
         noteEditId: false,
-        notesContent: []
       }
     },
     mounted() {
       this.transcriptionContent = this.document.transcription || ''
-      this.notesContent = this.notes;
     },
     methods: {
       confirmNoteDelete (noteId) {
-        console.log("confirmNoteDelete", noteId)
         this.$store.dispatch('document/removeNote', noteId)
           .then(noteId => {
-            const pattern  = new RegExp('<a class="note" href="#'+noteId+'">\\[note\\]<\\/a>', 'gi')
-            console.log('pattern', pattern)
-            console.log('note in transcription', pattern.test(this.transcriptionContent))
-            console.log('note in title', pattern.test(this.document.title), this.document.title)
-            console.log('note in title', this.document.title.replace(pattern, ''))
-            console.log('note in argument', pattern.test(this.document.argument), this.document.argument)
+            this.removeNoteFromDocument(noteId)
+            this.removeNoteFromWitnesses(noteId)
+            this.cancelNoteDelete()
           })
       },
       cancelNoteDelete () {
-        console.log("cancelNoteDelete")
         this.noteId = false
       },
       updateNote (note) {
-        console.log("updateNote", note)
         this.$store.dispatch('document/updateNote', note)
           .then(() => {
             this.closeNoteEdit()
@@ -102,29 +95,93 @@
           })
       },
       openNoteEdit (note) {
-        console.log("openNoteEdit", note)
         this.noteEdit = note;
       },
       closeNoteEdit () {
-        console.log("closeNoteEdit")
         this.noteEdit = false;
       },
 
-      removeNoteFromTranscription () {
-
+      removeNoteFromDocument (noteId) {
+        const pattern  = new RegExp('<a class="note" href="#'+noteId+'">\\[note\\]<\\/a>', 'mgi')
+        const attributes = {};
+        let changed = false;
+        if (this.transcriptionContent) {
+          const docTranscription = removeContentEditableAttributesFromString(this.transcriptionContent)
+          const inTranscription = pattern.test(docTranscription)
+          if (inTranscription) {
+            attributes.transcription = docTranscription.replace(pattern, '')
+            changed = true
+          }
+        }
+        if (this.document.title) {
+          const docTitle = removeContentEditableAttributesFromString(this.document.title)
+          const inTitle = pattern.test(docTitle)
+          if (inTitle) {
+            attributes.title = docTitle.replace(pattern, '')
+            changed = true
+          }
+        }
+        if (this.document['creation-label']) {
+          const docLabel = removeContentEditableAttributesFromString(this.document['creation-label'])
+          const inLabel = pattern.test(docLabel)
+          if (inLabel) {
+            attributes['creation-label'] = docLabel.replace(pattern, '')
+            changed = true
+          }
+        }
+        if (this.document.argument) {
+          const docArgument = removeContentEditableAttributesFromString(this.document.argument)
+          const inArgument = pattern.test(docArgument)
+          if (inArgument) {
+            attributes.argument = docArgument.replace(pattern, '')
+            changed = true
+          }
+        }
+        if (changed) {
+          const data = { id: this.document.id, attributes };
+          this.$store.dispatch('document/save', data)
+            .then(response => {
+              if (attributes.transcription) this.transcriptionContent = attributes.transcription
+            })
+            .catch(err => {
+              console.error(err)
+          })
+        }
       },
-      removeNoteFromArgument () {
-
-      },
-      removeNoteFromTitle () {
-
-      },
+      removeNoteFromWitnesses (noteId) {
+        const pattern  = new RegExp('<a class="note" href="#'+noteId+'">\\[note\\]<\\/a>', 'gi')
+        this.witnesses.forEach((wit, index) => {
+          const w = {...wit}
+          removeContentEditableAttributesFromObject(w)
+          const inContent = pattern.test(w.content)
+          const inClassification = pattern.test(w['classification-mark'])
+          let changed = false
+          if (inContent) {
+            w.content = w.content.replace(pattern, '')
+            changed = true
+          }
+          if (inClassification) {
+            w['classification-mark'] = w['classification-mark'].replace(pattern, '')
+            changed = true
+          }
+          if(changed) {
+            this.$store.dispatch('document/updateWitness', w)
+              .then(response => {})
+              .catch(err => {
+                console.error(err)
+              })
+          }
+        })
+      }
     },
     computed: {
-      ...mapState('document', ['document', 'notes']),
+      ...mapState('document', ['document', 'notes', 'witnesses']),
       noteItemClass () {
         return this.editable ? 'note-item--editable' : false
       }
+    },
+    watch: {
+
     }
   }
 </script>

@@ -1,7 +1,7 @@
 <template>
   <button class="save-button button" @click.prevent="clickHandler" :class="buttonClass">
     <save-button-icon :status="status"/>
-     &nbsp; {{ statustext }}
+     &nbsp; {{ statusText }}
   </button>
 </template>
 
@@ -40,7 +40,7 @@
           case 'error': return 'disabled disabled save-bar__error has-text-danger'
         }
       },
-      statustext () {
+      statusText () {
         if (this.status === 'loading') {
           return 'Enregistrement...';
         } else if (this.status === 'error') {

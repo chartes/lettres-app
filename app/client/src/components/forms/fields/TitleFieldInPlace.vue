@@ -105,7 +105,7 @@
     },
     watch: {
       initialValue (val, oldVal) {
-        console.log("TitleFieldInPlace watch initialValue", val, '=>', oldVal)
+        this.value = val
       },
       status (val) {
         if (val === 'success') {
