@@ -89,7 +89,17 @@ const getPersons = function (included) {
         let found = included.find(item => item.type === r.type && item.id === r.id);
         return found ? {id: found.id, ...found.attributes} : null;
     })
-  };
+  },
+
+  removeContentEditableAttributes = function (attributesObject) {
+    if (!attributesObject) return;
+    Object.keys(attributesObject).forEach(k => {
+      console.log("Is string", (typeof attributesObject[k] === 'string'))
+      if (typeof attributesObject[k] === 'string') {
+        attributesObject[k] = attributesObject[k].replace(' contenteditable="false"', '')
+      }
+    })
+  }
 
 
 export  {
@@ -103,5 +113,7 @@ export  {
   getCollections,
   getCurrentLock,
 
-  getIncludedRelation
+  getIncludedRelation,
+
+  removeContentEditableAttributes
 }

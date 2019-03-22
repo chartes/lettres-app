@@ -1,7 +1,8 @@
 import http_with_csrf_token, {http} from '../../../modules/http-common';
 import {
   getPersons, getLanguages, getWitnesses,
-  getNotes, getCollections, getCurrentLock,  getPlacenames
+  getNotes, getCollections, getCurrentLock,  getPlacenames,
+  removeContentEditableAttributes
 } from '../../../modules/document-helpers';
 import Vue from 'vue';
 import {getInstitution} from '../witnesses'
@@ -32,6 +33,8 @@ const state = {
   links: [],
   totalCount: 0,
 };
+
+
 
 function makeDummyDocument(data) {
   let DUMMY_DOCUMENT = {
@@ -223,6 +226,7 @@ const actions = {
     const modifiedData = data.attributes || data.relationships;
     console.log('document/save', data)
     data.type = 'document';
+    removeContentEditableAttributes(data.attributes)
     const http = http_with_csrf_token();
     return http.patch(`/documents/${data.id}`, { data })
       .then(response => {
@@ -311,6 +315,7 @@ const actions = {
     witness.num = Math.max.apply(null, state.witnesses.map(w => w.num)) + 1;
 
     const witnessData = { ...witness };
+    removeContentEditableAttributes(witnessData)
     const institutionId = witness.institution ? witness.institution.id : null;
     delete(witnessData.id);
     delete(witnessData.institution);
@@ -347,6 +352,7 @@ const actions = {
   updateWitness ({commit, state}, witness) {
 
     const attributes = {...witness}
+    removeContentEditableAttributes(attributes)
     const institutionId = witness.institution ? witness.institution.id : null;
     delete (attributes.id)
     delete (attributes.institution)
