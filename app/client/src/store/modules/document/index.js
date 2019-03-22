@@ -2,7 +2,7 @@ import http_with_csrf_token, {http} from '../../../modules/http-common';
 import {
   getPersons, getLanguages, getWitnesses,
   getNotes, getCollections, getCurrentLock,  getPlacenames,
-  removeContentEditableAttributes
+  removeContentEditableAttributesFromObject
 } from '../../../modules/document-helpers';
 import Vue from 'vue';
 import {getInstitution} from '../witnesses'
@@ -116,10 +116,15 @@ const mutations = {
     state.notes.splice(index, 1, no)
   },
   ADD_NOTE (state, payload) {
-    const exists = state.notes.find(coll => coll.id === payload.id)
+    const exists = state.notes.find(note => note.id === payload.id)
     if (exists) return;
     const before = state.notes.length;
     state.notes = [ ...state.notes, payload ]
+  },
+  REMOVE_NOTE (state, payload) {
+    let note = state.notes.find(n => n.id === payload)
+    const index = state.notes.indexOf(note)
+    state.notes.splice(index, 1)
   },
 
   ADD_WITNESS (state, payload) {
@@ -226,7 +231,7 @@ const actions = {
     const modifiedData = data.attributes || data.relationships;
     console.log('document/save', data)
     data.type = 'document';
-    removeContentEditableAttributes(data.attributes)
+    removeContentEditableAttributesFromObject(data.attributes)
     const http = http_with_csrf_token();
     return http.patch(`/documents/${data.id}`, { data })
       .then(response => {
@@ -315,7 +320,7 @@ const actions = {
     witness.num = Math.max.apply(null, state.witnesses.map(w => w.num)) + 1;
 
     const witnessData = { ...witness };
-    removeContentEditableAttributes(witnessData)
+    removeContentEditableAttributesFromObject(witnessData)
     const institutionId = witness.institution ? witness.institution.id : null;
     delete(witnessData.id);
     delete(witnessData.institution);
@@ -499,7 +504,14 @@ const actions = {
       })
   },
   removeNote ({commit, state}, noteId) {
-    return noteId
+
+    const http = http_with_csrf_token();
+    return http.delete(`notes/${noteId}?without-relationships`)
+      .then(response => {
+        console.log('response', response)
+        commit('REMOVE_NOTE', noteId);
+        return noteId;
+      })
   },
 
   initializeDummyDocument({commit, state, rootState}, defaultData) {

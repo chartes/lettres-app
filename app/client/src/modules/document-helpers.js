@@ -91,12 +91,14 @@ const getPersons = function (included) {
     })
   },
 
-  removeContentEditableAttributes = function (attributesObject) {
+  removeContentEditableAttributesFromString = function (str) {
+    return str.replace(/ contenteditable="false"/mgi, '')
+  },
+  removeContentEditableAttributesFromObject = function (attributesObject) {
     if (!attributesObject) return;
     Object.keys(attributesObject).forEach(k => {
-      console.log("Is string", (typeof attributesObject[k] === 'string'))
       if (typeof attributesObject[k] === 'string') {
-        attributesObject[k] = attributesObject[k].replace(' contenteditable="false"', '')
+        attributesObject[k] = removeContentEditableAttributesFromString(attributesObject[k])
       }
     })
   }
@@ -115,5 +117,6 @@ export  {
 
   getIncludedRelation,
 
-  removeContentEditableAttributes
+  removeContentEditableAttributesFromString,
+  removeContentEditableAttributesFromObject
 }

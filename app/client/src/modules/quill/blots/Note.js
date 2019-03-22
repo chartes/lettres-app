@@ -30,6 +30,11 @@ class NoteBlot extends Parchment.Embed {
     return node;
   }
 
+  constructor(domNode, value) {
+    domNode.setAttribute('contenteditable', false);
+    super(domNode, value);
+  }
+
   static formats(domNode) {
     return getNoteId(domNode)
   }
@@ -39,7 +44,7 @@ class NoteBlot extends Parchment.Embed {
   }
 
   format(name, value) {
-    return;
+    //return;
     if (ATTRIBUTES.indexOf(name) > -1) {
       if (value) {
         this.domNode.setAttribute(name, value);

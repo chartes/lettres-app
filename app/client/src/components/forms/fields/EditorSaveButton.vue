@@ -1,5 +1,5 @@
 <template>
-    <button
+  <button
             class="argument__save button is-small"
             :class="saveButtonClass"
             :disabled="status === 'disabled'"
@@ -11,29 +11,23 @@
 
 <script>
 
-    import IconSave from '../../ui/icons/IconSave';
-    import IconError from '../../ui/icons/IconError';
-    import IconSuccess from '../../ui/icons/IconSuccess';
+  import IconSave from '../../ui/icons/IconSave';
+  import IconError from '../../ui/icons/IconError';
+  import IconSuccess from '../../ui/icons/IconSuccess';
 
 
   export default {
-      name: "editor-save-button",
-      props: {
-          name: {
-              type: String, required: true
-          },
-          value: {
-              type: String, required: true
-          },
-          docId: {
-              type: Number, required: true
-          }
-      },
-      data() {
-          return {
-              status: 'normal',
-              editorEnabled: true,
-              form: ''
+    name: "editor-save-button",
+    props: {
+      name: { type: String, required: true },
+      value: { type: String, required: true },
+      docId: { type: Number, required: true }
+    },
+    data() {
+        return {
+          status: 'normal',
+          editorEnabled: true,
+          form: ''
           }
       },
 
@@ -44,15 +38,15 @@
               const attributes = {}
               attributes[this.name] = this.value;
               const data = { id: this.docId, attributes };
-              console.log('saves transcription ', data )
+              console.log('saves document ', data )
               this.$store.dispatch('document/save', data)
-                      .then(response => {
-                          this.status = 'success'
-                          setTimeout(() => this.status = 'normal', 3000)
-                      }).catch(() => {
-                  this.status = 'error'
-                  setTimeout(() => this.status = 'normal', 3000)
-              })
+                  .then(response => {
+                      this.status = 'success'
+                      setTimeout(() => this.status = 'normal', 3000)
+                  }).catch(() => {
+                    this.status = 'error'
+                     setTimeout(() => this.status = 'normal', 3000)
+                })
           },
       },
 

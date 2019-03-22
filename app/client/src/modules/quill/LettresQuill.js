@@ -53,6 +53,10 @@ function lineBreakMatcher() {
 const options = {
   modules: {
 
+    history: {
+      userOnly: true
+    },
+
     clipboard: {
       matchers: [
         ['lb', lineBreakMatcher]

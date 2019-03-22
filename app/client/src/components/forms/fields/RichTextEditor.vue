@@ -182,6 +182,7 @@
 
       updateValue () {
         const content = this.getEditorHTML();
+        content.replace(' contenteditable="false"', '')
         if (this.multiline) {
           return this.$emit('input', content.replace(/<p><br><\/p>$/, ''));
         }
@@ -280,8 +281,7 @@
         let format = {}
         format[formatName] = value;
         let range = this.editor.getSelection(true);
-        this.editor.insertEmbed(range.index, formatName, value, Quill.sources.USER)
-       // this.editor.updateContents(getNewDelta().retain(range.index).delete(range.length).insert(format), Quill.sources.USER);
+        this.editor.insertEmbed(range.index, formatName, value, Quill.sources.API)
         this.editor.setSelection(range.index + 1, Quill.sources.SILENT);
       },
 
@@ -293,8 +293,6 @@
       },
 
       setRangeBound (range) {
-        /** get and set the range bound of the selection to locate the actions bar **/
-          //console.log("setRangeBound", range);
         let rangeBounds = this.editor.getBounds(range);
         this.actionsPositions.left = rangeBounds.left;
         this.actionsPositions.right = rangeBounds.right;
