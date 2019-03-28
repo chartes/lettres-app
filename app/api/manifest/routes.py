@@ -2,9 +2,8 @@ import os
 
 import json
 import pprint
-from flask import current_app, request, Response
+from flask import current_app, request, Response, url_for
 import pysftp
-import sys
 
 
 from app import api_bp, JSONAPIResponseFactory
@@ -15,55 +14,6 @@ CONTENT_TYPE = "application/json; charset=utf-8"
 HEADERS = {"Access-Control-Allow-Origin": "*",
            "Access-Control-Allow-Methods": ["GET"]}
 
-
-#@api_bp.route("/api/<api_version>/iiif/witnesses/<witness_id>/manifest")
-#def get_manifest(api_version, witness_id):
-#    witness = Witness.query.filter(Witness.id == witness_id).first()
-#    if witness:
-#        #if witness.images and len(witness.images) > 0:
-#        #try:
-#        #    manifest = current_app.manifest_factory.make_manifest(request.url, witness)
-#        #    if len(manifest["sequences"][0]["canvases"]) == 0:
-#        #        raise Exception("Cannot fetch canvases")
-#        #except Exception as e:
-#        #    return JSONAPIResponseFactory.make_errors_response(
-#        #        {
-#        #            "status": 403,
-#        #            "title": "Cannot build manifest for Witness %s" % witness_id,
-#        #            "details": str(e)
-#        #        }, status=403
-#        #    )
-#        manifest = current_app.manifest_factory.make_manifest(request.url, witness)
-#        response = Response(
-#            json.dumps(manifest, indent=2, ensure_ascii=False),
-#            content_type=CONTENT_TYPE,
-#            headers=HEADERS,
-#        )
-#        return response, 200
-#        #else:
-#        #    return JSONAPIResponseFactory.make_errors_response(
-#        #        {"status": 404, "title": "Witness %s does not have any images" % witness_id}, status=404
-#        #    )
-#
-#    else:
-#        return JSONAPIResponseFactory.make_errors_response(
-#               {"status": 404, "title": "Witness %s does not exist" % witness_id}, status=404
-#        )
-#
-
-@api_bp.route("/api/<api_version>/iiif/editor/manifests/<witness_id>/template")
-def get_manifest_template(api_version, witness_id):
-    witness = Witness.query.filter(Witness.id == witness_id).first()
-    host = request.host_url
-    # TODO : faire un manifest template (avec les bonnes urls dedans quand même)
-    manifest, manifest_url = current_app.manifest_factory.make_manifest(host, witness)
-
-    response = Response(
-        json.dumps(manifest, indent=2, ensure_ascii=False),
-        content_type=CONTENT_TYPE,
-        headers=HEADERS,
-    )
-    return response, 200
 
 @api_bp.route("/api/<api_version>/iiif/documents/<doc_id>/collection/default")
 def get_collection(api_version, doc_id):
@@ -81,14 +31,19 @@ def get_collection(api_version, doc_id):
             {"status": 404, "title": "Document %s does not exist" % doc_id}, status=404
         )
 
-def upload_manifest(filename):
+
+def upload_manifest(filename, manifest):
     SFTP_CONFIG = {
         "host": current_app.config.get("SFTP_IIIF_HOST", ""),
         "username": current_app.config.get("SFTP_IIIF_USERNAME", ""),
         "password": current_app.config.get("SFTP_IIIF_PASSWORD", ""),
         "default_path": current_app.config.get("SFTP_IIIF_DEFAULT_MANIFEST_PATH", "/srv/manifests")
     }
-    # print(SFTP_CONFIG)
+    # write to the temp folder first
+    with open(filename, 'w') as f:
+        f.write(json.dumps(manifest, indent=2, ensure_ascii=False))
+        f.flush()
+    # upload the file
     with pysftp.Connection(**SFTP_CONFIG) as srv:
         srv.put(filename)
 
@@ -105,6 +60,31 @@ def upload_collection(filename):
         srv.put(filename)
 
 
+def rework_manifest_data(data, witness):
+    manifest = json.loads(data)
+    if manifest["label"] == "Manifest":
+        manifest["label"] = witness.content
+    manifest["@id"] = "{0}/manifest{1}.json".format(current_app.config["IIIF_MANIFEST_ENDPOINT"], witness.id)
+    manifest["related"] = request.host_url[:-1] + url_for('app_bp.index', doc_id=witness.document_id)
+    manifest["sequences"][0]["@id"] = manifest["sequences"][0]["@id"].replace("template.json",
+                                                                              "manifest%s.json" % witness.id)
+    current_img_num = 1
+    for i, canvas in enumerate(manifest["sequences"][0]["canvases"]):
+        canvas["@id"] = "{0}/canvas/f{1}".format(manifest["@id"], i+1)
+        for img in canvas["images"]:
+            img["@id"] = "{0}/f{1}.img".format(manifest["@id"], current_img_num)
+            img["on"] = canvas["@id"]
+            current_img_num += 1
+
+    return manifest
+
+
+def rework_collection_data(doc_id=None):
+    doc = Document.query.filter(Document.id == doc_id).first()
+    collection, collection_url = current_app.manifest_factory.make_collection(doc)
+    return collection, collection_url
+
+
 @api_require_roles("contributor")
 @api_bp.route("/api/<api_version>/iiif/editor/manifests", methods=('GET', 'POST'))
 @api_bp.route("/api/<api_version>/iiif/editor/manifests/<manifest_id>", methods=('GET', 'POST'))
@@ -112,29 +92,35 @@ def iiif_editor_manifest(api_version, manifest_id=None):
     if manifest_id is None:
         manifest_id = request.referrer.rsplit('/', maxsplit=1)[-1]
 
+    witness = Witness.query.filter(Witness.id == manifest_id).first()
+    if witness is None:
+        code = 403
+        data = {"message": "Wrong witness"}
+        return JSONAPIResponseFactory.make_errors_response({
+            "status": code,
+            "title": data
+        }), code
+
     if request.method == 'POST':
-
-        #tmp_filename = os.path.join(current_app.config.get('LOCAL_TMP_FOLDER'), "manifest{0}.json".format(manifest_id.id))
-        #print(tmp_filename, manifest_url, end="... ", flush=False)
-        #with open(tmp_filename, 'w') as f:
-        #    f.write(json.dumps(manifest))
-        #    f.flush()
-        #    if upload:
-        #        upload_manifest(tmp_filename)
-        #        print('uploaded', end="... ", flush=True)
-        #    print('OK')
-
+        # rework the manifest data to make sure the ids match the witness
+        manifest = rework_manifest_data(request.data, witness)
+        pprint.pprint(manifest)
+        # upload
+        tmp_filename = os.path.join(current_app.config.get('LOCAL_TMP_FOLDER'), "manifest%s.json" % manifest_id)
+        upload_manifest(tmp_filename, manifest)
 
         data = {
-            "uri": "http://localhost:5004/lettres/api/1.0/iiif/witnesses/%s/manifest" % manifest_id
+            #"{0}/manifest{1}.json".format(current_app.config["IIIF_MANIFEST_ENDPOINT"], manifest_id)
+            "uri": request.host_url[:-1] + url_for('api_bp.put_manifest', manifest_id=manifest_id, api_version=1.0)
         }
+
         code = 200
     else:
         code = 200
         if manifest_id is None:
             data = {
                 "manifests": [
-                    {"uri": "http://localhost:5004/lettres/api/1.0/iiif/witnesses/%s/manifest" % manifest_id},
+                    {"uri": "{0}/manifest{1}.json".format(current_app.config["IIIF_MANIFEST_ENDPOINT"], manifest_id) },
                 ]
             }
         else:
@@ -172,26 +158,49 @@ def iiif_editor_manifest(api_version, manifest_id=None):
 
 
 @api_require_roles("contributor")
-@api_bp.route("/api/<api_version>/iiif/witnesses/<witness_id>/manifest", methods=('PUT', ))
-def put_manifest(api_version, witness_id):
-    if witness_id is None:
+@api_bp.route("/api/<api_version>/iiif/editor/manifests/<manifest_id>", methods=['PUT'])
+def put_manifest(api_version, manifest_id):
+    witness = Witness.query.filter(Witness.id == manifest_id).first()
+    if witness is None:
         code = 403
-        data = {
-            "message": "Wrong witness"
-        }
+        data = {"message": "Wrong witness"}
+        return JSONAPIResponseFactory.make_errors_response({
+            "status": code,
+            "title": data
+        }), code
     else:
-        data = {
-            "message": "Manifest successfully updated"
-        }
-        code = 201
+        try:
+            tmp = current_app.config.get('LOCAL_TMP_FOLDER')
 
-        tmp_filename = os.path.join(current_app.config.get('LOCAL_TMP_FOLDER'), "manifest%s.json" % witness_id)
-        print(tmp_filename)
-        with open(tmp_filename, 'wb') as f:
-            f.write(request.data)
-            f.flush()
-            upload_manifest(tmp_filename)
+            # rework the manifest data to make sure the ids match the witness
+            manifest = rework_manifest_data(request.data, witness)
+            pprint.pprint(manifest)
+            # upload
+            tmp_filename = os.path.join(tmp, "manifest%s.json" % manifest_id)
+            upload_manifest(tmp_filename, manifest)
 
-    return JSONAPIResponseFactory.make_response(data), code
+            # rework the collection (add/update the new manifest)
+            collection, collection_url = rework_collection_data(witness.document_id)
+            # upload
+            tmp_filename = os.path.join(tmp, "document{0}.json".format(witness.document_id))
+            with open(tmp_filename, 'w') as f:
+                f.write(json.dumps(collection))
+                f.flush()
+                upload_collection(tmp_filename)
+                print(tmp_filename, "uploaded")
+
+            data = {"message": "Manifest successfully updated"}
+            code = 201
+
+            return JSONAPIResponseFactory.make_response(data), code
+        except Exception as e:
+            print(e)
+            code = 403
+            return JSONAPIResponseFactory.make_errors_response({
+                "status": code,
+                "title": str(e)
+            }), code
+
+
 
 

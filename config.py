@@ -81,6 +81,9 @@ class Config(object):
     SFTP_IIIF_DEFAULT_MANIFEST_PATH = parse_var_env('SFTP_IIIF_DEFAULT_MANIFEST_PATH')
     SFTP_IIIF_DEFAULT_COLLECTION_PATH = parse_var_env('SFTP_IIIF_DEFAULT_COLLECTION_PATH')
 
+    IIIF_MANIFEST_ENDPOINT = parse_var_env('IIIF_MANIFEST_ENDPOINT')
+    IIIF_COLLECTION_ENDPOINT = parse_var_env('IIIF_COLLECTION_ENDPOINT')
+
     @staticmethod
     def init_app(app):
         pass

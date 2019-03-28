@@ -211,9 +211,10 @@
         created() {
             this.$store.dispatch('user/fetchCurrent').then(resp => {
                 this.loaded = true;
-                if (this.docId !== undefined)
+                if (this.docId === undefined) {
+                    console.warn("loading docs");
                     this.goToDocPage(parseInt(this.currentPage));
-                
+                }
                 if (this.current_user === null){
                     //remove sections from the menu
                     this.items.splice(this.findMenuItem('last_searches'), 1)

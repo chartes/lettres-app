@@ -1,3 +1,4 @@
+import requests
 from flask import current_app
 
 from app.api.abstract_facade import JSONAPIAbstractChangeloggedFacade
@@ -116,14 +117,12 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
         ]
     
     def get_iiif_collection_url(self):
-        return 'http://{0}/collections/lettres/document{1}.json'.format(current_app.config['SFTP_IIIF_HOST'], self.obj.id)
-        #
-        #if self.obj.witnesses:
-        #    url = "{doc_url}/collection/default".format(doc_url=self.self_link)
-        #    _s = url.rindex(self.TYPE)
-        #    return "{0}iiif/{1}".format(url[0:_s], url[_s:])
-        #else:
-        #    return None
+        url = '{0}/document{1}.json'.format(current_app.config['IIIF_COLLECTION_ENDPOINT'], self.obj.id)
+        resp = requests.head(url)
+        if resp.status_code == 200:
+            return url
+        else:
+            return None
 
     def get_iiif_thumbnail(self):
         for w in self.obj.witnesses:

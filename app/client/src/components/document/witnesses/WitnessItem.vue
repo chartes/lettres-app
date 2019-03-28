@@ -18,7 +18,7 @@
           <icon-pen-edit/>
         </a>
         <a :href="editManifest" target="_blank">
-          <v-img src="/static/images/logo-iiif-34x30.png" class="witness-item__iiif-logo"></v-img>
+          <v-img src="/lettres/static/images/logo-iiif-34x30.png" class="witness-item__iiif-logo"></v-img>
         </a>
         <a v-if="canBeRemoved" @click="deleteAction(me)" class="witness-item__delete">
           <icon-bin/>

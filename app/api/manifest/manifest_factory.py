@@ -29,11 +29,9 @@ class ManifestFactory(object):
     def make_collection(self, doc):
         f_obj, errors, kwargs = DocumentFacade.get_facade('', doc)
         collection_url = f_obj.get_iiif_collection_url()
-
         collection = dict(self.collection_template)
 
         manifest_urls = []
-
         for witness in sorted(doc.witnesses, key=attrgetter('num')):
             f_obj, errors, kwargs = WitnessFacade.get_facade('', witness)
             manifest_url = f_obj.get_iiif_manifest_url()
@@ -78,7 +76,6 @@ class ManifestFactory(object):
         # group images by manifest url
         grouped_images = {}
         for img in ordered_images:
-
             # /!\ maybe tied to the manifest url naming scheme in Gallica
             #url = img.canvas_id.rsplit("/", maxsplit=2)[0]
             orig_manifest_url = "{url}/manifest.json".format(url=img.canvas_id)

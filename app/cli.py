@@ -114,7 +114,7 @@ def make_cli():
             click.echo("Loaded fixtures to the database")
 
     @click.command('make-manifests')
-    @click.option('--host', required=True)
+    @click.option('--host', required=False, default="https://dev.chartes.psl.eu")
     @click.option('--witnesses', default=None)
     @click.option('--upload', default=False)
     def make_manifests(host, witnesses, upload):
@@ -122,7 +122,9 @@ def make_cli():
             if witnesses is None:
                 witnesses = Witness.query.all()
             else:
-                witnesses = Witness.query.filter(Witness.id.in_(witnesses.split(',')))
+                witnesses = Witness.query.filter(Witness.id.in_(witnesses.split(','))).all()
+
+            witnesses = [w for w in witnesses if w.images and len(w.images) > 0]
 
             host = "{host}{api_prefix}".format(host=host, api_prefix=app.config["API_URL_PREFIX"])
 
@@ -147,16 +149,16 @@ def make_cli():
             if documents is None:
                 documents = Document.query.all()
             else:
-                documents = Document.query.filter(Document.id.in_(documents.split(',')))
+                documents = Document.query.filter(Document.id.in_(documents.split(','))).all()
 
             for doc in documents:
 
-                manifest, collection_url = app.manifest_factory.make_collection(doc)
+                collection, collection_url = app.manifest_factory.make_collection(doc)
 
                 tmp_filename = os.path.join(app.config.get('LOCAL_TMP_FOLDER'), "document{0}.json".format(doc.id))
                 print(tmp_filename, collection_url, end="... ", flush=False)
                 with open(tmp_filename, 'w') as f:
-                    f.write(json.dumps(manifest))
+                    f.write(json.dumps(collection))
                     f.flush()
                     if upload:
                         upload_collection(tmp_filename)
