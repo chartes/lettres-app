@@ -28,20 +28,6 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
     cursor.execute("PRAGMA foreign_keys=ON")
     cursor.close()
 
-
-class PrefixMiddleware(object):
-    def __init__(self, app, prefix=''):
-        self.app = app
-        self.prefix = prefix
-
-    def __call__(self, environ, start_response):
-
-        if environ['PATH_INFO'].startswith(self.prefix):
-            environ['PATH_INFO'] = environ['PATH_INFO'][len(self.prefix):]
-            environ['SCRIPT_NAME'] = self.prefix
-            return self.app(environ, start_response)
-
-
 """
 class ModelChangeEvent(object):
     def __init__(self, app, session, *callbacks):
@@ -90,7 +76,6 @@ def create_app(config_name="dev"):
         from config import config
         app.config.from_object(config[config_name])
 
-    app.wsgi_app = PrefixMiddleware(app.wsgi_app, prefix=app.config["APP_URL_PREFIX"])
     #api_bp.url_prefix = app.config["API_URL_PREFIX"]
     app.debug = app.config["DEBUG"]
 
