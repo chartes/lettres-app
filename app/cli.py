@@ -4,6 +4,7 @@ import click
 import json
 import pprint
 import requests
+from elasticsearch import AuthorizationException
 
 from app import create_app
 from app.api.collection.facade import CollectionFacade
@@ -27,20 +28,21 @@ def add_default_users(db):
     User.add_default_users()
 
 
-def load_elastic_conf(conf_name, index_name):
+def load_elastic_conf(conf_name, index_name, delete=False):
     url = '/'.join([app.config['ELASTICSEARCH_URL'], index_name])
     res = None
     try:
-        res = requests.delete(url)
+        if delete:
+            res = requests.delete(url)
 
-        with open('elasticsearch/_settings.conf.json', 'r') as _settings:
-            settings = json.load(_settings)
+            with open('elasticsearch/_settings.conf.json', 'r') as _settings:
+                settings = json.load(_settings)
 
-            with open('elasticsearch/%s.conf.json' % conf_name, 'r') as f:
-                payload = json.load(f)
-                payload["settings"] = settings
-                res = requests.put(url, json=payload)
-                assert str(res.status_code).startswith("20")
+                with open('elasticsearch/%s.conf.json' % conf_name, 'r') as f:
+                    payload = json.load(f)
+                    payload["settings"] = settings
+                    res = requests.put(url, json=payload)
+                    assert str(res.status_code).startswith("20")
 
     except FileNotFoundError as e:
         print("no conf...", flush=True, end=" ")
@@ -133,13 +135,8 @@ def make_cli():
 
                 tmp_filename = os.path.join(app.config.get('LOCAL_TMP_FOLDER'), "manifest{0}.json".format(w.id))
                 print(tmp_filename, manifest_url, end="... ", flush=False)
-                with open(tmp_filename, 'w') as f:
-                    f.write(json.dumps(manifest))
-                    f.flush()
-                    if upload:
-                        upload_manifest(tmp_filename)
-                        print('uploaded', end="... ", flush=True)
-                    print('OK')
+                upload_manifest(tmp_filename, manifest, upload=upload)
+                print('OK')
 
     @click.command('make-collection-manifests')
     @click.option('--documents', default=None)
@@ -157,18 +154,14 @@ def make_cli():
 
                 tmp_filename = os.path.join(app.config.get('LOCAL_TMP_FOLDER'), "document{0}.json".format(doc.id))
                 print(tmp_filename, collection_url, end="... ", flush=False)
-                with open(tmp_filename, 'w') as f:
-                    f.write(json.dumps(collection))
-                    f.flush()
-                    if upload:
-                        upload_collection(tmp_filename)
-                        print('uploaded', end="... ", flush=True)
-                    print('OK')
+                upload_collection(tmp_filename, collection, upload=upload)
+                print('OK')
 
     @click.command("db-reindex")
     @click.option('--indexes', default="all")
     @click.option('--host', required=True)
-    def db_reindex(indexes, host):
+    @click.option('--delete', required=False, default=None)
+    def db_reindex(indexes, host, delete):
         """
         Rebuild the elasticsearch indexes from the current database
         """
@@ -192,12 +185,22 @@ def make_cli():
 
                 index_name = info["facade"].get_index_name()
 
+                url = "/".join([app.config['ELASTICSEARCH_URL'], index_name, '_settings'])
+
+                def reset_readonly():
+                    r = requests.put(url, json={"index.blocks.read_only_allow_delete": None})
+                    assert (r.status_code == 200)
+
                 try:
-                    load_elastic_conf(name, index_name)
+                    load_elastic_conf(name, index_name, delete=delete is not None)
 
                     for obj in info["model"].query.all():
                         f_obj = info["facade"](prefix, obj)
-                        f_obj.reindex("insert", propagate=False)
+                        try:
+                            f_obj.reindex("insert", propagate=False)
+                        except AuthorizationException:
+                            reset_readonly()
+                            f_obj.reindex("insert", propagate=False)
 
                     print("OK")
                 except Exception as e:

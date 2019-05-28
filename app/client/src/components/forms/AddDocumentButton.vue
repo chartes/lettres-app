@@ -131,6 +131,11 @@
                 this.opened = false;
             },
             submit() {
+            	  // fix bug
+                if (this.witness.tradition === '') {
+	                this.witness.tradition = null;
+                }
+            	
                 this.opened = false;
                 this.$store.dispatch('user/fetchCurrent').then(response => {
                     const defaultData = {

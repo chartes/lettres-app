@@ -32,7 +32,7 @@ def get_collection(api_version, doc_id):
         )
 
 
-def upload_manifest(filename, manifest):
+def upload_manifest(filename, manifest, upload=True):
     SFTP_CONFIG = {
         "host": current_app.config.get("SFTP_IIIF_HOST", ""),
         "username": current_app.config.get("SFTP_IIIF_USERNAME", ""),
@@ -43,21 +43,27 @@ def upload_manifest(filename, manifest):
     with open(filename, 'w') as f:
         f.write(json.dumps(manifest, indent=2, ensure_ascii=False))
         f.flush()
-    # upload the file
-    with pysftp.Connection(**SFTP_CONFIG) as srv:
-        srv.put(filename)
+    if upload:
+        # upload the file
+        with pysftp.Connection(**SFTP_CONFIG) as srv:
+            srv.put(filename)
 
 
-def upload_collection(filename):
+def upload_collection(filename, collection, upload=True):
     SFTP_CONFIG = {
         "host": current_app.config.get("SFTP_IIIF_HOST", ""),
         "username": current_app.config.get("SFTP_IIIF_USERNAME", ""),
         "password": current_app.config.get("SFTP_IIIF_PASSWORD", ""),
         "default_path": current_app.config.get("SFTP_IIIF_DEFAULT_COLLECTION_PATH", "/srv/collections")
     }
-    # print(SFTP_CONFIG)
-    with pysftp.Connection(**SFTP_CONFIG) as srv:
-        srv.put(filename)
+    # write to the temp folder first
+    with open(filename, 'w') as f:
+        f.write(json.dumps(collection, indent=2, ensure_ascii=False))
+        f.flush()
+
+    if upload:
+        with pysftp.Connection(**SFTP_CONFIG) as srv:
+            srv.put(filename)
 
 
 def rework_manifest_data(data, witness):
@@ -76,12 +82,21 @@ def rework_manifest_data(data, witness):
             img["on"] = canvas["@id"]
             current_img_num += 1
 
+    tmp = current_app.config.get('LOCAL_TMP_FOLDER')
+    tmp_filename = os.path.join(tmp, "manifest%s.json" % witness.id)
+    upload_manifest(tmp_filename, manifest)
+
     return manifest
 
 
 def rework_collection_data(doc_id=None):
     doc = Document.query.filter(Document.id == doc_id).first()
     collection, collection_url = current_app.manifest_factory.make_collection(doc)
+
+    tmp = current_app.config.get('LOCAL_TMP_FOLDER')
+    tmp_filename = os.path.join(tmp, "document%s.json" % doc_id)
+    upload_collection(tmp_filename, collection)
+
     return collection, collection_url
 
 
@@ -104,16 +119,13 @@ def iiif_editor_manifest(api_version, manifest_id=None):
     if request.method == 'POST':
         # rework the manifest data to make sure the ids match the witness
         manifest = rework_manifest_data(request.data, witness)
-        pprint.pprint(manifest)
-        # upload
-        tmp_filename = os.path.join(current_app.config.get('LOCAL_TMP_FOLDER'), "manifest%s.json" % manifest_id)
-        upload_manifest(tmp_filename, manifest)
+        # rework the collection (add/update the new manifest)
+        collection, collection_url = rework_collection_data(witness.document_id)
 
         data = {
             #"{0}/manifest{1}.json".format(current_app.config["IIIF_MANIFEST_ENDPOINT"], manifest_id)
             "uri": request.host_url[:-1] + url_for('api_bp.put_manifest', manifest_id=manifest_id, api_version=1.0)
         }
-
         code = 200
     else:
         code = 200
@@ -170,24 +182,10 @@ def put_manifest(api_version, manifest_id):
         }), code
     else:
         try:
-            tmp = current_app.config.get('LOCAL_TMP_FOLDER')
-
             # rework the manifest data to make sure the ids match the witness
             manifest = rework_manifest_data(request.data, witness)
-            pprint.pprint(manifest)
-            # upload
-            tmp_filename = os.path.join(tmp, "manifest%s.json" % manifest_id)
-            upload_manifest(tmp_filename, manifest)
-
             # rework the collection (add/update the new manifest)
             collection, collection_url = rework_collection_data(witness.document_id)
-            # upload
-            tmp_filename = os.path.join(tmp, "document{0}.json".format(witness.document_id))
-            with open(tmp_filename, 'w') as f:
-                f.write(json.dumps(collection))
-                f.flush()
-                upload_collection(tmp_filename)
-                print(tmp_filename, "uploaded")
 
             data = {"message": "Manifest successfully updated"}
             code = 201

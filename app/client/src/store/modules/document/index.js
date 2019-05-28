@@ -360,7 +360,7 @@ const actions = {
   updateWitness ({commit, state}, witness) {
 
     const attributes = {...witness}
-    removeContentEditableAttributes(attributes)
+    //removeContentEditableAttributesFr(attributes)
     const institutionId = witness.institution ? witness.institution.id : null;
     delete (attributes.id)
     delete (attributes.institution)
