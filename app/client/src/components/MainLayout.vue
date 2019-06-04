@@ -217,7 +217,7 @@
                 }
                 if (this.current_user === null){
                     //remove sections from the menu
-                    this.items.splice(this.findMenuItem('last_searches'), 1)
+                    //this.items.splice(this.findMenuItem('last_searches'), 1)
                     this.items.splice(this.findMenuItem('account'), 1);
                     this.items.splice(this.findMenuItem('params'), 1);
                 }
