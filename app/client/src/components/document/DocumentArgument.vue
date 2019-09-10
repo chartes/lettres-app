@@ -2,7 +2,7 @@
   <div v-if="(document.argument && document.argument.length)  || editable> 0" class="document__argument">
 
     <header class="argument__header">
-      <h2 class="argument__title subtitle">Argument</h2>
+      <h2 class="argument__title subtitle">Analyse</h2>
     </header>
 
     <rich-text-editor

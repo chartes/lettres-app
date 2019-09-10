@@ -15,12 +15,12 @@
       <form @submit.prevent="">
         <field-text
                 label="Nom"
-                placeholder="Nom de l'institution"
+                placeholder="ex. Bibliothèque nationale de France"
                 v-model="form.name"
         />
         <field-text
                 label="Référence"
-                placeholder="Référence de l'institution"
+                placeholder="ex. https://www.wikidata.org/wiki/Q193563"
                 v-model="form.ref"
         />
       </form>

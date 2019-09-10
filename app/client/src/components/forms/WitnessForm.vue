@@ -28,20 +28,6 @@
             />
           </div>
           <div class="column">
-            <select-autocomplete-field
-                label="Institution"
-                v-model="form.institution"
-                :items="institutionsSearchResults"
-                :is-async="true"
-                @search="searchInstitution"
-                label-key="name"
-            >
-              <button
-                  class="button is-outlined is-link"
-                  @click="openInstitutionForm">
-                Ajouter une institution
-              </button>
-            </select-autocomplete-field>
           </div>
         </div>
         
@@ -49,8 +35,27 @@
                 label="Témoin"
                 v-model="form.content"
         />
+
+        <div>
+          <select-autocomplete-field
+                  label="Institution"
+                  v-model="form.institution"
+                  :items="institutionsSearchResults"
+                  :is-async="true"
+                  @search="searchInstitution"
+                  label-key="name"
+          >
+            <button
+                    class="button is-outlined is-link"
+                    @click="openInstitutionForm">
+              Ajouter une institution
+            </button>
+          </select-autocomplete-field>
+
+        </div>
+
         <rich-text-editor
-                label="Côte du témoin"
+                label="Unité de conservation du témoin (cote)"
                 v-model="form['classification-mark']"
                 :formats="[['italic','superscript','note']]"
         />
