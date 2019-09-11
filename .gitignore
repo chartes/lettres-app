@@ -15,3 +15,4 @@ npm-debug.log*
 *.js.map
 report.html
 tests/data/lettres.test.sqlite
+/dev.env
