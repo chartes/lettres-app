@@ -20,26 +20,28 @@
 
   &__subtitle {
     margin-bottom: 1em;
-
     &::before {
 
-      content: '';
-      display: inline-block;
-      height: 1.2em;
-      width: 1.2em;
-      margin-right: .5em;
-      background: url(#{$image-path}/icons/document-sender.svg) no-repeat 50% 50%;
-      vertical-align: top;
+      //content: '';
+      //display: inline-block;
+      //height: 1.2em;
+      //width: 1.2em;
+      //margin-right: .5em;
+      //background: url(#{$image-path}/icons/document-sender.svg) no-repeat 50% 50%;
+      //vertical-align: top;
 
     }
     &--recipient::before {
-      background-image: url(#{$image-path}/icons/document-recipients.svg)
+      //background-image: url(#{$image-path}/icons/document-recipients.svg)
     }
   }
 
   &__recipients, &__senders {
     .button {
-      margin-top: 1rem;
+      display: inline-block;
+      height: 1em;
+      vertical-align: baseline;
+     // margin-top: 1rem;
     }
   }
 }

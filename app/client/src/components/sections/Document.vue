@@ -4,17 +4,17 @@
     
     <article v-if="document && documentsPreview[doc_id]" class="document__content" >
       <document-attributes :editable="canEdit" class="document__subsection"/>
+  
+      <h2 class="subtitle">Dates</h2>
+      <document-date-attributes :editable="canEdit"/>
+      <document-placenames :editable="canEdit"/>
       
+      <div class="document__subsection"></div>
+  
       <document-witnesses :editable="canEdit" :list="witnesses"/>
       <div class="document__subsection"></div>
-      <div class="columns">
-        <div class="column">
-          <document-persons :editable="canEdit"/>
-        </div>
-        <div class="column ">
-          <document-placenames :editable="canEdit"/>
-        </div>
-      </div>
+  
+      <document-persons :editable="canEdit"/>
       
       <div class="document__subsection"></div>
       <document-collections :editable="canEdit" class="document__subsection"/>
@@ -44,6 +44,7 @@
     import DocumentWitnesses from "../document/DocumentWitnesses";
     import DocumentCollections from "../document/DocumentCollections";
     import DocumentAttributes from "../document/DocumentAttributes";
+    import DocumentDateAttributes from "../document/DocumentDateAttributes";
 
     export default {
 
@@ -57,7 +58,8 @@
             DocumentTagBar,
             DocumentCollections,
             DocumentWitnesses,
-            DocumentAttributes
+            DocumentAttributes,
+            DocumentDateAttributes,
         },
         props: {
             doc_id : {required: true, type: Number}

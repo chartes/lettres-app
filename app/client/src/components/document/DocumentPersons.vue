@@ -1,14 +1,14 @@
 <template>
-  <section class="document-persons ">
-    <header class="document-persons__header">
-      <h2 class="document-persons__title subtitle">Correspondants</h2>
+  <section class="document-correspondents ">
+    <header class="document-correspondents__header">
+      <h2 class="document-correspondents__title subtitle">Correspondants</h2>
     </header>
 
     <div class="columns">
 
       <div class="document-correspondents__senders column">
 
-        <h3 class="document-persons__subtitle">
+        <h3 class="document-correspondents__subtitle">
           Expéditeur
           <a v-if="editable" class="tag" href="#" @click="openAddPerson('sender')">
             <icon-add/>
@@ -32,7 +32,7 @@
 
       <div class="document-correspondents__recipients column">
 
-        <h3 class="document-persons__subtitle">
+        <h3 class="document-correspondents__subtitle">
           Destinataire{{ documentRecipients.length > 1 ? 's':'' }}
           <a v-if="editable" class="tag" href="#" @click="openAddPerson('recipient')">
             <icon-add/>

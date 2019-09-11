@@ -1,9 +1,8 @@
 <template>
   <section class="document-persons  ">
-    <header class="document-persons__header">
-      <h2 class="document-persons__title subtitle">Dates de lieu</h2>
+    <header>
+      Dates de lieu
     </header>
-    
     <div class="columns">
       
       <div class="document-placenames__senders column">

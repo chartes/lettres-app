@@ -1,7 +1,7 @@
 <template>
   <div class="document__attributes">
 
-    <header class="document__attributes--title">
+    <header class="document__attributes--title subtitle">
       <title-field-in-place
               :tabulation-index="0"
               label="Titre"
@@ -14,36 +14,7 @@
       />
     </header>
 
-    <div class="columns is-multiline" v-if="editAttributes">
-      <div class="column is-one-third">
-        <date-field
-                :tabulation-index="0"
-                label="Date de rédaction"
-                name="creation"
-                not-set="Inconnue"
-                :initial-value="document['creation']"
-                :editable="editable"
-                v-on:changed="fieldChanged"/>
-      </div>
-      <div class="column is-one-third">
-        <date-field
-                :tabulation-index="0"
-                label="Date de rédaction (rédigée avant le ...)"
-                name="creation-not-after"
-                :initial-value="document['creation-not-after']"
-                :editable="editable"
-                v-on:changed="fieldChanged"/>
-      </div>
-      <div class="column is-one-third">
-        <text-field-in-place
-                :tabulation-index="0"
-                label="Date de rédaction (étiquette)"
-                name="creation-label"
-                not-set="Inconnue"
-                :initial-value="document['creation-label']"
-                :editable="editable"
-                v-on:changed="fieldChanged"/>
-      </div>
+    <div class="columns is-multiline subtitle" v-if="editAttributes">
       <div class="column">
         <multiselect-field
                 :editable="editable"
@@ -58,14 +29,12 @@
 </template>
 <script>
   import { mapState } from 'vuex';
-  import TextFieldInPlace from '../forms/fields/TextFieldInPlace';
   import MultiselectField from '../forms/fields/MultiselectField';
-  import DateField from '../forms/fields/DateField';
   import TitleFieldInPlace from '../forms/fields/TitleFieldInPlace';
 
   export default {
     name: 'DocumentAttributes',
-    components: {TitleFieldInPlace,  DateField, MultiselectField, TextFieldInPlace },
+    components: {TitleFieldInPlace,  MultiselectField },
     props: {
       editable: {
         type: Boolean,
@@ -81,11 +50,6 @@
       }
     },
     methods: {
-      fieldChanged (fieldProps) {
-        const data = { id: this.document.id, attributes: {} };
-        data.attributes[fieldProps.name] = fieldProps.value;
-        this.$store.dispatch('document/save', data)
-      },
       titleChanged (fieldProps) {
         const data = { id: this.document.id, attributes: {} };
         data.attributes[fieldProps.name] = fieldProps.value;

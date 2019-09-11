@@ -1,16 +1,17 @@
-.witness-list__title::before {
-
+.date-list__title::before {
+/*
   content: '';
   display: inline-block;
   height: 1em;
   width: 1em;
   margin-right: .5em;
-  background: url(#{$image-path}/icons/document-witnesses.svg) no-repeat 50% 50%;
+  background: url(#{$image-path}/icons/document-dates.svg) no-repeat 50% 50%;
   vertical-align: top;
+*/
 
 }
 
-.witness-list {
+.date-list {
 
 
   &__header {
@@ -25,7 +26,7 @@
     margin-top: 1rem;
   }
 }
-.witness-item {
+.date-item {
 
   $action-w: rem-calc(24);
 
@@ -67,7 +68,7 @@
 
 }
 
-.witness-form, .modal-card, .modal-content{
+.date-form, .modal-card, .modal-content{
  width: auto !important;
  min-width: 860px !important;
 }

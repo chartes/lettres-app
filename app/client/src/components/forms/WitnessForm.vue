@@ -36,7 +36,7 @@
                 v-model="form.content"
         />
 
-        <div>
+        <div style="margin-bottom: 1em;">
           <select-autocomplete-field
                   label="Institution"
                   v-model="form.institution"
@@ -53,9 +53,9 @@
           </select-autocomplete-field>
 
         </div>
-
+        
         <rich-text-editor
-                label="Unité de conservation du témoin (cote)"
+                label="Cote / unité de conservation"
                 v-model="form['classification-mark']"
                 :formats="[['italic','superscript','note']]"
         />
