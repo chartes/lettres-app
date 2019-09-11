@@ -17,3 +17,4 @@ report.html
 tests/data/lettres.test.sqlite
 tmp/
 dev.env
+/dev.env
