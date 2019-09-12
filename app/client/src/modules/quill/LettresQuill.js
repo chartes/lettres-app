@@ -52,7 +52,6 @@ function lineBreakMatcher() {
 
 const options = {
   modules: {
-
     history: {
       userOnly: true
     },
@@ -74,22 +73,30 @@ const options = {
         }
       }
     }
-  }
+  },
+  placeholder: null,
 };
 
 
 function getNewQuill (elt, opt = null) {
 
-  let opts = opt || options;
-
-  let quill = new Quill(elt, options);
+  const opts = {...options, ...opt};
+  console.log("quill options:", opts);
+  
+  let quill = new Quill(elt, opts);
   var length = quill.getLength()
   var text = quill.getText(length - 2, 2)
-
   // Remove extraneous new lines
+
   if (text === '\n\n') {
     quill.deleteText(quill.getLength() - 2, 2)
   }
+  
+  // fix placeholder not showing
+  if (quill.getLength() === 4) {
+    quill.setText('');
+  }
+
   return quill;
 }
 

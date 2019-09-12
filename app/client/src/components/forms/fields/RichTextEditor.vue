@@ -90,6 +90,7 @@
       multiline: { type: Boolean, default: true },
       enabled: { type: Boolean, default: true },
       formats: { type: Array, default: () => [['note','page','link'],['bold','italic','superscript','underline','del'],['person','location','cite']] },
+      options: { type: Object, default: () => {}},
     },
     //mixins: [EditorNotesMixins],
     components: {
@@ -142,11 +143,12 @@
 
       initEditor(editorElement, initialContent) {
 
-        console.log("initEditor", initialContent)
-
-        editorElement.innerHTML = this.sanitize(initialContent);
-        this.editor = getNewQuill(editorElement);
-        this.editorElement = editorElement;
+        console.log("initEditor", initialContent.length);
+	      editorElement.innerHTML = this.sanitize(initialContent);
+	
+	      this.editor = getNewQuill(editorElement, this.$props.options);
+	      
+	      this.editorElement = editorElement;
         this.editorContentElement = editorElement.children[0];
         this.activateEvents();
         this.editor.updateContents(getNewDelta().retain(this.editor.getLength(), 'silent'))

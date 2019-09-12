@@ -23,7 +23,12 @@
           </div>
         </div>
         
-        <rich-text-editor label="Témoin" v-model="form.content"/>
+        <rich-text-editor
+            label="Témoin"
+            v-model="form.content"
+            :formats="[['note','link'],['bold','italic','superscript','underline','del'],[]] "
+            :options="{placeholder: 'Ex. Bibl. nat. Fr., Français 3512, fol. 53r'}"/>
+        
         
         <div style="margin-bottom: 1em;">
           <span style="margin-bottom: 1em;">
@@ -46,7 +51,6 @@
                 </template>
   
               </select-autocomplete-field>
-
             </div>
             <institution-form v-if="institutionForm"
                               label="Ajouter une nouvelle institution"
@@ -62,6 +66,7 @@
             label="Cote / unité de conservation"
             v-model="form['classification-mark']"
             :formats="[['italic','superscript','note']]"
+            :options="{placeholder: 'Ex. Français 3512, Ms. 564, K 35'}"
         />
       </form>
     </div>
