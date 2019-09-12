@@ -7,7 +7,7 @@
     margin-top: 1rem;
   }
   &__title::before {
-
+/*
     content: '';
     display: inline-block;
     height: 1em;
@@ -15,14 +15,14 @@
     margin-right: .5em;
     background: url(#{$image-path}/icons/document-placenames.svg) no-repeat 50% 50%;
     vertical-align: top;
-
+*/
   }
 
   &__subtitle {
     margin-bottom: 1em;
 
     &::before {
-
+/*
       content: '';
       display: inline-block;
       height: 1.2em;
@@ -30,7 +30,7 @@
       margin-right: .5em;
       background: url(#{$image-path}/icons/document-placename-send.svg) no-repeat 50% 50%;
       vertical-align: top;
-
+*/
     }
     &--recieve::before {
       background-image: url(#{$image-path}/icons/document-placename-receive.svg)

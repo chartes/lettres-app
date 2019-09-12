@@ -305,11 +305,8 @@ const actions = {
         }
     });
   },
-
   fetchWitnessInstitution ({ commit }, witnessId) {
     return http.get(`/witnesses/${witnessId}?include=institution`).then( response => {
-
-
       const institution = getInstitution(response.data.included)
       if (institution.id === null) return null;
       commit('UPDATE_WITNESS_INSTITUTION', { witnessId, institution })
@@ -355,9 +352,8 @@ const actions = {
       })
   },
   updateWitness ({commit, state}, witness) {
-
     const attributes = {...witness}
-    removeContentEditableAttributes(attributes)
+    removeContentEditableAttributesFromObject(attributes)
     const institutionId = witness.institution ? witness.institution.id : null;
     delete (attributes.id)
     delete (attributes.institution)
@@ -384,6 +380,8 @@ const actions = {
         attributes: attributes,
         relationships
     }
+    console.log("saving institution to witness", data)
+  
     const http = http_with_csrf_token();
     return http.patch(`witnesses/${witness.id}?without-relationships`, {data})
       .then(response => {

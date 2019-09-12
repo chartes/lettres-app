@@ -41,14 +41,10 @@
 </template>
 
 <script>
-  import IconPenEdit from '../ui/icons/IconPenEdit';
-  import IconBin from '../ui/icons/IconBin';
   import WitnessForm from '../forms/WitnessForm';
   import LaunchButton from '../forms/LaunchButton';
   import ErrorMessage from '../ui/ErrorMessage';
-  import IconArrowDown from '../ui/icons/IconArrowDown';
   import IconAdd from '../ui/icons/IconAdd';
-  import {mapState} from 'vuex';
   import WitnessItem from './witnesses/WitnessItem';
 
   export default {
@@ -75,6 +71,7 @@
     methods: {
       
       updateWitness (witness) {
+      	console.log("update witness", witness);
         this.removeError()
         this.$store.dispatch('document/updateWitness', witness)
           .then( response => {

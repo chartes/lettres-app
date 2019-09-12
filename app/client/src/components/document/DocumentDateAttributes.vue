@@ -2,7 +2,7 @@
   <div class="document-date__attributes">
 
     <header class="document-date__attributes--title">
-        Dates de temps
+      <u>Dates de temps</u>
     </header>
 
     <div class="columns is-multiline" v-if="editAttributes">
@@ -35,8 +35,6 @@
                 :editable="editable"
                 v-on:changed="fieldChanged"/>
       </div>
-  
-
     </div>
   </div>
 </template>

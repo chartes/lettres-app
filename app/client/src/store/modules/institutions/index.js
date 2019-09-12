@@ -1,5 +1,6 @@
 import http_with_csrf_token from '../../../modules/http-common';
 import {http} from '../../../modules/http-common';
+import wikidata from "../../../modules/ref-providers/wikidata";
 
 const state = {
 
@@ -7,6 +8,8 @@ const state = {
   currentInstitution: null,
   institutionsSearchResults: [],
   newInstitution: null,
+  
+  institutionsWikidataSearchResults: null,
 
 };
 
@@ -23,8 +26,18 @@ const mutations = {
   },
 
   SEARCH_RESULTS (state, payload) {
+    payload = [{id: null, name: 'Non renseignée', ref: null}, ...payload];
     state.institutionsSearchResults = payload;
-  }
+  },
+  
+  WIKIDATA_SEARCH_RESULTS(state, payload) {
+    state.institutionsWikidataSearchResults = payload.map(p => {
+      return {
+        ...p,
+        name: p.description ? `${p.name} — ${p.description}` : p.name
+      }
+    });
+  },
 
 };
 
@@ -63,7 +76,7 @@ const actions = {
         type: 'institution',
         attributes: institution
       }
-    }
+    };
 
     const http = http_with_csrf_token();
     return http.post(`/institutions`, institutionData).then( response => {
@@ -80,7 +93,15 @@ const actions = {
       const institutions = response.data.data.map(inst => { return { id: inst.id, ...inst.attributes}});
       commit('SEARCH_RESULTS', institutions)
     });
-  }
+  },
+  
+  searchOnWikidata({commit}, what) {
+    commit('WIKIDATA_SEARCH_RESULTS', []);
+    wikidata.findOrganization(what).then((result) => {
+      console.log(result);
+      commit('WIKIDATA_SEARCH_RESULTS', result)
+    });
+  },
 
 };
 

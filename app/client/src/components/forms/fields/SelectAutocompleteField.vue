@@ -26,6 +26,7 @@
                 @keydown.enter="onEnter"
                 @keydown.capture.esc="closeSearchBox"
             />
+            <slot name="inputActions"></slot>
           </div>
         </div>
 

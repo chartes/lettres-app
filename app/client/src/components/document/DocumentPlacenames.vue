@@ -1,13 +1,13 @@
 <template>
-  <section class="document-persons  ">
+  <section class="document-placenames  ">
     <header>
-      Dates de lieu
+      <u>Dates de lieu</u>
     </header>
     <div class="columns">
       
       <div class="document-placenames__senders column">
         
-        <h3 class="document-persons__subtitle">
+        <h3 class="document-placenames__subtitle">
           Expédition
           <a v-if="editable" class="tag" href="#" @click="openAddPlacename('location-date-from')">
             <icon-add/>
@@ -33,7 +33,7 @@
       
       <div class="document-placenames__recipients column">
         
-        <h3 class="document-persons__subtitle">
+        <h3 class="document-placenames__subtitle">
           Destination{{ locationDateTo.length > 1 ? 's':'' }}
           <a v-if="editable && locationDateTo.length === 0" class="tag" href="#"
              @click="openAddPlacename('location-date-to')">
