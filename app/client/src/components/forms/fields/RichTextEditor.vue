@@ -439,8 +439,15 @@
         let formats = this.editor.getFormat();
         this.updateButtons(formats)
       },
-
-      /**************
+	    removePersonForm() {
+		    console.log("removePersonForm")
+		    this.editor.format('person', false);
+		    this.closePersonForm();
+		    let formats = this.editor.getFormat();
+		    this.updateButtons(formats)
+	    },
+	
+	    /**************
        *
        * CITE METHODS
        */

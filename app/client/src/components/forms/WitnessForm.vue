@@ -45,11 +45,12 @@
                   notSet="Non renseignée"
               >
                 <template v-slot:inputActions>
-                  <button class="button mt-1" href="#" @click="openNewInstitutionForm">
-                    <i class="fas fa-plus mr-1"></i>Ajouter
-                  </button>
+         
                 </template>
                 <template v-slot:outputActions>
+                  <a class="witness-item__delete" style="vertical-align: bottom;" href="#" @click="openNewInstitutionForm">
+                    <icon-add/>
+                  </a>
                   <a class="witness-item__delete" style="vertical-align: bottom;" href="#" @click="clearInstitution">
                     <icon-bin/>
                   </a>

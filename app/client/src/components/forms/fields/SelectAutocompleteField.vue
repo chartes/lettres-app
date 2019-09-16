@@ -154,6 +154,7 @@
         this.isOpen = true;
         Vue.nextTick(() => {
           this.$refs.searchInput.focus()
+          console.log("hello")
         })
       },
       closeSearchBox () {

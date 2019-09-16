@@ -1,4 +1,4 @@
-<template>
+<template xmlns:v-slot="http://www.w3.org/1999/XSL/Transform">
 
   <modal-form class="person-list-form"
           :title="title"
@@ -8,8 +8,7 @@
           :submitting="false"
   >
     <div class="person-list-form">
-      <div class="columns">
-        <div class="column is-5">
+    
           <select-autocomplete-field
             v-model="form"
             :items="personsSearchResults"
@@ -17,23 +16,23 @@
             @search="searchPerson"
             label-key="label"
             notSet="Rechercher une personne"
-          />
-        </div>
-        <div class="column is-1 person-list-form__separator">
-          <div><p><em>ou</em></p></div>
-        </div>
-        <div class="column is-5">
-          <div class="person-list-form__add-new has-text-centered">
+          >
+            <template v-slot:inputActions>
+              <a class="witness-item__delete" style="font-size: small;" href="#"
+                 @click="openNewPersonForm">
+                <span>Ajoutez une nouvelle personne en cliquant ici.</span>
+              </a>
+            </template>
+            
+            <template v-slot:outputActions>
+              <a class="witness-item__delete" style="vertical-align: bottom;" href="#"
+                 @click="openNewPersonForm">
+                <icon-add/>
+              </a>
+            </template>
 
-            <p>
-              <launch-button
-                      label="Ajouter une nouvelle personne"
-                      @click="openNewPersonForm"
-              />
-            </p>
-          </div>
-        </div>
-      </div>
+          </select-autocomplete-field>
+
     </div>
 
     <person-form v-if="personForm"
@@ -56,6 +55,7 @@
   import LaunchButton from './LaunchButton';
   import PersonForm from './PersonForm';
   import SelectAutocompleteField from "./fields/SelectAutocompleteField";
+  import IconAdd from "../ui/icons/IconAdd";
 
   export default {
     name: "PersonListForm",
@@ -64,7 +64,8 @@
       LaunchButton,
       SelectAutocompleteField,
       FieldText,
-      ModalForm
+      ModalForm,
+      IconAdd
     },
     props: {
       title: { type: String, default: '' },

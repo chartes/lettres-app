@@ -8,8 +8,6 @@
           :submitting="false"
   >
     <div class="person-list-form">
-      <div class="columns">
-        <div class="column is-5">
           <select-autocomplete-field
             v-model="form"
             :items="placenamesSearchResults"
@@ -17,19 +15,22 @@
             @search="searchPlacename"
             label-key="label"
             notSet="Rechercher un lieu"
-          />
-        </div>
-        <div class="column is-1 person-list-form__separator">
-          <div><p><em>ou</em></p></div>
-        </div>
-        <div class="column is-5">
-          <div class="person-list-form__add-new has-text-centered">
-            <p>
-              <launch-button label="Ajouter un nouveau lieu"  @click="openNewPlacenameForm"/>
-            </p>
-          </div>
-        </div>
-      </div>
+          >
+            <template v-slot:inputActions>
+              <a class="witness-item__delete" style="font-size: small;" href="#"
+                 @click="openNewPlacenameForm">
+                <span>Ajoutez un nouveau lieu en cliquant ici.</span>
+              </a>
+            </template>
+  
+            <template v-slot:outputActions>
+              <a class="witness-item__delete" style="vertical-align: bottom;" href="#"
+                 @click="openNewPlacenameForm">
+                <icon-add/>
+              </a>
+            </template>
+            
+          </select-autocomplete-field>
     </div>
 
     <placename-form v-if="placenameForm"
@@ -52,6 +53,7 @@
   import LaunchButton from './LaunchButton';
   import PlacenameForm from './PlacenameForm';
   import SelectAutocompleteField from "./fields/SelectAutocompleteField";
+  import IconAdd from "../ui/icons/IconAdd";
 
   export default {
     name: "PlacenameListForm",
@@ -60,7 +62,8 @@
       LaunchButton,
       SelectAutocompleteField,
       FieldText,
-      ModalForm
+      ModalForm,
+      IconAdd
     },
     props: {
       title: { type: String, default: '' },
