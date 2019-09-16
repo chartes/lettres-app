@@ -1,6 +1,7 @@
 import http_with_csrf_token from '../../../modules/http-common';
 import {http} from '../../../modules/http-common';
 import wikidata from "../../../modules/ref-providers/wikidata";
+import  Vue from "vue";
 
 const state = {
 
@@ -19,7 +20,7 @@ const mutations = {
     state.institutions = payload;
   },
   UPDATE_ONE (state, payload) {
-    state.currentInstitution = payload;
+    Vue.set(state, 'currentInstitution', payload)//state.currentInstitution = payload;
   },
   ADD_ONE (state, payload) {
     state.currentInstitution = payload;
@@ -85,7 +86,6 @@ const actions = {
       return institution
     })
   },
-
   search ({ commit }, what) {
     console.log('institution search', what)
     commit('SEARCH_RESULTS', [])

@@ -1,5 +1,6 @@
 .field-multiselect {
 
+
   &__actions {
     position: relative;
   }
@@ -8,6 +9,8 @@
     top: 0;
     left: 0;
     z-index: 10;
+    min-width: 200px;
+
   }
 
 }

@@ -1,4 +1,5 @@
 import {http} from '../../../modules/http-common';
+import  Vue from "vue";
 
 export const getInstitution = function (included) {
   let found = included.find(item => item.type === 'institution');
@@ -32,9 +33,7 @@ const actions = {
       commit('UPDATE_ONE', witness);
       return witness;
     });
-  },
-
-
+  }
 };
 
 const getters = {

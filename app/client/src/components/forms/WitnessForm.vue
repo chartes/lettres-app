@@ -1,4 +1,4 @@
-<template>
+<template xmlns:v-slot="http://www.w3.org/1999/XSL/Transform">
   
   <modal-form
       :title="title"
@@ -49,8 +49,15 @@
                     <i class="fas fa-plus mr-1"></i>Ajouter
                   </button>
                 </template>
-  
+                <template v-slot:outputActions>
+                  <a class="witness-item__delete" style="vertical-align: bottom;" href="#" @click="clearInstitution">
+                    <icon-bin/>
+                  </a>
+                </template>
               </select-autocomplete-field>
+  
+      
+              
             </div>
             <institution-form v-if="institutionForm"
                               label="Ajouter une nouvelle institution"
@@ -77,7 +84,7 @@
 
 <script>
 	
-	import { mapState } from 'vuex';
+	import {mapActions, mapState} from 'vuex';
 	import IconAdd from '../ui/icons/IconAdd';
 	
 	import ModalForm from './ModalForm';
@@ -90,6 +97,7 @@
 	import LoadingIndicator from '../ui/LoadingIndicator';
 	import InstitutionForm from './InstitutionForm';
 	import LaunchButton from './LaunchButton';
+	import IconBin from "../ui/icons/IconBin";
 	
 	export default {
 		name: "witness-form",
@@ -103,7 +111,8 @@
 			FieldText,
 			ModalForm,
 			LaunchButton,
-			IconAdd
+			IconAdd,
+			IconBin
 		},
 		props: {
 			title: { type: String, default: '' },
@@ -142,7 +151,6 @@
 						this.institutionError = error.toString()
 					})
 			},
-			
 			searchInstitution(search) {
 				this.$store.dispatch('institutions/search', search)
 			},
@@ -152,10 +160,17 @@
 			closeNewInstitutionForm() {
 				this.institutionForm = false
 			},
-			
+      clearInstitution() {
+        this.form.institution = null;
+      },
 			submitAction () {
 				if (this.form.institution && this.form.institution.id === null) this.form.institution = null
-				if (this.form.tradition === '') this.form.tradition = null
+				if (this.form.tradition === '') this.form.tradition = null;
+				
+				if (this.form.institution === null) {
+					this.$store.dispatch('document/removeWitnessInstitution', this.currentWitness.id)
+        }
+				
 				this.$props.submit(this.form);
 			},
 			cancelAction () {

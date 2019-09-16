@@ -14,7 +14,7 @@
       <div class="field-select-autocomplete__searchbox" v-show="isOpen">
 
         <div class="field-select-autocomplete__search">
-          <div class="control" :class="{ 'is-loading': isLoading }">
+          <span class="control" :class="{ 'is-loading': isLoading }">
             <input ref="searchInput"
                 class="input is-search"
                 placeholder="Rechercher"
@@ -27,9 +27,10 @@
                 @keydown.capture.esc="closeSearchBox"
             />
             <slot name="inputActions"></slot>
-          </div>
-        </div>
+          </span>
 
+        </div>
+  
         <div class="field-select-autocomplete__results">
           <ul class="field-select-autocomplete__items">
             <li class="loading" v-if="isLoading">
@@ -51,6 +52,8 @@
           <slot></slot>
         </div>
       </div>
+      
+      <slot name="outputActions"></slot>
 
     </div>
 

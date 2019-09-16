@@ -2,6 +2,10 @@
 
   &__wrapper {
     position: relative;
+
+    .control {
+      display: inline-block;
+    }
   }
   &__search, &__footer {
     padding: 1em;
@@ -60,6 +64,7 @@
     border-radius: 4px;
     background: #fff;
     z-index: 10;
+
   }
   &__items {
     min-height: 4em;

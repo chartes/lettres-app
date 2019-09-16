@@ -313,6 +313,9 @@ const actions = {
       return institution;
     });
   },
+  removeWitnessInstitution({commit}, witnessId) {
+    return http.patch(`/witnesses/${witnessId}/relationships/institution`, {data: null});
+  },
   addWitness ({commit, state}, witness) {
     witness.num = Math.max.apply(null, state.witnesses.map(w => w.num)) + 1;
 
@@ -380,7 +383,7 @@ const actions = {
         attributes: attributes,
         relationships
     }
-    console.log("saving institution to witness", data)
+    console.log("saving  witness", data)
   
     const http = http_with_csrf_token();
     return http.patch(`witnesses/${witness.id}?without-relationships`, {data})
