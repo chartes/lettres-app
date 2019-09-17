@@ -90,7 +90,7 @@
       },
       notSet: {
         type: String,
-        default: 'non renseigné'
+        default: 'Non renseigné'
       }
     },
 

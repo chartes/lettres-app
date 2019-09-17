@@ -86,7 +86,7 @@ module.exports = {
     overlay: true,
     proxy: {
       '/lettres': {
-        target: 'http://localhost:5004',
+        target: 'http://localhost',
         publicPath: '/lettres/static/js/',
         changeOrigin: true
   }

@@ -71,7 +71,7 @@
       },
       notSet: {
         type: String,
-        default: 'non renseigné'
+        default: 'Non renseigné'
       },
       searchPlaceholder: {
         type: String,

@@ -74,6 +74,16 @@ class Config(object):
     JWT_COOKIE_CSRF_PROTECT = True
     JWT_ACCESS_COOKIE_PATH = parse_var_env('JWT_ACCESS_COOKIE_PATH')
 
+    LOCAL_TMP_FOLDER = parse_var_env('LOCAL_TMP_FOLDER')
+    SFTP_IIIF_HOST = parse_var_env('SFTP_IIIF_HOST')
+    SFTP_IIIF_USERNAME = parse_var_env('SFTP_IIIF_USERNAME')
+    SFTP_IIIF_PASSWORD = parse_var_env('SFTP_IIIF_PASSWORD')
+    SFTP_IIIF_DEFAULT_MANIFEST_PATH = parse_var_env('SFTP_IIIF_DEFAULT_MANIFEST_PATH')
+    SFTP_IIIF_DEFAULT_COLLECTION_PATH = parse_var_env('SFTP_IIIF_DEFAULT_COLLECTION_PATH')
+
+    IIIF_MANIFEST_ENDPOINT = parse_var_env('IIIF_MANIFEST_ENDPOINT')
+    IIIF_COLLECTION_ENDPOINT = parse_var_env('IIIF_COLLECTION_ENDPOINT')
+
     @staticmethod
     def init_app(app):
         pass

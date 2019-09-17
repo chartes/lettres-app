@@ -46,6 +46,19 @@ class JSONAPIResponseFactory:
         )
 
     @classmethod
+    def make_raw_response(cls, resource, **kwargs):
+        headers = kwargs.get("headers", {})
+        headers.update(JSONAPIResponseFactory.HEADERS)
+        if "headers" in kwargs:
+            kwargs.pop("headers")
+        return Response(
+            resource,
+            content_type=JSONAPIResponseFactory.CONTENT_TYPE,
+            headers=headers,
+            **kwargs
+        )
+
+    @classmethod
     def make_data_response(cls, data_resource, links, included_resources, meta, **kwargs):
         resource = JSONAPIResponseFactory.encapsulate_data(data_resource, links, included_resources, meta)
         return JSONAPIResponseFactory.make_response(resource, **kwargs)

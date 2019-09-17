@@ -65,7 +65,7 @@
         </template>
       </v-list>
   
-      <v-container grid-list-md text-xs-center class="main-layout__sponsors">
+      <v-container grid-list-md  class="main-layout__sponsors">
         <v-layout row wrap>
           <v-flex xs12>
             <a href="http://www.cths.fr">
@@ -211,12 +211,13 @@
         created() {
             this.$store.dispatch('user/fetchCurrent').then(resp => {
                 this.loaded = true;
-                if (this.docId !== undefined)
+                if (this.docId === null) {
+                    console.warn("loading docs");
                     this.goToDocPage(parseInt(this.currentPage));
-                
+                }
                 if (this.current_user === null){
                     //remove sections from the menu
-                    this.items.splice(this.findMenuItem('last_searches'), 1)
+                    //this.items.splice(this.findMenuItem('last_searches'), 1)
                     this.items.splice(this.findMenuItem('account'), 1);
                     this.items.splice(this.findMenuItem('params'), 1);
                 }
@@ -243,8 +244,6 @@
                 items: [
                     {name: 'documents', icon: 'search', text: 'Parcourir les documents',
                         action: () => this.goToPage(baseAppURL)},
-                    {name: 'last_searches', icon: 'history', text: 'Recherches récentes',
-                        action: () => this.goToPage(`${baseAppURL}/recherches-recentes`)},
                     {name: 'collections', icon: 'search', text: 'Parcourir les collections',
                         action: () => this.goToPage(`${baseAppURL}/collections`)},
                     {

@@ -220,6 +220,9 @@ const actions = {
     const http = http_with_csrf_token();
     if (filters)
       filters = '&' + filters;
+    else {
+      filters = '';
+    }
     return http.get(`/search?query=${query}&index=${index}&include=${incs.join(',')}&without-relationships&page[size]=${pageSize}&page[number]=${pageId}${filters}`)
       .then( (response) => {
       commit('UPDATE_ALL', response.data);
@@ -383,8 +386,6 @@ const actions = {
         attributes: attributes,
         relationships
     }
-    console.log("saving  witness", data)
-  
     const http = http_with_csrf_token();
     return http.patch(`witnesses/${witness.id}?without-relationships`, {data})
       .then(response => {

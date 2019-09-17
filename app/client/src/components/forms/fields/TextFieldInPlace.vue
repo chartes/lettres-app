@@ -38,7 +38,7 @@
     </div>
 
     <div v-else>
-      <h1 class="title" :class="unknownClass" v-html="value || notSet"></h1>
+      <span  :class="unknownClass" v-html="value || notSet"></span>
     </div>
 
   </div>
