@@ -1,6 +1,6 @@
 <template>
   <div class="field-title">
-    <field-label v-if="!!label" :label="label"/>
+    <field-label v-if="!!label" :label="label" :add-colons="false"/>
 
     <div class="field field-title__field" v-if="editable && editMode" ref="hover">
       <div class="control">
@@ -38,7 +38,7 @@
     </div>
 
     <div v-else>
-      <h1 class="title" :class="unknownClass" v-html="value || notSet"></h1>
+      <h1 class="" :class="unknownClass" v-html="value || notSet"></h1>
     </div>
 
   </div>

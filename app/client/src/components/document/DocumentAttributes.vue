@@ -19,6 +19,7 @@
         <multiselect-field
                 :editable="editable"
                 label="Langues"
+                :add-colons="false"
                 :optionsList="allLanguages"
                 :selectedItems="languages"
                 :onChange="languagesChanged"/>

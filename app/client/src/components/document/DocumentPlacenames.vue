@@ -1,60 +1,52 @@
 <template>
-  <section class="document-placenames  ">
-    <header>
-      <u>Dates de lieu</u>
-    </header>
+  <section class="document-placenames mb-3" style="width: 100%">
+
     <div class="columns">
       
-      <div class="document-placenames__senders column">
+      <div class="document-placenames__senders column is-one-third">
         
-        <h3 class="document-placenames__subtitle">
-          Expédition
+        <h3 class="document-placenames__subtitle subtitle">
+          Dates de lieu d'expédition
           <a v-if="editable" class="tag" href="#" @click="openAddPlacename('location-date-from')">
             <icon-add/>
           </a>
         </h3>
-
-        <ul class="document-placenames__senders-list" v-if="locationDateFrom.length">
-          <li v-for="c in locationDateFrom" :key="c.placename.id" class="placename-item">
-            <a :href="c.placename.ref" target="_blank">
-              {{ c.placename.label }}
-            </a>
-            <a v-if="editable" class="witness-item__delete" @click="unlinkPlacenameFromDoc(c)">
-              <icon-bin/>
-            </a>
-          </li>
-        </ul>
-        
-        <div v-else>
-          <p class="placename-item"><em>Aucune date de lieu n'a été renseignée</em></p>
+  
+        <div v-if="locationDateFrom.length" v-for="c in locationDateFrom" :key="c.placename.id"
+             class="tags has-addons are-medium document-placenames__senders-list mb-1">
+                <span class="tag">
+                     <a :href="c.placename.ref" target="_blank">
+                      {{ c.placename.label }}
+                    </a>
+                </span>
+          <a v-if="editable" class="tag is-delete" @click.prevent="unlinkPlacenameFromDoc(c)"></a>
+        </div>
+        <div v-if="locationDateFrom.length === 0">
+          <p class="placename-item"><em>Aucune date de lieu d'expédition renseignée</em></p>
         </div>
       
       </div>
       
-      <div class="document-placenames__recipients column">
-        
-        <h3 class="document-placenames__subtitle">
-          Destination{{ locationDateTo.length > 1 ? 's':'' }}
-          <a v-if="editable && locationDateTo.length === 0" class="tag" href="#"
-             @click="openAddPlacename('location-date-to')">
+      <div class="document-placenames__recipients column  is-one-third">
+        <h3 class="document-placenames__subtitle subtitle">
+          Dates de lieu de destination
+          <a v-if="editable" class="tag" href="#" @click="openAddPlacename('location-date-to')">
             <icon-add/>
           </a>
         </h3>
-
-        <ul class="document-placenames__recipients-list" v-if="locationDateTo.length">
-          <li v-for="c in locationDateTo" :key="c.placename.id" class="placename-item">
-            <a :href="c.placename.ref" target="_blank">
-              {{ c.placename.label }}</a>
-            <a v-if="editable" class="placename-item__delete" @click="unlinkPlacenameFromDoc(c)">
-              <icon-bin/>
-            </a>
-          </li>
-        </ul>
-        
-        <div v-else>
-          <p class="placename-item"><em>Aucune date de lieu n'a été renseignée</em></p>
+  
+        <div v-if="locationDateTo.length" v-for="c in locationDateTo" :key="c.placename.id"
+             class="tags has-addons are-medium document-placenames__senders-list mb-1">
+                <span class="tag">
+                     <a :href="c.placename.ref" target="_blank">
+                      {{ c.placename.label }}
+                    </a>
+                </span>
+          <a v-if="editable" class="tag is-delete" @click.prevent="unlinkPlacenameFromDoc(c)"></a>
         </div>
-      
+        <div v-if="locationDateTo.length === 0">
+          <p class="placename-item"><em>Aucune date de lieu de destination renseignée</em></p>
+        </div>
       </div>
       
       <placename-list-form

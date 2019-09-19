@@ -1,45 +1,43 @@
 <template xmlns:v-slot="http://www.w3.org/1999/XSL/Transform">
   
-  <div class="document__collections" >
+  <section class="document__collections" >
+  
+    <div class="panel mt-4">
+      <header class="panel-heading">
+        <h2 class="collection-list__title subtitle">
+          Collections
+          <a v-if="editable" class="tag" href="#" @click="openCollectionEdit">
+            <icon-add/>
+          </a>
+        </h2>
     
-    <header class="collection-list__header">
-      <h2 class="collection-list__title subtitle">
-        Collections
-        <a v-if="editable" class="tag" href="#" @click="openCollectionEdit">
-          <icon-add/>
-        </a>
-      </h2>
-      <h3 v-if="collectionsHierarchies.length > 0" >
-        Ce document fait partie des collections suivantes :
-      </h3>
-    </header>
+      </header>
     
-
-    <div class="document__collections--content">
-        <span  v-for="hierarchy in collectionsHierarchies" :key="hierarchy.id">
-          <v-layout row>
-            <v-flex shrink pa-1>
-              <v-breadcrumbs tag="span" :items="hierarchy" divider=">">
-                <template v-slot:item="props">
-                  <a :href="`/lettres/collections/${props.item.id}`">{{ props.item.title}}</a>
-                </template>
-              </v-breadcrumbs>
-            </v-flex>
-            <v-flex pa-1 :fill-height="true" :align-baseline="true">
-              <a v-if="editable && collectionsHierarchies.length > 1" @click="removeCollection(hierarchy[hierarchy.length-1])" class="collection-item__delete">
-                <icon-bin/>
-              </a>
-            </v-flex>
-          </v-layout>
-        </span>
-        <div v-if="collectionsHierarchies.length === 0" class="collection-list__list">
-          <p class="collection-item"><em>Aucune collection n'a été renseignée</em></p>
+      <div class="document__collections--content panel-block" style="display: inline-block; width: 100%">
+          <span  v-for="hierarchy in collectionsHierarchies" :key="hierarchy.id">
+            <v-layout row>
+              <v-flex shrink pa-1>
+                <v-breadcrumbs tag="span" :items="hierarchy" divider=">">
+                  <template v-slot:item="props">
+                    <a :href="`/lettres/collections/${props.item.id}`">{{ props.item.title}}</a>
+                  </template>
+                </v-breadcrumbs>
+              </v-flex>
+              <v-flex pa-1 :fill-height="true" :align-baseline="true">
+                <a v-if="editable && collectionsHierarchies.length > 1" @click="removeCollection(hierarchy[hierarchy.length-1])" class="collection-item__delete">
+                  <icon-bin/>
+                </a>
+              </v-flex>
+            </v-layout>
+          </span>
+          <div v-if="collectionsHierarchies.length === 0" class="collection-list__list">
+            <p class="collection-item"><em>Aucune collection n'a été renseignée</em></p>
+          </div>
+        
+        <div v-if="error" class="collection-list__error notification is-danger">
+          {{error}}
         </div>
-      
-      <div v-if="error" class="collection-list__error notification is-danger">
-        {{error}}
       </div>
-    
     </div>
     
     <collection-list-form
@@ -49,7 +47,7 @@
         :cancel="closeCollectionEdit"
     />
   
-  </div>
+  </section>
 
 </template>
 

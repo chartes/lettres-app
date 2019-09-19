@@ -3,26 +3,39 @@
     <document-tag-bar v-if="isUserLoaded" :doc-id="doc_id"/>
     
     <article v-if="document && documentsPreview[doc_id]" class="document__content" >
-      <document-attributes :editable="canEdit" class="document__subsection"/>
   
-      <h2 class="subtitle">Dates</h2>
-      <document-date-attributes :editable="canEdit"/>
-      <document-placenames :editable="canEdit"/>
-      
-      <div class="document__subsection"></div>
+      <!-- titre et langue -->
+      <document-attributes :editable="canEdit"/>
   
-      <document-witnesses :editable="canEdit" :list="witnesses"/>
-      <div class="document__subsection"></div>
+      <!-- dates de lieux et de temps -->
+      <div class="panel mt-5">
+        <p class="panel-heading">Dates</p>
+        <div class="panel-block">
+          <document-date-attributes :editable="canEdit"/>
+        </div>
+        <div class="panel-block">
+          <document-placenames :editable="canEdit"/>
+        </div>
+      </div>
   
+      <!-- correspondents -->
       <document-persons :editable="canEdit"/>
-      
-      <div class="document__subsection"></div>
-      <document-collections :editable="canEdit" class="document__subsection"/>
-      
-      <document-argument :editable="canEdit" class="document__subsection"/>
-      <document-transcription :editable="canEdit"/>
-      
-      <div style="margin-left: 0;">
+     
+      <!-- témoins -->
+      <document-witnesses :editable="canEdit" :list="witnesses"/>
+
+      <!-- collections -->
+      <document-collections :editable="canEdit"/>
+
+      <div class="mt-5">
+        <!-- analyse -->
+        <document-argument :editable="canEdit"/>
+  
+        <!-- transcription -->
+        <document-transcription :editable="canEdit"/>
+      </div>
+
+      <div class="mt-5" style="margin-left: 0;">
         <changelog v-if="current_user" v-bind:compact="true" :doc-id="doc_id" :currentUserOnly="false" page-size="10"/>
       </div>
     </article>

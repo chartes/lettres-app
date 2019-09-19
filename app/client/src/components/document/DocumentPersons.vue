@@ -1,66 +1,57 @@
 <template>
-  <section class="document-correspondents ">
-    <header class="document-correspondents__header">
-      <h2 class="document-correspondents__title subtitle">Correspondants</h2>
-    </header>
-
-    <div class="columns">
-
-      <div class="document-correspondents__senders column">
-
-        <h3 class="document-correspondents__subtitle">
-          Expéditeur
+  <section class="document-correspondents">
+    <div class="panel">
+      <header class="panel-heading">
+        <h2 class="document-correspondents__title subtitle">Correspondants</h2>
+      </header>
+      <div class="panel-block" style="display: inline-block; width: 100%">
+        <div class="subtitle mb-2" >
+          Expéditeur{{documentSender.length > 1 ? 's' :''}}
           <a v-if="editable" class="tag" href="#" @click="openAddPerson('sender')">
             <icon-add/>
           </a>
-        </h3>
-
-        <ul class="document-correspondents__senders-list" v-if="documentSender.length">
-          <li v-for="c in documentSender" :key="c.person.id" class="correspondent-item">
-            <a :href="c.person.ref" target="_blank">
-              {{ c.person.label }}
-            </a>
-            <a v-if="editable" class="witness-item__delete" @click="unlinkPersonFromDoc(c)"><icon-bin/></a>
-          </li>
-        </ul>
-
-        <div v-else>
-          <p class="person-item"><em>Aucun expéditeur n'a été renseigné</em></p>
         </div>
-
+        <div v-if="documentSender.length" v-for="c in documentSender" :key="c.person.id"
+             class="tags has-addons are-medium correspondent-item mb-1">
+                <span class="tag">
+                    <a :href="c.person.ref" target="_blank">
+                      {{ c.person.label }}
+                    </a>
+                </span>
+                <a v-if="editable" class="tag is-delete" @click.prevent="unlinkPersonFromDoc(c)"></a>
+        </div>
+        <div v-if="documentSender.length === 0">
+          <p class="person-item"><em>Aucun expéditeur renseigné</em></p>
+        </div>
       </div>
-
-      <div class="document-correspondents__recipients column">
-
-        <h3 class="document-correspondents__subtitle">
-          Destinataire{{ documentRecipients.length > 1 ? 's':'' }}
+      <div class="panel-block" style="display: inline-block; width: 100%">
+        <div class="subtitle mb-2">
+            Destinataire{{ documentRecipients.length > 1 ? 's':'' }}
           <a v-if="editable" class="tag" href="#" @click="openAddPerson('recipient')">
             <icon-add/>
           </a>
-        </h3>
-
-        <ul class="document-correspondents__recipients-list" v-if="documentRecipients.length">
-          <li v-for="c in documentRecipients" :key="c.person.id" class="correspondent-item">
-            <a :href="c.person.ref" target="_blank">
-              {{ c.person.label }}</a>
-            <a v-if="editable" class="person-item__delete" @click="unlinkPersonFromDoc(c)"><icon-bin/></a>
-          </li>
-        </ul>
-
-        <div v-else>
-          <p class="correspondent-item"><em>Aucun destinataire n'a été renseigné</em></p>
         </div>
-
+        <div v-if="documentRecipients.length > 0" v-for="c in documentRecipients" :key="c.person.id"
+             class="tags has-addons are-medium correspondent-item mb-1">
+             <span class="tag">
+                 <a :href="c.person.ref" target="_blank">{{ c.person.label }}</a>
+             </span>
+             <a v-if="editable" class="tag is-delete" @click.prevent="unlinkPersonFromDoc(c)"></a>
+        </div>
+        <div v-if="documentRecipients.length === 0">
+          <p class="person-item"><em>Aucun destinataire renseigné</em></p>
+        </div>
       </div>
-
+  
       <person-list-form
           v-if="personsForm && editable"
           title="Sélectionner une personne"
           :submit="linkPersonToDoc"
           :cancel="closePersonChoice"
       />
+      </div>
+  
 
-    </div>
   </section>
 </template>
 

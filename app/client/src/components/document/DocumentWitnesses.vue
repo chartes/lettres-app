@@ -1,34 +1,34 @@
 <template>
-  <div class="witness-list">
-    <header class="witness-list__header">
-      <h2 class="witness-list__title subtitle">
-        Témoins
-        <a v-if="editable" class="tag" href="#" @click="openNewWitnessEdit">
-          <icon-add/>
-        </a>
-      </h2>
-    </header>
-    <div class="witness-list__content">
-      
-      <ul class="witness-list__list">
-
+  <section class="witness-list">
+    <div class="panel mt-4">
+      <header class="panel-heading">
+        <h2 class="witness-list__title subtitle">
+          Témoins
+          <a v-if="editable" class="tag" href="#" @click="openNewWitnessEdit">
+            <icon-add/>
+          </a>
+        </h2>
+ 
+      </header>
+     
+      <div class="witness-list__content panel-block " style="display: inline-block; width: 100%">
         <witness-item
-                v-for="witness, index in list"
-                :editable="editable"
-                :can-be-removed="list.length > 1"
-                :list-index="index"
-                :list-length="list.length"
-                :witness="witness"
-                :edit-action="openWitnessEdit"
-                :reorder-action="reorderWitness"
-                :delete-action="removeWitness"
-                :key="index"
+            v-for="witness, index in list"
+            :editable="editable"
+            :can-be-removed="list.length > 1"
+            :list-index="index"
+            :list-length="list.length"
+            :witness="witness"
+            :edit-action="openWitnessEdit"
+            :reorder-action="reorderWitness"
+            :delete-action="removeWitness"
+            :key="index"
         />
+        <error-message :error="error"/>
 
-      </ul>
-      
-      <error-message :error="error"/>
+      </div>
     </div>
+   
     <witness-form
             v-if="editMode === 'new' || editMode === 'edit'"
             :title="editMode === 'new' ? 'Nouveau témoin' : 'Éditer le témoin'"
@@ -37,7 +37,7 @@
             :submit="editMode === 'new' ? addWitness : updateWitness"
             :cancel="closeWitnessEdit"
     />
-  </div>
+  </section>
 </template>
 
 <script>

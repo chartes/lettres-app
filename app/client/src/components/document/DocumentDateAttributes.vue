@@ -1,8 +1,8 @@
 <template>
-  <div class="document-date__attributes">
+  <div class="document-date__attributes" style="width: 100%">
 
-    <header class="document-date__attributes--title">
-      <u>Dates de temps</u>
+    <header class="document-date__attributes--title mb-3">
+      <span class="subtitle">Dates de temps</span>
     </header>
 
     <div class="columns is-multiline" v-if="editAttributes">
