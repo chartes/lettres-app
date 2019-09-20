@@ -249,12 +249,15 @@ class PersonHasRole(db.Model, ChangesMixin):
     __tablename__ = 'person_has_role'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     __table_args__ = (
+        db.UniqueConstraint('person_id', 'function', name='_person_has_role_function_uc'),
         db.UniqueConstraint('person_id', 'document_id', name='_person_has_role_document_uc'),
     )
 
     person_id = db.Column(db.Integer, db.ForeignKey('person.id', ondelete='CASCADE'), nullable=False)
     document_id = db.Column(db.Integer, db.ForeignKey('document.id', ondelete='CASCADE'), nullable=False)
     person_role_id = db.Column(db.Integer, db.ForeignKey('person_role.id', ondelete='CASCADE'))
+
+    function = db.Column(db.String(100), nullable=True)
 
     person = db.relationship("Person", backref=db.backref("persons_having_roles"), single_parent=True)
     document = db.relationship("Document", backref=db.backref("persons_having_roles", cascade="all, delete-orphan"), single_parent=True)

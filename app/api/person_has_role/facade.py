@@ -31,6 +31,7 @@ class PersonHasRoleFacade(JSONAPIAbstractFacade):
         resource = {
             **self.resource_identifier,
             "attributes": {
+                "function": self.obj.function
             },
             "meta": self.meta,
             "links": {
