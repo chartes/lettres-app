@@ -6,7 +6,7 @@ from flask_jwt_extended import JWTManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_user import UserManager
 from flask_migrate import Migrate
-from sqlalchemy import event
+from sqlalchemy import event, MetaData
 from sqlalchemy.engine import Engine
 
 from dotenv import load_dotenv
@@ -16,8 +16,14 @@ from app.api.response_factory import JSONAPIResponseFactory
 
 
 # Initialize Flask extensions
-
-db = SQLAlchemy()
+naming_convention = {
+    "ix": 'ix_%(column_0_label)s',
+    "uq": "uq_%(table_name)s_%(column_0_name)s",
+    "ck": "ck_%(table_name)s_%(column_0_name)s",
+    "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
+    "pk": "pk_%(table_name)s"
+}
+db = SQLAlchemy(metadata=MetaData(naming_convention=naming_convention))
 
 api_bp = Blueprint('api_bp', __name__)
 app_bp = Blueprint('app_bp', __name__, template_folder='templates', static_folder='static')
@@ -82,7 +88,7 @@ def create_app(config_name="dev"):
 
     db.init_app(app)
     config[config_name].init_app(app)
-    migrate = Migrate(app, db)
+    migrate = Migrate(app, db, render_as_batch=True)
 
     app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) if app.config['ELASTICSEARCH_URL'] else None
 

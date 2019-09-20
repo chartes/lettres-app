@@ -71,7 +71,7 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
                              self.with_relationships_data).resource
             for c in self.obj.placenames_having_roles
         ]
-    
+
     def get_person_resource_identifiers(self):
         from app.api.person.facade import PersonFacade
         return [] if self.obj.persons_having_roles is None else [
@@ -101,7 +101,7 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
                          self.with_relationships_data).resource
             for c in self.obj.placenames_having_roles
         ]
-    
+
     def get_placenames_having_roles_resource_identifiers(self):
         from app.api.placename_has_role.facade import PlacenameHasRoleFacade
         return [] if self.obj.placenames_having_roles is None else [
@@ -115,7 +115,7 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
             PlacenameHasRoleFacade(self.url_prefix, c, True, True).resource
             for c in self.obj.placenames_having_roles
         ]
-    
+
     def get_iiif_collection_url(self):
         url = '{0}/document{1}.json'.format(current_app.config['IIIF_COLLECTION_ENDPOINT'], self.obj.id)
         resp = requests.head(url)
@@ -186,7 +186,7 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
                 "resource_identifier_getter": self.get_person_resource_identifiers,
                 "resource_getter": self.get_person_resources
             },
-            
+
             "placenames-having-roles": {
                 "links": self._get_links(rel_name="placenames-having-roles"),
                 "resource_identifier_getter": self.get_placenames_having_roles_resource_identifiers,

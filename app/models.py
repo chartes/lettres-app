@@ -290,7 +290,7 @@ class User(db.Model, UserMixin):
 
     @staticmethod
     def add_default_users():
-        password = "pbkdf2:sha256:50000$RyjGxAYv$02c62c497306be557eb4080a432c466453f297eb9dbfb62dc0160fe376f22689" # Lettres2019!
+        password = "pbkdf2:sha256:50000$RyjGxAYv$02c62c497306be557eb4080a432c466453f297eb9dbfb62dc0160fe376f22689"
         admin = UserRole.query.filter(UserRole.name == "admin").first()
         contributor = UserRole.query.filter(UserRole.name == "contributor").first()
 
@@ -398,7 +398,7 @@ class Changelog(db.Model):
     object_type = db.Column(db.String, Enum(*CHANGELOG_OBJECT_TYPES), index=True)
     object_id = db.Column(db.Integer, nullable=False, index=True)
 
-    user_id = db.Column(db.Integer, db.ForeignKey(User.id))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     event_date = db.Column(DateTime(timezone=True), server_default=func.now())
     description = db.Column(db.String, nullable=True)
 
