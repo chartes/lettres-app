@@ -16,11 +16,13 @@
                 placeholder="ex : Nom, Prénom"
                 v-model="form.label"
         />
+        <!--
         <field-text
-                label="Description"
+                label="Fonction occupée"
                 placeholder="ex : Duc d'Anjou, prince marchand, etc."
-                v-model="form.description"
+                v-model="form.func"
         />
+        -->
 
         <div class="person-form__link-to-ref">
           <div class="columns">

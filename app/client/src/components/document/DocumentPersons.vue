@@ -15,7 +15,7 @@
              class="tags has-addons are-medium correspondent-item mb-1">
                 <span class="tag">
                     <a :href="c.person.ref" target="_blank">
-                      {{ c.person.label }}
+                      {{ !!c.person.func ? `${c.person.label}, ${c.person.func}` : c.person.label }}
                     </a>
                 </span>
                 <a v-if="editable" class="tag is-delete" @click.prevent="unlinkPersonFromDoc(c)"></a>
@@ -34,7 +34,9 @@
         <div v-if="documentRecipients.length > 0" v-for="c in documentRecipients" :key="c.person.id"
              class="tags has-addons are-medium correspondent-item mb-1">
              <span class="tag">
-                 <a :href="c.person.ref" target="_blank">{{ c.person.label }}</a>
+                 <a :href="c.person.ref" target="_blank">
+                   {{ !!c.person.func ? `${c.person.label}, ${c.person.func}` : c.person.label }}
+                 </a>
              </span>
              <a v-if="editable" class="tag is-delete" @click.prevent="unlinkPersonFromDoc(c)"></a>
         </div>
@@ -85,14 +87,16 @@
       },
       closePersonChoice() {
         this.personsForm = null;
+        console.log("close person choice");
       },
       linkPersonToDoc(person) {
-        const personId = person.id
-        const role = this.getRoleByLabel(this.personsForm)
+        const personId = person.id;
+        const role = this.getRoleByLabel(this.personsForm);
         const roleId =  role && role.id ? role.id : null;
         this.$store.dispatch('persons/linkToDocument', {
           personId,
-          roleId
+          roleId,
+          func: person.func
         })
           .then(personHasRole => {
             const corrData = {
@@ -100,7 +104,7 @@
               personId,
               relationId: personHasRole.id,
               role,
-              roleId
+              roleId,
             }
             this.$store.dispatch('document/addPerson', corrData);
             this.closePersonChoice()

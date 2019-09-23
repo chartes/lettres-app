@@ -68,9 +68,12 @@ const actions = {
       })
   },
 
-  linkToDocument ({ commit, rootState }, {roleId, personId}) {
+  linkToDocument ({ commit, rootState }, {roleId, personId, func}) {
     const data = { data: {
         type: 'person-has-role',
+        attributes: {
+          function: func
+        },
         relationships: {
           document: {
             data: {
@@ -87,7 +90,7 @@ const actions = {
           person: {
             data: {
               id: personId,
-              type: 'person'
+              type: 'person',
             }
           }
         }

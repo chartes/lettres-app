@@ -132,7 +132,7 @@
       },
       setResult(result) {
         this.$emit('input', result);
-        this.isOpen = false;
+        this.closeSearchBox();
       },
       onArrowDown(evt) {
         this.arrowCounter = (this.arrowCounter + 1) % this.results.length;
@@ -154,7 +154,6 @@
         this.isOpen = true;
         Vue.nextTick(() => {
           this.$refs.searchInput.focus()
-          console.log("hello")
         })
       },
       closeSearchBox () {
@@ -169,10 +168,11 @@
     watch: {
       items: function (val, oldValue) {
         // actually compare the
-        if (!!val || val.length !== oldValue.length) {
+        if (!!val && val.length !== oldValue.length) {
           this.results = val;
           this.isLoading = false;
           this.isOpen = true;
+          console.log(val, oldValue, val.length, oldValue.length, !!val, val.length !== oldValue.length)
         }
       },
     },

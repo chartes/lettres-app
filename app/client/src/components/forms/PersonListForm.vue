@@ -5,44 +5,52 @@
           :cancel="cancelAction"
           :remove="remove ? removeAction : null"
           :valid="validForm"
+          :submit="submitAction"
           :submitting="false"
   >
     <div class="person-list-form">
-    
-          <select-autocomplete-field
-            v-model="form"
-            :items="personsSearchResults"
-            :is-async="true"
-            @search="searchPerson"
-            label-key="label"
-            notSet="Rechercher une personne"
-          >
-            <template v-slot:inputActions>
-              <a class="witness-item__delete" style="font-size: small;" href="#"
-                 @click="openNewPersonForm">
-                <span>Ajoutez une nouvelle personne en cliquant ici.</span>
-              </a>
-            </template>
-            
-            <template v-slot:outputActions>
-              <a class="witness-item__delete" style="vertical-align: bottom;" href="#"
-                 @click="openNewPersonForm">
-                <icon-add/>
-              </a>
-            </template>
+       <select-autocomplete-field
+         v-model="form"
+         :items="personsSearchResults"
+         :is-async="true"
+         @search="searchPerson"
+         label-key="label"
+         notSet="Rechercher une personne"
+       >
+       <template v-slot:inputActions>
+         <a class="witness-item__delete" style="font-size: small;" href="#"
+            @click="openNewPersonForm">
+           <span>Ajoutez une nouvelle personne en cliquant ici.</span>
+         </a>
+       </template>
+       
+       <template v-slot:outputActions>
+         <a class="witness-item__delete" style="vertical-align: bottom;" href="#"
+            @click="openNewPersonForm">
+           <icon-add/>
+         </a>
+       </template>
 
-          </select-autocomplete-field>
-
+       </select-autocomplete-field>
+       
+       <div class="mt-4">
+         <field-text
+             label="Fonction occupée à ce moment"
+             placeholder="ex : Duc d'Anjou, prince marchand, etc."
+             v-model="form.func"
+         />
+       </div>
+       
     </div>
 
     <person-form v-if="personForm"
-            label="Ajouter une nouvelle personne"
-            :error="newPersonError"
-            :submit="createNewPerson"
-            :cancel="closeNewPersonForm"
-            title="Ajouter une nouvelle personne"
+       label="Ajouter une nouvelle personne"
+       :error="newPersonError"
+       :submit="createNewPerson"
+       :cancel="closeNewPersonForm"
+       title="Ajouter une nouvelle personne"
     />
-
+  
   </modal-form>
 
 </template>
@@ -56,6 +64,7 @@
   import PersonForm from './PersonForm';
   import SelectAutocompleteField from "./fields/SelectAutocompleteField";
   import IconAdd from "../ui/icons/IconAdd";
+  import TextFieldInPlace from "./fields/TextFieldInPlace";
 
   export default {
     name: "PersonListForm",
@@ -65,7 +74,8 @@
       SelectAutocompleteField,
       FieldText,
       ModalForm,
-      IconAdd
+      IconAdd,
+	    TextFieldInPlace
     },
     props: {
       title: { type: String, default: '' },
@@ -89,8 +99,9 @@
         this.$store.dispatch('persons/search', search)
       },
 
-      submitAction () {
+      submitAction() {
         this.$props.submit(this.form);
+        this.closeNewPersonForm();
       },
       cancelAction () {
         if (this.personForm) return;
@@ -109,28 +120,31 @@
       createNewPerson (person) {
         this.$store.dispatch('persons/addOne', person)
           .then(corr => {
-            this.$props.submit({
-              id: corr.id,
-              ...corr.attributes
-            });
+          	this.form = {
+		          id: corr.id,
+		          ...corr.attributes
+	          };
+	          this.closeNewPersonForm();
+	
           })
           .catch(error => {
             this.newPersonError = error.toString()
           })
       },
-
     },
     watch: {
       form (val, oldVal) {
-        this.submitAction()
+        //this.submitAction()
       },
     },
     computed: {
 
       ...mapState('persons', ['personsSearchResults']),
-
+      personIsSelected() {
+      	return !this.form.label && (this.form.label.length >= 1);
+      },
       validForm () {
-        return !!this.form.name && (this.form.name.length >= 1);
+        return !!this.form.label && (this.form.label.length >= 1);
       },
 
     }
