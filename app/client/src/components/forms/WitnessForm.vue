@@ -168,7 +168,7 @@
 				if (this.form.institution && this.form.institution.id === null) this.form.institution = null
 				if (this.form.tradition === '') this.form.tradition = null;
 				
-				if (this.form.institution === null) {
+				if (this.form.institution === null && !!this.currentWitness) {
 					this.$store.dispatch('document/removeWitnessInstitution', this.currentWitness.id)
         }
 				

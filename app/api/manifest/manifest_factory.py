@@ -17,7 +17,7 @@ class ManifestFactory(object):
 
     }
 
-    CACHE_DURATION = 60*60      # cache manifests (in seconds)
+    CACHE_DURATION = 10      # cache manifests (in seconds)
     CACHE_ENTRY_MAX = 150    # how many manifests to cache
 
     def __init__(self):
