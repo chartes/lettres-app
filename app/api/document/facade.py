@@ -149,6 +149,7 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
                 "creation-not-after": self.obj.creation_not_after,
                 "creation-label": self.obj.creation_label,
                 "transcription": self.obj.transcription,
+                "address": self.obj.address,
 
                 "is-published": False if self.obj.is_published is None else self.obj.is_published,
 
@@ -244,6 +245,7 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
             "title": self.obj.title,
             "argument": self.obj.argument,
             "transcription": self.obj.transcription,
+            "address": self.obj.address,
 
             "witnesses": [{"id": w.id, "content": w.content} for w in self.obj.witnesses],
             "languages": [{"id": l.id, "code": l.code} for l in self.obj.languages],
@@ -325,6 +327,7 @@ class DocumentSearchFacade(DocumentFacade):
                 "creation-not-after": self.obj.creation_not_after,
                 "creation-label": self.obj.creation_label,
                 "transcription": self.obj.transcription,
+                "address": self.obj.address,
                 "is-published": False if self.obj.is_published is None else self.obj.is_published,
             },
             "meta": self.meta,

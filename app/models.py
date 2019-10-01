@@ -59,6 +59,8 @@ class Document(db.Model, ChangesMixin):
     creation_label = db.Column(db.String)
 
     transcription = db.Column(db.Text)
+    address = db.Column(db.Text)
+
     prev_document_id = db.Column(db.Integer, db.ForeignKey('document.id'), index=True)
     is_published = db.Column(db.Boolean, index=True)
 

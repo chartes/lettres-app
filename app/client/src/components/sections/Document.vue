@@ -28,14 +28,8 @@
       <document-argument :editable="canEdit"/>
 
       <!-- dates de lieux et de temps -->
-      <div class="panel">
-        <p class="panel-heading document__transcription--title ">Transcription</p>
-        <div class="panel-block">
-          <!-- transcription -->
-          <document-transcription :editable="canEdit"/>
-        </div>
-      </div>
-      
+      <document-transcription :editable="canEdit"/>
+
       <!-- collections -->
       <document-collections :editable="canEdit"/>
       

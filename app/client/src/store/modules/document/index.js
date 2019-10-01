@@ -14,7 +14,8 @@ const TRANSLATION_MAPPING = {
   'is-published': 'Statut de publication',
   'argument': 'Argument',
   'transcription': 'Transcription',
-  'title': 'Titre'
+  'title': 'Titre',
+  'address': 'Adresse'
 };
 
 const state = {

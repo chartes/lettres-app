@@ -1,45 +1,71 @@
 <template>
-  <div class="document__transcription ">
-    <br/>
-    <header class="title">
-      <h2 class="subtitle">Lettre</h2>
-    </header>
-
-    <rich-text-editor
+  <div class="">
+    <div class="panel document__transcription">
+    
+      <header class="panel-heading">
+        <h2 class="document__transcription--title subtitle">Transcription</h2>
+      </header>
+      
+      <div class="panel-block" style="display: inline-block; width: 100%">
+        <h3 class="subtitle mt-3">Adresse</h3>
+        
+        <rich-text-editor
+            v-if="editable"
+            v-model="addressContent"
+            :formats="[['note','page','link'],['italic','superscript'],[]]"
+        >
+          <editor-save-button
+              :doc-id="document.id"
+              name="address"
+              :value="addressContent"/>
+        </rich-text-editor>
+        <div v-else class="document__transcription--content" v-html="addressContent"></div>
+      </div>
+      
+      <div class="panel-block" style="display: inline-block; width: 100%">
+        <h3 class="subtitle mt-3">Lettre</h3>
+        <rich-text-editor
             v-if="editable"
             v-model="transcriptionContent"
             :formats="[['note','page','link'],['italic','superscript'],[]]"
-    >
-      <editor-save-button
+        >
+          <editor-save-button
               :doc-id="document.id"
               name="transcription"
               :value="transcriptionContent"/>
-    </rich-text-editor>
-    <div v-else class="document__transcription--content" v-html="transcriptionContent"></div>
-
+        </rich-text-editor>
+        <div v-else class="document__transcription--content" v-html="transcriptionContent"></div>
+      </div>
+     
+    </div>
+    
     <ol v-if="notes.length" class="note-list notes">
-       <li  v-for="note in notes" :key="note.id">
-         <div class="note-item" :class="noteItemClass">
-           <div class="note-item__text" v-html="note.content"></div>
-           <a v-if="editable" @click="openNoteEdit(note)" class="note-item__edit"><icon-pen-edit/></a>
-           <a v-if="editable" @click="noteId = note.id" class="note-item__delete"><icon-bin/></a>
-         </div>
-       </li>
+      <li v-for="note in notes" :key="note.id">
+        <div class="note-item" :class="noteItemClass">
+          <div class="note-item__text" v-html="note.content"></div>
+          <a v-if="editable" @click="openNoteEdit(note)" class="note-item__edit">
+            <icon-pen-edit/>
+          </a>
+          <a v-if="editable" @click="noteId = note.id" class="note-item__delete">
+            <icon-bin/>
+          </a>
+        </div>
+      </li>
     </ol>
     <note-form
-            v-if="noteEdit"
-            title="Éditer la note"
-            :note="noteEdit"
-            :noteId="noteEditId"
-            :submit="updateNote"
-            :cancel="closeNoteEdit"
+        v-if="noteEdit"
+        title="Éditer la note"
+        :note="noteEdit"
+        :noteId="noteEditId"
+        :submit="updateNote"
+        :cancel="closeNoteEdit"
     />
     <modal-confirm-note-delete
-          v-if="noteId"
-          :note-id="noteId"
-          :cancel="cancelNoteDelete"
-          :submit="confirmNoteDelete"
-      />
+        v-if="noteId"
+        :note-id="noteId"
+        :cancel="cancelNoteDelete"
+        :submit="confirmNoteDelete"
+    />
   </div>
 </template>
 
@@ -66,13 +92,15 @@
     data () {
       return {
         transcriptionContent: '',
-        noteId: null,
+	      addressContent: '',
+	      noteId: null,
         noteEdit: false,
         noteEditId: false,
       }
     },
     mounted() {
-      this.transcriptionContent = this.document.transcription || ''
+      this.transcriptionContent = this.document.transcription || '';
+	    this.addressContent = this.document.address || ''
     },
     methods: {
       confirmNoteDelete (noteId) {
@@ -114,6 +142,14 @@
             changed = true
           }
         }
+	      if (this.addressContent) {
+		      const docAddress = removeContentEditableAttributesFromString(this.addressContent)
+		      const inAddress = pattern.test(docAddress)
+		      if (inAddress) {
+			      attributes.address = docAddress.replace(pattern, '')
+			      changed = true
+		      }
+	      }
         if (this.document.title) {
           const docTitle = removeContentEditableAttributesFromString(this.document.title)
           const inTitle = pattern.test(docTitle)
@@ -142,7 +178,8 @@
           const data = { id: this.document.id, attributes };
           this.$store.dispatch('document/save', data)
             .then(response => {
-              if (attributes.transcription) this.transcriptionContent = attributes.transcription
+              if (attributes.transcription) this.transcriptionContent = attributes.transcription;
+	            if (attributes.address) this.addressContent = attributes.address;
             })
             .catch(err => {
               console.error(err)
