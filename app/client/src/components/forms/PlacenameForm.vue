@@ -16,11 +16,13 @@
                 placeholder="ex : Troyes"
                 v-model="form.label"
         />
+        <!--
         <field-text
                 label="Description"
                 placeholder="ex : Depuis le donjon de, Château de Versailles..."
                 v-model="form.description"
         />
+       
         <field-text
             label="Longitude"
             v-model="form.long"
@@ -31,6 +33,7 @@
             v-model="form.lat"
             placeholder="ex : 88.982440908013"
         />
+         -->
         <div class="person-form__link-to-ref">
           <div class="columns">
             <div class="column is-5">

@@ -168,10 +168,12 @@
     watch: {
       items: function (val, oldValue) {
         // actually compare the
-        if ((!!val && val.length !== oldValue.length) || (!!val && val.length === 0)) {
-          this.results = val;
-          this.isLoading = false;
-          this.isOpen = true;
+        if (!!val) {
+	        if ((val.length !== oldValue.length) || (val.length === 0)) {
+		        this.results = val;
+		        this.isLoading = false;
+		        this.isOpen = true;
+	        }
         }
       },
     },
