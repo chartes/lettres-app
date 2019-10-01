@@ -208,12 +208,15 @@ class PlacenameHasRole(db.Model, ChangesMixin):
     __tablename__ = 'placename_has_role'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     __table_args__ = (
+        db.UniqueConstraint('placename_id', 'function', name='_placename_has_role_function_uc'),
         db.UniqueConstraint('placename_id', 'document_id', 'placename_role_id', name='_placename_has_role_document_uc'),
     )
 
     placename_id = db.Column(db.Integer, db.ForeignKey('placename.id', ondelete='CASCADE'), nullable=False)
     document_id = db.Column(db.Integer, db.ForeignKey('document.id', ondelete='CASCADE'), nullable=False)
     placename_role_id = db.Column(db.Integer, db.ForeignKey('placename_role.id', ondelete='CASCADE'))
+
+    function = db.Column(db.String(100), nullable=True)
 
     placename = db.relationship("Placename", backref=db.backref("placenames_having_roles"), single_parent=True)
     document = db.relationship("Document", backref=db.backref("placenames_having_roles", cascade="all, delete-orphan"),
