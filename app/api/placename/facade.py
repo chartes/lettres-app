@@ -67,7 +67,6 @@ class PlacenameFacade(JSONAPIAbstractChangeloggedFacade):
             **self.resource_identifier,
             "attributes": {
                 "label": self.obj.label,
-                "description": self.obj.description,
                 "long": self.obj.long,
                 "lat": self.obj.lat,
                 "ref": self.obj.ref,

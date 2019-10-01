@@ -24,17 +24,21 @@
       <!-- témoins -->
       <document-witnesses :editable="canEdit" :list="witnesses"/>
 
+      <!-- analyse -->
+      <document-argument :editable="canEdit"/>
+
+      <!-- dates de lieux et de temps -->
+      <div class="panel">
+        <p class="panel-heading document__transcription--title ">Transcription</p>
+        <div class="panel-block">
+          <!-- transcription -->
+          <document-transcription :editable="canEdit"/>
+        </div>
+      </div>
+      
       <!-- collections -->
       <document-collections :editable="canEdit"/>
-
-      <div class="mt-5">
-        <!-- analyse -->
-        <document-argument :editable="canEdit"/>
-  
-        <!-- transcription -->
-        <document-transcription :editable="canEdit"/>
-      </div>
-
+      
       <div class="mt-5" style="margin-left: 0;">
         <changelog v-if="current_user" v-bind:compact="true" :doc-id="doc_id" :currentUserOnly="false" page-size="10"/>
       </div>

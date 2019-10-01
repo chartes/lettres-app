@@ -1,22 +1,26 @@
 <template>
-  <div v-if="(document.argument && document.argument.length)  || editable> 0" class="document__argument">
+  <div v-if="(document.argument && document.argument.length)  || editable> 0"
+       class="panel mt-5">
 
-    <header class="argument__header">
+    <header class="panel-heading argument__header">
       <h2 class="argument__title subtitle">Analyse</h2>
     </header>
+    
+    <div class="panel-block">
+      <rich-text-editor
+          v-if="editable"
+          v-model="form"
+          :enabled="editorEnabled"
+          :formats="[['note','link'],['italic','superscript'],['person','location','cite']]"
+      >
+        <editor-save-button
+            :doc-id="document.id"
+            name="argument"
+            :value="form"/>
+      </rich-text-editor>
+      <div v-else class="argument__content" v-html="form"></div>
 
-    <rich-text-editor
-            v-if="editable"
-            v-model="form"
-            :enabled="editorEnabled"
-            :formats="[['note','link'],['bold','italic','superscript','underline'],['person','location','cite']]"
-    >
-      <editor-save-button
-              :doc-id="document.id"
-              name="argument"
-              :value="form"/>
-    </rich-text-editor>
-    <div v-else class="argument__content" v-html="form"></div>
+    </div>
 
   </div>
 </template>

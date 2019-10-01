@@ -67,7 +67,6 @@ class PersonFacade(JSONAPIAbstractChangeloggedFacade):
             **self.resource_identifier,
             "attributes": {
                 "label": self.obj.label,
-                "description": self.obj.description,
                 "ref": self.obj.ref,
             },
             "meta": self.meta,

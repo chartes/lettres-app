@@ -1,13 +1,14 @@
 <template>
-  <div class="document__transcription document__subsection">
+  <div class="document__transcription ">
     <br/>
     <header class="title">
-      <h2 class="document__transcription--title subtitle">Transcription</h2>
+      <h2 class="subtitle">Lettre</h2>
     </header>
 
     <rich-text-editor
             v-if="editable"
             v-model="transcriptionContent"
+            :formats="[['note','page','link'],['italic','superscript'],[]]"
     >
       <editor-save-button
               :doc-id="document.id"

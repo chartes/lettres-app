@@ -1,6 +1,6 @@
 <template>
   
-  <div class="field rich-text-editor">
+  <div class="field rich-text-editor" style="width: 100%">
     
     <field-label v-if="!!label" :label="label"/>
     
