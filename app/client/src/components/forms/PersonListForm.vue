@@ -38,6 +38,7 @@
              label="Fonction occupée à ce moment"
              placeholder="ex : Duc d'Anjou, prince marchand, etc."
              v-model="form.func"
+             :disabled="!validForm"
          />
        </div>
        
@@ -140,9 +141,6 @@
     computed: {
 
       ...mapState('persons', ['personsSearchResults']),
-      personIsSelected() {
-      	return !this.form.label && (this.form.label.length >= 1);
-      },
       validForm () {
         return !!this.form.label && (this.form.label.length >= 1);
       },

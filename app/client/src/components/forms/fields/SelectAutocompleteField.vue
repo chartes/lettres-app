@@ -172,7 +172,6 @@
           this.results = val;
           this.isLoading = false;
           this.isOpen = true;
-          console.log(val, oldValue, val.length, oldValue.length, !!val, val.length !== oldValue.length)
         }
       },
     },

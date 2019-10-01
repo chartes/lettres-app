@@ -126,7 +126,7 @@ class JSONAPIAbstractFacade(object):
         except Exception as e:
             print(e)
             errors = {
-                "status": 403,
+                "status": 409,
                 "title": "Error creating resource with data: %s" % str([attributes, related_resources]),
                 "detail": str(e)
             }

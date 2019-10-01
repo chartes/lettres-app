@@ -70,10 +70,13 @@ const actions = {
             })
     },
 
-    linkToDocument({commit, rootState}, {roleId, placenameId}) {
+    linkToDocument({commit, rootState}, {roleId, placenameId, func}) {
         const data = {
             data: {
                 type: 'placename-has-role',
+                attributes: {
+                    function: func
+                },
                 relationships: {
                     document: {
                         data: {

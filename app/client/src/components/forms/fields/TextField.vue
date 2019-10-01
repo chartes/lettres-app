@@ -18,6 +18,7 @@
                :value="value"
                :tabindex="tabindex"
                @input="updateField"
+               :disabled="disabled"
         />
       </div>
     </div>
@@ -45,6 +46,7 @@
       spellcheck: { type: Boolean, default: false },
       required: { type: Boolean, default: false },
       tabindex: {},
+	    disabled: {type: Boolean, default: false}
     },
     methods: {
       updateField() {

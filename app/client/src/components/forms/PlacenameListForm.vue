@@ -6,6 +6,7 @@
           :remove="remove ? removeAction : null"
           :valid="validForm"
           :submitting="false"
+          :submit="submitAction"
   >
     <div class="person-list-form">
           <select-autocomplete-field
@@ -31,6 +32,15 @@
             </template>
             
           </select-autocomplete-field>
+      
+          <div class="mt-4">
+            <field-text
+                label="Description du lieu"
+                placeholder="ex : Depuis le camp militaire aux abords de la ville"
+                v-model="form.func"
+                :disabled="!validForm"
+            />
+          </div>
     </div>
 
     <placename-form v-if="placenameForm"
@@ -121,17 +131,16 @@
     },
     watch: {
       form (val, oldVal) {
-        this.submitAction()
+        //this.submitAction()
       },
     },
     computed: {
 
       ...mapState('placenames', ['placenamesSearchResults']),
-
-      validForm () {
-        return !!this.form.name && (this.form.name.length >= 1);
-      },
-
+	
+	    validForm() {
+		    return !!this.form.label && (this.form.label.length >= 1);
+	    },
     }
   }
 </script>

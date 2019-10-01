@@ -16,7 +16,7 @@
              class="tags has-addons are-medium document-placenames__senders-list mb-1">
                 <span class="tag">
                      <a :href="c.placename.ref" target="_blank">
-                      {{ c.placename.label }}
+                      {{ !!c.placename.func ? `${c.placename.label}, ${c.placename.func}` : c.placename.label }}
                     </a>
                 </span>
           <a v-if="editable" class="tag is-delete" @click.prevent="unlinkPlacenameFromDoc(c)"></a>
@@ -39,7 +39,7 @@
              class="tags has-addons are-medium document-placenames__senders-list mb-1">
                 <span class="tag">
                      <a :href="c.placename.ref" target="_blank">
-                      {{ c.placename.label }}
+                      {{ !!c.placename.func ? `${c.placename.label}, ${c.placename.func}` : c.placename.label }}
                     </a>
                 </span>
           <a v-if="editable" class="tag is-delete" @click.prevent="unlinkPlacenameFromDoc(c)"></a>
@@ -98,7 +98,8 @@
                 const roleId = role && role.id ? role.id : null;
                 this.$store.dispatch('placenames/linkToDocument', {
                     placenameId,
-                    roleId
+                    roleId,
+		                func: placename.func
                 })
                     .then(placenameHasRole => {
                         if (!!placenameHasRole) {
