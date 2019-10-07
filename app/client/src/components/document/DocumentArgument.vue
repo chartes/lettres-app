@@ -3,7 +3,7 @@
        class="panel mt-5">
 
     <header class="panel-heading argument__header">
-      <h2 class="argument__title subtitle">Analyse</h2>
+      <h2 class="argument__title subtitle">Analyse de la lettre</h2>
     </header>
     
     <div class="panel-block">
@@ -11,7 +11,7 @@
           v-if="editable"
           v-model="form"
           :enabled="editorEnabled"
-          :formats="[['note','link'],['italic','superscript'],['person','location','cite']]"
+          :formats="[['note','link'],['italic','superscript'],['person','location']]"
       >
         <editor-save-button
             :doc-id="document.id"
