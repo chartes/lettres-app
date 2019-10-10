@@ -31,42 +31,25 @@
                       v-model="witness.tradition"
                   />
                   </div>
-                    <div class="column">
-                  <select-autocomplete-field
-                      label="Institution"
-                      v-model="witness.institution"
-                      :items="institutionsSearchResults"
-                      :is-async="true"
-                      @search="searchInstitution"
-                      label-key="name"
-                  >
-                    <button
-                        class="button is-outlined is-link"
-                        @click="openInstitutionForm">
-                      Ajouter une institution
-                    </button>
-                  </select-autocomplete-field>
-                    </div>
+                  <div class="column">
+                    <institution-list-form :witness="witness"></institution-list-form>
+                  </div>
                 </div>
 
                 <rich-text-editor
                     label="Témoin"
                     v-model="witness.content"
+                    :formats="[['italic','superscript'], ['note','link']] "
+                    :options="{placeholder: 'Ex. Bibl. nat. Fr., Français 3512, fol. 53r'}"
                 />
                 <rich-text-editor
-                    label="Côte du témoin"
+                    label="Cote / unité de conservation"
                     v-model="witness['classification-mark']"
-                    :formats="[['italic','superscript','note']]"
+                    :formats="[['italic','superscript'], ['link']]"
+                    :options="{placeholder: 'Ex. Français 3512, Ms. 564, K 35'}"
                 />
               </form>
             </div>
-            <institution-form
-                v-if="institutionForm"
-                title="Ajouter une institution"
-                :submit="submitInstitutionForm"
-                :cancel="closeInstitutionForm"
-                :error="institutionError"
-            />
             
           </v-layout>
         </v-container>
@@ -85,7 +68,6 @@
 <script>
     import {mapState} from 'vuex';
     import LoadingIndicator from "../ui/LoadingIndicator";
-    import InstitutionForm from "./InstitutionForm";
     import SelectAutocompleteField from "./fields/SelectAutocompleteField";
     import RichTextEditor from "./fields/RichTextEditor";
     import FieldLabel from "./fields/FieldLabel";
@@ -93,11 +75,12 @@
     import FieldSelect from "./fields/SelectField";
     import {statuses, traditions} from './data';
     import {baseAppURL} from "../../modules/http-common";
+    import InstitutionListForm from "./InstitutionListForm";
 
     export default {
         name: "add-document-button",
         components: {
-            InstitutionForm,
+            InstitutionListForm,
             LoadingIndicator,
             SelectAutocompleteField,
             RichTextEditor,

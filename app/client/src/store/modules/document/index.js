@@ -318,6 +318,7 @@ const actions = {
     });
   },
   removeWitnessInstitution({commit}, witnessId) {
+    const http = http_with_csrf_token();
     return http.patch(`/witnesses/${witnessId}/relationships/institution`, {data: null});
   },
   addWitness ({commit, state}, witness) {

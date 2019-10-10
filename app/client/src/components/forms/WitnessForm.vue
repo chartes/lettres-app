@@ -31,43 +31,7 @@
         
         
         <div style="margin-bottom: 1em;">
-          <span style="margin-bottom: 1em;">
-            Institution :
-          </span>
-          <div>
-            <div class="institution-list-form">
-              <select-autocomplete-field
-                  v-model="form.institution"
-                  :items="institutionsSearchResults"
-                  :is-async="true"
-                  @search="searchInstitution"
-                  label-key="name"
-                  notSet="Non renseignée"
-              >
-                <template v-slot:inputActions>
-         
-                </template>
-                <template v-slot:outputActions>
-                  <a class="witness-item__delete" style="vertical-align: bottom;" href="#" @click="openNewInstitutionForm">
-                    <icon-add/>
-                  </a>
-                  <a class="witness-item__delete" style="vertical-align: bottom;" href="#" @click="clearInstitution">
-                    <icon-bin/>
-                  </a>
-                </template>
-              </select-autocomplete-field>
-  
-      
-              
-            </div>
-            <institution-form v-if="institutionForm"
-                              label="Ajouter une nouvelle institution"
-                              :error="institutionError"
-                              :submit="createNewInstitution"
-                              :cancel="closeNewInstitutionForm"
-                              title="Ajouter une nouvelle institution"
-            />
-          </div>
+          <institution-list-form :witness="form"></institution-list-form>
         </div>
         
         <rich-text-editor
@@ -99,10 +63,12 @@
 	import InstitutionForm from './InstitutionForm';
 	import LaunchButton from './LaunchButton';
 	import IconBin from "../ui/icons/IconBin";
+	import InstitutionListForm from "./InstitutionListForm";
 	
 	export default {
 		name: "witness-form",
 		components: {
+			InstitutionListForm,
 			InstitutionForm,
 			LoadingIndicator,
 			SelectAutocompleteField,
@@ -127,8 +93,8 @@
 			return {
 				form: { ...this.$props.witness },
 				loading: false,
-				institutionForm: false,
-				institutionError: null,
+				//institutionForm: false,
+				//institutionError: null,
 			}
 		},
 		mounted () {
@@ -138,15 +104,10 @@
 			}
 		},
 		methods: {
+			/*
 			createNewInstitution(institution) {
 				this.$store.dispatch('institutions/addOne', institution)
 					.then(corr => {
-						/*
-						this.$props.submit({
-							id: corr.id,
-              institution: institution
-						});
-						*/
 					})
 					.catch(error => {
 						this.institutionError = error.toString()
@@ -164,6 +125,7 @@
       clearInstitution() {
         this.form.institution = null;
       },
+      */
 			submitAction () {
 				if (this.form.institution && this.form.institution.id === null) this.form.institution = null
 				if (this.form.tradition === '') this.form.tradition = null;
@@ -175,7 +137,7 @@
 				this.$props.submit(this.form);
 			},
 			cancelAction () {
-				if (this.institutionForm) return;
+				//if (this.institutionForm) return;
 				this.$props.cancel();
 			},
 			removeAction () {

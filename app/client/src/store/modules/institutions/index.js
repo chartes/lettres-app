@@ -27,7 +27,7 @@ const mutations = {
   },
 
   SEARCH_RESULTS (state, payload) {
-    payload = [{id: null, name: 'Non renseignée', ref: null}, ...payload];
+    payload = [...payload];
     state.institutionsSearchResults = payload;
   },
   

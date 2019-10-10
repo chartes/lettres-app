@@ -21,8 +21,6 @@ function http_with_csrf_token() {
   });
 }
 
-export default http_with_csrf_token;
-/*
 http.interceptors.response.use(function (response) {
   return response
 }, function (error) {
@@ -42,5 +40,7 @@ http.interceptors.response.use(function (response) {
   }
   return Promise.reject(error)
 });
-*/
+
+export default http_with_csrf_token;
+
 
