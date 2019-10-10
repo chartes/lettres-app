@@ -26,7 +26,7 @@
         <rich-text-editor
             label="Témoin"
             v-model="form.content"
-            :formats="[['note','link'],['bold','italic','superscript','underline','del'],[]] "
+            :formats="[['italic','superscript'], ['note','link']] "
             :options="{placeholder: 'Ex. Bibl. nat. Fr., Français 3512, fol. 53r'}"/>
         
         
@@ -73,7 +73,7 @@
         <rich-text-editor
             label="Cote / unité de conservation"
             v-model="form['classification-mark']"
-            :formats="[['italic','superscript','note']]"
+            :formats="[['italic','superscript'], ['link']]"
             :options="{placeholder: 'Ex. Français 3512, Ms. 564, K 35'}"
         />
       </form>

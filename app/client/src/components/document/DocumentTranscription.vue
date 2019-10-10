@@ -12,7 +12,7 @@
         <rich-text-editor
             v-if="editable"
             v-model="addressContent"
-            :formats="[['note'],['italic','superscript'],[]]"
+            :formats="[['italic','superscript'],['note']]"
         >
           <editor-save-button
               :doc-id="document.id"
@@ -27,7 +27,7 @@
         <rich-text-editor
             v-if="editable"
             v-model="transcriptionContent"
-            :formats="[['note','page','link'],['italic','superscript'],['person','location']]"
+            :formats="[['italic','superscript', 'page'], ['person','location'], ['note']]"
         >
           <editor-save-button
               :doc-id="document.id"

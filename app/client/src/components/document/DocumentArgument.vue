@@ -11,7 +11,7 @@
           v-if="editable"
           v-model="form"
           :enabled="editorEnabled"
-          :formats="[['note','link'],['italic','superscript'],['person','location']]"
+          :formats="[['italic','superscript'],['person','location'],['note','link']]"
       >
         <editor-save-button
             :doc-id="document.id"
