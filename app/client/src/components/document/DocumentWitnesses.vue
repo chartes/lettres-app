@@ -31,7 +31,7 @@
    
     <witness-form
             v-if="editMode === 'new' || editMode === 'edit'"
-            :title="editMode === 'new' ? 'Nouveau témoin' : 'Éditer le témoin'"
+            :title="editMode === 'new' ? 'Nouveau témoin' : 'Décrire le témoin'"
             :witness="selectedWitness"
             :witnessId="selectedWitnessId"
             :submit="editMode === 'new' ? addWitness : updateWitness"

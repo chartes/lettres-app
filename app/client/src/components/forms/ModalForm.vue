@@ -30,7 +30,7 @@
       submit: { type: Function},
       remove: { type: Function},
       valid: { type: Boolean, required: true},
-      submitText: { type: String, default: 'Soumettre'},
+      submitText: { type: String, default: 'Enregistrer'},
       removeText: {type: String, default: 'Supprimer'},
       submitting: { type: Boolean, default: false},
     },

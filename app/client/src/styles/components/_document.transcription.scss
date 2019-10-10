@@ -12,3 +12,22 @@
 
   }
 }
+
+.document__transcription {
+
+  &--tr-content {
+    .ql-editor  {
+      counter-reset: paragraph;
+
+      p::before {
+        color: #AAAAAA;
+        counter-increment: paragraph;
+        content: "¶" counter(paragraph);
+        padding-right: 8px;
+      }
+
+    }
+
+  }
+
+}

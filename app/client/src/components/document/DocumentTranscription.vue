@@ -12,7 +12,7 @@
         <rich-text-editor
             v-if="editable"
             v-model="addressContent"
-            :formats="[['note','link'],['italic','superscript'],['person','location']]"
+            :formats="[['note'],['italic','superscript'],[]]"
         >
           <editor-save-button
               :doc-id="document.id"
@@ -22,7 +22,7 @@
         <div v-else class="document__transcription--content" v-html="addressContent"></div>
       </div>
       
-      <div class="panel-block" style="display: inline-block; width: 100%">
+      <div class="panel-block document__transcription--tr-content" style="display: inline-block; width: 100%">
         <h3 class="subtitle mt-3">Lettre</h3>
         <rich-text-editor
             v-if="editable"
