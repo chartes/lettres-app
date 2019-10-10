@@ -65,7 +65,6 @@
   import PersonForm from './PersonForm';
   import SelectAutocompleteField from "./fields/SelectAutocompleteField";
   import IconAdd from "../ui/icons/IconAdd";
-  import TextFieldInPlace from "./fields/TextFieldInPlace";
 
   export default {
     name: "PersonListForm",
@@ -75,8 +74,7 @@
       SelectAutocompleteField,
       FieldText,
       ModalForm,
-      IconAdd,
-	    TextFieldInPlace
+      IconAdd
     },
     props: {
       title: { type: String, default: '' },

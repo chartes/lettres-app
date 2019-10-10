@@ -31,8 +31,9 @@
          @click="enterEditMode"
          @mouseover="overField"
          @mouseout="outField">
-      <div class="field-title__control control">
-        <span class="field-title__input field-title__input--fake" :class="unknownClass" v-html="value || notSet"/>
+      <div class=" control">
+        <span class=" field-title__input--fake"
+              :class="userClass" v-html="value || notSet"/>
         <component class="field-title__icon" :is="editButtonIcon"/>
       </div>
     </div>
@@ -47,7 +48,7 @@
 <script>
   import FieldLabel from './FieldLabel';
   import TextFieldMixins from './TextFieldMixins';
-  import RichTextEditor from './RichTextEditor';
+  import RichTextEditor from "./RichTextEditor";
   import IconSave from '../../ui/icons/IconSave';
   import IconPenEdit from '../../ui/icons/IconPenEdit';
   import IconError from '../../ui/icons/IconError';
@@ -62,6 +63,9 @@
           return ['normal', 'success', 'error', 'loading', 'disabled' ].indexOf(value) !== -1
         },
         default: 'normal'
+      },
+      'specificClass' : {
+      	default: null
       }
     },
     methods: {
@@ -76,13 +80,10 @@
           case 'normal':
           case 'disabled':
             return 'is-success'
-            break
           case 'success':
             return 'is-success'
-            break
           case 'error':
             return 'is-danger'
-            break
           case 'loading':
             return 'is-loading'
         }
@@ -93,15 +94,15 @@
           case 'loading':
           case 'disabled':
             return IconSave;
-            break;
           case 'success':
             return IconSuccess;
-            break;
           case 'error':
             return IconError;
-            break;
         }
       },
+      userClass() {
+      	return !!this.$props.specificClass ? this.$props.specificClass  : '';
+      }
     },
     watch: {
       initialValue (val, oldVal) {

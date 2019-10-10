@@ -27,8 +27,9 @@
             label="Témoin"
             v-model="form.content"
             :formats="[['italic','superscript'], ['note','link']] "
-            :options="{placeholder: 'Ex. Bibl. nat. Fr., Français 3512, fol. 53r'}"/>
-        
+            :options="{placeholder: 'Ex. Bibl. nat. Fr., Français 3512, fol. 53r'}"
+            :multiline="false"
+/>
         
         <div style="margin-bottom: 1em;">
           <institution-list-form :witness="form"></institution-list-form>
@@ -39,6 +40,7 @@
             v-model="form['classification-mark']"
             :formats="[['italic','superscript'], ['link']]"
             :options="{placeholder: 'Ex. Français 3512, Ms. 564, K 35'}"
+            :multiline="false"
         />
       </form>
     </div>
@@ -92,9 +94,7 @@
 		data() {
 			return {
 				form: { ...this.$props.witness },
-				loading: false,
-				//institutionForm: false,
-				//institutionError: null,
+				loading: false
 			}
 		},
 		mounted () {
@@ -104,28 +104,6 @@
 			}
 		},
 		methods: {
-			/*
-			createNewInstitution(institution) {
-				this.$store.dispatch('institutions/addOne', institution)
-					.then(corr => {
-					})
-					.catch(error => {
-						this.institutionError = error.toString()
-					})
-			},
-			searchInstitution(search) {
-				this.$store.dispatch('institutions/search', search)
-			},
-			openNewInstitutionForm() {
-				this.institutionForm = true
-			},
-			closeNewInstitutionForm() {
-				this.institutionForm = false
-			},
-      clearInstitution() {
-        this.form.institution = null;
-      },
-      */
 			submitAction () {
 				if (this.form.institution && this.form.institution.id === null) this.form.institution = null
 				if (this.form.tradition === '') this.form.tradition = null;
@@ -137,7 +115,6 @@
 				this.$props.submit(this.form);
 			},
 			cancelAction () {
-				//if (this.institutionForm) return;
 				this.$props.cancel();
 			},
 			removeAction () {

@@ -26,27 +26,29 @@
                 v-on:changed="fieldChanged"/>
       </div>
       <div class="column is-one-third">
-        <text-field-in-place
-                :tabulation-index="0"
-                label="Date de rédaction (étiquette)"
-                name="creation-label"
-                not-set="Inconnue"
-                :initial-value="document['creation-label']"
-                :editable="editable"
-                v-on:changed="fieldChanged"/>
+        <title-field-in-place
+            label="Date de rédaction (étiquette) :"
+            name="creation-label"
+            :not-set="null"
+            :initial-value="document['creation-label']"
+            :editable="editable"
+            :status="creationLabelStatus"
+            specific-class="field-date__input"
+            v-on:changed="fieldChanged"
+        />
       </div>
     </div>
   </div>
 </template>
 <script>
   import { mapState } from 'vuex';
-  import TextFieldInPlace from '../forms/fields/TextFieldInPlace';
   import DateField from '../forms/fields/DateField';
   import DocumentPlacenames from "./DocumentPlacenames";
+  import TitleFieldInPlace from "../forms/fields/TitleFieldInPlace";
 
   export default {
     name: 'DocumentAttributes',
-    components: {DateField, TextFieldInPlace, DocumentPlacenames },
+    components: {DateField, TitleFieldInPlace, DocumentPlacenames },
     props: {
       editable: {
         type: Boolean,
@@ -58,14 +60,31 @@
     },
     data() {
       return {
-        titleStatus: 'normal'
+	      creationLabelStatus: 'normal'
       }
     },
     methods: {
       fieldChanged (fieldProps) {
         const data = { id: this.document.id, attributes: {} };
         data.attributes[fieldProps.name] = fieldProps.value;
-        this.$store.dispatch('document/save', data)
+        this.$store.dispatch('document/save', data).then(response => {
+        	
+        	switch (fieldProps.name) {
+            case 'creation-label':
+	            this.creationLabelStatus = 'success';
+	            setTimeout(() => {
+		            this.creationLabelStatus = "normal"
+	            }, 3000)
+		          break;
+	        }
+       
+        }).catch(e => {
+	        switch (fieldProps.name) {
+		        case 'creation-label':
+			        this.creationLabelStatus = 'error';
+		          break;
+	        }
+        });
       },
 
     },

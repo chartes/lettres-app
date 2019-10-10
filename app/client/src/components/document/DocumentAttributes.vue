@@ -10,6 +10,7 @@
               :initial-value="document.title"
               :editable="editable"
               :status="titleStatus"
+              specific-class="field-title__input"
               v-on:changed="titleChanged"
       />
     </header>
