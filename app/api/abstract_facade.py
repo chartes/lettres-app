@@ -1,7 +1,6 @@
-import pprint
 from flask import current_app, request
 
-from app import db, api_bp
+from app import db
 
 
 class JSONAPIAbstractFacade(object):
@@ -12,7 +11,7 @@ class JSONAPIAbstractFacade(object):
     TYPE = "ABSTRACT-TYPE"
     TYPE_PLURAL = "ABSTRACT-TYPE-PLURAL"
 
-    ITEMS_PER_PAGE = 1000 #TODO: au delà il faut passer par l'api scroll d'elastic search
+    ITEMS_PER_PAGE = 1000
 
     def __init__(self, url_prefix, obj, with_relationships_links=True, with_relationships_data=True):
         self.obj = obj
@@ -343,13 +342,13 @@ class JSONAPIAbstractFacade(object):
         return to_be_reindexed
 
     def add_to_index(self, propagate=False):
-        from app.search import SearchIndexManager
+        from app.api.search import SearchIndexManager
         for data in self.get_data_to_index_when_added(propagate):
             print("add to index", self.obj, data["index"], data["id"])
             SearchIndexManager.add_to_index(index=data["index"], id=data["id"], payload=data["payload"])
 
     def remove_from_index(self, propagate=False):
-        from app.search import SearchIndexManager
+        from app.api.search import SearchIndexManager
         for data in self.get_data_to_index_when_removed(propagate):
             SearchIndexManager.remove_from_index(index=data["index"], id=data["id"])
 

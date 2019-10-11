@@ -71,5 +71,5 @@ class InstitutionFacade(JSONAPIAbstractFacade):
         return institution_data
 
     def remove_from_index(self, propagate):
-        from app.search import SearchIndexManager
+        from app.api.search import SearchIndexManager
         SearchIndexManager.remove_from_index(index=self.get_index_name(), id=self.id)

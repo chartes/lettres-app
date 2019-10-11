@@ -1,6 +1,3 @@
-import pprint
-
-from app import db
 from app.api.abstract_facade import JSONAPIAbstractChangeloggedFacade
 from app.models import Language
 
@@ -77,7 +74,7 @@ class LanguageFacade(JSONAPIAbstractChangeloggedFacade):
             return languages_data + self.get_relationship_data_to_index(rel_name="documents")
 
     def remove_from_index(self, propagate):
-        from app.search import SearchIndexManager
+        from app.api.search import SearchIndexManager
 
         SearchIndexManager.remove_from_index(index=self.get_index_name(), id=self.id)
 

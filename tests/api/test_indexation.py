@@ -18,14 +18,14 @@ class TestIndexation(TestBaseServer):
             self.app.elasticsearch.indices.delete(index=index_name, ignore=[400, 404])  # remove all records
 
             from app.models import Document
-            from app.search import SearchIndexManager
+            from app.api.search import SearchIndexManager
             for doc in Document.query.all():
                 f_obj = DocumentFacade("", doc)
                 for data in f_obj.get_data_to_index_when_added():
                     SearchIndexManager.add_to_index(index=index_name, id=doc.id, payload=data)
 
     def reindex_document(self, id):
-        from app.search import SearchIndexManager
+        from app.api.search import SearchIndexManager
         f_obj, errors, kwargs = DocumentFacade.get_resource_facade("", id)
         index_name = DocumentFacade.get_index_name()
         for data in f_obj.get_data_to_index_when_added():

@@ -19,14 +19,14 @@ error_403_privileges = JSONAPIResponseFactory.make_errors_response(
     status=403
 )
 
-def error_403_unhandled_error(e):
+def error_400_unhandled_error(e):
     return JSONAPIResponseFactory.make_errors_response(
         {
-            "status": 403,
+            "status": 400,
             "title": "Unhandled error. Check your data",
             "details": str(e)
         },
-        status=403
+        status=400
 )
 
 
