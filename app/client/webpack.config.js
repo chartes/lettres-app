@@ -75,6 +75,7 @@ module.exports = {
       'vue$': 'vue/dist/vue.esm.js',
       'parchment': path.resolve(__dirname, 'node_modules/parchment/src/parchment.ts'),
       'quill$': path.resolve(__dirname, 'node_modules/quill/quill.js'),
+      '@': resolve('src'),
     },
     extensions: ['*', '.js', '.vue', '.json', '.ts']
   },

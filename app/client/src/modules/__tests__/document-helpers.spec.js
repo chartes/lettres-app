@@ -1,4 +1,4 @@
-import {getPersons, getInstitution, getLanguages, getTradition} from '../document-helpers'
+import {getPersons, getInstitution, getLanguages} from '../document-helpers'
 
 const includedIn = [
   {
@@ -403,6 +403,7 @@ describe('Persons helpers', () => {
     expect(getInstitution(incIn)).toEqual({ "id": 11, "name": "Marriage parent share.", "ref": "https://kelley.biz/posts/wp-content/author.html" })
   })
 
+  /*
   test('getTradition', () => {
 
     const incIn = [
@@ -436,7 +437,7 @@ describe('Persons helpers', () => {
 
     expect(getTradition(incIn)).toEqual({ "id": 1, "label": "south", "description": "Pm interview everything sound." })
   })
-
+*/
   test('getLanguages', () => {
 
     const incIn = [

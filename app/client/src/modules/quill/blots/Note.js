@@ -5,9 +5,9 @@
 */
 
 import Parchment from 'parchment';
-import Quill from 'quill/quill';
+//import Quill from 'quill/quill';
 
-const Embed  = Quill.import('blots/embed')
+//const Embed  = Quill.import('blots/embed')
 
 const ATTRIBUTES = [
   'href',

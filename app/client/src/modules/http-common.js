@@ -38,6 +38,7 @@ http.interceptors.response.use(function (response) {
 
     });
   }
+  // TODO: resolve plutôt ?
   return Promise.reject(error)
 });
 

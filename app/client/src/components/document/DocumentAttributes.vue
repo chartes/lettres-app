@@ -14,7 +14,6 @@
               v-on:changed="titleChanged"
       />
     </header>
-
     <div class="columns is-multiline subtitle" v-if="editAttributes">
       <div class="column">
         <multiselect-field

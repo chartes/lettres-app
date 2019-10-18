@@ -9,7 +9,6 @@
                 </div>
             </div>
 
-
             <div class="control field-multiselect__actions"
                  v-if="editable && optionsList.length > ids.length"
                  v-click-outside="hideList"

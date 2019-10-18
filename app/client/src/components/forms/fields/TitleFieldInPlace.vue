@@ -1,7 +1,6 @@
 <template>
   <div class="field-title">
     <field-label v-if="!!label" :label="label" :add-colons="false"/>
-
     <div class="field field-title__field" v-if="editable && editMode" ref="hover">
       <div class="control">
         <rich-text-editor
