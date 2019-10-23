@@ -125,31 +125,31 @@ def create_app(config_name="dev"):
             return url_for(endpoint) if endpoint else url_for('app_bp.index')
 
     # Initialize Flask-User
-    app.user_manager = CustomUserManager(app, db, UserClass=User, UserInvitationClass=UserInvitation)
+    #app.user_manager = CustomUserManager(app, db, UserClass=User, UserInvitationClass=UserInvitation)
 
-    from flask_user import user_changed_username, user_confirmed_email, user_sent_invitation, user_registered
-
-    def reindex_user(user):
-        print("reindex user", user)
-        from app.api.user.facade import UserFacade
-        f_obj = UserFacade(url_prefix="", obj=user, with_relationships_data=False, with_relationships_links=False)
-        f_obj.reindex("insert", propagate=False)
-
-    @user_changed_username.connect_via(app)
-    def user_changed_username(sender, **extra):
-        reindex_user(extra['user'])
-
-    @user_confirmed_email.connect_via(app)
-    def user_confirmed_email(sender, **extra):
-        reindex_user(extra['user'])
-
-    @user_sent_invitation.connect_via(app)
-    def user_sent_invitation(sender, **extra):
-        reindex_user(extra['user'])
-
-    @user_registered.connect_via(app)
-    def user_registered(sender, **extra):
-        reindex_user(extra['user'])
+    #from flask_user import user_changed_username, user_confirmed_email, user_sent_invitation, user_registered
+    #
+    #def reindex_user(user):
+    #    print("reindex user", user)
+    #    from app.api.user.facade import UserFacade
+    #    f_obj = UserFacade(url_prefix="", obj=user, with_relationships_data=False, with_relationships_links=False)
+    #    f_obj.reindex("insert", propagate=False)
+    #
+    #@user_changed_username.connect_via(app)
+    #def user_changed_username(sender, **extra):
+    #    reindex_user(extra['user'])
+    #
+    #@user_confirmed_email.connect_via(app)
+    #def user_confirmed_email(sender, **extra):
+    #    reindex_user(extra['user'])
+    #
+    #@user_sent_invitation.connect_via(app)
+    #def user_sent_invitation(sender, **extra):
+    #    reindex_user(extra['user'])
+    #
+    #@user_registered.connect_via(app)
+    #def user_registered(sender, **extra):
+    #    reindex_user(extra['user'])
 
     """
     ========================================================

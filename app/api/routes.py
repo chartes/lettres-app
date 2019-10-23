@@ -1,6 +1,8 @@
 from flask import jsonify, current_app, request, url_for
 from flask_jwt_extended import create_access_token, set_access_cookies, \
-    unset_jwt_cookies
+    unset_jwt_cookies, create_refresh_token
+from sqlalchemy import or_
+from werkzeug.security import safe_str_cmp, check_password_hash
 
 from app import api_bp
 from app.models import User
@@ -53,6 +55,33 @@ def create_token(api_version):
 @api_bp.route('/api/<api_version>/token/refresh')
 def refresh_token_route(api_version):
     return refresh_token(current_user)
+
+
+@api_bp.route('/api/<api_version>/login', methods=['POST'])
+def login(api_version):
+    username = request.json.get('email', None)
+    password = request.json.get('password', None)
+
+    user = User.query.filter(or_(User.username == username, User.email == username)).first()
+    print(user, username, password)
+    from app.api.decorators import error_401
+
+    if user is None:
+        return error_401
+
+    passwords_match = check_password_hash(user.password, password)
+    if not passwords_match:
+        print("password missmatch", user.password, password)
+        return error_401
+
+    u = user.to_json()
+    access_token = create_access_token(identity=u, fresh=True)
+    refresh_token = create_refresh_token(u)
+
+    ret = {'access_token': access_token, 'refresh_token': refresh_token}
+    return jsonify(ret), 200
+
+
 
 
 # register manifest generation api url
