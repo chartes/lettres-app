@@ -1,6 +1,7 @@
+import flask
 from flask import jsonify, current_app, request, url_for
 from flask_jwt_extended import create_access_token, set_access_cookies, \
-    unset_jwt_cookies, create_refresh_token
+    unset_jwt_cookies, create_refresh_token, jwt_refresh_token_required, get_jwt_identity, set_refresh_cookies
 from sqlalchemy import or_
 from werkzeug.security import safe_str_cmp, check_password_hash
 
@@ -56,14 +57,27 @@ def create_token(api_version):
 def refresh_token_route(api_version):
     return refresh_token(current_user)
 
+def create_tokens(user):
+    u = user.to_json()
+    access_token = create_access_token(identity=u, fresh=True)
+    refresh_token = create_refresh_token(u)
+    data = {
+        'username': user.username,
+        'firstname': user.first_name,
+        'lastname': user.last_name,
+        'id': user.id,
+        'email': user.email,
+        'roles': [r.name for r in user.roles]
+    }
+    return data, access_token, refresh_token,
+
 
 @api_bp.route('/api/<api_version>/login', methods=['POST'])
 def login(api_version):
-    username = request.json.get('email', None)
-    password = request.json.get('password', None)
-
+    json = request.get_json(force=True)
+    username = json.get('email', None)
+    password = json.get('password', None)
     user = User.query.filter(or_(User.username == username, User.email == username)).first()
-    print(user, username, password)
     from app.api.decorators import error_401
 
     if user is None:
@@ -71,17 +85,38 @@ def login(api_version):
 
     passwords_match = check_password_hash(user.password, password)
     if not passwords_match:
-        print("password missmatch", user.password, password)
         return error_401
 
-    u = user.to_json()
-    access_token = create_access_token(identity=u, fresh=True)
-    refresh_token = create_refresh_token(u)
+    data, access_token, refresh_token = create_tokens(user)
 
-    ret = {'access_token': access_token, 'refresh_token': refresh_token}
-    return jsonify(ret), 200
+    resp = jsonify(data)
+
+    set_access_cookies(resp, access_token)
+    set_refresh_cookies(resp, refresh_token)
+
+    print("login:", resp.headers)
+
+    return resp, 200
 
 
+@api_bp.route('/api/<api_version>/refresh', methods=['POST'])
+@jwt_refresh_token_required
+def refresh(api_version):
+    user = get_jwt_identity()
+    user = User.query.filter(User.username == user).first()
+    if user is None:
+        from app.api.decorators import error_403_privileges
+        return error_403_privileges
+
+    data, access_token, refresh_token = create_tokens(user)
+
+    resp = jsonify(data)
+
+    set_access_cookies(resp, access_token)
+    set_refresh_cookies(resp, refresh_token)
+    print("token refreshed")
+
+    return resp, 200
 
 
 # register manifest generation api url

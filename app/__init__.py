@@ -92,9 +92,6 @@ def create_app(config_name="dev"):
 
     app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) if app.config['ELASTICSEARCH_URL'] else None
 
-    CORS(app, resources={r"*": {"origins": "*"}})
-
-
     from app.models import User
     from app.models import UserInvitation
 
@@ -174,6 +171,12 @@ def create_app(config_name="dev"):
     def user_identity_lookup(user):
         return user["username"]
 
+    #@app.jwt.expired_token_loader
+    #def expired_token():
+    #    current_user = get_jwt_identity()
+    #    print("expired", request.headers)
+    #    return JSONAPIResponseFactory.make_raw_response({})
+
     from app.api.manifest.manifest_factory import ManifestFactory
     app.manifest_factory = ManifestFactory()
 
@@ -201,6 +204,7 @@ def create_app(config_name="dev"):
     # =====================================
     # register api routes
     # =====================================
+    CORS(api_bp, supports_credentials=True)
 
     from app.api.route_registrar import JSONAPIRouteRegistrar
     app.api_url_registrar = JSONAPIRouteRegistrar(app.config["API_VERSION"], app.config["API_URL_PREFIX"])

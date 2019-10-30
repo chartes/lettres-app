@@ -1,4 +1,4 @@
-
+import datetime
 import os
 from sqlalchemy_utils import database_exists, create_database
 
@@ -72,7 +72,9 @@ class Config(object):
     JWT_SECRET_KEY = parse_var_env('JWT_SECRET_KEY')
     JWT_TOKEN_LOCATION = ['cookies', 'headers']
     JWT_COOKIE_CSRF_PROTECT = True
-    JWT_ACCESS_COOKIE_PATH = parse_var_env('JWT_ACCESS_COOKIE_PATH')
+    JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(seconds=int(parse_var_env('JWT_ACCESS_TOKEN_EXPIRES')))
+    #JWT_ACCESS_COOKIE_PATH = parse_var_env('JWT_ACCESS_COOKIE_PATH')
+    #JWT_REFRESH_COOKIE_PATH = parse_var_env('JWT_REFRESH_COOKIE_PATH')
 
     LOCAL_TMP_FOLDER = parse_var_env('LOCAL_TMP_FOLDER')
     SFTP_IIIF_HOST = parse_var_env('SFTP_IIIF_HOST')
