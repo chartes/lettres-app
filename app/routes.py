@@ -91,6 +91,16 @@ def user_action(action):
     return refresh_token(user, resp)
 
 
+@app_bp.route("/users/register")
+def register():
+    user = current_user
+    if user.is_authenticated:
+        return redirect(url_for("app_bp.index"))
+    t = current_app.user_manager.register_view()
+
+    return t
+
+
 @app_bp.route("/users/login")
 def login():
     user = current_user

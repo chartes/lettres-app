@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from flask import jsonify, current_app, request, url_for
 from flask_jwt_extended import create_access_token, set_access_cookies, \
     unset_jwt_cookies
@@ -9,7 +11,8 @@ from flask_login import current_user
 
 def refresh_token(user, resp=None):
     if not user.is_anonymous:
-        access_token = create_access_token(identity=user.to_json(), fresh=True)
+        expires = timedelta(days=10)
+        access_token = create_access_token(identity=user.to_json(), fresh=True, expires_delta=expires)
         auth_headers = {'login': True, 'user': url_for("api_bp.users_single_obj_endpoint", id=user.id)}
         if resp:
             resp.headers["login"] = auth_headers["login"]
@@ -45,7 +48,8 @@ def create_token(api_version):
         if not passwords_match:
             return error_401
 
-    access_token = create_access_token(identity=user.to_json())
+    expires = timedelta(days=10)
+    access_token = create_access_token(identity=user.to_json(), expires_delta=expires)
     ret = {'access_token': access_token}
     return jsonify(ret), 200
 
