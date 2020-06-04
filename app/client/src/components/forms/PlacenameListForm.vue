@@ -37,7 +37,7 @@
             <field-text
                 label="Description du lieu"
                 placeholder="ex : Depuis le camp militaire aux abords de la ville"
-                v-model="form.func"
+                v-model="form.function"
                 :disabled="!validForm"
             />
           </div>

@@ -37,7 +37,7 @@
          <field-text
              label="Fonction occupée à ce moment"
              placeholder="ex : Duc d'Anjou, prince marchand, etc."
-             v-model="form.func"
+             v-model="form.function"
              :disabled="!validForm"
          />
        </div>
