@@ -7,7 +7,7 @@ venv
 *.mwb
 tests/data/lettres-test.sqlite
 /app/client/node_modules/
-
+/app/static/js/main.build.*
 # Frontend directories and files
 
 node_modules/
