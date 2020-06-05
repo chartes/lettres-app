@@ -35,7 +35,7 @@
              class="tags has-addons are-medium correspondent-item mb-1">
              <span class="tag">
                  <a :href="c.person.ref" target="_blank">
-                   {{ !!c.person.func ? `${c.person.label}, ${c.person.func}` : c.person.label }}
+                   {{ !!c.person.function ? `${c.person.label}, ${c.person.function}` : c.person.label }}
                  </a>
              </span>
              <a v-if="editable" class="tag is-delete" @click.prevent="unlinkPersonFromDoc(c)"></a>

@@ -39,7 +39,7 @@
              class="tags has-addons are-medium document-placenames__senders-list mb-1">
                 <span class="tag">
                      <a :href="c.placename.ref" target="_blank">
-                      {{ !!c.placename.func ? `${c.placename.label}, ${c.placename.func}` : c.placename.label }}
+                      {{ !!c.placename.function ? `${c.placename.label}, ${c.placename.function}` : c.placename.label }}
                     </a>
                 </span>
           <a v-if="editable" class="tag is-delete" @click.prevent="unlinkPlacenameFromDoc(c)"></a>
