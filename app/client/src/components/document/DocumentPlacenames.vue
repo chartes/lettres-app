@@ -90,10 +90,10 @@
                 this.placenamesForm = role;
             },
             closePlacenameChoice() {
-                this.placenamesForm = null;
+	            this.placenamesForm = null;
             },
             linkPlacenameToDoc(placename) {
-                const placenameId = placename.id
+	            const placenameId = placename.id
                 const role = this.getRoleByLabel(this.placenamesForm)
                 const roleId = role && role.id ? role.id : null;
                 this.$store.dispatch('placenames/linkToDocument', {
@@ -102,7 +102,7 @@
 		                func: placename.function
                 })
                     .then(placenameHasRole => {
-                        if (!!placenameHasRole) {
+                        
                             const corrData = {
                                 placename,
                                 placenameId,
@@ -111,8 +111,7 @@
                                 roleId
                             };
                             this.$store.dispatch('document/addPlacename', corrData);
-                        }
-                        this.closePlacenameChoice()
+	                    this.closePlacenameChoice()
                     })
             },
             unlinkPlacenameFromDoc(placename) {
