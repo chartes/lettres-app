@@ -92,12 +92,14 @@
         newPersonError: null
       }
     },
+	  mounted() {
+		  this.searchPerson('*')
+	  },
     methods: {
 
       searchPerson (search) {
         this.$store.dispatch('persons/search', search)
       },
-
       submitAction() {
         this.$props.submit(this.form);
         this.closeNewPersonForm();

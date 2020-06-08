@@ -24,7 +24,7 @@
         </div>
         
         <rich-text-editor
-            label="Témoin"
+            label="Témoin *"
             v-model="form.content"
             :formats="[['italic','superscript'], ['note','link']] "
             :options="{placeholder: 'Ex. Bibl. nat. Fr., Français 3512, fol. 53r'}"
@@ -105,14 +105,16 @@
 		},
 		methods: {
 			submitAction () {
-				if (this.form.institution && this.form.institution.id === null) this.form.institution = null
-				if (this.form.tradition === '') this.form.tradition = null;
+				if (this.isValid) {
+          if (this.form.institution && this.form.institution.id === null) this.form.institution = null
+          if (this.form.tradition === '') this.form.tradition = null;
+          
+          if (this.form.institution === null && !!this.currentWitness) {
+            this.$store.dispatch('document/removeWitnessInstitution', this.currentWitness.id)
+          }
 				
-				if (this.form.institution === null && !!this.currentWitness) {
-					this.$store.dispatch('document/removeWitnessInstitution', this.currentWitness.id)
-        }
-				
-				this.$props.submit(this.form);
+					this.$props.submit(this.form);
+				}
 			},
 			cancelAction () {
 				this.$props.cancel();

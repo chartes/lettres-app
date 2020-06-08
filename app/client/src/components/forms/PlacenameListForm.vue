@@ -91,6 +91,9 @@
         newPlacenameError: null
       }
     },
+	  mounted() {
+		  this.searchPlacename('*')
+	  },
     methods: {
 
       searchPlacename (search) {

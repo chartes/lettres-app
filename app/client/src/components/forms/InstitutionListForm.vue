@@ -61,7 +61,10 @@
         institutionError: null,
       }
     },
-    methods: {
+    mounted() {
+      this.searchInstitution('*')
+    },
+		methods: {
 	    createNewInstitution(institution) {
 		    this.$store.dispatch('institutions/addOne', institution)
 			    .then(corr => {
