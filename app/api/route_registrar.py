@@ -144,7 +144,7 @@ class JSONAPIRouteRegistrar(object):
                             field=filter_fieldname,
                             criteria=True if criteria_upper == 'TRUE' else False
                         )
-                        print(text(new_criteria))
+                        print(str(new_criteria))
                     elif not not_null_operator:
                         if criteria:
                             # filter[field]=value
@@ -163,7 +163,7 @@ class JSONAPIRouteRegistrar(object):
                         col = "{table}.{field}".format(table=model.__tablename__, field=filter_fieldname)
                         new_criteria = column(col, is_literal=True).isnot(None)
 
-                    # print(str(new_criteria))
+                    print(str(new_criteria))
                     filter_criteriae.append(text(new_criteria))
 
             objs_query = objs_query.filter(*filter_criteriae)

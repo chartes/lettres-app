@@ -29,6 +29,7 @@ class Config(object):
 
     ELASTICSEARCH_URL = parse_var_env('ELASTICSEARCH_URL')
     INDEX_PREFIX = parse_var_env('INDEX_PREFIX')
+    DEFAULT_INDEX_NAME = parse_var_env('DEFAULT_INDEX_NAME')
     SEARCH_RESULT_PER_PAGE =  parse_var_env('SEARCH_RESULT_PER_PAGE')
 
     ASSETS_DEBUG = parse_var_env('ASSETS_DEBUG') or False
