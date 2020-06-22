@@ -100,26 +100,26 @@ def create_app(config_name="dev"):
         Setup Flask-User
     ========================================================
     """
-    class CustomUserManager(UserManager):
-        def customize(self, app):
-            self.UserInvitationClass = UserInvitation
-            self.email_manager._render_and_send_email_with_exceptions = self.email_manager._render_and_send_email
-
-            def with_protection(*args, **kargs):
-                try:
-                    self.email_manager._render_and_send_email_with_exceptions(*args, **kargs)
-                except Exception as e:
-                    print(e)
-            self.email_manager._render_and_send_email = with_protection
-
-        def hash_password(self, password):
-            return generate_password_hash(password.encode('utf-8'))
-
-        def verify_password(self, password, password_hash):
-            return check_password_hash(password_hash, password)
-
-        def _endpoint_url(self, endpoint):
-            return url_for(endpoint) if endpoint else url_for('app_bp.index')
+    # class CustomUserManager(UserManager):
+    #     def customize(self, app):
+    #         self.UserInvitationClass = UserInvitation
+    #         self.email_manager._render_and_send_email_with_exceptions = self.email_manager._render_and_send_email
+    #
+    #         def with_protection(*args, **kargs):
+    #             try:
+    #                 self.email_manager._render_and_send_email_with_exceptions(*args, **kargs)
+    #             except Exception as e:
+    #                 print(e)
+    #         self.email_manager._render_and_send_email = with_protection
+    #
+    #     def hash_password(self, password):
+    #         return generate_password_hash(password.encode('utf-8'))
+    #
+    #     def verify_password(self, password, password_hash):
+    #         return check_password_hash(password_hash, password)
+    #
+    #     def _endpoint_url(self, endpoint):
+    #         return url_for(endpoint) if endpoint else url_for('app_bp.index')
 
     # Initialize Flask-User
     #app.user_manager = CustomUserManager(app, db, UserClass=User, UserInvitationClass=UserInvitation)
