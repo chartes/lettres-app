@@ -3,7 +3,7 @@ from app.api.collection.facade import CollectionFacade
 from app.api.person.facade import PersonFacade
 from app.api.person_has_role.facade import PersonHasRoleFacade
 from app.api.person_role.facade import PersonRoleFacade
-from app.api.document.facade import DocumentFacade, DocumentSearchFacade
+from app.api.document.facade import DocumentFacade, DocumentSearchFacade, DocumentBookmarkFacade
 from app.api.image.facade import ImageFacade
 from app.api.institution.facade import InstitutionFacade
 from app.api.language.facade import LanguageFacade
@@ -92,12 +92,20 @@ class JSONAPIFacadeManager(object):
         },
     }
 
+    IMMEDIATE_FACADES = {
+        "bookmark": DocumentBookmarkFacade
+    }
+
     @staticmethod
     def get_facade_class(obj, facade_type="default"):
         try:
             return JSONAPIFacadeManager.FACADES[obj.__class__.__tablename__][facade_type]
-        except KeyError as e:
-            print("Facade %s %s unknown" % (obj.__class__.__tablename__, facade_type))
+        except Exception as e:
+            try:
+                return JSONAPIFacadeManager.IMMEDIATE_FACADES[facade_type]
+            except KeyError as e:
+                print(e)
+            print("Facade %s %s unknown" % (obj, facade_type))
             return None
 
     @staticmethod
@@ -105,6 +113,10 @@ class JSONAPIFacadeManager(object):
         type = type.replace("-", "_")
         try:
             return JSONAPIFacadeManager.FACADES[type][facade_type]
-        except KeyError as e:
+        except Exception as e:
+            try:
+                return JSONAPIFacadeManager.IMMEDIATE_FACADES[facade_type]
+            except KeyError as e:
+                print(e)
             print("Facade %s %s unknown" % (type, facade_type))
             return None

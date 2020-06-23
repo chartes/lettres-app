@@ -64,10 +64,6 @@ class JSONAPIAbstractFacade(object):
         return {"id": id, "type": type}
 
     @staticmethod
-    def get_resource_facade(*args, **kwargs):
-        raise NotImplementedError
-
-    @staticmethod
     def get_facade(url_prefix, obj, facade_type="default", **kwargs):
         from app.api.facade_manager import JSONAPIFacadeManager
         facade_class = JSONAPIFacadeManager.get_facade_class(obj, facade_type=facade_type)
