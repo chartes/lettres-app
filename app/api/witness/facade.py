@@ -30,10 +30,11 @@ class WitnessFacade(JSONAPIAbstractChangeloggedFacade):
 
     def get_iiif_manifest_url(self):
         url = '{0}/manifest{1}.json'.format(current_app.config['IIIF_MANIFEST_ENDPOINT'], self.obj.id)
-        resp = requests.head(url)
-        if resp.status_code == 200:
-            return url
-        else:
+        try:
+            resp = requests.head(url)
+            if resp.status_code == 200:
+                return url
+        except Exception:
             return None
 
     @property

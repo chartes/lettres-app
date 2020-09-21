@@ -144,7 +144,7 @@ class JSONAPIRouteRegistrar(object):
                             field=filter_fieldname,
                             criteria=True if criteria_upper == 'TRUE' else False
                         )
-                        print(text(new_criteria))
+                        print(str(new_criteria))
                     elif not not_null_operator:
                         if criteria:
                             # filter[field]=value
@@ -163,7 +163,7 @@ class JSONAPIRouteRegistrar(object):
                         col = "{table}.{field}".format(table=model.__tablename__, field=filter_fieldname)
                         new_criteria = column(col, is_literal=True).isnot(None)
 
-                    # print(str(new_criteria))
+                    print(str(new_criteria))
                     filter_criteriae.append(text(new_criteria))
 
             objs_query = objs_query.filter(*filter_criteriae)
@@ -484,7 +484,7 @@ class JSONAPIRouteRegistrar(object):
         # register the rule
         api_bp.add_url_rule(search_rule, endpoint=search_endpoint.__name__, view_func=search_endpoint)
 
-    def register_get_routes(self, model, facade_class, decorators=()):
+    def register_get_routes(self, model, f_class, decorators=()):
         """
 
         :param model:
@@ -499,7 +499,7 @@ class JSONAPIRouteRegistrar(object):
         # ================================
         get_collection_rule = '/api/{api_version}/{type_plural}'.format(
             api_version=self.api_version,
-            type_plural=facade_class.TYPE_PLURAL
+            type_plural=f_class.TYPE_PLURAL
         )
 
         def collection_endpoint():
@@ -540,6 +540,10 @@ class JSONAPIRouteRegistrar(object):
             links = {
 
             }
+
+            facade_class = f_class
+            if "facade" in request.args:
+                facade_class = JSONAPIFacadeManager.get_facade_class(model, request.args["facade"])
 
             objs_query = model.query
             try:
@@ -628,7 +632,7 @@ class JSONAPIRouteRegistrar(object):
             collection_endpoint = dec(collection_endpoint)
 
         collection_endpoint.__name__ = "%s_%s" % (
-            facade_class.TYPE_PLURAL.replace("-", "_"), collection_endpoint.__name__)
+            f_class.TYPE_PLURAL.replace("-", "_"), collection_endpoint.__name__)
         # register the rule
         api_bp.add_url_rule(get_collection_rule, endpoint=collection_endpoint.__name__, view_func=collection_endpoint)
 
@@ -637,7 +641,7 @@ class JSONAPIRouteRegistrar(object):
         # =======================
         single_obj_rule = '/api/{api_version}/{type_plural}/<id>'.format(
             api_version=self.api_version,
-            type_plural=facade_class.TYPE_PLURAL
+            type_plural=f_class.TYPE_PLURAL
         )
 
         def single_obj_endpoint(id):
@@ -657,12 +661,19 @@ class JSONAPIRouteRegistrar(object):
              Return a 400 Bad Request if something goes wrong with the syntax or
              if the sort/filter criteriae are incorrect
             """
+
+            facade_class = f_class
+            if "facade" in request.args:
+                facade_class = JSONAPIFacadeManager.get_facade_class(model, request.args["facade"])
+
             url_prefix = request.host_url[:-1] + self.url_prefix
 
             w_rel_links, w_rel_data = JSONAPIRouteRegistrar.get_relationships_mode(request.args)
             f_obj, kwargs, errors = facade_class.get_resource_facade(url_prefix, id,
                                                                      with_relationships_links=w_rel_links,
                                                                      with_relationships_data=w_rel_data)
+
+            print(facade_class, f_obj)
             if f_obj is None:
                 return JSONAPIResponseFactory.make_errors_response(errors, **kwargs)
             else:
@@ -689,7 +700,7 @@ class JSONAPIRouteRegistrar(object):
             single_obj_endpoint = dec(single_obj_endpoint)
 
         single_obj_endpoint.__name__ = "%s_%s" % (
-            facade_class.TYPE_PLURAL.replace("-", "_"), single_obj_endpoint.__name__)
+            f_class.TYPE_PLURAL.replace("-", "_"), single_obj_endpoint.__name__)
         # register the rule
         api_bp.add_url_rule(single_obj_rule, endpoint=single_obj_endpoint.__name__, view_func=single_obj_endpoint)
 
@@ -826,6 +837,7 @@ class JSONAPIRouteRegistrar(object):
             else:
                 relationship = f_obj.relationships[rel_name]
                 resource_data = relationship["resource_getter"]()
+                print(relationship, f_obj)
                 if resource_data is None:
                     count = 0
                 else:

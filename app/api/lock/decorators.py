@@ -1,19 +1,19 @@
 import datetime
 from flask import request
-from flask_jwt_extended import verify_jwt_in_request, get_jwt_claims
-from flask_login import current_user
+from flask_jwt_extended import verify_jwt_in_request_optional, get_jwt_identity
 from functools import wraps
 
 from app import db
 from app.api.decorators import error_403_privileges, error_400_unhandled_error
 from app.api.route_registrar import json_loads
-from app.models import Lock, DATETIME_FORMAT
+from app.models import Lock, DATETIME_FORMAT, User
 
 
 def manage_lock_addition():
     def wrap(view_function):
         @wraps(view_function)
         def wrapped_f(*args, **kwargs):
+            verify_jwt_in_request_optional()
 
             try:
                 r = json_loads(request.data)
@@ -29,15 +29,18 @@ def manage_lock_addition():
             except Exception as e:
                 return error_400_unhandled_error(e)
 
-            verify_jwt_in_request()
-            roles = get_jwt_claims()
-
-            # contributor cannot add locks it does not own
-            # contributor cannot add locks if an active lock already exists
-            print(roles, current_user.id, lock_user_id, old_locks, active_lock)
-
-            if 'admin' not in roles and (current_user.id != lock_user_id or len(active_lock) >= 1):
+            #roles = get_jwt_claims()
+            identity = get_jwt_identity()
+            current_user = User.query.filter(User.username == identity).first()
+            if current_user is None:
                 return error_403_privileges
+            else:
+                print(current_user.id, current_user.is_admin, lock_user_id, old_locks, active_lock)
+                # contributor cannot add locks it does not own
+                # contributor cannot add locks if an active lock already exists
+                if not current_user.is_admin and (current_user.id != lock_user_id or len(active_lock) >= 1):
+                    return error_403_privileges
+
 
             # if the doc is already locked, expire the previous locks on this object
             # TODO watch permissions first
@@ -78,6 +81,7 @@ def manage_lock_removal():
     def wrap(view_function):
         @wraps(view_function)
         def wrapped_f(*args, **kwargs):
+            verify_jwt_in_request_optional()
 
             try:
                 r = json_loads(request.data)
@@ -86,12 +90,14 @@ def manage_lock_removal():
             except Exception as e:
                 return error_400_unhandled_error(e)
 
-            verify_jwt_in_request()
-            roles = get_jwt_claims()
-
-            # contributor cannot remove locks it does not own
-            if 'admin' not in roles and current_user.id != lock.user_id:
+            identity = get_jwt_identity()
+            current_user = User.query.filter(User.username == identity).first()
+            if current_user is None:
                 return error_403_privileges
+            else:
+                # contributor cannot remove locks it does not own
+                if not current_user.is_admin and current_user.id != lock.user_id:
+                    return error_403_privileges
 
             # HOOK ici pour transformer le DELETE en UPDATE
             print("TODO: transformer le delete en update (déverrouillage")

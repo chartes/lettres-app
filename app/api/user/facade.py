@@ -1,5 +1,6 @@
 
 from app.api.abstract_facade import JSONAPIAbstractFacade
+from app.api.document.facade import DocumentBookmarkFacade
 from app.models import User, datetime_to_str
 
 
@@ -79,9 +80,9 @@ class UserFacade(JSONAPIAbstractFacade):
 
             "bookmarks": {
                 "links": self._get_links(rel_name="bookmarks"),
-                "resource_identifier_getter": self.get_related_resource_identifiers(DocumentFacade, "bookmarks",
+                "resource_identifier_getter": self.get_related_resource_identifiers(DocumentBookmarkFacade, "bookmarks",
                                                                                     to_many=True),
-                "resource_getter": self.get_related_resources(DocumentFacade, "bookmarks", to_many=True),
+                "resource_getter": self.get_related_resources(DocumentBookmarkFacade, "bookmarks", to_many=True),
             }
         }
 

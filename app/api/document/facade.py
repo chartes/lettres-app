@@ -1,7 +1,7 @@
 import requests
 from flask import current_app
 
-from app.api.abstract_facade import JSONAPIAbstractChangeloggedFacade
+from app.api.abstract_facade import JSONAPIAbstractChangeloggedFacade, JSONAPIAbstractFacade
 from app.models import Document, PersonRole
 
 
@@ -337,4 +337,52 @@ class DocumentSearchFacade(DocumentFacade):
         }
         if self.with_relationships_links:
             resource["relationships"] = self.get_exposed_relationships()
+        return resource
+
+
+class DocumentBookmarkFacade(DocumentFacade):
+
+    def __init__(self, *args, **kwargs):
+        super(DocumentFacade, self).__init__(*args, **kwargs)
+        self.relationships = {
+
+        }
+
+    @staticmethod
+    def get_resource_facade(url_prefix, id, **kwargs):
+        e = Document.query.filter(Document.id == id).first()
+        if e is None:
+            kwargs = {"status": 404}
+            errors = [{"status": 404, "title": "document %s does not exist" % id}]
+        else:
+            e = DocumentBookmarkFacade(url_prefix, e, **kwargs)
+            kwargs = {}
+            errors = []
+        return e, kwargs, errors
+
+    @property
+    def resource(self):
+        """
+        remove the thumbnail generation from the attributes
+        :return:
+        """
+        resource = {
+            **self.resource_identifier,
+            "attributes": {
+                "title": self.obj.title,
+                "argument": self.obj.argument,
+                "creation": self.obj.creation,
+                "creation-not-after": self.obj.creation_not_after,
+                "creation-label": self.obj.creation_label,
+                "is-published": False if self.obj.is_published is None else self.obj.is_published,
+            },
+            "meta": self.meta,
+            "links": {
+                "self": self.self_link
+            }
+        }
+
+        if self.with_relationships_links:
+            resource["relationships"] = self.get_exposed_relationships()
+
         return resource

@@ -5,7 +5,7 @@ from flask import Response
 class JSONAPIResponseFactory:
 
     CONTENT_TYPE = "application/vnd.api+json; charset=utf-8"
-    HEADERS = {"Access-Control-Allow-Origin": "*",
+    HEADERS = { #"Access-Control-Allow-Origin": "*",
                "Access-Control-Allow-Methods": ["GET", "POST", "DELETE", "PATCH"]}
 
     @classmethod

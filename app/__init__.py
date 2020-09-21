@@ -92,9 +92,6 @@ def create_app(config_name="dev"):
 
     app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) if app.config['ELASTICSEARCH_URL'] else None
 
-    CORS(app, resources={r"*": {"origins": "*"}})
-
-
     from app.models import User
     from app.models import UserInvitation
 
@@ -103,53 +100,53 @@ def create_app(config_name="dev"):
         Setup Flask-User
     ========================================================
     """
-    class CustomUserManager(UserManager):
-        def customize(self, app):
-            self.UserInvitationClass = UserInvitation
-            self.email_manager._render_and_send_email_with_exceptions = self.email_manager._render_and_send_email
-
-            def with_protection(*args, **kargs):
-                try:
-                    self.email_manager._render_and_send_email_with_exceptions(*args, **kargs)
-                except Exception as e:
-                    print(e)
-            self.email_manager._render_and_send_email = with_protection
-
-        def hash_password(self, password):
-            return generate_password_hash(password.encode('utf-8'))
-
-        def verify_password(self, password, password_hash):
-            return check_password_hash(password_hash, password)
-
-        def _endpoint_url(self, endpoint):
-            return url_for(endpoint) if endpoint else url_for('app_bp.index')
+    # class CustomUserManager(UserManager):
+    #     def customize(self, app):
+    #         self.UserInvitationClass = UserInvitation
+    #         self.email_manager._render_and_send_email_with_exceptions = self.email_manager._render_and_send_email
+    #
+    #         def with_protection(*args, **kargs):
+    #             try:
+    #                 self.email_manager._render_and_send_email_with_exceptions(*args, **kargs)
+    #             except Exception as e:
+    #                 print(e)
+    #         self.email_manager._render_and_send_email = with_protection
+    #
+    #     def hash_password(self, password):
+    #         return generate_password_hash(password.encode('utf-8'))
+    #
+    #     def verify_password(self, password, password_hash):
+    #         return check_password_hash(password_hash, password)
+    #
+    #     def _endpoint_url(self, endpoint):
+    #         return url_for(endpoint) if endpoint else url_for('app_bp.index')
 
     # Initialize Flask-User
-    app.user_manager = CustomUserManager(app, db, UserClass=User, UserInvitationClass=UserInvitation)
+    #app.user_manager = CustomUserManager(app, db, UserClass=User, UserInvitationClass=UserInvitation)
 
-    from flask_user import user_changed_username, user_confirmed_email, user_sent_invitation, user_registered
-
-    def reindex_user(user):
-        print("reindex user", user)
-        from app.api.user.facade import UserFacade
-        f_obj = UserFacade(url_prefix="", obj=user, with_relationships_data=False, with_relationships_links=False)
-        f_obj.reindex("insert", propagate=False)
-
-    @user_changed_username.connect_via(app)
-    def user_changed_username(sender, **extra):
-        reindex_user(extra['user'])
-
-    @user_confirmed_email.connect_via(app)
-    def user_confirmed_email(sender, **extra):
-        reindex_user(extra['user'])
-
-    @user_sent_invitation.connect_via(app)
-    def user_sent_invitation(sender, **extra):
-        reindex_user(extra['user'])
-
-    @user_registered.connect_via(app)
-    def user_registered(sender, **extra):
-        reindex_user(extra['user'])
+    #from flask_user import user_changed_username, user_confirmed_email, user_sent_invitation, user_registered
+    #
+    #def reindex_user(user):
+    #    print("reindex user", user)
+    #    from app.api.user.facade import UserFacade
+    #    f_obj = UserFacade(url_prefix="", obj=user, with_relationships_data=False, with_relationships_links=False)
+    #    f_obj.reindex("insert", propagate=False)
+    #
+    #@user_changed_username.connect_via(app)
+    #def user_changed_username(sender, **extra):
+    #    reindex_user(extra['user'])
+    #
+    #@user_confirmed_email.connect_via(app)
+    #def user_confirmed_email(sender, **extra):
+    #    reindex_user(extra['user'])
+    #
+    #@user_sent_invitation.connect_via(app)
+    #def user_sent_invitation(sender, **extra):
+    #    reindex_user(extra['user'])
+    #
+    #@user_registered.connect_via(app)
+    #def user_registered(sender, **extra):
+    #    reindex_user(extra['user'])
 
     """
     ========================================================
@@ -173,6 +170,12 @@ def create_app(config_name="dev"):
     @app.jwt.user_identity_loader
     def user_identity_lookup(user):
         return user["username"]
+
+    #@app.jwt.expired_token_loader
+    #def expired_token():
+    #    current_user = get_jwt_identity()
+    #    print("expired", request.headers)
+    #    return JSONAPIResponseFactory.make_raw_response({})
 
     from app.api.manifest.manifest_factory import ManifestFactory
     app.manifest_factory = ManifestFactory()
@@ -201,6 +204,7 @@ def create_app(config_name="dev"):
     # =====================================
     # register api routes
     # =====================================
+    CORS(api_bp, supports_credentials=True)
 
     from app.api.route_registrar import JSONAPIRouteRegistrar
     app.api_url_registrar = JSONAPIRouteRegistrar(app.config["API_VERSION"], app.config["API_URL_PREFIX"])
