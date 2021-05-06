@@ -12,7 +12,7 @@ elasticsearch==6.3.1
 eventlet==0.24.1
 Faker==1.0.0
 Flask==1.0.2
-Flask-Cors==3.0.7
+Flask-Cors==3.0.9
 Flask-JWT-Extended==3.15.0
 Flask-Login==0.4.1
 Flask-Mail==0.9.1
