@@ -6,10 +6,10 @@
           "type": "boolean"
         },
         "creation": {
-          "type": "text"
+          "type": "date"
         },
         "creation-not-after": {
-          "type": "text"
+          "type": "date"
         },
         "title": {
           "type": "text",

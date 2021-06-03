@@ -3,7 +3,7 @@ from app.api.collection.facade import CollectionFacade
 from app.api.person.facade import PersonFacade
 from app.api.person_has_role.facade import PersonHasRoleFacade
 from app.api.person_role.facade import PersonRoleFacade
-from app.api.document.facade import DocumentFacade, DocumentSearchFacade, DocumentBookmarkFacade
+from app.api.document.facade import DocumentFacade, DocumentSearchFacade, DocumentBookmarkFacade, DocumentPreviewFacade
 from app.api.image.facade import ImageFacade
 from app.api.institution.facade import InstitutionFacade
 from app.api.language.facade import LanguageFacade
@@ -93,7 +93,8 @@ class JSONAPIFacadeManager(object):
     }
 
     IMMEDIATE_FACADES = {
-        "bookmark": DocumentBookmarkFacade
+        "bookmark": DocumentBookmarkFacade,
+        "preview": DocumentPreviewFacade
     }
 
     @staticmethod
