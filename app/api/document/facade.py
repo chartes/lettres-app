@@ -18,18 +18,6 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
     def id(self):
         return self.obj.id
 
-    #@staticmethod
-    #def get_resource_facade(url_prefix, id, **kwargs):
-    #    e = Document.query.filter(Document.id == id).first()
-    #    if e is None:
-    #        kwargs = {"status": 404}
-    #        errors = [{"status": 404, "title": "document %s does not exist" % id}]
-    #    else:
-    #        e = DocumentFacade(url_prefix, e, **kwargs)
-    #        kwargs = {}
-    #        errors = []
-    #    return e, kwargs, errors
-
     def get_persons_having_roles_resource_identifiers(self, rel_facade=None):
         from app.api.person_has_role.facade import PersonHasRoleFacade
         rel_facade = PersonHasRoleFacade if not rel_facade else rel_facade
@@ -376,7 +364,6 @@ class DocumentStatusFacade(DocumentFacade):
 
     @property
     def resource(self):
-        print("get resource !!!!!!!!!!!!!")
         resource = {
             **self.resource_identifier,
             "attributes": {
