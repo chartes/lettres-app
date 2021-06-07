@@ -1,4 +1,3 @@
-from app import db
 from app.api.abstract_facade import JSONAPIAbstractFacade
 from app.models import Changelog, datetime_to_str
 
@@ -10,21 +9,11 @@ class ChangelogFacade(JSONAPIAbstractFacade):
     TYPE = "change"
     TYPE_PLURAL = "changes"
 
+    MODEL = Changelog
+
     @property
     def id(self):
         return self.obj.id
-
-    @staticmethod
-    def get_resource_facade(url_prefix, id, **kwargs):
-        e = Changelog.query.filter(Changelog.id == id).first()
-        if e is None:
-            kwargs = {"status": 404}
-            errors = [{"status": 404, "title": "change %s does not exist" % id}]
-        else:
-            e = ChangelogFacade(url_prefix, e, **kwargs)
-            kwargs = {}
-            errors = []
-        return e, kwargs, errors
 
     @property
     def resource(self):

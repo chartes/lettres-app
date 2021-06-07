@@ -9,21 +9,23 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
     TYPE = "collection"
     TYPE_PLURAL = "collections"
 
+    MODEL = Collection
+
     @property
     def id(self):
         return self.obj.id
 
-    @staticmethod
-    def get_resource_facade(url_prefix, id, **kwargs):
-        e = Collection.query.filter(Collection.id == id).first()
-        if e is None:
-            kwargs = {"status": 404}
-            errors = [{"status": 404, "title": "Collection %s does not exist" % id}]
-        else:
-            e = CollectionFacade(url_prefix, e, **kwargs)
-            kwargs = {}
-            errors = []
-        return e, kwargs, errors
+    #@staticmethod
+    #def get_resource_facade(url_prefix, id, **kwargs):
+    #    e = Collection.query.filter(Collection.id == id).first()
+    #    if e is None:
+    #        kwargs = {"status": 404}
+    #        errors = [{"status": 404, "title": "Collection %s does not exist" % id}]
+    #    else:
+    #        e = CollectionFacade(url_prefix, e, **kwargs)
+    #        kwargs = {}
+    #        errors = []
+    #    return e, kwargs, errors
 
     def get_parents_resource_identifiers(self, rel_facade=None):
         parents = self.obj.parents

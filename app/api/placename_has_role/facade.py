@@ -10,21 +10,11 @@ class PlacenameHasRoleFacade(JSONAPIAbstractFacade):
     TYPE = "placename-has-role"
     TYPE_PLURAL = "placenames-having-roles"
 
+    MODEL = PlacenameHasRole
+
     @property
     def id(self):
         return self.obj.id
-
-    @staticmethod
-    def get_resource_facade(url_prefix, id, **kwargs):
-        e = PlacenameHasRole.query.filter(PlacenameHasRole.id == id).first()
-        if e is None:
-            kwargs = {"status": 404}
-            errors = [{"status": 404, "title": "PlacenameHasRole %s does not exist" % id}]
-        else:
-            e = PlacenameHasRoleFacade(url_prefix, e, **kwargs)
-            kwargs = {}
-            errors = []
-        return e, kwargs, errors
 
     @property
     def resource(self):

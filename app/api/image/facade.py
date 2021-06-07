@@ -10,21 +10,23 @@ class ImageFacade(JSONAPIAbstractFacade):
     TYPE = "image"
     TYPE_PLURAL = "images"
 
+    MODEL = Image
+
     @property
     def id(self):
         return self.obj.id
 
-    @staticmethod
-    def get_resource_facade(url_prefix, id, **kwargs):
-        e = Image.query.filter(Image.id == id).first()
-        if e is None:
-            kwargs = {"status": 404}
-            errors = [{"status": 404, "title": "image %s does not exist" % id}]
-        else:
-            e = ImageFacade(url_prefix, e, **kwargs)
-            kwargs = {}
-            errors = []
-        return e, kwargs, errors
+    #@staticmethod
+    #def get_resource_facade(url_prefix, id, **kwargs):
+    #    e = Image.query.filter(Image.id == id).first()
+    #    if e is None:
+    #        kwargs = {"status": 404}
+    #        errors = [{"status": 404, "title": "image %s does not exist" % id}]
+    #    else:
+    #        e = ImageFacade(url_prefix, e, **kwargs)
+    #        kwargs = {}
+    #        errors = []
+    #    return e, kwargs, errors
 
     @property
     def resource(self):

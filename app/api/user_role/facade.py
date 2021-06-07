@@ -1,5 +1,5 @@
 from app.api.abstract_facade import JSONAPIAbstractFacade
-from app.models import User
+from app.models import UserRole
 
 
 class UserRoleFacade(JSONAPIAbstractFacade):
@@ -9,21 +9,11 @@ class UserRoleFacade(JSONAPIAbstractFacade):
     TYPE = "user_role"
     TYPE_PLURAL = "user-roles"
 
+    MODEL = UserRole
+
     @property
     def id(self):
         return self.obj.id
-
-    @staticmethod
-    def get_resource_facade(url_prefix, id, **kwargs):
-        e = User.query.filter(User.id == id).first()
-        if e is None:
-            kwargs = {"status": 404}
-            errors = [{"status": 404, "title": "user role %s does not exist" % id}]
-        else:
-            e = UserRoleFacade(url_prefix, e, **kwargs)
-            kwargs = {}
-            errors = []
-        return e, kwargs, errors
 
     @staticmethod
     def create_resource(model, obj_id, attributes, related_resources):

@@ -10,21 +10,23 @@ class NoteFacade(JSONAPIAbstractChangeloggedFacade):
     TYPE = "note"
     TYPE_PLURAL = "notes"
 
+    MODEL = Note
+
     @property
     def id(self):
         return self.obj.id
 
-    @staticmethod
-    def get_resource_facade(url_prefix, id, **kwargs):
-        e = Note.query.filter(Note.id == id).first()
-        if e is None:
-            kwargs = {"status": 404}
-            errors = [{"status": 404, "title": "note %s does not exist" % id}]
-        else:
-            e = NoteFacade(url_prefix, e, **kwargs)
-            kwargs = {}
-            errors = []
-        return e, kwargs, errors
+    #@staticmethod
+    #def get_resource_facade(url_prefix, id, **kwargs):
+    #    e = Note.query.filter(Note.id == id).first()
+    #    if e is None:
+    #        kwargs = {"status": 404}
+    #        errors = [{"status": 404, "title": "note %s does not exist" % id}]
+    #    else:
+    #        e = NoteFacade(url_prefix, e, **kwargs)
+    #        kwargs = {}
+    #        errors = []
+    #    return e, kwargs, errors
 
     @property
     def resource(self):

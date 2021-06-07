@@ -10,21 +10,23 @@ class LockFacade(JSONAPIAbstractFacade):
     TYPE = "lock"
     TYPE_PLURAL = "locks"
 
+    MODEL = Lock
+
     @property
     def id(self):
         return self.obj.id
 
-    @staticmethod
-    def get_resource_facade(url_prefix, id, **kwargs):
-        e = Lock.query.filter(Lock.id == id).first()
-        if e is None:
-            kwargs = {"status": 404}
-            errors = [{"status": 404, "title": "lock %s does not exist" % id}]
-        else:
-            e = LockFacade(url_prefix, e, **kwargs)
-            kwargs = {}
-            errors = []
-        return e, kwargs, errors
+    #@staticmethod
+    #def get_resource_facade(url_prefix, id, **kwargs):
+    #    e = Lock.query.filter(Lock.id == id).first()
+    #    if e is None:
+    #        kwargs = {"status": 404}
+    #        errors = [{"status": 404, "title": "lock %s does not exist" % id}]
+    #    else:
+    #        e = LockFacade(url_prefix, e, **kwargs)
+    #        kwargs = {}
+    #        errors = []
+    #    return e, kwargs, errors
 
     @property
     def resource(self):

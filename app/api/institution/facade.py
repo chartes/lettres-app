@@ -9,21 +9,23 @@ class InstitutionFacade(JSONAPIAbstractFacade):
     TYPE = "institution"
     TYPE_PLURAL = "institutions"
 
+    MODEL = Institution
+
     @property
     def id(self):
         return self.obj.id
 
-    @staticmethod
-    def get_resource_facade(url_prefix, id, **kwargs):
-        e = Institution.query.filter(Institution.id == id).first()
-        if e is None:
-            kwargs = {"status": 404}
-            errors = [{"status": 404, "title": "institution %s does not exist" % id}]
-        else:
-            e = InstitutionFacade(url_prefix, e, **kwargs)
-            kwargs = {}
-            errors = []
-        return e, kwargs, errors
+    #@staticmethod
+    #def get_resource_facade(url_prefix, id, **kwargs):
+    #    e = Institution.query.filter(Institution.id == id).first()
+    #    if e is None:
+    #        kwargs = {"status": 404}
+    #        errors = [{"status": 404, "title": "institution %s does not exist" % id}]
+    #    else:
+    #        e = InstitutionFacade(url_prefix, e, **kwargs)
+    #        kwargs = {}
+    #        errors = []
+    #    return e, kwargs, errors
 
     @property
     def resource(self):

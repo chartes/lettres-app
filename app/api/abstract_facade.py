@@ -62,9 +62,21 @@ class JSONAPIAbstractFacade(object):
     def make_resource_identifier(id, type):
         return {"id": id, "type": type}
 
-    @staticmethod
-    def get_resource_facade(*args, **kwargs):
-        raise NotImplementedError
+    #@staticmethod
+    #def get_resource_facade(*args, **kwargs):
+    #    raise NotImplementedError
+
+    @classmethod
+    def get_resource_facade(cls, url_prefix, id, **kwargs):
+        e = cls.MODEL.query.filter(cls.MODEL.id == id).first()
+        if e is None:
+            kwargs = {"status": 404}
+            errors = [{"status": 404, "title": "%s %s does not exist" % (cls.MODEL, id)}]
+        else:
+            e = cls(url_prefix, e, **kwargs)
+            kwargs = {}
+            errors = []
+        return e, kwargs, errors
 
     @staticmethod
     def get_facade(url_prefix, obj, facade_type="default", **kwargs):

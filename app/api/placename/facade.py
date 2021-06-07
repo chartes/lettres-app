@@ -10,21 +10,11 @@ class PlacenameFacade(JSONAPIAbstractChangeloggedFacade):
     TYPE = "placename"
     TYPE_PLURAL = "placenames"
 
+    MODEL = Placename
+
     @property
     def id(self):
         return self.obj.id
-
-    @staticmethod
-    def get_resource_facade(url_prefix, id, **kwargs):
-        e = Placename.query.filter(Placename.id == id).first()
-        if e is None:
-            kwargs = {"status": 404}
-            errors = [{"status": 404, "title": "placename %s does not exist" % id}]
-        else:
-            e = PlacenameFacade(url_prefix, e, **kwargs)
-            kwargs = {}
-            errors = []
-        return e, kwargs, errors
 
     @staticmethod
     def update_resource(obj, obj_type, attributes, related_resources, append=False):

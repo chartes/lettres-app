@@ -12,21 +12,11 @@ class WitnessFacade(JSONAPIAbstractChangeloggedFacade):
     TYPE = "witness"
     TYPE_PLURAL = "witnesses"
 
+    MODEL = Witness
+
     @property
     def id(self):
         return self.obj.id
-
-    @staticmethod
-    def get_resource_facade(url_prefix, id, **kwargs):
-        e = Witness.query.filter(Witness.id == id).first()
-        if e is None:
-            kwargs = {"status": 404}
-            errors = [{"status": 404, "title": "witness %s does not exist" % id}]
-        else:
-            e = WitnessFacade(url_prefix, e, **kwargs)
-            kwargs = {}
-            errors = []
-        return e, kwargs, errors
 
     def get_iiif_manifest_url(self):
         url = '{0}/manifest{1}.json'.format(current_app.config['IIIF_MANIFEST_ENDPOINT'], self.obj.id)

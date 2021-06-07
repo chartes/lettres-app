@@ -10,21 +10,11 @@ class PersonFacade(JSONAPIAbstractChangeloggedFacade):
     TYPE = "person"
     TYPE_PLURAL = "persons"
 
+    MODEL = Person
+
     @property
     def id(self):
         return self.obj.id
-
-    @staticmethod
-    def get_resource_facade(url_prefix, id, **kwargs):
-        e = Person.query.filter(Person.id == id).first()
-        if e is None:
-            kwargs = {"status": 404}
-            errors = [{"status": 404, "title": "person %s does not exist" % id}]
-        else:
-            e = PersonFacade(url_prefix, e, **kwargs)
-            kwargs = {}
-            errors = []
-        return e, kwargs, errors
 
     @staticmethod
     def update_resource(obj, obj_type, attributes, related_resources, append=False):

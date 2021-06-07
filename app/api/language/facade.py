@@ -9,21 +9,23 @@ class LanguageFacade(JSONAPIAbstractChangeloggedFacade):
     TYPE = "language"
     TYPE_PLURAL = "languages"
 
+    MODEL = Language
+
     @property
     def id(self):
         return self.obj.id
 
-    @staticmethod
-    def get_resource_facade(url_prefix, id, **kwargs):
-        e = Language.query.filter(Language.id == id).first()
-        if e is None:
-            kwargs = {"status": 404}
-            errors = [{"status": 404, "title": "language %s does not exist" % id}]
-        else:
-            e = LanguageFacade(url_prefix, e, **kwargs)
-            kwargs = {}
-            errors = []
-        return e, kwargs, errors
+    #@staticmethod
+    #def get_resource_facade(url_prefix, id, **kwargs):
+    #    e = Language.query.filter(Language.id == id).first()
+    #    if e is None:
+    #        kwargs = {"status": 404}
+    #        errors = [{"status": 404, "title": "language %s does not exist" % id}]
+    #    else:
+    #        e = LanguageFacade(url_prefix, e, **kwargs)
+    #        kwargs = {}
+    #        errors = []
+    #    return e, kwargs, errors
 
     @property
     def resource(self):
