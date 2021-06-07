@@ -1,8 +1,8 @@
 import requests
 from flask import current_app
 
-from app.api.abstract_facade import JSONAPIAbstractChangeloggedFacade, JSONAPIAbstractFacade
-from app.models import Document, PersonRole
+from app.api.abstract_facade import JSONAPIAbstractChangeloggedFacade
+from app.models import Document
 
 
 class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
@@ -28,91 +28,115 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
             errors = []
         return e, kwargs, errors
 
-    def get_persons_having_roles_resource_identifiers(self):
+    def get_persons_having_roles_resource_identifiers(self, rel_facade=None):
         from app.api.person_has_role.facade import PersonHasRoleFacade
+        rel_facade = PersonHasRoleFacade if not rel_facade else rel_facade
+
         return [] if self.obj.persons_having_roles is None else [
-            PersonHasRoleFacade.make_resource_identifier(c.id, PersonHasRoleFacade.TYPE)
+            rel_facade.make_resource_identifier(c.id, rel_facade.TYPE)
             for c in self.obj.persons_having_roles
         ]
 
-    def get_persons_having_roles_resources(self):
+    def get_persons_having_roles_resources(self, rel_facade=None):
         from app.api.person_has_role.facade import PersonHasRoleFacade
+        rel_facade = PersonHasRoleFacade if not rel_facade else rel_facade
+
         return [] if self.obj.persons_having_roles is None else [
-            PersonHasRoleFacade(self.url_prefix, c, True, True).resource
+            rel_facade(self.url_prefix, c, True, True).resource
             for c in self.obj.persons_having_roles
         ]
 
-    def get_person_role_resource_identifiers(self):
+    def get_person_role_resource_identifiers(self, rel_facade=None):
         from app.api.person_role.facade import PersonRoleFacade
+        rel_facade = PersonRoleFacade if not rel_facade else rel_facade
+
         return [] if self.obj.persons_having_roles is None else [
-            PersonRoleFacade.make_resource_identifier(c_h_r.person_role.id, PersonRoleFacade.TYPE)
+            rel_facade.make_resource_identifier(c_h_r.person_role.id, rel_facade.TYPE)
             for c_h_r in self.obj.persons_having_roles
         ]
 
-    def get_person_role_resources(self):
+    def get_person_role_resources(self, rel_facade=None):
         from app.api.person_role.facade import PersonRoleFacade
+        rel_facade = PersonRoleFacade if not rel_facade else rel_facade
+
         return [] if self.obj.persons_having_roles is None else [
-            PersonRoleFacade(self.url_prefix, c.person_role, self.with_relationships_links,
+            rel_facade(self.url_prefix, c.person_role, self.with_relationships_links,
                              self.with_relationships_data).resource
             for c in self.obj.persons_having_roles
         ]
 
-    def get_placename_role_resource_identifiers(self):
+    def get_placename_role_resource_identifiers(self, rel_facade=None):
         from app.api.placename_role.facade import PlacenameRoleFacade
+        rel_facade = PlacenameRoleFacade if not rel_facade else rel_facade
+
         return [] if self.obj.placenames_having_roles is None else [
-            PlacenameRoleFacade.make_resource_identifier(c_h_r.placename_role.id, PlacenameRoleFacade.TYPE)
+            rel_facade.make_resource_identifier(c_h_r.placename_role.id, rel_facade.TYPE)
             for c_h_r in self.obj.placenames_having_roles
         ]
 
-    def get_placename_role_resources(self):
+    def get_placename_role_resources(self, rel_facade=None):
         from app.api.placename_role.facade import PlacenameRoleFacade
+        rel_facade = PlacenameRoleFacade if not rel_facade else rel_facade
+
         return [] if self.obj.placenames_having_roles is None else [
-            PlacenameRoleFacade(self.url_prefix, c.placename_role, self.with_relationships_links,
+            rel_facade(self.url_prefix, c.placename_role, self.with_relationships_links,
                              self.with_relationships_data).resource
             for c in self.obj.placenames_having_roles
         ]
 
-    def get_person_resource_identifiers(self):
+    def get_person_resource_identifiers(self, rel_facade=None):
         from app.api.person.facade import PersonFacade
+        rel_facade = PersonFacade if not rel_facade else rel_facade
+
         return [] if self.obj.persons_having_roles is None else [
-            PersonFacade.make_resource_identifier(c_h_r.person.id, PersonFacade.TYPE)
+            rel_facade.make_resource_identifier(c_h_r.person.id, rel_facade.TYPE)
             for c_h_r in self.obj.persons_having_roles
         ]
 
-    def get_person_resources(self):
+    def get_person_resources(self, rel_facade=None):
         from app.api.person.facade import PersonFacade
+        rel_facade = PersonFacade if not rel_facade else rel_facade
+
         return [] if self.obj.persons_having_roles is None else [
-            PersonFacade(self.url_prefix, c.person, self.with_relationships_links,
+            rel_facade(self.url_prefix, c.person, self.with_relationships_links,
                          self.with_relationships_data).resource
             for c in self.obj.persons_having_roles
         ]
 
-    def get_placename_resource_identifiers(self):
+    def get_placename_resource_identifiers(self, rel_facade=None):
         from app.api.placename.facade import PlacenameFacade
+        rel_facade = PlacenameFacade if not rel_facade else rel_facade
+
         return [] if self.obj.placenames_having_roles is None else [
-            PlacenameFacade.make_resource_identifier(c_h_r.placename.id, PlacenameFacade.TYPE)
+            rel_facade.make_resource_identifier(c_h_r.placename.id, rel_facade.TYPE)
             for c_h_r in self.obj.placenames_having_roles
         ]
 
-    def get_placename_resources(self):
+    def get_placename_resources(self, rel_facade=None):
         from app.api.placename.facade import PlacenameFacade
+        rel_facade = PlacenameFacade if not rel_facade else rel_facade
+
         return [] if self.obj.placenames_having_roles is None else [
-            PlacenameFacade(self.url_prefix, c.placename, self.with_relationships_links,
+            rel_facade(self.url_prefix, c.placename, self.with_relationships_links,
                          self.with_relationships_data).resource
             for c in self.obj.placenames_having_roles
         ]
 
-    def get_placenames_having_roles_resource_identifiers(self):
+    def get_placenames_having_roles_resource_identifiers(self, rel_facade=None):
         from app.api.placename_has_role.facade import PlacenameHasRoleFacade
+        rel_facade = PlacenameHasRoleFacade if not rel_facade else rel_facade
+
         return [] if self.obj.placenames_having_roles is None else [
-            PlacenameHasRoleFacade.make_resource_identifier(c.id, PlacenameHasRoleFacade.TYPE)
+            rel_facade.make_resource_identifier(c.id, rel_facade.TYPE)
             for c in self.obj.placenames_having_roles
         ]
 
-    def get_placenames_having_roles_resources(self):
+    def get_placenames_having_roles_resources(self, rel_facade=None):
         from app.api.placename_has_role.facade import PlacenameHasRoleFacade
+        rel_facade = PlacenameHasRoleFacade if not rel_facade else rel_facade
+
         return [] if self.obj.placenames_having_roles is None else [
-            PlacenameHasRoleFacade(self.url_prefix, c, True, True).resource
+            rel_facade(self.url_prefix, c, True, True).resource
             for c in self.obj.placenames_having_roles
         ]
 
@@ -341,26 +365,20 @@ class DocumentSearchFacade(DocumentFacade):
         return resource
 
 
-class DocumentPreviewFacade(DocumentFacade):
+class DocumentStatusFacade(DocumentFacade):
     def __init__(self, *args, **kwargs):
-        super(DocumentPreviewFacade, self).__init__(*args, **kwargs)
-        self.relationships.pop("current-lock")
-        self.relationships.pop("changes")
+        super(DocumentStatusFacade, self).__init__(*args, **kwargs)
+        self.relationships = {
+            "current-lock": self.relationships["current-lock"]
+        }
 
     @property
     def resource(self):
+        print("get resource !!!!!!!!!!!!!")
         resource = {
             **self.resource_identifier,
             "attributes": {
-                "title": self.obj.title,
-                "argument": self.obj.argument,
-                "creation": self.obj.creation,
-                "creation-not-after": self.obj.creation_not_after,
-                "creation-label": self.obj.creation_label,
-                "transcription": self.obj.transcription,
-                "address": self.obj.address,
                 "is-published": False if self.obj.is_published is None else self.obj.is_published,
-                "iiif-thumbnail-url": self.get_iiif_thumbnail()
             },
             "meta": self.meta,
             "links": {

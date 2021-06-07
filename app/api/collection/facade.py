@@ -25,17 +25,21 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
             errors = []
         return e, kwargs, errors
 
-    def get_parents_resource_identifiers(self):
+    def get_parents_resource_identifiers(self, rel_facade=None):
         parents = self.obj.parents
+        rel_facade = CollectionFacade if not rel_facade else rel_facade
+
         return [] if parents is None else [
-            CollectionFacade.make_resource_identifier(parent.id, CollectionFacade.TYPE)
+            rel_facade.make_resource_identifier(parent.id, rel_facade.TYPE)
             for parent in parents
         ]
 
-    def get_parents_resources(self):
+    def get_parents_resources(self, rel_facade=None):
         parents = self.obj.parents
+        rel_facade = CollectionFacade if not rel_facade else rel_facade
+
         return [] if parents is None else [
-            CollectionFacade(self.url_prefix, parent, self.with_relationships_links,
+            rel_facade(self.url_prefix, parent, self.with_relationships_links,
                              self.with_relationships_data).resource
             for parent in parents
         ]

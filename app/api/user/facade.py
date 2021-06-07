@@ -62,7 +62,6 @@ class UserFacade(JSONAPIAbstractFacade):
         """
         from app.api.user_role.facade import UserRoleFacade
         from app.api.lock.facade import LockFacade
-        from app.api.document.facade import DocumentFacade
 
         self.relationships = {
             "roles": {

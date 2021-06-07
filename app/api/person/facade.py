@@ -33,30 +33,38 @@ class PersonFacade(JSONAPIAbstractChangeloggedFacade):
             related_resources["persons_having_roles"] = related_resources.pop("roles-within-documents")
         return JSONAPIAbstractFacade.update_resource(obj, obj_type, attributes, related_resources, append)
 
-    def get_document_resource_identifiers(self):
+    def get_document_resource_identifiers(self, rel_facade=None):
         from app.api.document.facade import DocumentFacade
+        rel_facade = DocumentFacade if not rel_facade else rel_facade
+
         return [] if self.obj.persons_having_roles is None else [
-            DocumentFacade.make_resource_identifier(c_h_r.document.id, DocumentFacade.TYPE)
+            rel_facade.make_resource_identifier(c_h_r.document.id, rel_facade.TYPE)
             for c_h_r in self.obj.persons_having_roles
         ]
 
-    def get_document_resources(self):
+    def get_document_resources(self, rel_facade=None):
         from app.api.document.facade import DocumentFacade
+        rel_facade = DocumentFacade if not rel_facade else rel_facade
+
         return [] if self.obj.persons_having_roles is None else [
-            DocumentFacade(self.url_prefix, c.document, self.with_relationships_links,
+            rel_facade(self.url_prefix, c.document, self.with_relationships_links,
                            self.with_relationships_data).resource
             for c in self.obj.persons_having_roles
         ]
 
-    def get_roles_resource_identifiers(self):
+    def get_roles_resource_identifiers(self, rel_facade=None):
         from app.api.person_has_role.facade import PersonHasRoleFacade
+        rel_facade = PersonHasRoleFacade if not rel_facade else rel_facade
+
         return [] if self.obj.persons_having_roles is None else [
-            PersonHasRoleFacade.make_resource_identifier(e.id, PersonHasRoleFacade.TYPE)
+            rel_facade.make_resource_identifier(e.id, rel_facade.TYPE)
             for e in self.obj.persons_having_roles]
 
-    def get_roles_resources(self):
+    def get_roles_resources(self, rel_facade=None):
         from app.api.person_has_role.facade import PersonHasRoleFacade
-        return [] if self.obj.persons_having_roles is None else [PersonHasRoleFacade(self.url_prefix, e,
+        rel_facade = PersonHasRoleFacade if not rel_facade else rel_facade
+
+        return [] if self.obj.persons_having_roles is None else [rel_facade(self.url_prefix, e,
                                                                                             self.with_relationships_links,
                                                                                             self.with_relationships_data).resource
                                                                         for e in self.obj.persons_having_roles]

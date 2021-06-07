@@ -16,7 +16,8 @@ class SearchIndexManager(object):
                         "must": [
                             {
                                 "query_string": {
-                                    "query": query
+                                    "query": query,
+                                    "default_operator": "AND"
                                 }
                             }
                         ]
@@ -52,12 +53,13 @@ class SearchIndexManager(object):
                     },
                     "type_count": {
                         "cardinality": {
-                            "field": "placename-id.keyword"
+                            "field": "id"
                         }
                     }
                 }
                 body["size"] = 0
 
+                sort_criteriae.reverse()
                 for crit in sort_criteriae:
                     for crit_name, crit_order in crit.items():
                         body["aggregations"]["items"]["composite"]["sources"].insert(0,
@@ -136,28 +138,3 @@ class SearchIndexManager(object):
             current_app.elasticsearch.delete(index=index, doc_type="_doc", id=id)
         except elasticsearch.exceptions.NotFoundError as e:
             print("WARNING: resource already removed from index:", str(e))
-
-    # @staticmethod
-    # def reindex_resources(changes):
-    #    from app.api.facade_manager import JSONAPIFacadeManager
-    #
-    #    for target_id, target, op in changes:
-    #
-    #        facade = JSONAPIFacadeManager.get_facade_class(target)
-    #        try:
-    #            #print("try to reindex", target)
-    #            if op in ('insert', 'update'):
-    #                target.id = target_id
-    #                f_obj = facade("", target)
-    #
-    #                #f_obj, kwargs, errors = facade.get_resource_facade("", id=target.id)
-    #            else:
-    #                target.id = target_id
-    #                f_obj = facade("", target)
-    #            #print("call to reindex for", target_id, target, op)
-    #
-    #            f_obj.reindex(op)
-    #        except Exception as e:
-    #            print("Error while indexing %s:" % target, e)
-    #            pass
-    #

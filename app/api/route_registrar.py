@@ -70,9 +70,19 @@ class JSONAPIRouteRegistrar(object):
         relationships = facade_obj.relationships
         # iter over the relationships to be included
         for inclusion in asked_relationships:
+
+            # parse for facade name
+            # eg.  ?include=place@map  to get the map facade of the place resource
+            rel = inclusion.split('@')
+            if len(rel) > 1:
+                rel_name, asked_facade_name = rel
+                asked_facade = JSONAPIFacadeManager.get_facade_class_from_name(rel_name, asked_facade_name)
+            else:
+                rel_name, asked_facade = rel[0], None
+
             try:
                 # try bring the related resources and add them to the list
-                related_resources = relationships[inclusion]["resource_getter"]()
+                related_resources = relationships[rel_name]["resource_getter"](asked_facade)
                 # make unique keys to avoid duplicates
                 if isinstance(related_resources, list):
                     for related_resource in related_resources:
@@ -144,7 +154,7 @@ class JSONAPIRouteRegistrar(object):
                             field=filter_fieldname,
                             criteria=True if criteria_upper == 'TRUE' else False
                         )
-                        print(str(new_criteria))
+                        # print(str(new_criteria))
                     elif not not_null_operator:
                         if criteria:
                             # filter[field]=value
@@ -164,7 +174,7 @@ class JSONAPIRouteRegistrar(object):
                         new_criteria = column(col, is_literal=True).isnot(None)
 
                     print(str(new_criteria))
-                    filter_criteriae.append(text(new_criteria))
+                    filter_criteriae.append(text(str(new_criteria)))
 
             objs_query = objs_query.filter(*filter_criteriae)
 
@@ -224,7 +234,7 @@ class JSONAPIRouteRegistrar(object):
                 for op, value in ops:
                     range[key][op] = value
                 return range
-        print(range)
+        # print(range)
         return range
 
     def search(self, index, query, range, groupby, sort_criteriae, page_id, page_size, page_after):
@@ -241,7 +251,7 @@ class JSONAPIRouteRegistrar(object):
         )
 
         if total == 0:
-            return {}, {"total": 0}
+            return [], {}, {"total": 0}
 
         res_dict = {}
         if groupby is None:
@@ -272,7 +282,7 @@ class JSONAPIRouteRegistrar(object):
                 res_dict[res_type].append(mapper(bucket["key"]["item"]))
             print("ids fetched !")
 
-        # fetch the actual objects from their ids
+        # build the query to get objects from their ids
         for res_type, res_ids in res_dict.items():
             when = []
             for i, id in enumerate(res_ids):
@@ -284,7 +294,7 @@ class JSONAPIRouteRegistrar(object):
                 res_dict[res_type] = res_dict[res_type].order_by(db.case(when, value=m.id))
 
         print({"total": total, "after": after_key})
-        return res_dict, {"total": total, "after": after_key}
+        return [r.id for r in results], res_dict, {"total": total, "after": after_key}
 
     def register_search_route(self, decorators=()):
 
@@ -332,7 +342,7 @@ class JSONAPIRouteRegistrar(object):
                     sort_criteriae.append({criteria: {"order": sort_order}})
 
             try:
-                res, meta = self.search(
+                sorted_ids_list, res, meta = self.search(
                     index=index,
                     query=query,
                     range=range,
@@ -353,7 +363,7 @@ class JSONAPIRouteRegistrar(object):
             links = {"self": JSONAPIRouteRegistrar.make_url(request.base_url, OrderedDict(request.args))}
 
             if meta["total"] <= 0:
-                facade_objs = []
+                sorted_facade_objs = []
                 included_resources = None
             else:
                 for idx in res.keys():
@@ -437,6 +447,8 @@ class JSONAPIRouteRegistrar(object):
 
                 # finally make the facades
                 facade_objs = []
+                sorted_facade_objs = [None] * len(sorted_ids_list)
+
                 for idx, r in res.items():
                     for obj in r:
                         facade_class_type = request.args["facade"] if "facade" in request.args else "search"
@@ -445,11 +457,31 @@ class JSONAPIRouteRegistrar(object):
                                              with_relationships_data=w_rel_data)
                         facade_objs.append(f_obj)
 
+                # reapply the initial sorts to the spread resources (because the order may have been split
+                # across different facades)
+                if groupby is None:
+                    # print([(i, o)for i, o in enumerate(sorted_ids_list)])
+                    # print([(i, o.id) for i, o in enumerate(facade_objs)])
+                    for f_obj in facade_objs:
+                        try:
+                            index = sorted_ids_list.index(str(f_obj.id))
+                            sorted_facade_objs[index] = f_obj
+                        except (ValueError, IndexError) as e:
+                            # print([o.id if o else None for o in sorted_facade_objs])
+                            # print("Not in list", index, f_obj.id, f_obj.obj.label)
+                            raise e
+
+                    sorted_facade_objs = [f for f in sorted_facade_objs if f is not None]
+                else:
+                    # TODO gerer le groupby quand pas sur le doctype ? à revérifier
+                    # l'agg côté ES gère déjà le tri multicritères
+                    sorted_facade_objs = facade_objs
+
                 # find out if related resources must be included too
                 included_resources = None
                 if "include" in request.args:
                     included_resources = []
-                    for facade_obj in facade_objs:
+                    for facade_obj in sorted_facade_objs:
                         included_res, errors = JSONAPIRouteRegistrar.get_included_resources(
                             request.args["include"].split(','),
                             facade_obj
@@ -463,6 +495,7 @@ class JSONAPIRouteRegistrar(object):
                                 included_resources.append(_res)
                         # included_resources.extend(included_res)
 
+            resources = [f.resource for f in sorted_facade_objs]
             res_meta = {
                 "total-count": meta["total"],
                 "duration": float('%.4f' % (time.time() - start_time))
@@ -470,12 +503,13 @@ class JSONAPIRouteRegistrar(object):
             if "after" in meta:
                 res_meta["after"] = meta["after"]
 
-            return JSONAPIResponseFactory.make_data_response(
-                [f.resource for f in facade_objs],
+            response = JSONAPIResponseFactory.make_data_response(
+                resources,
                 links=links,
                 included_resources=included_resources,
                 meta=res_meta
             )
+            return response
 
         # APPLY decorators if any
         for dec in decorators:
@@ -673,7 +707,7 @@ class JSONAPIRouteRegistrar(object):
                                                                      with_relationships_links=w_rel_links,
                                                                      with_relationships_data=w_rel_data)
 
-            print(facade_class, f_obj)
+            print("@@@", f_obj, facade_class, kwargs, errors)
             if f_obj is None:
                 return JSONAPIResponseFactory.make_errors_response(errors, **kwargs)
             else:
@@ -837,7 +871,6 @@ class JSONAPIRouteRegistrar(object):
             else:
                 relationship = f_obj.relationships[rel_name]
                 resource_data = relationship["resource_getter"]()
-                print(relationship, f_obj)
                 if resource_data is None:
                     count = 0
                 else:
@@ -889,8 +922,8 @@ class JSONAPIRouteRegistrar(object):
                     if "include" in request.args:
                         included_resources = []
                         for res in resource_data:
-                            f_class = JSONAPIFacadeManager.FACADES[res["type"].replace('-', '_')]
-                            f_obj, kwargs, errors = f_class["default"].get_resource_facade(
+                            f_class = JSONAPIFacadeManager.get_facade_class_from_facade_type(res["type"])
+                            f_obj, kwargs, errors = f_class.get_resource_facade(
                                 url_prefix, res["id"],
                                 with_relationships_links=w_rel_links,
                                 with_relationships_data=w_rel_data

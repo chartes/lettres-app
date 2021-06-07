@@ -1,4 +1,3 @@
-from app import db
 from app.api.abstract_facade import JSONAPIAbstractFacade
 from app.models import User
 
@@ -25,20 +24,6 @@ class UserRoleFacade(JSONAPIAbstractFacade):
             kwargs = {}
             errors = []
         return e, kwargs, errors
-
-    #def get_user_resource_identifiers(self):
-    #    from app.api.user.facade import UserFacade
-    #    return [] if self.obj.users is None else [
-    #        UserFacade.make_resource_identifier(c.id, UserFacade.TYPE)
-    #        for c in self.obj.users
-    #    ]
-    #
-    #def get_users_resources(self):
-    #    from app.api.user.facade import UserFacade
-    #    return [] if self.obj.users is None else [
-    #        UserFacade(self.url_prefix, c, self.with_relationships_links, self.with_relationships_data).resource
-    #        for c in self.obj.users
-    #    ]
 
     @staticmethod
     def create_resource(model, obj_id, attributes, related_resources):
