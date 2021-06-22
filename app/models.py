@@ -2,6 +2,7 @@ import datetime
 from flask_user import UserMixin
 from sqlalchemy import Enum, DateTime, func
 from sqlalchemy.ext.declarative import declared_attr
+from werkzeug.security import check_password_hash
 
 from app import db
 
@@ -317,12 +318,27 @@ class User(db.Model, UserMixin):
 
     def to_json(self):
         return {
+            "id": self.id,
             "username": self.username,
             "roles": [r.name for r in self.roles]
         }
 
     def is_admin(self):
         return 'admin' in [r.name for r in self.roles]
+
+    @classmethod
+    def authenticate(cls, **kwargs):
+        email = kwargs.get('email')
+        password = kwargs.get('password')
+
+        if not email or not password:
+            return None
+
+        user = cls.query.filter_by(email=email).first()
+        if not user or not check_password_hash(user.password, password):
+            return None
+
+        return user
 
 
 class UserRole(db.Model):

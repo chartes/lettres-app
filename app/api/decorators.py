@@ -1,8 +1,9 @@
-from flask import session, current_app
+import jwt
+from flask import session, current_app, request, jsonify
 from flask_jwt_extended import get_jwt_identity, get_jwt_claims, jwt_required, verify_jwt_in_request
 from functools import wraps
 from app import JSONAPIResponseFactory
-
+from app.models import User
 
 error_401 = JSONAPIResponseFactory.make_errors_response(
     {
@@ -32,20 +33,44 @@ def error_400_unhandled_error(e):
 
 
 def api_require_roles(*required_roles):
-    def wrap(view_function):
+    def token_required_wrapper(view_function):
         @wraps(view_function)
-        def wrapped_f(*args, **kwargs):
-            verify_jwt_in_request()
-            ret = {
-                'current_identity': get_jwt_identity(),  # username
-                'current_roles': get_jwt_claims()  # roles
+        def _verify(*args, **kwargs):
+            auth_headers = request.headers.get('Authorization', '').split()
+
+            invalid_msg = {
+                'message': 'Invalid token. Registeration and / or authentication required',
+                'authenticated': False
             }
-            print("You are %s." % ret, "You need to be", required_roles)
-            for required_role in required_roles:
-                if required_role not in ret["current_roles"]:
-                    print("Sorry, you are not '" + required_role + "'")
-                    return error_401
-            res = view_function(*args, **kwargs)
-            return res
-        return wrapped_f
-    return wrap
+            expired_msg = {
+                'message': 'Expired token. Reauthentication required.',
+                'authenticated': False
+            }
+
+            if len(auth_headers) != 2:
+                return jsonify(invalid_msg), 401
+
+            try:
+                token = auth_headers[1]
+                data = jwt.decode(token, current_app.config['SECRET_KEY'])
+                user = User.query.filter_by(email=data['sub']).first()
+                if not user:
+                    raise RuntimeError('User not found')
+
+                for required_role in required_roles:
+                    if required_role not in [r.name for r in user.roles]:
+                        print("Sorry, you are not '" + required_role + "'")
+                        return error_401
+
+                return view_function(*args, **kwargs)
+
+            except jwt.ExpiredSignatureError:
+                return jsonify(expired_msg), 401  # 401 is Unauthorized HTTP status code
+
+            except (jwt.InvalidTokenError, Exception) as e:
+                print(e)
+                return jsonify(invalid_msg), 401
+
+        return _verify
+
+    return token_required_wrapper
