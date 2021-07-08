@@ -56,7 +56,8 @@ class WitnessFacade(JSONAPIAbstractChangeloggedFacade):
 
         from app.api.institution.facade import InstitutionFacade
         from app.api.document.facade import DocumentFacade
-
+        from app.api.image.facade import ImageFacade
+        
         self.relationships.update({
             "document": {
                 "links": self._get_links(rel_name="document"),
@@ -69,6 +70,12 @@ class WitnessFacade(JSONAPIAbstractChangeloggedFacade):
                 "resource_identifier_getter": self.get_related_resource_identifiers(InstitutionFacade, "institution",
                                                                                     to_many=False),
                 "resource_getter": self.get_related_resources(InstitutionFacade, "institution", to_many=False),
+            },
+            "images": {
+                "links": self._get_links(rel_name="images"),
+                "resource_identifier_getter": self.get_related_resource_identifiers(ImageFacade, "images",
+                                                                                    to_many=True),
+                "resource_getter": self.get_related_resources(ImageFacade, "images", to_many=True),
             }
         })
 

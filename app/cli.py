@@ -115,47 +115,47 @@ def make_cli():
 
             click.echo("Loaded fixtures to the database")
 
-    @click.command('make-manifests')
-    @click.option('--host', required=False, default="https://dev.chartes.psl.eu")
-    @click.option('--witnesses', default=None)
-    @click.option('--upload', default=False)
-    def make_manifests(host, witnesses, upload):
-        with app.app_context():
-            if witnesses is None:
-                witnesses = Witness.query.all()
-            else:
-                witnesses = Witness.query.filter(Witness.id.in_(witnesses.split(','))).all()
-
-            witnesses = [w for w in witnesses if w.images and len(w.images) > 0]
-
-            host = "{host}{api_prefix}".format(host=host, api_prefix=app.config["API_URL_PREFIX"])
-
-            for w in witnesses:
-                manifest, manifest_url = app.manifest_factory.make_manifest(host, w)
-
-                tmp_filename = os.path.join(app.config.get('LOCAL_TMP_FOLDER'), "manifest{0}.json".format(w.id))
-                print(tmp_filename, manifest_url, end="... ", flush=False)
-                upload_manifest(tmp_filename, manifest, upload=upload)
-                print('OK')
-
-    @click.command('make-collection-manifests')
-    @click.option('--documents', default=None)
-    @click.option('--upload', default=False)
-    def make_collection_manifests(documents, upload):
-        with app.app_context():
-            if documents is None:
-                documents = Document.query.all()
-            else:
-                documents = Document.query.filter(Document.id.in_(documents.split(','))).all()
-
-            for doc in documents:
-
-                collection, collection_url = app.manifest_factory.make_collection(doc)
-
-                tmp_filename = os.path.join(app.config.get('LOCAL_TMP_FOLDER'), "document{0}.json".format(doc.id))
-                print(tmp_filename, collection_url, end="... ", flush=False)
-                upload_collection(tmp_filename, collection, upload=upload)
-                print('OK')
+    #@click.command('make-manifests')
+    #@click.option('--host', required=False, default="https://dev.chartes.psl.eu")
+    #@click.option('--witnesses', default=None)
+    #@click.option('--upload', default=False)
+    #def make_manifests(host, witnesses, upload):
+    #    with app.app_context():
+    #        if witnesses is None:
+    #            witnesses = Witness.query.all()
+    #        else:
+    #            witnesses = Witness.query.filter(Witness.id.in_(witnesses.split(','))).all()
+    #
+    #        witnesses = [w for w in witnesses if w.images and len(w.images) > 0]
+    #
+    #        host = "{host}{api_prefix}".format(host=host, api_prefix=app.config["API_URL_PREFIX"])
+    #
+    #        for w in witnesses:
+    #            manifest, manifest_url = app.manifest_factory.make_manifest(host, w)
+    #
+    #            tmp_filename = os.path.join(app.config.get('LOCAL_TMP_FOLDER'), "manifest{0}.json".format(w.id))
+    #            print(tmp_filename, manifest_url, end="... ", flush=False)
+    #            upload_manifest(tmp_filename, manifest, upload=upload)
+    #            print('OK')
+    #
+    #@click.command('make-collection-manifests')
+    #@click.option('--documents', default=None)
+    #@click.option('--upload', default=False)
+    #def make_collection_manifests(documents, upload):
+    #    with app.app_context():
+    #        if documents is None:
+    #            documents = Document.query.all()
+    #        else:
+    #            documents = Document.query.filter(Document.id.in_(documents.split(','))).all()
+    #
+    #        for doc in documents:
+    #
+    #            collection, collection_url = app.manifest_factory.make_collection(doc)
+    #
+    #            tmp_filename = os.path.join(app.config.get('LOCAL_TMP_FOLDER'), "document{0}.json".format(doc.id))
+    #            print(tmp_filename, collection_url, end="... ", flush=False)
+    #            upload_collection(tmp_filename, collection, upload=upload)
+    #            print('OK')
 
     @click.command("db-reindex")
     @click.option('--indexes', default="all")
@@ -225,8 +225,8 @@ def make_cli():
     cli.add_command(db_fixtures)
     cli.add_command(db_recreate)
     cli.add_command(db_reindex)
-    cli.add_command(make_manifests)
-    cli.add_command(make_collection_manifests)
+    #cli.add_command(make_manifests)
+    #cli.add_command(make_collection_manifests)
 
     cli.add_command(run)
 
