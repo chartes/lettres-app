@@ -1,5 +1,4 @@
-import requests
-from flask import current_app
+from flask import current_app, request
 
 from app.api.abstract_facade import JSONAPIAbstractChangeloggedFacade
 from app.models import Witness
@@ -19,13 +18,9 @@ class WitnessFacade(JSONAPIAbstractChangeloggedFacade):
         return self.obj.id
 
     def get_iiif_manifest_url(self):
-        url = '{0}/manifest{1}.json'.format(current_app.config['IIIF_MANIFEST_ENDPOINT'], self.obj.id)
-        try:
-            resp = requests.head(url)
-            if resp.status_code == 200:
-                return url
-        except Exception:
-            return None
+        host = request.host_url[:-1]
+        prefix = current_app.config['IIIF_URL_PREFIX']
+        return f"{host}{prefix}/witnesses/{self.obj.id}/manifest"
 
     @property
     def resource(self):
@@ -57,7 +52,7 @@ class WitnessFacade(JSONAPIAbstractChangeloggedFacade):
         from app.api.institution.facade import InstitutionFacade
         from app.api.document.facade import DocumentFacade
         from app.api.image.facade import ImageFacade
-        
+
         self.relationships.update({
             "document": {
                 "links": self._get_links(rel_name="document"),

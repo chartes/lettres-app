@@ -1,8 +1,9 @@
 import requests
-from flask import current_app
+from flask import current_app, request
 
 from app.api.abstract_facade import JSONAPIAbstractChangeloggedFacade
-from app.models import Document
+from app.api.witness.facade import WitnessFacade
+from app.models import Document, WITNESS_STATUS_VALUES
 
 
 class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
@@ -130,13 +131,19 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
             for c in self.obj.placenames_having_roles
         ]
 
-    def get_iiif_collection_url(self):
-        url = '{0}/document{1}.json'.format(current_app.config['IIIF_COLLECTION_ENDPOINT'], self.obj.id)
-        resp = requests.head(url)
-        if resp.status_code == 200:
-            return url
-        else:
+    def get_first_witness_manifest_url(self):
+        w = sorted(self.obj.witnesses, key=lambda k: k.num)
+        print('get_first_witness_manifest_url', w)
+        if len(w) == 0:
             return None
+        f_obj, errors, kwargs = WitnessFacade.get_facade('', w[0])
+        return f_obj.get_iiif_manifest_url()
+
+    def get_iiif_collection_url(self):
+        #return "https://iiif.chartes.psl.eu/collections/encpos/encpos_1892.json"
+        host = request.host_url[:-1]
+        prefix = current_app.config['IIIF_URL_PREFIX']
+        return f"{host}{prefix}/documents/{self.obj.id}/collection"
 
     def get_iiif_thumbnail(self):
         for w in self.obj.witnesses:
@@ -167,6 +174,7 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
 
                 "is-published": False if self.obj.is_published is None else self.obj.is_published,
 
+                "iiif-base-witness-manifest-url": self.get_first_witness_manifest_url(),
                 "iiif-collection-url": self.get_iiif_collection_url(),
                 "iiif-thumbnail-url": self.get_iiif_thumbnail()
             },

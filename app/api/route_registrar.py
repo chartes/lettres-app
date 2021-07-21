@@ -1243,7 +1243,7 @@ class JSONAPIRouteRegistrar(object):
                 related_resources = {}
                 for rel_name, rel in relationships.items():
                     related_resources[rel_name] = []
-
+                    print(rel_name, rel, related_resources)
                     if not rel or "data" not in rel:
                         return JSONAPIResponseFactory.make_errors_response(
                             {"status": 400,
@@ -1251,7 +1251,7 @@ class JSONAPIRouteRegistrar(object):
                             status=400
                         )
                     elif not rel["data"]:
-                        related_resources[rel_name] = None
+                        #related_resources[rel_name] = None
                         continue
 
                     if not isinstance(rel["data"], list):

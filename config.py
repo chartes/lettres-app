@@ -40,6 +40,7 @@ class Config(object):
     APP_URL_PREFIX = parse_var_env('APP_URL_PREFIX')
     API_VERSION = parse_var_env('API_VERSION')
     API_URL_PREFIX = parse_var_env('API_URL_PREFIX')
+    IIIF_URL_PREFIX = parse_var_env('IIIF_URL_PREFIX')
 
     # Flask-User settings
     USER_APP_NAME = parse_var_env("USER_APP_NAME") or "Lettres"     # Shown in and email templates and page footers

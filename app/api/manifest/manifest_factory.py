@@ -1,7 +1,7 @@
 import datetime
 import json
 import requests
-from flask import current_app
+from flask import current_app, request
 from operator import attrgetter
 
 from app.api.document.facade import DocumentFacade
@@ -50,7 +50,9 @@ class ManifestFactory(object):
 
         return collection, collection_url
 
-    def make_manifest(self, host, witness):
+    def make_manifest(self, witness):
+        api_prefix_url = request.host_url[:-1] + current_app.config['API_URL_PREFIX']
+
         f_obj, errors, kwargs = WitnessFacade.get_facade('', witness)
         manifest_url = f_obj.get_iiif_manifest_url()
 
@@ -59,13 +61,13 @@ class ManifestFactory(object):
         # ==== manifest @id
         manifest["@id"] = manifest_url
         # ==== manifest related
-        manifest["related"] = host + "/documents/%s" % witness.document_id
+        manifest["related"] = f"{api_prefix_url}/documents/{witness.document_id}"
 
         # === manifest label
         manifest["label"] = witness.content
 
         # ==== sequence @id
-        seq = manifest_url + "/sequence/normal"
+        seq = f"{manifest_url}/sequence/normal"
         manifest["sequences"][0]["@id"] = seq
 
         # ==== canvases

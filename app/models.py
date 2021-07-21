@@ -407,7 +407,7 @@ class Lock(db.Model):
 
 CHANGELOG_OBJECT_TYPES = [o.__tablename__ for o in (
     Document, Collection, Person, PersonHasRole, PersonRole,
-    Image, Institution, Language, Note, Witness, Lock
+    Institution, Language, Note, Witness, Lock
 )] + ['document_has_language', 'document_has_collection']
 
 
