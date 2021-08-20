@@ -8,8 +8,6 @@ from elasticsearch import AuthorizationException
 
 from app import create_app
 from app.api.collection.facade import CollectionFacade
-from app.api.manifest.manifest_factory import ManifestFactory
-from app.api.manifest.routes import upload_manifest, upload_collection
 from app.api.person.facade import PersonFacade
 from app.api.document.facade import DocumentFacade
 from app.api.institution.facade import InstitutionFacade

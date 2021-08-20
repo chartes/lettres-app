@@ -9,5 +9,13 @@ def register_placename_api_urls(app):
     registrar.register_patch_routes(Placename, PlacenameFacade)
     registrar.register_delete_routes(Placename, PlacenameFacade)
 
+    registrar.register_relationship_get_route(PlacenameFacade, 'roles-within-documents')
+    registrar.register_relationship_post_route(PlacenameFacade, 'roles-within-documents')
+    registrar.register_relationship_patch_route(PlacenameFacade, 'roles-within-documents')
+
+    registrar.register_relationship_get_route(PlacenameFacade, 'documents')
+    registrar.register_relationship_post_route(PlacenameFacade, 'documents')
+    registrar.register_relationship_patch_route(PlacenameFacade, 'documents')
+
     registrar.register_relationship_get_route(PlacenameFacade, 'changes')
     registrar.register_relationship_post_route(PlacenameFacade, 'changes')

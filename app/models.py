@@ -219,6 +219,7 @@ class PlacenameHasRole(db.Model, ChangesMixin):
     placename_role_id = db.Column(db.Integer, db.ForeignKey('placename_role.id', ondelete='CASCADE'))
 
     function = db.Column(db.String(100), nullable=True)
+    field = db.Column(db.String(100), nullable=True)
 
     placename = db.relationship("Placename", backref=db.backref("placenames_having_roles"), single_parent=True)
     document = db.relationship("Document", backref=db.backref("placenames_having_roles", cascade="all, delete-orphan"),
@@ -262,6 +263,7 @@ class PersonHasRole(db.Model, ChangesMixin):
     person_role_id = db.Column(db.Integer, db.ForeignKey('person_role.id', ondelete='CASCADE'))
 
     function = db.Column(db.String(100), nullable=True)
+    field = db.Column(db.String(100), nullable=True)
 
     person = db.relationship("Person", backref=db.backref("persons_having_roles"), single_parent=True)
     document = db.relationship("Document", backref=db.backref("persons_having_roles", cascade="all, delete-orphan"), single_parent=True)

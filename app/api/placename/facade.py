@@ -85,23 +85,40 @@ class PlacenameFacade(JSONAPIAbstractChangeloggedFacade):
         """
         self.relationships.update({
             "roles-within-documents": {
-                "links": self._get_links(rel_name="roles-within-documents"),
+                "links": self._get_links(rel_name="roles-within-documents"),  # TODO wrong ?
                 "resource_identifier_getter": self.get_roles_resource_identifiers,
                 "resource_getter": self.get_roles_resources
             },
             "documents": {
-                "links": self._get_links(rel_name="documents"),
+                "links": self._get_links(rel_name="documents"),  # TODO wrong ?
                 "resource_identifier_getter": self.get_document_resource_identifiers,
                 "resource_getter": self.get_document_resources
-            },
+            }
         })
 
     def get_data_to_index_when_added(self, propagate):
         _res = self.resource
+
+        from app.api.placename_has_role.facade import PlacenameHasRoleFacade
+
+        rels = []
+        for e in self.obj.placenames_having_roles:
+            r = PlacenameHasRoleFacade(self.url_prefix, e, True, True).resource
+            rels.append({
+                "type": r["type"],
+                "id": r["id"],
+                "placename_function": r["attributes"]["function"],
+                "placename_field": r["attributes"]["field"],
+                "role_id": e.placename_role.id,
+                "document_id": e.document.id
+            })
+
         payload = {
             "id": _res["id"],
             "type": _res["type"],
-            "label": _res["attributes"]["label"]
+            **_res["attributes"],
+
+            "relationships":  rels
         }
         placename_data = [{"id": _res["id"], "index": self.get_index_name(), "payload": payload}]
         if not propagate:

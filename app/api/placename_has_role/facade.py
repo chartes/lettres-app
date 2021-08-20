@@ -21,7 +21,8 @@ class PlacenameHasRoleFacade(JSONAPIAbstractFacade):
         resource = {
             **self.resource_identifier,
             "attributes": {
-                "function": self.obj.function
+                "function": self.obj.function,
+                "field": self.obj.field
             },
             "meta": self.meta,
             "links": {
@@ -57,3 +58,5 @@ class PlacenameHasRoleFacade(JSONAPIAbstractFacade):
                 "resource_getter": self.get_related_resources(rel_facade, u_rel_name, to_many),
             }
 
+    def get_data_to_index_when_added(self, propagate):
+        return self.get_relationship_data_to_index(rel_name="placename")
