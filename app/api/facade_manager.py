@@ -9,7 +9,7 @@ from app.api.institution.facade import InstitutionFacade
 from app.api.language.facade import LanguageFacade
 from app.api.note.facade import NoteFacade
 from app.api.placename.facade import PlacenameFacade
-from app.api.placename_has_role.facade import PlacenameHasRoleFacade
+from app.api.placename_has_role.facade import PlacenameHasRoleFacade, PlacenameHasRoleIncludedFacade
 from app.api.placename_role.facade import PlacenameRoleFacade
 from app.api.user.facade import UserFacade
 from app.api.user_role.facade import UserRoleFacade
@@ -23,6 +23,8 @@ _FACADES = {
     # immediate facades
     "bookmark": DocumentBookmarkFacade,
     "status": DocumentStatusFacade,
+
+    "placenameHasRoleWithIds": PlacenameHasRoleIncludedFacade,
 
     Collection.__tablename__: {
         "default": CollectionFacade,
@@ -39,6 +41,7 @@ _FACADES = {
     PlacenameHasRole.__tablename__: {
         "default": PlacenameHasRoleFacade,
         "search": PlacenameHasRoleFacade,
+        "withIds": PlacenameHasRoleIncludedFacade
     },
     PlacenameRole.__tablename__: {
         "default": PlacenameRoleFacade,
@@ -109,10 +112,12 @@ class JSONAPIFacadeManager(object):
     def get_facade_class_from_name(rel, name):
         try:
             return JSONAPIFacadeManager.FACADES[rel][name]
-        except Exception as e:
-            print(e)
-            print("Facade %s unknown" % name)
-            return JSONAPIFacadeManager.FACADES[name]
+        except Exception:
+            try:
+                return JSONAPIFacadeManager.FACADES[name]
+            except Exception as e:
+                print("Facade %s unknown, %s" % (name, e))
+                return None
 
     @staticmethod
     def get_facade_class(obj, facade_type="default"):

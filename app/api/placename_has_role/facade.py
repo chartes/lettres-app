@@ -60,3 +60,28 @@ class PlacenameHasRoleFacade(JSONAPIAbstractFacade):
 
     def get_data_to_index_when_added(self, propagate):
         return self.get_relationship_data_to_index(rel_name="placename")
+
+
+class PlacenameHasRoleIncludedFacade(PlacenameHasRoleFacade):
+    def __init__(self, *args, **kwargs):
+        super(PlacenameHasRoleIncludedFacade, self).__init__(*args, **kwargs)
+
+    @property
+    def resource(self):
+        print('======'*100)
+        resource = {
+            **self.resource_identifier,
+            "attributes": {
+                "function": self.obj.function,
+                "field": self.obj.field,
+                "placename_id": self.obj.placename_id,
+                "document_id": self.obj.document_id,
+                "role_id": self.obj.placename_role_id
+            },
+            "meta": self.meta,
+            "links": {
+                "self": self.self_link
+            }
+        }
+
+        return resource

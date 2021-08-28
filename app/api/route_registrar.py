@@ -94,7 +94,7 @@ class JSONAPIRouteRegistrar(object):
                         unique_key = (related_resources["type"], related_resources["id"])
                         included_resources[unique_key] = related_resources
             except KeyError as e:
-                errors.append({"status": 403, "title": "Cannot include the relationship %s" % str(e)})
+                errors.append({"status": 400, "title": "Cannot include the relationship %s" % str(e)})
 
         facade_obj.with_relationships_data = w_data
         facade_obj.with_relationships_links = w_links

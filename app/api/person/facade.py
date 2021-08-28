@@ -27,20 +27,23 @@ class PersonFacade(JSONAPIAbstractChangeloggedFacade):
         from app.api.document.facade import DocumentFacade
         rel_facade = DocumentFacade if not rel_facade else rel_facade
 
-        return [] if self.obj.persons_having_roles is None else [
+        resIds = [] if self.obj.persons_having_roles is None else [
             rel_facade.make_resource_identifier(c_h_r.document.id, rel_facade.TYPE)
             for c_h_r in self.obj.persons_having_roles
         ]
+
+        return list({object_['id']: object_ for object_ in resIds}.values())
 
     def get_document_resources(self, rel_facade=None):
         from app.api.document.facade import DocumentFacade
         rel_facade = DocumentFacade if not rel_facade else rel_facade
 
-        return [] if self.obj.persons_having_roles is None else [
+        resources = [] if self.obj.persons_having_roles is None else [
             rel_facade(self.url_prefix, c.document, self.with_relationships_links,
                            self.with_relationships_data).resource
             for c in self.obj.persons_having_roles
         ]
+        return list({object_.id: object_ for object_ in resources}.values())
 
     def get_roles_resource_identifiers(self, rel_facade=None):
         from app.api.person_has_role.facade import PersonHasRoleFacade
