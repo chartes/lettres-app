@@ -68,7 +68,6 @@ class PlacenameHasRoleIncludedFacade(PlacenameHasRoleFacade):
 
     @property
     def resource(self):
-        print('======'*100)
         resource = {
             **self.resource_identifier,
             "attributes": {
@@ -76,7 +75,9 @@ class PlacenameHasRoleIncludedFacade(PlacenameHasRoleFacade):
                 "field": self.obj.field,
                 "placename_id": self.obj.placename_id,
                 "document_id": self.obj.document_id,
-                "role_id": self.obj.placename_role_id
+                "role_id": self.obj.placename_role_id,
+                "document_title": self.obj.document.title,
+                "document_creation_label": self.obj.document.creation_label
             },
             "meta": self.meta,
             "links": {
