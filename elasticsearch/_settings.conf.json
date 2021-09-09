@@ -1,3 +1,51 @@
 {
-
+  "analysis": {
+    "filter": {
+      "french_elision": {
+        "type": "elision",
+        "articles_case": true,
+        "articles": [
+          "l",
+          "m",
+          "t",
+          "qu",
+          "n",
+          "s",
+          "j",
+          "d",
+          "c",
+          "jusqu",
+          "quoiqu",
+          "lorsqu",
+          "puisqu"
+        ]
+      }
+    },
+    "char_filter": {
+      "html_stripper": {
+        "type": "html_strip"
+      }
+    },
+    "analyzer": {
+      "folding": {
+        "tokenizer": "standard",
+        "stopwords": "_french_",
+        "filter": [
+          "french_elision",
+          "icu_folding"
+        ],
+        "char_filter": [
+          "html_stripper"
+        ]
+      },
+      "keyword": {
+        "tokenizer": "keyword",
+        "stopwords": "_french_",
+        "filter": [
+          "french_elision",
+          "icu_folding"
+        ]
+      }
+    }
+  }
 }

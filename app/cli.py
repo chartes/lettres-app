@@ -26,11 +26,11 @@ def add_default_users(db):
     User.add_default_users()
 
 
-def load_elastic_conf(conf_name, index_name, delete=False):
+def load_elastic_conf(conf_name, index_name, rebuild=False):
     url = '/'.join([app.config['ELASTICSEARCH_URL'], index_name])
     res = None
     try:
-        if delete:
+        if rebuild:
             res = requests.delete(url)
 
             with open('elasticsearch/_settings.conf.json', 'r') as _settings:
@@ -158,8 +158,8 @@ def make_cli():
     @click.command("db-reindex")
     @click.option('--indexes', default="all")
     @click.option('--host', required=True)
-    @click.option('--delete', required=False, default=None)
-    def db_reindex(indexes, host, delete):
+    @click.option('--rebuild', is_flag=True, help="truncate the index before updating its configuration")
+    def db_reindex(indexes, host, rebuild):
         """
         Rebuild the elasticsearch indexes from the current database
         """
@@ -190,7 +190,7 @@ def make_cli():
                     assert (r.status_code == 200)
 
                 try:
-                    load_elastic_conf(name, index_name, delete=delete is not None)
+                    load_elastic_conf(name, index_name, rebuild=rebuild)
 
                     for obj in info["model"].query.all():
                         f_obj = info["facade"](prefix, obj)

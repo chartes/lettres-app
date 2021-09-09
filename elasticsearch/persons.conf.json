@@ -4,9 +4,12 @@
       "properties": {
         "label": {
           "type": "text",
+          "analyzer": "folding",
           "fields": {
             "keyword": {
-              "type": "keyword"
+              "type": "text",
+              "analyzer": "keyword",
+              "fielddata": "true"
             }
           }
         }
