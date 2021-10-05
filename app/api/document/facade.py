@@ -269,7 +269,7 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
             "transcription": self.obj.transcription,
             "address": self.obj.address,
 
-            "witnesses": [{"id": w.id, "content": w.content} for w in self.obj.witnesses],
+            "witnesses": [{"id": w.id, "content": w.content, "classification-mark": w.classification_mark} for w in self.obj.witnesses],
             "languages": [{"id": l.id, "code": l.code} for l in self.obj.languages],
             "collections": [{"id": c.id, "title": c.title} for c in self.obj.collections],
             "persons": [
