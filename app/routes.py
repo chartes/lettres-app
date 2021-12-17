@@ -38,20 +38,3 @@ def get_document_collection(doc_id):
 
     return JSONAPIResponseFactory.make_response(collection, headers=headers)
 
-#@app_bp.route("/iiif/editor/witnesses/<witness_id>")
-#def iiif_editor(witness_id):
-#    user = current_user
-#    if not user.is_authenticated:
-#        return redirect(url_for("app_bp.index"))
-#
-#    witness = Witness.query.filter(Witness.id == witness_id).first()
-#    if witness is None:
-#        abort(status=404)
-#
-#    f_obj, errors, kwargs = WitnessFacade.get_facade('', witness)
-#    manifest_url = f_obj.get_iiif_manifest_url()
-#
-#    return render_template("iiif-manifest-editor/editor.html", manifest_url=manifest_url)
-
-
-
