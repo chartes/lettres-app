@@ -60,3 +60,29 @@ class PersonHasRoleFacade(JSONAPIAbstractFacade):
 
     def get_data_to_index_when_added(self, propagate):
         return self.get_relationship_data_to_index(rel_name="person")
+
+
+class PersonHasRoleIncludedFacade(PersonHasRoleFacade):
+    def __init__(self, *args, **kwargs):
+        super(PersonHasRoleIncludedFacade, self).__init__(*args, **kwargs)
+
+    @property
+    def resource(self):
+        resource = {
+            **self.resource_identifier,
+            "attributes": {
+                "function": self.obj.function,
+                "field": self.obj.field,
+                "person_id": self.obj.person_id,
+                "document_id": self.obj.document_id,
+                "role_id": self.obj.person_role_id,
+                "document_title": self.obj.document.title,
+                "document_creation_label": self.obj.document.creation_label
+            },
+            "meta": self.meta,
+            "links": {
+                "self": self.self_link
+            }
+        }
+
+        return resource

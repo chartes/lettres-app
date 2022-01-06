@@ -11,6 +11,8 @@ from app.api.note.facade import NoteFacade
 from app.api.placename.facade import PlacenameFacade
 from app.api.placename_has_role.facade import PlacenameHasRoleFacade, PlacenameHasRoleIncludedFacade
 from app.api.placename_role.facade import PlacenameRoleFacade
+from app.api.person_has_role.facade import PersonHasRoleFacade, PersonHasRoleIncludedFacade
+
 from app.api.user.facade import UserFacade
 from app.api.user_role.facade import UserRoleFacade
 from app.api.witness.facade import WitnessFacade
@@ -25,6 +27,7 @@ _FACADES = {
     "status": DocumentStatusFacade,
 
     "placenameHasRoleWithIds": PlacenameHasRoleIncludedFacade,
+    "personHasRoleWithIds": PersonHasRoleIncludedFacade,
 
     Collection.__tablename__: {
         "default": CollectionFacade,
@@ -50,6 +53,7 @@ _FACADES = {
     PersonHasRole.__tablename__: {
         "default": PersonHasRoleFacade,
         "search": PersonHasRoleFacade,
+        "withIds": PersonHasRoleIncludedFacade
     },
     PersonRole.__tablename__: {
         "default": PersonRoleFacade,
