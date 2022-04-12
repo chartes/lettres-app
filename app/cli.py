@@ -92,26 +92,6 @@ def make_cli():
             db.session.commit()
             click.echo("Dropped then recreated the database")
 
-    @click.command("db-fixtures")
-    def db_fixtures():
-        """ Loads demo/tests data to the database
-        """
-        with app.app_context():
-            from app import db
-
-            db.drop_all()
-            db.create_all()
-
-            from faker import Faker
-            fake = Faker()
-            fake.seed(12345)
-            from db.fixtures.create_fake_data import create_fake_documents, create_fake_users
-            print("Generating fake data...", end=" ", flush=True)
-            create_fake_users(db, nb_users=5, fake=fake)
-            create_fake_documents(db, nb_docs=10, nb_persons=20, fake=fake)
-            print("done !")
-
-            click.echo("Loaded fixtures to the database")
 
     #@click.command('make-manifests')
     #@click.option('--host', required=False, default="https://dev.chartes.psl.eu")
@@ -220,7 +200,6 @@ def make_cli():
         app.run()
 
     cli.add_command(db_create)
-    cli.add_command(db_fixtures)
     cli.add_command(db_recreate)
     cli.add_command(db_reindex)
     #cli.add_command(make_manifests)

@@ -2,6 +2,8 @@ from elasticsearch import Elasticsearch
 from flask import Flask, Blueprint
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+from flask_mail import Mail
+
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import event, MetaData
 from sqlalchemy.engine import Engine
@@ -9,7 +11,6 @@ from sqlalchemy.engine import Engine
 from dotenv import load_dotenv
 
 from app.api.response_factory import JSONAPIResponseFactory
-
 
 # Initialize Flask extensions
 naming_convention = {
@@ -19,7 +20,9 @@ naming_convention = {
     "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
     "pk": "pk_%(table_name)s"
 }
+
 db = SQLAlchemy(metadata=MetaData(naming_convention=naming_convention))
+mail = Mail()
 
 api_bp = Blueprint('api_bp', __name__)
 iiif_bp = Blueprint('iiif_bp', __name__)
@@ -45,10 +48,11 @@ class PrefixMiddleware(object):
             return self.app(environ, start_response)
 
 
-
 def create_app(config_name="dev", with_hardcoded_prefix=False):
     """ Create the application """
     app = Flask(__name__)
+
+
     if not isinstance(config_name, str):
         from config import config
         print("default config")
@@ -64,7 +68,9 @@ def create_app(config_name="dev", with_hardcoded_prefix=False):
 
     db.init_app(app)
     config[config_name].init_app(app)
-    #migrate = Migrate(app, db, render_as_batch=True)
+    mail.init_app(app)
+
+    # migrate = Migrate(app, db, render_as_batch=True)
 
     if with_hardcoded_prefix:
         app.wsgi_app = PrefixMiddleware(app.wsgi_app, prefix=app.config["APP_URL_PREFIX"])
@@ -72,11 +78,27 @@ def create_app(config_name="dev", with_hardcoded_prefix=False):
     app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) if app.config['ELASTICSEARCH_URL'] else None
 
     """
-    ========================================================
-        Setup Flask-JWT-Extended
-    ========================================================
+        ========================================================
+              Setup Flask-JWT-Extended
+        ========================================================
     """
     app.jwt = JWTManager(app)
+
+    # Create a function that will be called whenever create_access_token
+    # is used. It will take whatever object is passed into the
+    # create_access_token method, and lets us define what the identity
+    # of the access token should be.
+    @app.jwt.user_identity_loader
+    def user_identity_lookup(user):
+        return user["email"]
+
+    # Create a function that will be called whenever create_access_token
+    # is used. It will take whatever object is passed into the
+    # create_access_token method, and lets us define what custom claims
+    # should be added to the access token.
+    @app.jwt.additional_claims_loader
+    def add_claims_to_access_token(user):
+        return user["roles"]
 
     from app.api.manifest.manifest_factory import ManifestFactory
     app.manifest_factory = ManifestFactory()

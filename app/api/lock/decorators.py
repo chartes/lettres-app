@@ -1,6 +1,6 @@
 import datetime
 from flask import request
-from flask_jwt_extended import verify_jwt_in_request_optional, get_jwt_identity
+#from flask_jwt_extended import verify_jwt_in_request_optional, get_jwt_identity
 from functools import wraps
 
 from app import db
@@ -13,7 +13,7 @@ def manage_lock_addition():
     def wrap(view_function):
         @wraps(view_function)
         def wrapped_f(*args, **kwargs):
-            verify_jwt_in_request_optional()
+            #verify_jwt_in_request_optional()
 
             try:
                 r = json_loads(request.data)

@@ -194,7 +194,7 @@ class Placename(db.Model, ChangesMixin):
     label = db.Column(db.String, nullable=False)
     long = db.Column(db.String)
     lat = db.Column(db.String)
-    ref = db.Column(db.String)
+    ref = db.Column(db.String, unique=True)
 
 
 class PlacenameRole(db.Model, ChangesMixin):
@@ -211,7 +211,6 @@ class PlacenameHasRole(db.Model, ChangesMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     __table_args__ = (
         db.UniqueConstraint('placename_id', 'function', name='_placename_has_role_function_uc'),
-        db.UniqueConstraint('placename_id', 'document_id', 'placename_role_id', name='_placename_has_role_document_uc'),
     )
 
     placename_id = db.Column(db.Integer, db.ForeignKey('placename.id', ondelete='CASCADE'), nullable=False)
@@ -238,7 +237,7 @@ class Person(db.Model, ChangesMixin):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     label = db.Column(db.String, nullable=False)
-    ref = db.Column(db.String)
+    ref = db.Column(db.String, unique=True)
 
 
 class PersonRole(db.Model, ChangesMixin):
@@ -255,7 +254,6 @@ class PersonHasRole(db.Model, ChangesMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     __table_args__ = (
         db.UniqueConstraint('person_id', 'function', name='_person_has_role_function_uc'),
-        db.UniqueConstraint('person_id', 'document_id', name='_person_has_role_document_uc'),
     )
 
     person_id = db.Column(db.Integer, db.ForeignKey('person.id', ondelete='CASCADE'), nullable=False)
@@ -327,6 +325,18 @@ class User(db.Model, UserMixin):
 
     def is_admin(self):
         return 'admin' in [r.name for r in self.roles]
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'username': self.username,
+            'email': self.email,
+            'email_confirmed_at': str(self.email_confirmed_at).split('.')[0],
+            'active': self.active,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'roles': [ro.name for ro in self.roles]
+        }
 
     @classmethod
     def authenticate(cls, **kwargs):
@@ -427,3 +437,23 @@ class Changelog(db.Model):
     description = db.Column(db.String, nullable=True)
 
     user = db.relationship('User', backref=db.backref("changes", uselist=True),  single_parent=True)
+
+
+MODELS = {
+    Document.__tablename__: Document,
+    Collection.__tablename__: Collection,
+    Note.__tablename__ : Note,
+    Witness.__tablename__: Witness,
+    Institution.__tablename__: Institution,
+    Image.__tablename__: Image,
+    Language.__tablename__: Language,
+    Placename.__tablename__: Placename,
+    PlacenameHasRole.__tablename__: PlacenameHasRole,
+    PlacenameRole.__tablename__: PlacenameRole,
+    Person.__tablename__: Person,
+    PersonHasRole.__tablename__: PersonHasRole,
+    PersonRole.__tablename__: PersonRole,
+    User.__tablename__: User,
+    UserRole.__tablename__: UserRole,
+    Lock.__tablename__:Lock
+}

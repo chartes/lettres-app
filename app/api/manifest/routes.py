@@ -1,14 +1,10 @@
-import os
 
 import json
-import pprint
 from flask import current_app, request, Response, url_for
-import pysftp
 
 
 from app import api_bp, JSONAPIResponseFactory
-from app.api.decorators import api_require_roles
-from app.models import Witness, Document
+from app.models import Document
 
 CONTENT_TYPE = "application/json; charset=utf-8"
 HEADERS = {"Access-Control-Allow-Origin": "*",

@@ -1,6 +1,5 @@
 import jwt
 from flask import session, current_app, request, jsonify
-from flask_jwt_extended import get_jwt_identity, get_jwt_claims, jwt_required, verify_jwt_in_request
 from functools import wraps
 from app import JSONAPIResponseFactory
 from app.models import User
@@ -52,7 +51,7 @@ def api_require_roles(*required_roles):
 
             try:
                 token = auth_headers[1]
-                data = jwt.decode(token, current_app.config['SECRET_KEY'])
+                data = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=["HS256"])
                 user = User.query.filter_by(email=data['sub']).first()
                 if not user:
                     raise RuntimeError('User not found')

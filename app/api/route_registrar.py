@@ -17,6 +17,7 @@ from sqlalchemy.sql.operators import ColumnOperators
 from app import JSONAPIResponseFactory, api_bp, db
 from app.api.facade_manager import JSONAPIFacadeManager
 from app.api.search import SearchIndexManager
+from app.models import MODELS
 
 if sys.version_info < (3, 6):
     json_loads = lambda s: json_loads(s.decode("utf-8")) if isinstance(s, bytes) else json.loads(s)
@@ -38,9 +39,7 @@ class JSONAPIRouteRegistrar(object):
         self.api_version = api_version
         self.url_prefix = url_prefix
 
-        # make a dict from models and their __tablename__
-        self.models = dict([(cls.__tablename__, cls) for cls in db.Model._decl_class_registry.values()
-                            if isinstance(cls, type) and issubclass(cls, db.Model)])
+        self.models = MODELS # dict tablename:model class
 
     @staticmethod
     def get_relationships_mode(args):
@@ -250,7 +249,6 @@ class JSONAPIRouteRegistrar(object):
             after=page_after,
             per_page=page_size
         )
-
         if total == 0:
             return [], {}, {"total": 0}
 
