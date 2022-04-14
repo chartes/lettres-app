@@ -706,7 +706,7 @@ class JSONAPIRouteRegistrar(object):
                                                                      with_relationships_links=w_rel_links,
                                                                      with_relationships_data=w_rel_data)
 
-            print("@@@", f_obj, facade_class, kwargs, errors)
+            #print("@@@", f_obj, facade_class, kwargs, errors)
             if f_obj is None:
                 return JSONAPIResponseFactory.make_errors_response(errors, **kwargs)
             else:
@@ -759,7 +759,7 @@ class JSONAPIRouteRegistrar(object):
             type_plural=facade_class.TYPE_PLURAL, rel_name=rel_name
         )
 
-        print(rule)
+        #print(rule)
 
         def resource_relationship_endpoint(id):
             url_prefix = request.host_url[:-1] + self.url_prefix

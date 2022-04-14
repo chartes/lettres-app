@@ -210,7 +210,7 @@ class PlacenameHasRole(db.Model, ChangesMixin):
     __tablename__ = 'placename_has_role'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     __table_args__ = (
-        db.UniqueConstraint('placename_id', 'function', name='_placename_has_role_function_uc'),
+        # db.UniqueConstraint('placename_id', 'function', name='_placename_has_role_function_uc'),
     )
 
     placename_id = db.Column(db.Integer, db.ForeignKey('placename.id', ondelete='CASCADE'), nullable=False)
@@ -253,7 +253,7 @@ class PersonHasRole(db.Model, ChangesMixin):
     __tablename__ = 'person_has_role'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     __table_args__ = (
-        db.UniqueConstraint('person_id', 'function', name='_person_has_role_function_uc'),
+        # db.UniqueConstraint('person_id', 'function', name='_person_has_role_function_uc'),
     )
 
     person_id = db.Column(db.Integer, db.ForeignKey('person.id', ondelete='CASCADE'), nullable=False)
