@@ -1,5 +1,6 @@
 
 from app.api.abstract_facade import JSONAPIAbstractFacade
+from app.api.changelog.facade import ChangelogFacade
 from app.api.document.facade import DocumentBookmarkFacade
 from app.models import User, datetime_to_str
 
@@ -72,7 +73,15 @@ class UserFacade(JSONAPIAbstractFacade):
                 "resource_identifier_getter": self.get_related_resource_identifiers(DocumentBookmarkFacade, "bookmarks",
                                                                                     to_many=True),
                 "resource_getter": self.get_related_resources(DocumentBookmarkFacade, "bookmarks", to_many=True),
+            },
+
+            "changes": {
+                "links": self._get_links(rel_name="changes"),
+                "resource_identifier_getter": self.get_related_resource_identifiers(ChangelogFacade, "changes",
+                                                                                    to_many=True),
+                "resource_getter": self.get_related_resources(ChangelogFacade, "changes", to_many=True),
             }
+
         }
 
     def get_data_to_index_when_added(self, propagate):
