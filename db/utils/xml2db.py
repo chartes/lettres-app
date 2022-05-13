@@ -13,20 +13,18 @@ from more_itertools import unique_everseen
 def insert_ref_data(db, cursor):
     """ Insertion des données de référence pour notre collection Catherine de Médicis """
 
+
+    """
     try:
         cursor.execute(
             "INSERT INTO person ("
             "id,"
             "label,"
-            "description,"
-            "key,"
             "ref)"
-            "VALUES (?, ?, ?, ?, ?)",
-            (1,
-            'Catherine',
-            'de Médicis',
-            'Catherine de Médicis (reine de France ; 1519-1589)',
-            'https://data.bnf.fr/ark:/12148/cb123351707'))
+            "VALUES (?, ?, ?)",
+            (77,
+            'Henri de Bourbon (1553-1610)',
+            'https://www.wikidata.org/wiki/Q936976'))
     except sqlite3.IntegrityError as e:
         print(e)
 
@@ -37,13 +35,14 @@ def insert_ref_data(db, cursor):
         print(e)
 
     try:
-        cursor.execute("INSERT INTO collection (id, title, description) VALUES (?, ?, ?)",
-                       (1, 'Catherine de Médicis', 'Lettres de Catherine de Médicis'))
+        cursor.execute("INSERT INTO language (id, code, label) VALUES (1, 'fro', 'Ancien français')")
     except sqlite3.IntegrityError as e:
         print(e)
+    """
 
     try:
-        cursor.execute("INSERT INTO language (id, code, label) VALUES (1, 'fro', 'Ancien français')")
+        cursor.execute("INSERT INTO collection (id, parent_id, title, description) VALUES (?, ?, ?, ?)",
+                       (3, None, 'Henri IV', 'Lettres de Henri IV'))
     except sqlite3.IntegrityError as e:
         print(e)
 
@@ -54,10 +53,9 @@ def insert_letter(db, cursor, xml_file):
     """ insertion des lettres depuis le XML """
 
     # FAKE DATA, pour insertion test
-    owner_id = 1
-    language_id = 1 # frm
-    collection_id = 1 # Lettres de Catherine de Medicis
-    correspondant_id = 1 # Catherine de Médicis
+    language_id = 1  # frm
+    collection_id = 3  # Lettres de Henri IV
+    correspondant_id = 77  # Henri IV
     correspondant_role_id = 1  # expéditeur
 
     file = '../../../lettres/src/'+xml_file
@@ -121,16 +119,18 @@ def insert_letter(db, cursor, xml_file):
                 "creation_not_after,"
                 "creation_label,"
                 "transcription,"
-                "owner_id)"
-                "VALUES (?, ?, ?, ?, ?, ?)",
+                "is_published,"
+                "address)"
+                "VALUES (?, ?, ?, ?, ?, ?, ?)",
                 (letter['title'],
                  letter['creation'],
                  letter['creation_not_after'],
                  letter['creation_label'],
                  letter['transcription'],
-                 owner_id))
+                 None,
+                 letter['title']))
         except sqlite3.IntegrityError as e:
-            print(e, "lettre %s" % (letter['id']))
+            print(e, "document, lettre %s" % (letter['id']))
 
         # Id de la dernière lettre insérée
         document_id = cursor.lastrowid
@@ -142,7 +142,7 @@ def insert_letter(db, cursor, xml_file):
                            "VALUES (?, ?, ?, ?)",
                            (document_id, witness_ed, 'édition', 'base'))
         except sqlite3.IntegrityError as e:
-            print(e, "lettre %s" % (letter['id']))
+            print(e, "sourceDoc witness, lettre %s" % (letter['id']))
         witness_id = cursor.lastrowid
 
         # on renseigne les URL des images de ce témoin de base
@@ -154,7 +154,7 @@ def insert_letter(db, cursor, xml_file):
                 cursor.execute("INSERT INTO image (witness_id, canvas_id, order_num) VALUES (?, ?, ?)",
                                (witness_id, canvas_id, i))
             except sqlite3.IntegrityError as e:
-                print(e)
+                print(e, "image")
 
         # les témoins énumérés dans l’édition imprimée
         for i, witness in enumerate(letter['witnesses']):
@@ -164,36 +164,38 @@ def insert_letter(db, cursor, xml_file):
             # on considère que le premier est le témoin de base
             if i == 0:
                 try:
-                    cursor.execute("INSERT INTO witness (document_id, content, status) VALUES (?, ?, ?)",
-                                   (document_id, witness, 'base'))
+                    cursor.execute("INSERT INTO witness (document_id, content, status, num) VALUES (?, ?, ?, ?)",
+                                   (document_id, witness, 'base', 2))
                 except sqlite3.IntegrityError as e:
                     print(e, "lettre %s" % (letter['id']))
             else:
                 try:
-                    cursor.execute("INSERT INTO witness (document_id, content, status) VALUES (?, ?, ?)",
-                                   (document_id, witness, 'autre'))
+                    cursor.execute("INSERT INTO witness (document_id, content, status, num) VALUES (?, ?, ?, ?)",
+                                   (document_id, witness, 'autre', i+2))
                 except sqlite3.IntegrityError as e:
-                    print(e, "lettre %s" % (letter['id']))
+                    print(e, "witness, lettre %s" % (letter['id']))
 
         try:
             cursor.execute("INSERT INTO document_has_language (document_id, language_id) VALUES (?, ?)",
                        (document_id, language_id))
         except sqlite3.IntegrityError as e:
-            print(e, "lettre %s" % (letter['id']))
+            print(e, "document_has_language, lettre %s" % (letter['id']))
 
         try:
             cursor.execute(
-                "INSERT INTO correspondent_has_role (correspondent_id, document_id, correspondent_role_id)"
+                "INSERT INTO person_has_role (person_id, document_id, person_role_id)"
                 "VALUES (?, ?, ?)",
                 (correspondant_id, document_id, correspondant_role_id))
         except sqlite3.IntegrityError as e:
             print(e, "lettre %s" % (letter['id']))
 
         try:
-            cursor.execute("INSERT INTO document_has_collection (document_id, collection_id) VALUES (?, ?)",
-                           (document_id, collection_id))
+            cursor.execute(
+                "INSERT INTO document_has_collection (document_id, collection_id)"
+                "VALUES (?, ?)",
+                (document_id, collection_id))
         except sqlite3.IntegrityError as e:
-            print(e, "lettre %s" % (letter['id']))
+            print(e, "document_has_collection, lettre %s" % (letter['id']))
 
         # notes // NB: des notes dans les notes ?
         note_refs = div.xpath('descendant::ref[@type="note"]')
@@ -206,7 +208,7 @@ def insert_letter(db, cursor, xml_file):
                 cursor.execute("INSERT INTO note (content, document_id) VALUES (?, ?)",
                                (note_content, document_id))
             except sqlite3.IntegrityError as e:
-                print(e, "lettre %s" % (letter['id']))
+                print(e, "note, lettre %s" % (letter['id']))
 
             # réécriture des liens aux notes
             note_id = str(cursor.lastrowid)
@@ -214,28 +216,28 @@ def insert_letter(db, cursor, xml_file):
                 cursor.execute('UPDATE document SET transcription = replace(transcription, ?, ?) WHERE id = ?',
                                (note_xml_id, note_id, document_id))
             except sqlite3.IntegrityError as e:
-                print(e, "lettre %s" % (letter['id']))
+                print(e, "update notes in document transcription, lettre %s" % (letter['id']))
             try:
                 cursor.execute('UPDATE document SET title = replace(title, ?, ?) WHERE id = ?',
                                (note_xml_id, note_id, document_id))
             except sqlite3.IntegrityError as e:
-                print(e, "lettre %s" % (letter['id']))
+                print(e, "update notes in document title, lettre %s" % (letter['id']))
             try:
                 cursor.execute('UPDATE document SET creation_label = replace(creation_label, ?, ?) WHERE id = ?',
                                (note_xml_id, note_id, document_id))
             except sqlite3.IntegrityError as e:
-                print(e, "lettre %s" % (letter['id']))
+                print(e, "update notes in document creation_label, lettre %s" % (letter['id']))
             try:
                 cursor.execute('UPDATE witness SET content = replace(content, ?, ?) WHERE document_id = ?',
                                (note_xml_id, note_id, document_id))
             except sqlite3.IntegrityError as e:
-                print(e, "lettre %s" % (letter['id']))
+                print(e, "update notes in witness, lettre %s" % (letter['id']))
 
         db.commit()
 
 
 def tei2html(tei_node):
-    """ conversion HTML 5 de certains nœeuds TEI / NB: finalement lourd de retourner du texte… """
+    """ conversion HTML 5 de certains nœuds TEI / NB: finalement lourd de retourner du texte… """
 
     tei2html = io.StringIO('''\
         <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
