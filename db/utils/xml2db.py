@@ -58,7 +58,7 @@ def insert_letter(db, cursor, xml_file):
     correspondant_id = 77  # Henri IV
     correspondant_role_id = 1  # expéditeur
 
-    file = '../../../lettres/src/'+xml_file
+    file = '../../../lettres/xml/'+xml_file
     tree = etree.parse(file)
 
     # la référence du volume (on considère que cette réf est un temoin de type édition,
