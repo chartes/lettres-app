@@ -85,6 +85,7 @@ class Document(db.Model, ChangesMixin):
                 return l
         return None
 
+
 class Collection(db.Model, ChangesMixin):
     """ Une collection: un regroupement de lettres.
 
@@ -100,6 +101,8 @@ class Collection(db.Model, ChangesMixin):
 
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.String(400))
+
+    admin_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     children = db.relationship("Collection", backref=db.backref('parent', remote_side=id))
 
@@ -295,6 +298,7 @@ class User(db.Model, UserMixin):
 
     roles = db.relationship('UserRole', secondary=association_user_has_role)
     bookmarks = db.relationship("Document", secondary=association_user_has_bookmark)
+    collections = db.relationship("Collection", backref="admin")
 
     @staticmethod
     def add_default_users():

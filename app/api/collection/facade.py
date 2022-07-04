@@ -1,4 +1,5 @@
 from app.api.abstract_facade import JSONAPIAbstractChangeloggedFacade
+from app.api.user.facade import UserFacade
 from app.models import Collection
 
 
@@ -83,6 +84,11 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
                 "resource_identifier_getter": self.get_related_resource_identifiers(DocumentFacade, "documents_including_children",
                                                                                     to_many=True),
                 "resource_getter": self.get_related_resources(DocumentFacade, "documents_including_children", to_many=True),
+            },
+            "admin": {
+                "links": self._get_links(rel_name="admin"),
+                "resource_identifier_getter": self.get_related_resource_identifiers(UserFacade, "admin", to_many=False),
+                "resource_getter": self.get_related_resources(UserFacade, "admin", to_many=False),
             },
             "parents": {
                 "links": self._get_links(rel_name="parents"),

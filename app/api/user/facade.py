@@ -53,6 +53,7 @@ class UserFacade(JSONAPIAbstractFacade):
         """
         from app.api.user_role.facade import UserRoleFacade
         from app.api.lock.facade import LockFacade
+        from app.api.collection.facade import CollectionFacade
 
         self.relationships = {
             "roles": {
@@ -73,6 +74,13 @@ class UserFacade(JSONAPIAbstractFacade):
                 "resource_identifier_getter": self.get_related_resource_identifiers(DocumentBookmarkFacade, "bookmarks",
                                                                                     to_many=True),
                 "resource_getter": self.get_related_resources(DocumentBookmarkFacade, "bookmarks", to_many=True),
+            },
+
+            "collections": {
+                "links": self._get_links(rel_name="collections"),
+                "resource_identifier_getter": self.get_related_resource_identifiers(CollectionFacade, "collections",
+                                                                                    to_many=True),
+                "resource_getter": self.get_related_resources(CollectionFacade, "collections", to_many=True),
             },
 
             "changes": {
