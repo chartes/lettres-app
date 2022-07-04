@@ -49,11 +49,15 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
 
     @property
     def resource(self):
+
         resource = {
             **self.resource_identifier,
             "attributes": {
                 "title": self.obj.title,
-                "description": self.obj.description
+                "description": self.obj.description,
+                "nb_docs": len(self.obj.documents_including_children),
+                "date_min": min([doc.creation for doc in self.obj.documents_including_children]),
+                "date_max": max([doc.creation for doc in self.obj.documents_including_children])
             },
             "meta": self.meta,
             "links": {
