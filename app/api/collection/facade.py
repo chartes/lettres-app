@@ -37,14 +37,33 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
             for parent in parents
         ]
 
+    def get_children_resource_identifiers(self, rel_facade=None):
+        children = self.obj.children
+        rel_facade = CollectionFacade if not rel_facade else rel_facade
+
+        return [] if children is None else [
+            rel_facade.make_resource_identifier(child.id, rel_facade.TYPE)
+            for child in children
+        ]
+
     def get_parents_resources(self, rel_facade=None):
         parents = self.obj.parents
         rel_facade = CollectionFacade if not rel_facade else rel_facade
 
         return [] if parents is None else [
             rel_facade(self.url_prefix, parent, self.with_relationships_links,
-                             self.with_relationships_data).resource
+                       self.with_relationships_data).resource
             for parent in parents
+        ]
+
+    def get_children_resources(self, rel_facade=None):
+        children = self.obj.children
+        rel_facade = CollectionFacade if not rel_facade else rel_facade
+
+        return [] if children is None else [
+            rel_facade(self.url_prefix, child, self.with_relationships_links,
+                       self.with_relationships_data).resource
+            for child in children
         ]
 
     @property
@@ -98,6 +117,11 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
                 "links": self._get_links(rel_name="parents"),
                 "resource_identifier_getter": self.get_parents_resource_identifiers,
                 "resource_getter": self.get_parents_resources,
+            },
+            "children": {
+                "links": self._get_links(rel_name="children"),
+                "resource_identifier_getter": self.get_children_resource_identifiers,
+                "resource_getter": self.get_children_resources,
             }
         })
 
