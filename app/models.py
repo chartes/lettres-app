@@ -194,7 +194,7 @@ class Placename(db.Model, ChangesMixin):
     __tablename__ = 'placename'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    label = db.Column(db.String, nullable=False)
+    label = db.Column(db.String, nullable=False, unique=True)
     long = db.Column(db.String)
     lat = db.Column(db.String)
     ref = db.Column(db.String, unique=True)
@@ -240,7 +240,7 @@ class Person(db.Model, ChangesMixin):
     __tablename__ = 'person'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    label = db.Column(db.String, nullable=False)
+    label = db.Column(db.String, nullable=False, unique=True)
     ref = db.Column(db.String, unique=True)
 
 
