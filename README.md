@@ -22,8 +22,7 @@ Installer la version Elasticsearch conforme aux spécifications
 Paramétrer elacticsearch.yml (Network) pour pointer vers l'URL de l'API (ex: 127.0.0.1)
 
 Depuis le répertoire d'accueil de l'application, exécuter :
-```
-python3 manage.py db-reindex --host=http://yourhost```
+`python3 manage.py db-reindex --host=http://yourhost`
 (ex: python3 manage.py db-reindex --host=http://localhost:5004)
 
 ## Documentation :
