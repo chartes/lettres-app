@@ -30,4 +30,4 @@ python3 manage.py db-reindex --host=http://yourhost```
 - [Documentation de l'API](https://github.com/chartes/lettres-app/blob/master/docs/API.md)
 
 ## Lancer le front-end
-- Voir [Readme du Front-end]()
+- Voir [Readme du Front-end](https://github.com/chartes/lettres-vue/blob/dev/README.md)
