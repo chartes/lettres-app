@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 import click
 import json
@@ -193,6 +194,36 @@ def make_cli():
             else:
                 print("Warning: index %s does not exist or is not declared in the cli" % name)
 
+    @click.command("add-user")
+    @click.option('--email', required=True)
+    @click.option('--username', required=True)
+    @click.option('--password', required=True)
+    @click.option('--admin', required=True, is_flag=True)
+    def db_add_user(email, username, password, admin):
+        with app.app_context():
+            from app import db
+            from werkzeug.security import generate_password_hash
+            from werkzeug.security import check_password_hash
+
+            pwd_hash = generate_password_hash(password)
+
+            admin_role = UserRole.query.filter(UserRole.name == "admin").first()
+            contributor_role = UserRole.query.filter(UserRole.name == "contributor").first()
+            roles = [contributor_role, admin_role] if admin else [contributor_role]
+
+            new_user = User(username=username,
+                            password=pwd_hash,
+                            email=email,
+                            active=True,
+                            email_confirmed_at=datetime.now(),
+                            roles=roles)
+
+            db.session.add(new_user)
+            db.session.commit()
+            print('User "%s" added' % username)
+            #new_user.roles = [contributor_role]
+            #db.session.commit()
+
     @click.command("run")
     def run():
         """ Run the application in Debug Mode [Not Recommended on production]
@@ -202,6 +233,7 @@ def make_cli():
     cli.add_command(db_create)
     cli.add_command(db_recreate)
     cli.add_command(db_reindex)
+    cli.add_command(db_add_user)
     #cli.add_command(make_manifests)
     #cli.add_command(make_collection_manifests)
 
