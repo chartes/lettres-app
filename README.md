@@ -24,6 +24,15 @@ Depuis le répertoire d'accueil de l'application, exécuter :
 `python3 manage.py db-reindex --host=http://yourhost`
 (ex: python3 manage.py db-reindex --host=http://localhost:5004)
 
+## Ajouter un utilisateur
+
+Depuis le répertoire d'accueil de l'application, exécuter :
+
+`python3 manage.py add-user --email=myemail@email.fr --username=myusername --password=MySup3rPassw0rd!`
+
+Ajouter le flag `--admin` pour ajouter les droits d'admin au compte crée
+
+
 ## Documentation :
 - [Documentation de l'API](https://github.com/chartes/lettres-app/blob/master/docs/API.md)
 
