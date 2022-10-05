@@ -24,6 +24,9 @@ naming_convention = {
 db = SQLAlchemy(metadata=MetaData(naming_convention=naming_convention))
 mail = Mail()
 
+global api_bp
+global iiif_bp
+
 api_bp = Blueprint('api_bp', __name__)
 iiif_bp = Blueprint('iiif_bp', __name__)
 
@@ -52,7 +55,6 @@ def create_app(config_name="dev", with_hardcoded_prefix=False):
     """ Create the application """
     app = Flask(__name__)
 
-
     if not isinstance(config_name, str):
         from config import config
         print("default config")
@@ -70,6 +72,8 @@ def create_app(config_name="dev", with_hardcoded_prefix=False):
     config[config_name].init_app(app)
     mail.init_app(app)
 
+    api_bp = Blueprint('api_bp', __name__)
+    iiif_bp = Blueprint('iiif_bp', __name__)
     # migrate = Migrate(app, db, render_as_batch=True)
 
     if with_hardcoded_prefix:
@@ -161,7 +165,8 @@ def create_app(config_name="dev", with_hardcoded_prefix=False):
         # generate search endpoint
         app.api_url_registrar.register_search_route()
 
-    app.register_blueprint(api_bp)
-    app.register_blueprint(iiif_bp)
+        print(hex(id(api_bp)))
+        app.register_blueprint(api_bp)
+        app.register_blueprint(iiif_bp)
 
     return app

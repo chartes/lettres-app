@@ -16,7 +16,7 @@ npm-debug.log*
 report.html
 tests/data/lettres.test.sqlite
 tmp/
-*.env
+production.env
 */.vscode
 db/lettres.dev.sqlite db/lettres.png
 db/collection_lettres_lot01.sql

@@ -4,6 +4,8 @@ import unittest
 from app.api.document.facade import DocumentFacade
 from tests.base_server import TestBaseServer
 
+
+@unittest.skip
 class TestIndexation(TestBaseServer):
 
     DOC_INDEX_NAME = "lettres__testing__document"

@@ -8,7 +8,7 @@ from app import db
 class TestGetRoutes(TestBaseServer):
 
     def load_fixtures(self):
-        from ..data.fixtures.dataset001 import load_fixtures as load_dataset001
+        from tests.data.fixtures.dataset001 import load_fixtures as load_dataset001
         with self.app.app_context():
             load_dataset001(db)
 
@@ -21,6 +21,7 @@ class TestGetRoutes(TestBaseServer):
 
         # ------ notes -------
         r, status, resource = self.api_get("documents/1/notes")
+
         self.assertEqual(50, resource["meta"]["total-count"])
         self.assertEqual("note", set([d["type"] for d in resource["data"]]).pop())
         r, status, resource = self.api_get("documents/1/relationships/notes")

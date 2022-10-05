@@ -7,26 +7,12 @@ from flask_testing import TestCase
 from json import JSONDecodeError
 from os.path import join
 from app import create_app, db
-from app.api.document.facade import DocumentFacade
 
 if sys.version_info < (3, 6):
     json_loads = lambda s: json_loads(s.decode("utf-8")) if isinstance(s, bytes) else json.loads(s)
 else:
     json_loads = json.loads
 
-_app = create_app("test")
-
-with _app.app_context():
-    if hasattr(current_app, "elasticsearch"):
-        print("DELETE AND CREATE SEARCH INDEXES")
-        _app.elasticsearch.indices.delete(
-            index=DocumentFacade.get_index_name(),
-            ignore=[400, 404]
-        )  # delete the index
-        _app.elasticsearch.indices.create(
-            index=DocumentFacade.get_index_name(),
-            ignore=[400, 404]
-        )  # create the index
 
 class TestBaseServer(TestCase):
 
@@ -36,13 +22,28 @@ class TestBaseServer(TestCase):
             self.load_fixtures()
 
     def create_app(self):
+        from app.api.document.facade import DocumentFacade
+
+        _app = create_app(config_name="test", with_hardcoded_prefix=True)
         with _app.app_context():
+            if hasattr(current_app, "elasticsearch"):
+                print("DELETE AND CREATE SEARCH INDEXES")
+                _app.elasticsearch.indices.delete(
+                    index=DocumentFacade.get_index_name(),
+                    ignore=[400, 404]
+                )  # delete the index
+                _app.elasticsearch.indices.create(
+                    index=DocumentFacade.get_index_name(),
+                    ignore=[400, 404]
+                )  # create the index
+
+
             db.create_all()
             self.client = _app.test_client(allow_subdomain_redirects=True)
             self.db = db
             self.url_prefix = _app.config["API_URL_PREFIX"]
 
-        return _app
+            return _app
 
     def tearDown(self):
         db.session.remove()
@@ -54,7 +55,6 @@ class TestBaseServer(TestCase):
         for table in reversed(meta.sorted_tables):
             db.session.execute(table.delete())
         db.session.commit()
-
 
     def load_sql_fixtures(self, fixtures):
         with self.app.app_context(), db.engine.connect() as connection:
@@ -95,6 +95,7 @@ class TestBaseServer(TestCase):
 
     @staticmethod
     def api_query(method, *args, **kwargs):
+        print(method, args, kwargs)
         r = method(*args, **kwargs)
         if r.data is None:
             return r, r.status, None
