@@ -1,6 +1,5 @@
-from flask import jsonify
+from flask import jsonify, current_app
 
-from app import api_bp
 from app.api.person_has_role.facade import PersonHasRoleFacade
 from app.models import PersonHasRole
 
@@ -16,7 +15,7 @@ def register_person_has_role_api_urls(app):
     registrar.register_relationship_patch_route(PersonHasRoleFacade, 'person')
     registrar.register_relationship_get_route(PersonHasRoleFacade, 'person-role')
 
-    @api_bp.route('/api/<api_version>/persons-functions')
+    @current_app.route('/api/<api_version>/persons-functions')
     def get_person_functions(api_version):
         phr = PersonHasRole.query.with_entities(PersonHasRole.function).filter(
             PersonHasRole.function != None

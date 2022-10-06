@@ -1,6 +1,5 @@
-from flask import jsonify
+from flask import jsonify, current_app
 
-from app import api_bp
 from app.api.placename.facade import PlacenameFacade
 from app.models import Placename
 
@@ -23,7 +22,7 @@ def register_placename_api_urls(app):
     registrar.register_relationship_get_route(PlacenameFacade, 'changes')
     registrar.register_relationship_post_route(PlacenameFacade, 'changes')
 
-    @api_bp.route('/api/<api_version>/all-placenames')
+    @current_app.route('/api/<api_version>/all-placenames')
     def all_placenames(api_version):
         placenames = Placename.query.with_entities(Placename.label).distinct().order_by(Placename.label).all()
         response = jsonify({"data": [p[0] for p in placenames]})

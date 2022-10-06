@@ -3,7 +3,7 @@ import json
 from flask import current_app, request, Response, url_for
 
 
-from app import api_bp, JSONAPIResponseFactory
+from app import JSONAPIResponseFactory
 from app.models import Document
 
 CONTENT_TYPE = "application/json; charset=utf-8"
@@ -11,7 +11,7 @@ HEADERS = {"Access-Control-Allow-Origin": "*",
            "Access-Control-Allow-Methods": ["GET"]}
 
 
-@api_bp.route("/api/<api_version>/iiif/documents/<doc_id>/collection/default")
+@current_app.route("/api/<api_version>/iiif/documents/<doc_id>/collection/default")
 def get_collection(api_version, doc_id):
     document = Document.query.filter(Document.id == doc_id).first()
     if document:
@@ -97,8 +97,8 @@ def get_collection(api_version, doc_id):
 #
 #
 #@api_require_roles("contributor")
-#@api_bp.route("/api/<api_version>/iiif/editor/manifests", methods=('GET', 'POST'))
-#@api_bp.route("/api/<api_version>/iiif/editor/manifests/<manifest_id>", methods=('GET', 'POST'))
+#@current_app.route("/api/<api_version>/iiif/editor/manifests", methods=('GET', 'POST'))
+#@current_app.route("/api/<api_version>/iiif/editor/manifests/<manifest_id>", methods=('GET', 'POST'))
 #def iiif_editor_manifest(api_version, manifest_id=None):
 #    if manifest_id is None:
 #        manifest_id = request.referrer.rsplit('/', maxsplit=1)[-1]
@@ -120,7 +120,7 @@ def get_collection(api_version, doc_id):
 #
 #        data = {
 #            #"{0}/manifest{1}.json".format(current_app.config["IIIF_MANIFEST_ENDPOINT"], manifest_id)
-#            "uri": request.host_url[:-1] + url_for('api_bp.put_manifest', manifest_id=manifest_id, api_version=1.0)
+#            "uri": request.host_url[:-1] + url_for('current_app.put_manifest', manifest_id=manifest_id, api_version=1.0)
 #        }
 #        code = 200
 #    else:
@@ -166,7 +166,7 @@ def get_collection(api_version, doc_id):
 #
 #
 #@api_require_roles("contributor")
-#@api_bp.route("/api/<api_version>/iiif/editor/manifests/<manifest_id>", methods=['PUT'])
+#@current_app.route("/api/<api_version>/iiif/editor/manifests/<manifest_id>", methods=['PUT'])
 #def put_manifest(api_version, manifest_id):
 #    witness = Witness.query.filter(Witness.id == manifest_id).first()
 #    if witness is None:

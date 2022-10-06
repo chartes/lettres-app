@@ -14,7 +14,7 @@ from sqlalchemy import func, desc, asc, column, text
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.sql.operators import ColumnOperators
 
-from app import JSONAPIResponseFactory, api_bp, db
+from app import JSONAPIResponseFactory, db
 from app.api.facade_manager import JSONAPIFacadeManager
 from app.api.search import SearchIndexManager
 from app.models import MODELS
@@ -515,7 +515,7 @@ class JSONAPIRouteRegistrar(object):
             search_endpoint = dec(search_endpoint)
 
         # register the rule
-        api_bp.add_url_rule(search_rule, endpoint=search_endpoint.__name__, view_func=search_endpoint)
+        current_app.add_url_rule(search_rule, endpoint=search_endpoint.__name__, view_func=search_endpoint)
 
     def register_get_routes(self, model, f_class, decorators=()):
         """
@@ -667,7 +667,7 @@ class JSONAPIRouteRegistrar(object):
         collection_endpoint.__name__ = "%s_%s" % (
             f_class.TYPE_PLURAL.replace("-", "_"), collection_endpoint.__name__)
         # register the rule
-        api_bp.add_url_rule(get_collection_rule, endpoint=collection_endpoint.__name__, view_func=collection_endpoint)
+        current_app.add_url_rule(get_collection_rule, endpoint=collection_endpoint.__name__, view_func=collection_endpoint)
 
         # =======================
         # Single resource GET route
@@ -735,7 +735,7 @@ class JSONAPIRouteRegistrar(object):
         single_obj_endpoint.__name__ = "%s_%s" % (
             f_class.TYPE_PLURAL.replace("-", "_"), single_obj_endpoint.__name__)
         # register the rule
-        api_bp.add_url_rule(single_obj_rule, endpoint=single_obj_endpoint.__name__, view_func=single_obj_endpoint)
+        current_app.add_url_rule(single_obj_rule, endpoint=single_obj_endpoint.__name__, view_func=single_obj_endpoint)
 
     def register_relationship_get_route(self, facade_class, rel_name, decorators=()):
         """
@@ -838,7 +838,7 @@ class JSONAPIRouteRegistrar(object):
             resource_relationship_endpoint.__name__
         )
         # register the rule
-        api_bp.add_url_rule(rule, endpoint=resource_relationship_endpoint.__name__,
+        current_app.add_url_rule(rule, endpoint=resource_relationship_endpoint.__name__,
                             view_func=resource_relationship_endpoint)
 
         # ===================================
@@ -957,7 +957,7 @@ class JSONAPIRouteRegistrar(object):
             facade_class.TYPE_PLURAL.replace("-", "_"), rel_name.replace("-", "_"), resource_endpoint.__name__
         )
         # register the rule
-        api_bp.add_url_rule(rule, endpoint=resource_endpoint.__name__, view_func=resource_endpoint)
+        current_app.add_url_rule(rule, endpoint=resource_endpoint.__name__, view_func=resource_endpoint)
 
     def register_post_routes(self, model, facade_class, decorators=()):
         """
@@ -1096,7 +1096,7 @@ class JSONAPIRouteRegistrar(object):
             facade_class.TYPE_PLURAL.replace("-", "_"), collection_endpoint.__name__
         )
         # register the rule
-        api_bp.add_url_rule(collection_obj_rule, endpoint=collection_endpoint.__name__, view_func=collection_endpoint,
+        current_app.add_url_rule(collection_obj_rule, endpoint=collection_endpoint.__name__, view_func=collection_endpoint,
                             methods=["POST"])
 
     def register_relationship_post_route(self, facade_class, rel_name, decorators=()):
@@ -1176,7 +1176,7 @@ class JSONAPIRouteRegistrar(object):
             resource_relationship_endpoint.__name__
         )
         # register the rule
-        api_bp.add_url_rule(
+        current_app.add_url_rule(
             rule,
             endpoint=resource_relationship_endpoint.__name__,
             view_func=resource_relationship_endpoint,
@@ -1323,7 +1323,7 @@ class JSONAPIRouteRegistrar(object):
             facade_class.TYPE_PLURAL.replace("-", "_"), single_obj_endpoint.__name__
         )
         # register the rule
-        api_bp.add_url_rule(single_obj_rule, endpoint=single_obj_endpoint.__name__, view_func=single_obj_endpoint,
+        current_app.add_url_rule(single_obj_rule, endpoint=single_obj_endpoint.__name__, view_func=single_obj_endpoint,
                             methods=["PATCH"])
 
     def register_relationship_patch_route(self, facade_class, rel_name, decorators=()):
@@ -1410,7 +1410,7 @@ class JSONAPIRouteRegistrar(object):
             resource_relationship_endpoint.__name__
         )
         # register the rule
-        api_bp.add_url_rule(
+        current_app.add_url_rule(
             rule,
             endpoint=resource_relationship_endpoint.__name__,
             view_func=resource_relationship_endpoint,
@@ -1462,7 +1462,7 @@ class JSONAPIRouteRegistrar(object):
             facade_class.TYPE_PLURAL.replace("-", "_"), single_obj_endpoint.__name__
         )
         # register the rule
-        api_bp.add_url_rule(single_obj_rule, endpoint=single_obj_endpoint.__name__, view_func=single_obj_endpoint,
+        current_app.add_url_rule(single_obj_rule, endpoint=single_obj_endpoint.__name__, view_func=single_obj_endpoint,
                             methods=["DELETE"])
 
     def register_relationship_delete_route(self, facade_class, rel_name, decorators=()):
@@ -1539,6 +1539,6 @@ class JSONAPIRouteRegistrar(object):
             facade_class.TYPE_PLURAL.replace("-", "_"), rel_name
         )
         # register the rule
-        api_bp.add_url_rule(resource_relationship_rule, endpoint=resource_relationship_endpoint.__name__,
+        current_app.add_url_rule(resource_relationship_rule, endpoint=resource_relationship_endpoint.__name__,
                             view_func=resource_relationship_endpoint,
                             methods=["DELETE"])

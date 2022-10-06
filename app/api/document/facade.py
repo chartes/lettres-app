@@ -133,7 +133,6 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
 
     def get_first_witness_manifest_url(self):
         w = sorted(self.obj.witnesses, key=lambda k: k.num)
-        print('get_first_witness_manifest_url', w)
         if len(w) == 0:
             return None
         f_obj, errors, kwargs = WitnessFacade.get_facade('', w[0])
@@ -324,7 +323,7 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
         return [{"id": self.obj.id, "index": self.get_index_name(), "payload": payload}]
 
     def get_data_to_index_when_removed(self, propagate):
-        print("GOING TO BE REMOVED FROM INDEX:", [{"id": self.obj.id, "index": self.get_index_name()}])
+        #print("GOING TO BE REMOVED FROM INDEX:", [{"id": self.obj.id, "index": self.get_index_name()}])
         return [{"id": self.obj.id, "index": self.get_index_name()}]
 
 

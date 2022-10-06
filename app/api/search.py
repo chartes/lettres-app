@@ -77,7 +77,7 @@ class SearchIndexManager(object):
                     sources_keys = [list(s.keys())[0] for s in body["aggregations"]["items"]["composite"]["sources"]]
                     body["aggregations"]["items"]["composite"]["after"] = {key: value for key, value in
                                                                            zip(sources_keys, after.split(','))}
-                    print(sources_keys, after, {key: value for key, value in zip(sources_keys, after.split(','))})
+                    #print(sources_keys, after, {key: value for key, value in zip(sources_keys, after.split(','))})
 
             if per_page is not None:
                 if page is None or groupby is not None:
@@ -94,7 +94,7 @@ class SearchIndexManager(object):
                 if index is None or len(index) == 0:
                     index = current_app.config["DEFAULT_INDEX_NAME"]
 
-                pprint.pprint(body)
+                #pprint.pprint(body)
                 search = current_app.elasticsearch.search(index=index, doc_type="_doc", body=body)
                 # from elasticsearch import Elasticsearch
                 # scan = Elasticsearch.helpers.scan(client=current_app.elasticsearch, index=index, doc_type="_doc", body=body)
@@ -118,7 +118,7 @@ class SearchIndexManager(object):
                     # grab the after_key returned by ES for future queries
                     if "after_key" in search["aggregations"]["items"]:
                         after_key = search["aggregations"]["items"]["after_key"]
-                    print("aggregations: {0} buckets; after_key: {1}".format(len(buckets), after_key))
+                    #print("aggregations: {0} buckets; after_key: {1}".format(len(buckets), after_key))
                     # pprint.pprint(buckets)
                     count = search["aggregations"]["type_count"]["value"]
 

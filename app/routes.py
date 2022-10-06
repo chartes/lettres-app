@@ -1,11 +1,12 @@
 from flask import current_app
 
-from app import iiif_bp, JSONAPIResponseFactory
+from app import JSONAPIResponseFactory
 from app.models import Witness, Document
 
 headers = {"Access-Control-Allow-Origin": "*"}
 
-@iiif_bp.route("/iiif/witnesses/<witness_id>/manifest")
+
+@current_app.route("/iiif/witnesses/<witness_id>/manifest")
 def get_witness_manifest(witness_id):
     witness = Witness.query.filter(Witness.id == witness_id).first()
     if witness is None:
@@ -22,7 +23,7 @@ def get_witness_manifest(witness_id):
     return JSONAPIResponseFactory.make_response(manifest, headers=headers)
 
 
-@iiif_bp.route("/iiif/documents/<doc_id>/collection")
+@current_app.route("/iiif/documents/<doc_id>/collection")
 def get_document_collection(doc_id):
     doc = Document.query.filter(Document.id == doc_id).first()
     if doc is None:
@@ -37,4 +38,3 @@ def get_document_collection(doc_id):
     print('get collection', collection_url)
 
     return JSONAPIResponseFactory.make_response(collection, headers=headers)
-

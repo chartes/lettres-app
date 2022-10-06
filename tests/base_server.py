@@ -1,7 +1,10 @@
+import datetime
 import os
 import sys
 import json
 import pprint
+
+import jwt
 from flask import current_app
 from flask_testing import TestCase
 from json import JSONDecodeError
@@ -13,6 +16,25 @@ if sys.version_info < (3, 6):
 else:
     json_loads = json.loads
 
+
+def make_auth_headers(username=None):
+    if username is None:
+        return {}
+
+    from app.models import User
+    user = User.query.filter(User.username == username).first()
+
+    token = jwt.encode({
+        'sub': user.email,
+        'iat': datetime.datetime.utcnow(),
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=20)},
+        current_app.config['SECRET_KEY'])
+
+    headers = {
+        'content-type': 'application/json',
+        'Authorization': "Bearer {}".format(token)
+    }
+    return headers
 
 class TestBaseServer(TestCase):
 
@@ -27,7 +49,6 @@ class TestBaseServer(TestCase):
         _app = create_app(config_name="test", with_hardcoded_prefix=True)
         with _app.app_context():
             if hasattr(current_app, "elasticsearch"):
-                print("DELETE AND CREATE SEARCH INDEXES")
                 _app.elasticsearch.indices.delete(
                     index=DocumentFacade.get_index_name(),
                     ignore=[400, 404]
@@ -73,29 +94,43 @@ class TestBaseServer(TestCase):
             url = "%s/%s" % (self.url_prefix, url)
         return self.client.get(url, follow_redirects=True, **kwargs)
 
+    def get_with_auth(self, url, auth_username=None, **kwargs):
+        return self.get(url, headers=make_auth_headers(auth_username), **kwargs)
+
     def post(self, url, data, absolute=False, **kwargs):
         if not absolute:
             url = "%s/%s" % (self.url_prefix, url)
         return self.client.post(url, data=json.dumps(data), follow_redirects=True, **kwargs)
+
+    def post_with_auth(self, url, auth_username=None, **kwargs):
+        return self.post(url, headers=make_auth_headers(auth_username), **kwargs)
 
     def put(self, data, url, absolute=False, **kwargs):
         if not absolute:
             url = "%s/%s" % (self.url_prefix, url)
         return self.client.put(url, data=json.dumps(data), follow_redirects=True, **kwargs)
 
+    def put_with_auth(self, url, auth_username=None, **kwargs):
+        return self.put(url, headers=make_auth_headers(auth_username), **kwargs)
+
     def patch(self, url, data, absolute=False, **kwargs):
         if not absolute:
             url = "%s/%s" % (self.url_prefix, url)
         return self.client.patch(url, data=json.dumps(data), follow_redirects=True, **kwargs)
+
+    def patch_with_auth(self, url, auth_username=None, **kwargs):
+        return self.patch(url, headers=make_auth_headers(auth_username), **kwargs)
 
     def delete(self, url, absolute=False, **kwargs):
         if not absolute:
             url = "%s/%s" % (self.url_prefix, url)
         return self.client.delete(url, follow_redirects=True, **kwargs)
 
+    def delete_with_auth(self, url, auth_username=None, **kwargs):
+        return self.delete(url, headers=make_auth_headers(auth_username), **kwargs)
+
     @staticmethod
     def api_query(method, *args, **kwargs):
-        print(method, args, kwargs)
         r = method(*args, **kwargs)
         if r.data is None:
             return r, r.status, None
@@ -107,19 +142,19 @@ class TestBaseServer(TestCase):
             return r, r.status, data
 
     def api_get(self, *args, **kwargs):
-        return TestBaseServer.api_query(self.get, *args, **kwargs)
+        return TestBaseServer.api_query(self.get_with_auth, *args, **kwargs)
 
     def api_post(self, *args, **kwargs):
-        return TestBaseServer.api_query(self.post, *args, **kwargs)
+        return TestBaseServer.api_query(self.post_with_auth, *args, **kwargs)
 
     def api_put(self, *args, **kwargs):
-        return TestBaseServer.api_query(self.put, *args, **kwargs)
+        return TestBaseServer.api_query(self.put_with_auth, *args, **kwargs)
 
     def api_patch(self, *args, **kwargs):
-        return TestBaseServer.api_query(self.patch, *args, **kwargs)
+        return TestBaseServer.api_query(self.patch_with_auth, *args, **kwargs)
 
     def api_delete(self, *args, **kwargs):
-        return TestBaseServer.api_query(self.delete, *args, **kwargs)
+        return TestBaseServer.api_query(self.delete_with_auth, *args, **kwargs)
 
     # ========================
     # Pagination test methods

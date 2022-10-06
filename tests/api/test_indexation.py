@@ -2,16 +2,15 @@ import pprint
 import unittest
 
 from app.api.document.facade import DocumentFacade
+from app.models import User
 from tests.base_server import TestBaseServer
 
 
-@unittest.skip
 class TestIndexation(TestBaseServer):
-
     DOC_INDEX_NAME = "lettres__testing__document"
 
     def load_fixtures(self):
-        from ..data.fixtures.dataset001 import load_fixtures as load_dataset001
+        from tests.data.fixtures.dataset001 import load_fixtures as load_dataset001
         with self.app.app_context():
             from app import db
             load_dataset001(db)
@@ -23,14 +22,14 @@ class TestIndexation(TestBaseServer):
             from app.api.search import SearchIndexManager
             for doc in Document.query.all():
                 f_obj = DocumentFacade("", doc)
-                for data in f_obj.get_data_to_index_when_added():
+                for data in f_obj.get_data_to_index_when_added(propagate=False):
                     SearchIndexManager.add_to_index(index=index_name, id=doc.id, payload=data)
 
     def reindex_document(self, id):
         from app.api.search import SearchIndexManager
         f_obj, errors, kwargs = DocumentFacade.get_resource_facade("", id)
         index_name = DocumentFacade.get_index_name()
-        for data in f_obj.get_data_to_index_when_added():
+        for data in f_obj.get_data_to_index_when_added(propagate=False):
             SearchIndexManager.add_to_index(index=index_name, id=id, payload=data)
 
     def test_doc_attribute_change(self):
@@ -42,7 +41,7 @@ class TestIndexation(TestBaseServer):
                     "title": "Document TestIndexation"
                 }
             }
-        })
+        }, auth_username=User.query.first().username)
         self.assert200(r)
         self.reindex_document(1)
 
@@ -73,7 +72,7 @@ class TestIndexation(TestBaseServer):
         r, s, res = self.api_post("documents/1/relationships/languages", data={
             "data": [
                 {"type": "language", "id": 99},
-             ]
+            ]
         })
         self.assert200(r)
 

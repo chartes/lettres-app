@@ -4,7 +4,7 @@ import unittest
 from tests.base_server import TestBaseServer
 from app import db
 
-@unittest.skip
+
 class TestGetRoutes(TestBaseServer):
 
     def load_fixtures(self):

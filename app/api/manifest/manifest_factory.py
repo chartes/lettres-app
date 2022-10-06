@@ -1,5 +1,8 @@
 import datetime
 import json
+import os
+import pathlib
+
 import requests
 from flask import current_app, request
 from operator import attrgetter
@@ -8,10 +11,12 @@ from app.api.document.facade import DocumentFacade
 from app.api.witness.facade import WitnessFacade
 
 
+dir = pathlib.Path(__file__).parent.resolve()
+
 class ManifestFactory(object):
 
-    MANIFEST_TEMPLATE_FILENAME = "app/api/manifest/manifest_template.json"
-    COLLECTION_TEMPLATE_FILENAME = "app/api/manifest/collection_template.json"
+    MANIFEST_TEMPLATE_FILENAME =  dir / "manifest_template.json"
+    COLLECTION_TEMPLATE_FILENAME = dir / "collection_template.json"
 
     CACHED_MANIFESTS = {
 

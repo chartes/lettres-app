@@ -16,7 +16,7 @@ from flask_jwt_extended import (
 from sqlalchemy import or_
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from app import api_bp, db, mail
+from app import db, mail
 from app.models import User, UserRole
 
 
@@ -32,7 +32,7 @@ def make_401(msg):
     return jsonify({'message': msg, 'authenticated': False}), 401
 
 
-@api_bp.route('/api/<api_version>/logout')
+@current_app.route('/api/<api_version>/logout')
 def logout(api_version):
     resp = jsonify({})
     unset_access_cookies(resp)
@@ -40,7 +40,7 @@ def logout(api_version):
     return resp, 200
 
 
-@api_bp.route('/api/<api_version>/login', methods=['POST'])
+@current_app.route('/api/<api_version>/login', methods=['POST'])
 def login(api_version):
     json = request.get_json(force=True)
     username = json.get('email', None)
@@ -66,7 +66,7 @@ def login(api_version):
     return jsonify({'token': token, 'user_data': user.serialize()})
 
 
-@api_bp.route('/api/<api_version>/current-user', methods=('GET',))
+@current_app.route('/api/<api_version>/current-user', methods=('GET',))
 def current_user(api_version):
     auth_headers = request.headers.get('Authorization', '').split()
     token = auth_headers[1]
@@ -95,7 +95,7 @@ def forbid_if_nor_teacher_nor_admin(view_function):
     return wrapped_f
 
 
-@api_bp.route('/api/<api_version>/invite-user', methods=['POST'])
+@current_app.route('/api/<api_version>/invite-user', methods=['POST'])
 @forbid_if_nor_teacher_nor_admin
 def invite_user(api_version):
     json = request.get_json(force=True)
@@ -143,7 +143,7 @@ def invite_user(api_version):
 
 
 #
-@api_bp.route('/api/<api_version>/update-user', methods=['POST'])
+@current_app.route('/api/<api_version>/update-user', methods=['POST'])
 @jwt_required
 def update_user(api_version):
     json = request.get_json(force=True)
@@ -190,7 +190,7 @@ def update_user(api_version):
     return resp, 200
 
 
-@api_bp.route('/api/<api_version>/send-password-reset-link', methods=['POST'])
+@current_app.route('/api/<api_version>/send-password-reset-link', methods=['POST'])
 def send_password_reset_link(api_version):
     json = request.get_json(force=True)
     email = json.get('email', None)
@@ -223,7 +223,7 @@ def send_password_reset_link(api_version):
     return response, 200
 
 
-@api_bp.route('/api/<api_version>/reset-password', methods=['POST'])
+@current_app.route('/api/<api_version>/reset-password', methods=['POST'])
 def reset_password(api_version):
     json = request.get_json(force=True)
     password = json.get('password', None)

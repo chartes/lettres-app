@@ -1,6 +1,6 @@
 from flask import request, current_app
 
-from app import api_bp, JSONAPIResponseFactory
+from app import JSONAPIResponseFactory
 
 
 COLLECTIONS_PARAMETERS = {
@@ -13,7 +13,7 @@ COLLECTIONS_PARAMETERS = {
 }
 
 
-@api_bp.route("/api/<api_version>")
+@current_app.route("/api/<api_version>")
 def api_get_capabilities(api_version):
     if "capabilities" in request.args:
         url_prefix = request.host_url[:-1] + current_app.config["API_URL_PREFIX"]

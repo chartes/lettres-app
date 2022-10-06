@@ -1,7 +1,7 @@
 import unittest
 import os
 
-os.chdir('..')
+#os.chdir('..')
 
 loader = unittest.TestLoader()
 start_dir = 'tests'
