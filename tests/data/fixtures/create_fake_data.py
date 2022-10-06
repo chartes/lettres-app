@@ -14,8 +14,8 @@ def create_fake_users(db, nb_users=50, fake=None):
 
     #logging.getLogger('faker.factory').setLevel(logging.ERROR)
 
-    admin = UserRole(name=fake.word())
-    contributor = UserRole(name=fake.word())
+    admin = UserRole(name='admin')
+    contributor = UserRole(name='contributor')
 
     db.session.add(admin)
     db.session.add(contributor)
@@ -32,7 +32,7 @@ def create_fake_users(db, nb_users=50, fake=None):
             first_name=fake.first_name(),
             last_name=fake.last_name()
         )
-        u1.role = roles[1]
+        u1.roles = roles if i == 0 else [contributor]
         db.session.add(u1)
         db.session.commit()
 
