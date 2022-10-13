@@ -57,8 +57,8 @@ class TestDeleteRoutes(TestBaseServer):
         for i in range(1, 16): # count images before deletion instead of hard coding number ?
             r, status, resource = self.api_get("images/"+str(i)+"/witness")
             self.assertEqual(0, resource["meta"]["total-count"])
-            # print(r.request.url)
-            # print(resource)
+            # print('Test run with api URL = ', r.request.url)
+            # print('Test returned resource = ', resource)
 
 
         # check that the object has been removed from the ES index
