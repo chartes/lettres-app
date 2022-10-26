@@ -226,7 +226,7 @@ def send_password_reset_link(api_version):
     return response, 200
 
 
-@current_app.route('/api/<api_version>/reset-password', methods=['POST'])
+@current_app.route('/api/<api_version>/reset-password', methods=['GET','POST'])
 def reset_password(api_version):
     json = request.get_json(force=True)
     password = json.get('password', None)
