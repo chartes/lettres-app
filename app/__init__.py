@@ -68,7 +68,7 @@ def create_app(config_name="dev", with_hardcoded_prefix=False):
 
     def with_url_prefix(url):
         from flask import request
-        return "".join((request.host_url[:-1], app.config['API_URL_PREFIX'], url))
+        return "".join((request.host_url[:-1], app.config['APP_URL_PREFIX'], url))
 
     app.with_url_prefix = with_url_prefix
 
