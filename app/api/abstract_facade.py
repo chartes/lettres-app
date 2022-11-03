@@ -381,7 +381,8 @@ class JSONAPIAbstractFacade(object):
 
 class JSONAPIAbstractChangeloggedFacade(JSONAPIAbstractFacade):
     """
-    :usedby : DocumentFacade (api/document/facade.py)
+    :usedby : DocumentFacade (api/document/facade.py), CollectionFacade, LanguageFacade, NoteFacade,
+    PersonFacade, PlacenameFacade, WitnessFacade
     :return: AbstratFacade avec une relation supplémentaire "changes"
     """
     def __init__(self, *args, **kwargs):
