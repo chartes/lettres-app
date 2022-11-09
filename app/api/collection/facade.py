@@ -73,6 +73,7 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
             **self.resource_identifier,
             "attributes": {
                 "title": self.obj.title,
+                "path": [c.title for c in self.obj.parents] + [self.obj.title],
                 "description": self.obj.description,
                 "nb_docs": len(self.obj.documents_including_children),
                 "date_min": min([doc.creation for doc in self.obj.documents_including_children if doc.creation]),

@@ -169,4 +169,7 @@ def create_app(config_name="dev", with_hardcoded_prefix=False):
         # generate search endpoint
         app.api_url_registrar.register_search_route()
 
+        for rule in app.url_map.iter_rules():
+            print(rule)
+
     return app
