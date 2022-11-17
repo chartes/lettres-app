@@ -66,6 +66,12 @@ def create_app(config_name="dev", with_hardcoded_prefix=False):
 
     app.debug = app.config["DEBUG"]
 
+    def with_url_prefix(url):
+        from flask import request
+        return "".join((request.host_url[:-1], app.config['APP_URL_PREFIX'], url))
+
+    app.with_url_prefix = with_url_prefix
+
     db.init_app(app)
     config[config_name].init_app(app)
     mail.init_app(app)
@@ -162,5 +168,8 @@ def create_app(config_name="dev", with_hardcoded_prefix=False):
 
         # generate search endpoint
         app.api_url_registrar.register_search_route()
+
+        #for rule in app.url_map.iter_rules():
+        #    print(rule)
 
     return app

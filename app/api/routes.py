@@ -208,14 +208,17 @@ def send_password_reset_link(api_version):
     token = jwt.encode({
         'sub': user.email,
         'iat': datetime.datetime.utcnow(),
-        'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=20)},
-        current_app.config['SECRET_KEY']).decode('ascii')
-    link = current_app.with_url_prefix('/reset-password?token=%s' % token)
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=20)
+    }, current_app.config['SECRET_KEY']
+    )
+    link = current_app.with_url_prefix(f"/reset-password?token={token}")
 
     msg = Message(
-        'Adele - Demande de récupération de mot de passe',
+        'Lettres - Demande de récupération de mot de passe',
         sender=current_app.config['MAIL_USERNAME'],
-        recipients=[email])
+        recipients=[email]
+    )
+
     msg.body = "Vous avez demandé à réinitialiser votre mot de passe. " \
                "Vous pouvez choisir un nouveau mot de passe en suivant ce lien: %s " \
                "\nSi vous n'avez pas fait cette demande vous pouvez ignorer cet email." % link
