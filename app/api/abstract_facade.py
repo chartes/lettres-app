@@ -147,13 +147,13 @@ class JSONAPIAbstractFacade(object):
     @staticmethod
     def patch_resource(obj, obj_type, attributes, related_resources, append):
         """
-        Update the obj but do not commit it
+        Prepare / Update the obj but do not commit it
         :param append:
-        :param obj:
+        :param obj: first get object to be updated
         :param obj_type:
         :param attributes:
         :param related_resources:
-        :return:
+        :return: Updated object formatted as required
         """
         print("UPDATING RESOURCE:", obj, obj_type, attributes, related_resources)
         # update attributes
@@ -263,6 +263,7 @@ class JSONAPIAbstractFacade(object):
                 "detail": str(e)
             }
             db.session.rollback()
+            # print('Deletion errors : ', errors)
         return errors
 
     def get_related_resource_identifiers(self, facade_class, rel_field, to_many=False):
@@ -379,7 +380,11 @@ class JSONAPIAbstractFacade(object):
 
 
 class JSONAPIAbstractChangeloggedFacade(JSONAPIAbstractFacade):
-
+    """
+    :usedby : DocumentFacade (api/document/facade.py), CollectionFacade, LanguageFacade, NoteFacade,
+    PersonFacade, PlacenameFacade, WitnessFacade
+    :return: AbstratFacade avec une relation supplémentaire "changes"
+    """
     def __init__(self, *args, **kwargs):
         from app.api.changelog.facade import ChangelogFacade
 
