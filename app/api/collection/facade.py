@@ -1,6 +1,9 @@
+from flask import current_app
+
+from app import JSONAPIResponseFactory
 from app.api.abstract_facade import JSONAPIAbstractChangeloggedFacade
 from app.api.user.facade import UserFacade
-from app.models import Collection
+from app.models import Collection, User
 
 
 class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
@@ -68,6 +71,16 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
 
     @property
     def resource(self):
+        if not self.obj.documents_including_children:
+            date_min = None
+            date_max = date_min
+        else:
+            creation = [
+                doc.creation for doc in self.obj.documents_including_children
+                if doc.creation
+            ]
+            date_min = min(creation)
+            date_max = max(creation)
 
         resource = {
             **self.resource_identifier,
@@ -76,8 +89,8 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
                 "path": [c.title for c in self.obj.parents] + [self.obj.title],
                 "description": self.obj.description,
                 "nb_docs": len(self.obj.documents_including_children),
-                "date_min": min([doc.creation for doc in self.obj.documents_including_children if doc.creation]),
-                "date_max": max([doc.creation for doc in self.obj.documents_including_children if doc.creation])
+                "date_min": date_min,
+                "date_max": date_max
             },
             "meta": self.meta,
             "links": {
@@ -151,3 +164,43 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
                 if data["payload"]["id"] != self.id and data["payload"]["type"] != self.TYPE:
                     data["payload"]["collections"] = [l for l in data["payload"]["collections"] if l.get("id") != self.id]
                     SearchIndexManager.add_to_index(index=data["index"], id=data["id"], payload=data["payload"])
+
+    @staticmethod
+    def create_resource(model, obj_id, attributes, related_resources):
+        admin_id = attributes.get("admin_id")
+        error = None
+        if not admin_id:
+            error = {
+                "status": 400,
+                "title": "Attribute 'admin_id' is missing",
+            }
+            print(error["title"])
+            return None, error
+        user = User.query.filter(User.id == admin_id).first()
+        if not user:
+            error = {
+                "status": 400,
+                "title": f"No user with ID '{admin_id}'"
+            }
+            print(error["title"])
+            return None, error
+        if not user.is_admin():
+            error = {
+                "status": 400,
+                "title": f"User with ID '{user.id}' is not admin",
+            }
+            print(error["title"])
+            return None, error
+        resource, error = JSONAPIAbstractChangeloggedFacade.create_resource(
+            model,
+            obj_id,
+            attributes,
+            related_resources
+        )
+        # UNIQUE constraint failed
+        if error["status"] == 409:
+            return resource, {
+                "status": 409,
+                "title": f"Invalid data (Hint: check if title '{attributes['title']}' is already in use)",    # noqa
+            }
+        return resource, error
