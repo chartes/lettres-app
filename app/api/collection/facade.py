@@ -1,3 +1,5 @@
+from flask import current_app
+
 from app.api.abstract_facade import JSONAPIAbstractChangeloggedFacade
 from app.api.user.facade import UserFacade
 from app.models import Collection
@@ -68,6 +70,16 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
 
     @property
     def resource(self):
+        if not self.obj.documents_including_children:
+            date_min = None
+            date_max = date_min
+        else:
+            creation = [
+                doc.creation for doc in self.obj.documents_including_children
+                if doc.creation
+            ]
+            date_min = min(creation)
+            date_max = max(creation)
 
         resource = {
             **self.resource_identifier,
@@ -76,8 +88,8 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
                 "path": [c.title for c in self.obj.parents] + [self.obj.title],
                 "description": self.obj.description,
                 "nb_docs": len(self.obj.documents_including_children),
-                "date_min": min([doc.creation for doc in self.obj.documents_including_children if doc.creation]),
-                "date_max": max([doc.creation for doc in self.obj.documents_including_children if doc.creation])
+                "date_min": date_min,
+                "date_max": date_max
             },
             "meta": self.meta,
             "links": {
@@ -151,3 +163,13 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
                 if data["payload"]["id"] != self.id and data["payload"]["type"] != self.TYPE:
                     data["payload"]["collections"] = [l for l in data["payload"]["collections"] if l.get("id") != self.id]
                     SearchIndexManager.add_to_index(index=data["index"], id=data["id"], payload=data["payload"])
+
+    @staticmethod
+    def create_resource(model, obj_id, attributes, related_resources):
+        related_resources["admin_id"] = current_app.get_current_user().id
+        return JSONAPIAbstractChangeloggedFacade.create_resource(
+            model,
+            obj_id,
+            attributes,
+            related_resources
+        )
