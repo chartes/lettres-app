@@ -409,6 +409,9 @@ class DocumentBookmarkFacade(DocumentFacade):
     @property
     def resource(self):
         """
+        rappel :
+        adresse = à qui s'adresse la lettre
+        argument = analyse
         remove the thumbnail generation from the attributes
         :return:
         """

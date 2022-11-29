@@ -47,6 +47,7 @@ def create_fake_documents(db, nb_docs=1000, nb_correspondents=None, fake=None):
     from app.models import PersonRole
     from app.models import Person
     from app.models import Witness
+    from app.models import Lock
 
     if fake is None:
         fake = Faker()
@@ -145,6 +146,31 @@ def create_fake_documents(db, nb_docs=1000, nb_correspondents=None, fake=None):
                 n = Note(content=fake.paragraph(), document_id=doc.id)
                 db.session.add(n)
                 db.session.flush()
+
+            # add fake Bookmarks
+            #from app.models import as
+            #nb_bookmarks = 50
+            #for i in range(0, nb_bookmarks):
+            #    users_have_bookmarks.appen((doc.id, user_id))
+
+            # add fake Locks
+            nb_locks = 2
+            if n_doc in range(0, nb_locks):
+                get_locked_doc_ids = Document.query.all()
+                target_locked_doc_ids = get_locked_doc_ids[:2]
+                # print('len target_locked_doc_ids : ', str(len(target_locked_doc_ids)))
+                new_lock = Lock(object_type="document",
+                                object_id=target_locked_doc_ids[n_doc].id,
+                                user_id=random.choice(users).id)
+                # print('locked docs_ids / user_ids :', str(target_locked_doc_ids[n_doc].id)+' / '+ str(random.choice(users).id))
+                db.session.add(new_lock)
+                db.session.flush() # generates lock id
+            '''control locked documents_id & user_ids :
+            locked_doc_ids = Lock.query.all()
+            for row in locked_doc_ids:
+                print(str(row.object_id) + ',' + str(row.user_id))
+                print("\n")
+            '''
 
             # add fake correspondent to the doc
             from app.models import PersonHasRole
