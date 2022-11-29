@@ -108,6 +108,20 @@ def create_app(config_name="dev", with_hardcoded_prefix=False):
     def add_claims_to_access_token(user):
         return user["roles"]
 
+    def get_current_user():
+        import jwt
+        from flask import request
+        from app.models import User
+        auth_headers = request.headers.get('Authorization', '').split()
+        if len(auth_headers) == 2:
+            token = auth_headers[1]
+            data = jwt.decode(token, key=app.config['SECRET_KEY'], algorithms=["HS256"])
+            return User.query.filter_by(email=data['sub']).first()
+        else:
+            return None
+
+    app.get_current_user = get_current_user
+
     from app.api.manifest.manifest_factory import ManifestFactory
     app.manifest_factory = ManifestFactory()
 
