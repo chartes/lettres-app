@@ -68,6 +68,16 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
 
     @property
     def resource(self):
+        if not self.obj.documents_including_children:
+            date_min = None
+            date_max = date_min
+        else:
+            creation = [
+                doc.creation for doc in self.obj.documents_including_children
+                if doc.creation
+            ]
+            date_min = min(creation)
+            date_max = max(creation)
 
         resource = {
             **self.resource_identifier,
@@ -76,8 +86,8 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
                 "path": [c.title for c in self.obj.parents] + [self.obj.title],
                 "description": self.obj.description,
                 "nb_docs": len(self.obj.documents_including_children),
-                "date_min": min([doc.creation for doc in self.obj.documents_including_children if doc.creation]),
-                "date_max": max([doc.creation for doc in self.obj.documents_including_children if doc.creation])
+                "date_min": date_min,
+                "date_max": date_max
             },
             "meta": self.meta,
             "links": {
