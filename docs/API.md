@@ -381,3 +381,45 @@ curl -X DELETE \
   -H 'cache-control: no-cache'
 ```
 Réponse ```204 NO CONTENT```
+
+## Manipulation des relations entre les resources et les collections :
+
+### Création des collections :
+
+### Le lien entre un document et une collection se créé au niveau du document :
+
+```json 
+curl -X POST \
+  http://localhost:5004/lettres/api/1.0/documents/**id du document**/relationships/collections?without-relationships\
+  -H 'Accept: application/vnd.api+json' \
+  -H 'Content-Type: application/json' \
+  -H 'cache-control: no-cache' \
+  -H 'Authorization: Bearer **Bearer_ID**
+  -d '{
+  	"data":[
+	{
+	"id": **id de la collection à lier au document**,
+	"type":"collection"
+	}
+	]
+}'
+```
+
+### Suppression du lien avec une collection au niveau du document :
+
+```json 
+curl -X DELETE \
+  http://localhost:5004/api/1.0/documents/3236/relationships/collections?without-relationships\
+  -H 'Accept: application/vnd.api+json' \
+  -H 'Content-Type: application/json' \
+  -H 'cache-control: no-cache' \
+  -H 'Authorization: Bearer **Bearer_ID**
+  -d '{
+  	"data":[
+	{
+	"id":**id de la collection à supprimer dans le document**,
+	"type":"collection"
+	}
+	]
+}'
+```
