@@ -161,3 +161,13 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
                 if data["payload"]["id"] != self.id and data["payload"]["type"] != self.TYPE:
                     data["payload"]["collections"] = [l for l in data["payload"]["collections"] if l.get("id") != self.id]
                     SearchIndexManager.add_to_index(index=data["index"], id=data["id"], payload=data["payload"])
+
+
+class CollectionHierarchyOnlyFacade(CollectionFacade):
+    def __init__(self, *args, **kwargs):
+        super(CollectionHierarchyOnlyFacade, self).__init__(*args, **kwargs)
+        self.relationships = {
+            "admin": self.relationships['admin'],
+            "parents": self.relationships["parents"],
+            "children": self.relationships["children"]
+        }
