@@ -204,3 +204,13 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
                 "title": f"Invalid data (Hint: check if title '{attributes['title']}' is already in use)",    # noqa
             }
         return resource, error
+
+
+class CollectionHierarchyOnlyFacade(CollectionFacade):
+    def __init__(self, *args, **kwargs):
+        super(CollectionHierarchyOnlyFacade, self).__init__(*args, **kwargs)
+        self.relationships = {
+            "admin": self.relationships['admin'],
+            "parents": self.relationships["parents"],
+            "children": self.relationships["children"]
+        }
