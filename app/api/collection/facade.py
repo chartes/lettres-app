@@ -151,3 +151,9 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
                 if data["payload"]["id"] != self.id and data["payload"]["type"] != self.TYPE:
                     data["payload"]["collections"] = [l for l in data["payload"]["collections"] if l.get("id") != self.id]
                     SearchIndexManager.add_to_index(index=data["index"], id=data["id"], payload=data["payload"])
+
+    @staticmethod
+    def delete_resource(obj):
+        for document in obj.documents_including_children:
+            document.parent_id = obj.parent_id
+        JSONAPIAbstractChangeloggedFacade.delete_resource(obj)
