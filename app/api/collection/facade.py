@@ -166,29 +166,38 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
                     SearchIndexManager.add_to_index(index=data["index"], id=data["id"], payload=data["payload"])
 
     @staticmethod
-    def create_resource(model, obj_id, attributes, related_resources):
+    def _validate_resource(attributes):
+        # validate admin_id
         admin_id = attributes.get("admin_id")
-        error = None
         if not admin_id:
-            error = {
+            return {
                 "status": 400,
                 "title": "Attribute 'admin_id' is missing",
             }
-            print(error["title"])
-            return None, error
         user = User.query.filter(User.id == admin_id).first()
         if not user:
-            error = {
+            return {
                 "status": 400,
                 "title": f"No user with ID '{admin_id}'"
             }
-            print(error["title"])
-            return None, error
         if not user.is_admin():
-            error = {
+            return {
                 "status": 400,
                 "title": f"User with ID '{user.id}' is not admin",
             }
+        # validate title
+        title = attributes.get("title")
+        if not title:
+            return {
+                "status": 400,
+                "title": "Attribute 'title' is missing or empty"
+            }
+        return None
+
+    @staticmethod
+    def create_resource(model, obj_id, attributes, related_resources):
+        error = CollectionFacade._validate_resource(attributes)
+        if error:
             print(error["title"])
             return None, error
         resource, error = JSONAPIAbstractChangeloggedFacade.create_resource(
@@ -204,6 +213,20 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
                 "title": f"Invalid data (Hint: check if title '{attributes['title']}' is already in use)",    # noqa
             }
         return resource, error
+
+    @staticmethod
+    def update_resource(obj, obj_type, attributes, related_resources, append=False):
+        error = CollectionFacade._validate_resource(attributes)
+        if error:
+            print(error["title"])
+            return None, error
+        return JSONAPIAbstractChangeloggedFacade.update_resource(
+            obj,
+            obj_type,
+            attributes,
+            related_resources,
+            append=append
+        )
 
 
 class CollectionHierarchyOnlyFacade(CollectionFacade):
