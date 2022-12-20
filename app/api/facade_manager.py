@@ -1,5 +1,5 @@
 from app.api.changelog.facade import ChangelogFacade
-from app.api.collection.facade import CollectionFacade
+from app.api.collection.facade import CollectionFacade, CollectionHierarchyOnlyFacade
 from app.api.person.facade import PersonFacade
 from app.api.person_has_role.facade import PersonHasRoleFacade
 from app.api.person_role.facade import PersonRoleFacade
@@ -32,6 +32,7 @@ _FACADES = {
     Collection.__tablename__: {
         "default": CollectionFacade,
         "search": CollectionFacade,
+        "hierarchy": CollectionHierarchyOnlyFacade,
     },
     Person.__tablename__: {
         "default": PersonFacade,
