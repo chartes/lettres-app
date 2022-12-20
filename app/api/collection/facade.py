@@ -198,7 +198,7 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
             related_resources
         )
         # UNIQUE constraint failed
-        if error["status"] == 409:
+        if error and error["status"] == 409:
             return resource, {
                 "status": 409,
                 "title": f"Invalid data (Hint: check if title '{attributes['title']}' is already in use)",    # noqa
