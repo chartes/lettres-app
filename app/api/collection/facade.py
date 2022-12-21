@@ -1,8 +1,9 @@
 from flask import current_app
 
-from app import JSONAPIResponseFactory
+from app import db, JSONAPIResponseFactory
 from app.api.abstract_facade import JSONAPIAbstractChangeloggedFacade
 from app.api.user.facade import UserFacade
+from app.api.document.facade import DocumentFacade
 from app.models import Collection, User
 
 
@@ -165,11 +166,43 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
                     data["payload"]["collections"] = [l for l in data["payload"]["collections"] if l.get("id") != self.id]
                     SearchIndexManager.add_to_index(index=data["index"], id=data["id"], payload=data["payload"])
 
+    def _get_children_including_children(self, children):
+        children_including_children = []
+        for child in children:
+            children_including_children += self._get_children_including_children(
+                child.children
+            )
+        return children_including_children
+
     @staticmethod
     def delete_resource(obj):
-        for document in obj.documents_including_children:
-            document.parent_id = obj.parent_id
-        JSONAPIAbstractChangeloggedFacade.delete_resource(obj)
+        collections_to_remove = [obj, *obj.children_including_children]
+        # if collection has parent collection, move documents there
+        if obj.parent_id:
+            new_collection = Collection.query.get(obj.parent_id)
+        # if not, move documents to unsorted documents collection
+        else:
+            new_collection = Collection.query.filter(
+                Collection.title == current_app.config["UNSORTED_DOCUMENTS_COLLECTION_TITLE"]
+            ).first()
+        # move all documents (including documents in subcollections) to new collection
+        documents = obj.documents_including_children
+        for document in documents:
+            collections = [
+                col for col in document.collections
+                if col not in collections_to_remove
+            ]
+            collections.append(new_collection)
+            DocumentFacade.update_resource(
+                document,
+                "document",
+                attributes={},
+                related_resources={"collections": collections}
+            )
+            DocumentFacade("", document).reindex("update", propagate=True)
+        # delete all collections
+        for collection in collections_to_remove:
+            JSONAPIAbstractChangeloggedFacade.delete_resource(collection)
 
     def create_resource(model, obj_id, attributes, related_resources):
         admin_id = attributes.get("admin_id")

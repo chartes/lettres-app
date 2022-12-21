@@ -65,6 +65,7 @@ class Config(object):
 
     IIIF_MANIFEST_ENDPOINT = parse_var_env('IIIF_MANIFEST_ENDPOINT')
     IIIF_COLLECTION_ENDPOINT = parse_var_env('IIIF_COLLECTION_ENDPOINT')
+    UNSORTED_DOCUMENTS_COLLECTION_TITLE = parse_var_env('UNSORTED_DOCUMENTS_COLLECTION_TITLE')
 
     @staticmethod
     def init_app(app):

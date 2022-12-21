@@ -116,6 +116,14 @@ class Collection(db.Model, ChangesMixin):
         return docs
 
     @property
+    def children_including_children(self):
+        children_including_children = []
+        for child in self.children:
+            children_including_children += child.children_including_children
+        children_including_children += self.children
+        return children_including_children
+
+    @property
     def parents(self):
         if self.parent is None:
             return []
