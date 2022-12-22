@@ -1,6 +1,5 @@
 from flask import current_app
 
-from app import db, JSONAPIResponseFactory
 from app.api.abstract_facade import JSONAPIAbstractChangeloggedFacade
 from app.api.user.facade import UserFacade
 from app.api.document.facade import DocumentFacade
@@ -168,6 +167,14 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
 
     @staticmethod
     def delete_resource(obj):
+        default_col_title = current_app.config["UNSORTED_DOCUMENTS_COLLECTION_TITLE"]
+        if obj.title == default_col_title:
+            error = {
+                "status": 400,
+                "title": f"Unsorted documents collection '{default_col_title}' cannot be deleted"
+            }
+            print(error)
+            return error
         collections_to_remove = [obj, *obj.children_including_children]
         # if collection has parent collection, move documents there
         if obj.parent_id:
@@ -175,7 +182,7 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
         # if not, move documents to unsorted documents collection
         else:
             new_collection = Collection.query.filter(
-                Collection.title == current_app.config["UNSORTED_DOCUMENTS_COLLECTION_TITLE"]
+                Collection.title == default_col_title
             ).first()
         # move all documents (including documents in subcollections) to new collection
         documents = obj.documents_including_children
