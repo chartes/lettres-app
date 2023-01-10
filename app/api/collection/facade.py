@@ -200,8 +200,15 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
             )
             DocumentFacade("", document).reindex("update", propagate=True)
         # delete all collections
+        # remove child collections before parent collections
+        collections_to_remove.sort(key=lambda c: c.id, reverse=True)
         for collection in collections_to_remove:
-            JSONAPIAbstractChangeloggedFacade.delete_resource(collection)
+            errors = JSONAPIAbstractChangeloggedFacade.delete_resource(
+                collection
+            )
+            if errors:  # stop if any collection cannot be removed
+                return errors
+        return errors
 
     def _validate_resource(attributes):
         # validate admin_id
