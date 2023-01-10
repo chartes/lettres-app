@@ -1446,12 +1446,13 @@ class JSONAPIRouteRegistrar(object):
             # =====================
             f_obj = facade_class("", obj)
             # reindex
+            f_obj.reindex("delete", propagate=True)
             errors = facade_class.delete_resource(obj)
 
             if errors is not None:
+                f_obj.reindex("insert", propagate=True) # entry has been deleted
                 return JSONAPIResponseFactory.make_errors_response(errors, status=404)
 
-            f_obj.reindex("delete", propagate=True)
             return JSONAPIResponseFactory.make_data_response(None, None, None, None, status=204)
 
         # APPLY decorators if any
