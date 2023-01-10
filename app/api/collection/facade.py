@@ -191,7 +191,10 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
                 col for col in document.collections
                 if col not in collections_to_remove
             ]
-            collections.append(new_collection)
+            # only add to unsorted documents collection
+            # if document is not related to any other
+            if not collections or new_collection.title != default_col_title:
+                collections.append(new_collection)
             DocumentFacade.update_resource(
                 document,
                 "document",
