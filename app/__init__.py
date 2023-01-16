@@ -185,5 +185,17 @@ def create_app(config_name="dev", with_hardcoded_prefix=False):
 
         #for rule in app.url_map.iter_rules():
         #    print(rule)
+        title = app.config["UNSORTED_DOCUMENTS_COLLECTION_TITLE"]
+        if not models.Collection.query.filter(models.Collection.title == title).all():
+            print(f"unsorted documents collection '{title}' does not exist")
+            print(f"creating unsorted documents collection '{title}' ...")
+            unsorted_documents_collection = models.Collection(
+                title=title,
+                description="Documents non triées",
+                admin_id=1,
+            )
+            db.session.add(unsorted_documents_collection)
+            db.session.commit()
+            print(f"unsorted documents collection '{title}' has been successfully created")
 
     return app

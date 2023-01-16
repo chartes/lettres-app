@@ -1,8 +1,8 @@
 from flask import current_app
 
-from app import JSONAPIResponseFactory
 from app.api.abstract_facade import JSONAPIAbstractChangeloggedFacade
 from app.api.user.facade import UserFacade
+from app.api.document.facade import DocumentFacade
 from app.models import Collection, User
 
 
@@ -166,6 +166,53 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
                     SearchIndexManager.add_to_index(index=data["index"], id=data["id"], payload=data["payload"])
 
     @staticmethod
+    def delete_resource(obj):
+        default_col_title = current_app.config["UNSORTED_DOCUMENTS_COLLECTION_TITLE"]
+        if obj.title == default_col_title:
+            error = {
+                "status": 400,
+                "title": f"Unsorted documents collection '{default_col_title}' cannot be deleted"
+            }
+            print(error)
+            return error
+        collections_to_remove = [obj, *obj.children_including_children]
+        # if collection has parent collection, move documents there
+        if obj.parent_id:
+            new_collection = Collection.query.get(obj.parent_id)
+        # if not, move documents to unsorted documents collection
+        else:
+            new_collection = Collection.query.filter(
+                Collection.title == default_col_title
+            ).first()
+        # move all documents (including documents in subcollections) to new collection
+        documents = obj.documents_including_children
+        for document in documents:
+            collections = [
+                col for col in document.collections
+                if col not in collections_to_remove
+            ]
+            # only add to unsorted documents collection
+            # if document is not related to any other
+            if not collections or new_collection.title != default_col_title:
+                collections.append(new_collection)
+            DocumentFacade.update_resource(
+                document,
+                "document",
+                attributes={},
+                related_resources={"collections": collections}
+            )
+            DocumentFacade("", document).reindex("update", propagate=True)
+        # delete all collections
+        # remove child collections before parent collections
+        collections_to_remove.sort(key=lambda c: c.id, reverse=True)
+        for collection in collections_to_remove:
+            errors = JSONAPIAbstractChangeloggedFacade.delete_resource(
+                collection
+            )
+            if errors:  # stop if any collection cannot be removed
+                return errors
+        return errors
+
     def _validate_resource(attributes):
         # validate admin_id
         admin_id = attributes.get("admin_id")
