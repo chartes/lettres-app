@@ -295,6 +295,14 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
                 }
                 for c_h_r in self.obj.persons_having_roles if c_h_r.person_role.label == 'sender'
             ],
+            "person-inlined": [
+                {
+                    "id": c_h_r.person.id,
+                    "label": c_h_r.person.label,
+                    "ref": c_h_r.person.ref
+                }
+                for c_h_r in self.obj.persons_having_roles if c_h_r.person_role.label == 'inlined'
+            ],
             "placenames": [
                 {
                     "id": c_h_r.placename.id,
@@ -318,6 +326,14 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
                     "ref": c_h_r.placename.ref
                 }
                 for c_h_r in self.obj.placenames_having_roles if c_h_r.placename_role.label == 'location-date-to'
+            ],
+            "location-inlined": [
+                {
+                    "id": c_h_r.placename.id,
+                    "label": c_h_r.placename.label,
+                    "ref": c_h_r.placename.ref
+                }
+                for c_h_r in self.obj.placenames_having_roles if c_h_r.placename_role.label == 'inlined'
             ]
         }
         return [{"id": self.obj.id, "index": self.get_index_name(), "payload": payload}]
