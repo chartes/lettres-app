@@ -46,11 +46,13 @@ class PrefixMiddleware(object):
             environ['SCRIPT_NAME'] = self.prefix
             return self.app(environ, start_response)
 
+# Without Prefix /lettres (also update in flask_app.py & in VUE_APP var_env):
+# def create_app(config_name="dev", with_hardcoded_prefix=False):
 
-def create_app(config_name="dev", with_hardcoded_prefix=False):
+# With Prefix /lettres (also update in flask_app.py & in VUE_APP var_env):
+def create_app(config_name="dev", with_hardcoded_prefix=True):
     """ Create the application """
     app = Flask(__name__)
-
     if not isinstance(config_name, str):
         from config import config
         print("default config")
