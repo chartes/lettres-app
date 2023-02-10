@@ -277,6 +277,11 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
 
 
 class CollectionHierarchyOnlyFacade(CollectionFacade):
+    TYPE = "collection"
+    TYPE_PLURAL = "collections"
+
+    MODEL = Collection
+
     def __init__(self, *args, **kwargs):
         super(CollectionHierarchyOnlyFacade, self).__init__(*args, **kwargs)
         self.relationships = {

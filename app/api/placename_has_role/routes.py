@@ -18,7 +18,7 @@ def register_placename_has_role_api_urls(app):
     @current_app.route('/api/<api_version>/placenames-functions')
     def get_placename_functions(api_version):
         phr = PlacenameHasRole.query.with_entities(PlacenameHasRole.function).filter(
-            PlacenameHasRole.function != None
+            PlacenameHasRole.function.isnot(None)
         ).distinct().order_by(PlacenameHasRole.function)
         print('PHR', phr)
         functions = [p[0] for p in phr] if phr else []

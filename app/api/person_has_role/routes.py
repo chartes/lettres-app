@@ -18,7 +18,7 @@ def register_person_has_role_api_urls(app):
     @current_app.route('/api/<api_version>/persons-functions')
     def get_person_functions(api_version):
         phr = PersonHasRole.query.with_entities(PersonHasRole.function).filter(
-            PersonHasRole.function != None
+            PersonHasRole.function.isnot(None)
         ).distinct().order_by(PersonHasRole.function)
         functions = [p[0] for p in phr] if phr else []
         return jsonify({'person-functions': functions})
