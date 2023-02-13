@@ -198,7 +198,7 @@ def make_cli():
     @click.option('--email', required=True)
     @click.option('--username', required=True)
     @click.option('--password', required=True)
-    @click.option('--admin', required=True, is_flag=True)
+    @click.option('--admin', is_flag=True)
     def db_add_user(email, username, password, admin):
         with app.app_context():
             from app import db
