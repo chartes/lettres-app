@@ -18,6 +18,8 @@ class Config(object):
     DEBUG = parse_var_env('DEBUG') or False
 
     SQLALCHEMY_DATABASE_URI = 'sqlite:////' + os.path.join(os.path.abspath(os.getcwd()), parse_var_env('DATABASE_URI'))
+    # for Windows (only 3 slash) :
+    # SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(os.path.abspath(os.getcwd()), parse_var_env('DATABASE_URI'))
     SQLALCHEMY_TRACK_MODIFICATIONS = parse_var_env('SQLALCHEMY_TRACK_MODIFICATIONS') or False
     SQLALCHEMY_ECHO = parse_var_env('SQLALCHEMY_ECHO') or False
     SQLALCHEMY_RECORD_QUERIES = parse_var_env('SQLALCHEMY_RECORD_QUERIES') or False
