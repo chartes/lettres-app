@@ -2,6 +2,7 @@ import pprint
 import time
 
 import json
+import ast
 import urllib
 import sys
 
@@ -10,7 +11,7 @@ from collections import OrderedDict
 
 from flask import request, current_app
 
-from sqlalchemy import func, desc, asc, column, text
+from sqlalchemy import func, desc, asc, column, text, or_
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.sql.operators import ColumnOperators
 
@@ -127,10 +128,13 @@ class JSONAPIRouteRegistrar(object):
     def parse_filter_parameter(objs_query, model):
         # if request has filter parameter
         filter_criteriae = []
+        filter_ids_criteriae = []
         properties_fieldnames = []
         filters = [(f, f[len('filter['):-1])  # (filter_param, filter_fieldname)
                    for f in request.args.keys() if f.startswith('filter[') and f.endswith(']')]
+        print('filters : ', filters)
         if len(filters) > 0:
+            print('filters : ', filters)
             for filter_param, filter_fieldname in filters:
                 filter_fieldname = filter_fieldname.replace("-", "_").replace('#', '')
 
@@ -144,41 +148,82 @@ class JSONAPIRouteRegistrar(object):
                 if isinstance(getattr(model, filter_fieldname), property):
                     properties_fieldnames.append((filter_param, filter_fieldname, not_null_operator))
                     continue
-
-                for criteria in request.args[filter_param].split(','):
-                    criteria_upper = criteria.upper()
-                    if criteria_upper == 'TRUE' or criteria_upper == 'FALSE':
-                        new_criteria = "{table}.{field} is {criteria}".format(
-                            table=model.__tablename__,
-                            field=filter_fieldname,
-                            criteria=True if criteria_upper == 'TRUE' else False
-                        )
-                        # print(str(new_criteria))
-                    elif not not_null_operator:
-                        if criteria:
-                            # filter[field]=value
-                            new_criteria = "{table}.{field}{operator}'{criteria}'".format(
+                print('filter_fieldname : ', filter_fieldname)
+                if filter_fieldname == 'user_id':
+                    print('criteriae is list :', ast.literal_eval(request.args[filter_param]))
+                    for criteria in ast.literal_eval(request.args[filter_param]):
+                        criteria_upper = str(criteria).upper()
+                        if criteria_upper == 'TRUE' or criteria_upper == 'FALSE':
+                            new_criteria = "{table}.{field} is {criteria}".format(
                                 table=model.__tablename__,
                                 field=filter_fieldname,
-                                operator="==",
-                                criteria=criteria
+                                criteria=True if criteria_upper == 'TRUE' else False
                             )
+                            # print(str(new_criteria))
+                        elif not not_null_operator:
+                            if criteria:
+                                # filter[field]=value
+                                new_criteria = "{table}.{field}{operator}'{criteria}'".format(
+                                    table=model.__tablename__,
+                                    field=filter_fieldname,
+                                    operator="==",
+                                    criteria="{}".format(criteria)
+                                )
+                            else:
+                                # filter[field] means IS NULL
+                                col = "{table}.{field}".format(table=model.__tablename__, field=filter_fieldname)
+                                new_criteria = column(col, is_literal=True).is_(None)
                         else:
-                            # filter[field] means IS NULL
+                            # filter[!field]  means IS NOT NULL
                             col = "{table}.{field}".format(table=model.__tablename__, field=filter_fieldname)
-                            new_criteria = column(col, is_literal=True).is_(None)
-                    else:
-                        # filter[!field]  means IS NOT NULL
-                        col = "{table}.{field}".format(table=model.__tablename__, field=filter_fieldname)
-                        new_criteria = column(col, is_literal=True).isnot(None)
+                            new_criteria = column(col, is_literal=True).isnot(None)
 
-                    print(str(new_criteria))
-                    filter_criteriae.append(text(str(new_criteria)))
+                        print(str(new_criteria))
+                        filter_ids_criteriae.append(text(str(new_criteria)))
+                        print('filter_ids_criteriae : ', str(filter_ids_criteriae))
 
-            objs_query = objs_query.filter(*filter_criteriae)
+                    objs_query = objs_query.filter(or_(*filter_ids_criteriae))
+                else:
+                    for criteria in request.args[filter_param].split(','):
+                        criteria_upper = criteria.upper()
+                        if criteria_upper == 'TRUE' or criteria_upper == 'FALSE':
+                            new_criteria = "{table}.{field} is {criteria}".format(
+                                table=model.__tablename__,
+                                field=filter_fieldname,
+                                criteria=True if criteria_upper == 'TRUE' else False
+                            )
+                            # print(str(new_criteria))
+                        elif not not_null_operator:
+                            if criteria:
+                                # filter[field]=value
+                                new_criteria = "{table}.{field}{operator}'{criteria}'".format(
+                                    table=model.__tablename__,
+                                    field=filter_fieldname,
+                                    operator=" LIKE ",
+                                    criteria="%{}%".format(criteria)
+                                )
+                            else:
+                                # filter[field] means IS NULL
+                                col = "{table}.{field}".format(table=model.__tablename__, field=filter_fieldname)
+                                new_criteria = column(col, is_literal=True).is_(None)
+                        else:
+                            # filter[!field]  means IS NOT NULL
+                            col = "{table}.{field}".format(table=model.__tablename__, field=filter_fieldname)
+                            new_criteria = column(col, is_literal=True).isnot(None)
+
+                        print(str(new_criteria))
+                        filter_criteriae.append(text(str(new_criteria)))
+                        print('filter_criteriae : ', str(filter_criteriae))
+
+                    objs_query = objs_query.filter(*filter_criteriae)
+
+
+            #objs_query = objs_query.filter(*filter_criteriae)
 
             # Filter the 'property fields' after the 'true' model fields
             filtered_prop_ids = []
+            print('len(properties_fieldnames) : ', len(properties_fieldnames))
+
             if len(properties_fieldnames) > 0:
                 for obj in objs_query.all():
                     for p, p_field, not_null_operator in properties_fieldnames:
@@ -186,7 +231,7 @@ class JSONAPIRouteRegistrar(object):
                             criteriae = []
                         else:
                             criteriae = request.args[p].split(',')
-                        # print("prop criteriae:", criteriae)
+                        print("prop criteriae:", criteriae)
                         if not not_null_operator:
                             if len(criteriae) == 0:
                                 if getattr(obj, p_field,
@@ -200,7 +245,7 @@ class JSONAPIRouteRegistrar(object):
                                            True):  # filter[!myprop] means myprop is False (in pythonic terms)
                                 filtered_prop_ids.append(obj.id)
 
-                # print("filtered prop id:", filtered_prop_ids)
+                print("filtered prop id:", filtered_prop_ids)
                 objs_query = objs_query.filter(ColumnOperators.in_(model.id, filtered_prop_ids))
 
         return objs_query
@@ -210,17 +255,22 @@ class JSONAPIRouteRegistrar(object):
         # if request has sorting parameter
         if "sort" in request.args:
             sort_criteriae = []
+            order_criteriae = []
             sort_order = asc
+            print('request.args["sort"] : ', request.args["sort"])
             for criteria in request.args["sort"].split(','):
                 if criteria.startswith('-'):
                     sort_order = desc
                     criteria = criteria[1:]
-                sort_criteriae.append(getattr(model, criteria.replace("-", "_")))
-            print("sort criteriae: ", request.args["sort"], sort_criteriae)
+                sort_criteriae.append(sort_order(getattr(model, criteria.replace("-", "_"))))
+                order_criteriae.append(sort_order)
+                print('criteria.replace("-", "_") : ', criteria.replace("-", "_"))
+            print("sort criteriae: ", sort_criteriae)
+            print("order_criteriae: ", order_criteriae)
             # reset the order clause
             objs_query = objs_query.order_by(False)
             # then apply the user order criteriae
-            objs_query = objs_query.order_by(sort_order(*sort_criteriae))
+            objs_query = objs_query.order_by(*sort_criteriae)
         return objs_query
 
     @staticmethod
