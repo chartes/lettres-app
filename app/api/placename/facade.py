@@ -65,6 +65,7 @@ class PlacenameFacade(JSONAPIAbstractChangeloggedFacade):
     def resource(self):
         resource = {
             **self.resource_identifier,
+            # TODO add label to ressource ? "label": self.obj.label,
             "attributes": {
                 "label": self.obj.label,
                 "long": self.obj.long,
