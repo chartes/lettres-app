@@ -367,7 +367,7 @@ class JSONAPIRouteRegistrar(object):
             query = request.args["query"]
             ranges = JSONAPIRouteRegistrar.parse_range_parameter()
             groupby = request.args["groupby[field]"] if "groupby[field]" in request.args else None
-            print('groupby', groupby)
+            #print('groupby', groupby)
             # if request has pagination parameters
             # add links to the top-level object
             if groupby:
@@ -411,7 +411,7 @@ class JSONAPIRouteRegistrar(object):
                     page_after=request.args["page[after]"] if "page[after]" in request.args else None,
                     page_size=page_size
                 )
-                print('sorted_ids_list, res, meta', sorted_ids_list, res, meta)
+                #print('sorted_ids_list, res, meta', sorted_ids_list, res, meta)
             except Exception as e:
                 # raise e
                 return JSONAPIResponseFactory.make_errors_response({
@@ -431,7 +431,7 @@ class JSONAPIRouteRegistrar(object):
                     # post process filtering
                     try:
                         res[idx] = JSONAPIRouteRegistrar.parse_filter_parameter(res[idx], self.models[idx])
-                        print('idx, res, res[idx]', idx, res, res[idx])
+                        #print('idx, res, res[idx]', idx, res, res[idx])
                     except Exception as e:
                         print(e)
                         return JSONAPIResponseFactory.make_errors_response(
@@ -467,12 +467,12 @@ class JSONAPIRouteRegistrar(object):
                 #                res[criteria_table_name] = res[criteria_table_name].order_by(sort_order(c))
 
                 try:
-                    print('res.keys()', res.keys())
+                    #print('res.keys()', res.keys())
                     for idx in res.keys():
                         res[idx] = res[idx].all()
-                        print('idx, res[idx]', idx, res[idx])
+                        #print('idx, res[idx]', idx, res[idx])
                 except Exception as e:
-                    print('tada', e)
+                    #print('route_registrar res[idx] error', e)
                     return JSONAPIResponseFactory.make_errors_response(
                         {"status": 400, "title": "Cannot fetch data", "detail": str(e)}, status=400
                     )
@@ -481,7 +481,7 @@ class JSONAPIRouteRegistrar(object):
                 nb_pages = max(1, int(ceil(meta["total"] / page_size)))
 
                 keep_pagination = "page[size]" in args or "page[number]" in args or meta["total"] > page_size
-                print('keep_pagination', keep_pagination)
+                #print('keep_pagination', keep_pagination)
                 if keep_pagination:
                     args["page[size]"] = page_size
 
@@ -521,7 +521,7 @@ class JSONAPIRouteRegistrar(object):
                         f_obj = facade_class(url_prefix, obj, with_relationships_links=w_rel_links,
                                              with_relationships_data=w_rel_data)
                         facade_objs.append(f_obj)
-                print('facade_objs', facade_objs)
+                #print('facade_objs', facade_objs)
                 # reapply the initial sorts to the spread resources (because the order may have been split
                 # across different facades)
                 if groupby is None:
@@ -537,12 +537,12 @@ class JSONAPIRouteRegistrar(object):
                             raise e
 
                     sorted_facade_objs = [f for f in sorted_facade_objs if f is not None]
-                    print('sorted_facade_objs not groupby', sorted_facade_objs)
+                    #print('sorted_facade_objs not groupby', sorted_facade_objs)
                 else:
                     # TODO gerer le groupby quand pas sur le doctype ? à revérifier
                     # l'agg côté ES gère déjà le tri multicritères
                     sorted_facade_objs = facade_objs
-                    print('sorted_facade_objs groupby', sorted_facade_objs)
+                    #print('sorted_facade_objs groupby', sorted_facade_objs)
                 # find out if related resources must be included too
                 included_resources = None
                 if "include" in request.args:
