@@ -247,7 +247,7 @@ class JSONAPIRouteRegistrar(object):
 
                 print("filtered prop id:", filtered_prop_ids)
                 objs_query = objs_query.filter(ColumnOperators.in_(model.id, filtered_prop_ids))
-
+        print('objs_query', objs_query)
         return objs_query
 
     @staticmethod
@@ -330,6 +330,7 @@ class JSONAPIRouteRegistrar(object):
 
                 res_dict[res_type].append(mapper(bucket["key"]["item"]))
             print("ids fetched !")
+            print('res_dict', res_dict)
 
         # build the query to get objects from their ids
         for res_type, res_ids in res_dict.items():
@@ -338,10 +339,12 @@ class JSONAPIRouteRegistrar(object):
                 when.append((id, i))
 
             m = self.models[res_type]
+            print('model', m)
             res_dict[res_type] = db.session.query(m).filter(m.id.in_(res_ids))
             if len(when) > 0:
                 res_dict[res_type] = res_dict[res_type].order_by(db.case(when, value=m.id))
 
+        print("res_dict: ", res_dict)
         print({"total": total, "after": after_key})
         return [r.id for r in results], res_dict, {"total": total, "after": after_key}
 
@@ -364,18 +367,25 @@ class JSONAPIRouteRegistrar(object):
             query = request.args["query"]
             ranges = JSONAPIRouteRegistrar.parse_range_parameter()
             groupby = request.args["groupby[field]"] if "groupby[field]" in request.args else None
-
+            print('groupby', groupby)
             # if request has pagination parameters
             # add links to the top-level object
-            if 'page[number]' in request.args or 'page[size]' in request.args:
-                num_page = int(request.args.get('page[number]', 1))
-                page_size = min(
-                    int(current_app.config["SEARCH_RESULT_PER_PAGE"]) + num_page,
-                    int(request.args.get('page[size]'))
-                )
-            else:
+            if groupby:
                 num_page = 1
-                page_size = int(current_app.config["SEARCH_RESULT_PER_PAGE"])
+                page_size = 6616
+            else:
+                if 'page[number]' in request.args or 'page[size]' in request.args:
+                    num_page = int(request.args.get('page[number]', 1))
+                    if 'page[size]' in request.args:
+                        page_size = min(
+                            int(current_app.config["SEARCH_RESULT_PER_PAGE"]) + num_page,#check with Vincent
+                            int(request.args.get('page[size]'))
+                        )
+                    else:
+                        page_size = int(current_app.config["SEARCH_RESULT_PER_PAGE"])
+                else:
+                    num_page = 1
+                    page_size = int(current_app.config["SEARCH_RESULT_PER_PAGE"])
 
             # Search, retrieve, filter, sort and paginate objs
             sort_criteriae = None
@@ -401,6 +411,7 @@ class JSONAPIRouteRegistrar(object):
                     page_after=request.args["page[after]"] if "page[after]" in request.args else None,
                     page_size=page_size
                 )
+                print('sorted_ids_list, res, meta', sorted_ids_list, res, meta)
             except Exception as e:
                 # raise e
                 return JSONAPIResponseFactory.make_errors_response({
@@ -420,6 +431,7 @@ class JSONAPIRouteRegistrar(object):
                     # post process filtering
                     try:
                         res[idx] = JSONAPIRouteRegistrar.parse_filter_parameter(res[idx], self.models[idx])
+                        print('idx, res, res[idx]', idx, res, res[idx])
                     except Exception as e:
                         print(e)
                         return JSONAPIResponseFactory.make_errors_response(
@@ -455,10 +467,12 @@ class JSONAPIRouteRegistrar(object):
                 #                res[criteria_table_name] = res[criteria_table_name].order_by(sort_order(c))
 
                 try:
+                    print('res.keys()', res.keys())
                     for idx in res.keys():
                         res[idx] = res[idx].all()
+                        print('idx, res[idx]', idx, res[idx])
                 except Exception as e:
-                    print(e)
+                    print('tada', e)
                     return JSONAPIResponseFactory.make_errors_response(
                         {"status": 400, "title": "Cannot fetch data", "detail": str(e)}, status=400
                     )
@@ -467,13 +481,15 @@ class JSONAPIRouteRegistrar(object):
                 nb_pages = max(1, int(ceil(meta["total"] / page_size)))
 
                 keep_pagination = "page[size]" in args or "page[number]" in args or meta["total"] > page_size
+                print('keep_pagination', keep_pagination)
                 if keep_pagination:
                     args["page[size]"] = page_size
 
                 if keep_pagination:
                     if groupby is not None:
                         if "after" in meta and meta["after"] is not None:
-                            args["page[after]"] = ",".join(list(meta["after"].values()))
+                            # 24/04/2023 : adding str() to allow grouping on numeric ids
+                            args["page[after]"] = ",".join(list(str(meta["after"].values())))
                             links["next"] = JSONAPIRouteRegistrar.make_url(request.base_url, args)
                             if links["next"] == links["self"]:
                                 links.pop("next")
@@ -505,7 +521,7 @@ class JSONAPIRouteRegistrar(object):
                         f_obj = facade_class(url_prefix, obj, with_relationships_links=w_rel_links,
                                              with_relationships_data=w_rel_data)
                         facade_objs.append(f_obj)
-
+                print('facade_objs', facade_objs)
                 # reapply the initial sorts to the spread resources (because the order may have been split
                 # across different facades)
                 if groupby is None:
@@ -521,11 +537,12 @@ class JSONAPIRouteRegistrar(object):
                             raise e
 
                     sorted_facade_objs = [f for f in sorted_facade_objs if f is not None]
+                    print('sorted_facade_objs not groupby', sorted_facade_objs)
                 else:
                     # TODO gerer le groupby quand pas sur le doctype ? à revérifier
                     # l'agg côté ES gère déjà le tri multicritères
                     sorted_facade_objs = facade_objs
-
+                    print('sorted_facade_objs groupby', sorted_facade_objs)
                 # find out if related resources must be included too
                 included_resources = None
                 if "include" in request.args:

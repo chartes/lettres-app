@@ -37,6 +37,76 @@
               "ignore_above": 32766
             }
           }
+        },
+        "senders": {
+          "properties": {
+            "label": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "text",
+                  "analyzer": "keyword",
+                  "fielddata": "true"
+                }
+              }
+            }
+          }
+        },
+        "recipients": {
+          "properties": {
+            "label": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "text",
+                  "analyzer": "keyword",
+                  "fielddata": "true"
+                }
+              }
+            }
+          }
+        },
+        "persons": {
+          "properties": {
+            "label": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "text",
+                  "analyzer": "keyword",
+                  "fielddata": "true"
+                }
+              }
+            }
+          }
+        },
+        "location-date-from": {
+          "properties": {
+            "label": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "text",
+                  "analyzer": "keyword",
+                  "fielddata": "true"
+                }
+              }
+            }
+          }
+        },
+        "location-date-to": {
+          "properties": {
+            "label": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "text",
+                  "analyzer": "keyword",
+                  "fielddata": "true"
+                }
+              }
+            }
+          }
         }
       }
     }
