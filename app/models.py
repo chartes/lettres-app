@@ -73,7 +73,7 @@ class Document(db.Model, ChangesMixin):
                                 backref=db.backref('documents', ))
     collections = db.relationship("Collection",
                                 secondary=association_document_has_collection,
-                                backref=db.backref('documents', ))
+                                backref=db.backref('documents', lazy='dynamic'), lazy='dynamic')
     next_document = db.relationship("Document", backref=db.backref('prev_document', remote_side=id), uselist=False)
 
     locks = db.relationship("Lock",
@@ -112,8 +112,30 @@ class Collection(db.Model, ChangesMixin):
         docs = []
         for c in self.children:
             docs += c.documents_including_children
-        docs += self.documents
-        return docs
+        docs += self.documents.distinct()
+        unique_docs = []
+        seen = set()
+        for doc_obj in docs:
+            if doc_obj.id not in seen:
+                unique_docs.append(doc_obj)
+                seen.add(doc_obj.id)
+        return unique_docs
+
+    @property
+    def published_including_children(self):
+        pub_docs = []
+        for c in self.children:
+            pub_docs += c.published_including_children
+        pub_docs += self.documents.filter_by(is_published=True).distinct()
+        unique_pub_docs = []
+        seen = set()
+        for doc_obj in pub_docs:
+            if doc_obj.id not in seen:
+                unique_pub_docs.append(doc_obj)
+                seen.add(doc_obj.id)
+        #print("pub_docs", pub_docs)
+        #print("unique_pub_docs", unique_pub_docs)
+        return unique_pub_docs
 
     @property
     def children_including_children(self):

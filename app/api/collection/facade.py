@@ -74,6 +74,13 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
         if not self.obj.documents_including_children:
             date_min = None
             date_max = date_min
+        elif self.obj.published_including_children:
+            creation = [
+                doc.creation for doc in self.obj.published_including_children
+                if doc.creation
+            ]
+            date_min = min(creation)
+            date_max = max(creation)
         else:
             creation = [
                 doc.creation for doc in self.obj.documents_including_children
@@ -89,6 +96,7 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
                 "path": [c.title for c in self.obj.parents] + [self.obj.title],
                 "description": self.obj.description,
                 "nb_docs": len(self.obj.documents_including_children),
+                "nb_pub_docs": len(self.obj.published_including_children),
                 "date_min": date_min,
                 "date_max": date_max
             },
@@ -121,6 +129,14 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
                 "resource_identifier_getter": self.get_related_resource_identifiers(DocumentFacade, "documents_including_children",
                                                                                     to_many=True),
                 "resource_getter": self.get_related_resources(DocumentFacade, "documents_including_children", to_many=True),
+            },
+            "published-including-children": {
+                "links": self._get_links(rel_name="published-including-children"),
+                "resource_identifier_getter": self.get_related_resource_identifiers(DocumentFacade,
+                                                                                    "published_including_children",
+                                                                                    to_many=True),
+                "resource_getter": self.get_related_resources(DocumentFacade, "published_including_children",
+                                                              to_many=True),
             },
             "admin": {
                 "links": self._get_links(rel_name="admin"),
