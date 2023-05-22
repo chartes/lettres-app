@@ -155,7 +155,7 @@ class JSONAPIAbstractFacade(object):
         :param related_resources:
         :return: Updated object formatted as required
         """
-        print("UPDATING RESOURCE:", obj, obj_type, attributes, related_resources)
+        print("patch_resource UPDATING RESOURCE:", obj, obj_type, attributes, related_resources)
         # update attributes
         for att, att_value in attributes.items():
             att_name = att.replace("-", "_")
@@ -166,21 +166,32 @@ class JSONAPIAbstractFacade(object):
                 raise AttributeError("Attribute %s does not exist" % att_name)
 
         # update related resources
+        print('related_resources.items()', related_resources.items())
         for rel_name, rel_data in related_resources.items():
             rel_name = rel_name.replace("-", "_")
             # print("  setting rel", rel_name, rel_data)
             if hasattr(obj, rel_name):
                 # print(getattr(obj, rel_name))
                 # append (POST) or replace (PATCH) replace related resources ?
+                print('append : ', append)
                 if not append:
                     try:
+                        print('obj, rel_name, rel_data', obj, rel_name, rel_data)
                         setattr(obj, rel_name, rel_data)
                     except Exception:
                         setattr(obj, rel_name, rel_data[0])
                 else:
                     try:
+                        print('getattr(obj, rel_name) : ', getattr(obj, rel_name), 'type getattr(obj, rel_name) : ',
+                              type(getattr(obj, rel_name)))
+                        print('rel_data : ', rel_data, 'type grel_data : ', type(rel_data))
+                        # failing on blank database, use instead : setattr(obj, rel_name, getattr(obj, rel_name, []).all() + rel_data)
                         setattr(obj, rel_name, getattr(obj, rel_name, []) + rel_data)
                     except Exception:
+                        print('getattr(obj, rel_name, []) : ', getattr(obj, rel_name, []),
+                              'type getattr(obj, rel_name, []) : ', type(getattr(obj, rel_name, [])))
+                        print('rel_data[0] : ', rel_data[0], 'type rel_data[0] : ', type(rel_data[0]))
+                        # failing on blank database, use instead : setattr(obj, rel_name, getattr(obj, rel_name, []).all() + rel_data[0])
                         setattr(obj, rel_name, getattr(obj, rel_name, []) + rel_data[0])
             else:
                 raise AttributeError("Relationship %s does not exist" % rel_name)
@@ -193,7 +204,9 @@ class JSONAPIAbstractFacade(object):
         try:
             if obj is None:
                 raise Exception("Object is None")
+            print('patch_resource init')
             resource = JSONAPIAbstractFacade.patch_resource(obj, obj_type, attributes, related_resources, append)
+            print('JSONAPIAbstractFacade.patch_resource failed')
             db.session.add(resource)
             db.session.commit()
         except Exception as e:
