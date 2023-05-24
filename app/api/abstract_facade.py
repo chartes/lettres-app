@@ -185,8 +185,8 @@ class JSONAPIAbstractFacade(object):
                         print('getattr(obj, rel_name) : ', getattr(obj, rel_name), 'type getattr(obj, rel_name) : ',
                               type(getattr(obj, rel_name)))
                         print('rel_data : ', rel_data, 'type grel_data : ', type(rel_data))
-                        # failing on blank database, use instead : setattr(obj, rel_name, getattr(obj, rel_name, []).all() + rel_data)
-                        setattr(obj, rel_name, getattr(obj, rel_name, []) + rel_data)
+                        setattr(obj, rel_name, getattr(obj, rel_name, []).all() + rel_data) # failing on blank database & add collection to document, use instead :
+                        # setattr(obj, rel_name, getattr(obj, rel_name, []) + rel_data)
                     except Exception:
                         print('getattr(obj, rel_name, []) : ', getattr(obj, rel_name, []),
                               'type getattr(obj, rel_name, []) : ', type(getattr(obj, rel_name, [])))
