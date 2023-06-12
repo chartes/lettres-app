@@ -363,6 +363,14 @@ class DocumentSearchFacade(DocumentFacade):
                 "creation": self.obj.creation,
                 "creation-not-after": self.obj.creation_not_after,
                 "creation-label": self.obj.creation_label,
+                """TODO: send directly senders etc in response ? "senders": [
+                    {
+                        "id": c_h_r.person.id,
+                        "label": c_h_r.person.label,
+                        "ref": c_h_r.person.ref
+                    }
+                    for c_h_r in self.obj.persons_having_roles if c_h_r.person_role.label == 'sender'
+                ],"""
                 #"transcription": self.obj.transcription,
                 #"address": self.obj.address,
                 "is-published": False if self.obj.is_published is None else self.obj.is_published,

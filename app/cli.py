@@ -3,6 +3,7 @@ from datetime import datetime
 
 import click
 import json
+import re
 import pprint
 import requests
 from elasticsearch import AuthorizationException
@@ -20,6 +21,9 @@ from app.models import UserRole, User, Document, Collection, Language, Witness, 
 
 app = None
 
+clean_tags = re.compile('<.*?>')
+def remove_html_tags(text):
+    return re.sub(clean_tags, ' ', text)
 
 def add_default_users(db):
     UserRole.add_default_roles()
@@ -176,7 +180,19 @@ def make_cli():
                     for obj in info["model"].query.all():
                         f_obj = info["facade"](prefix, obj)
                         try:
-                            f_obj.reindex("insert", propagate=False)
+                            if index_name == "lettres__development__documents":
+                                if f_obj.obj.title is not None and len(f_obj.obj.title) >0:
+                                    f_obj.obj.title = remove_html_tags(f_obj.obj.title)
+                                    print('f_obj.id / f_obj.obj.title : ', f_obj.id, f_obj.obj.title)
+                                if f_obj.obj.argument is not None and len(f_obj.obj.argument) >0:
+                                    f_obj.obj.argument = remove_html_tags(f_obj.obj.argument)
+                                    #print('f_obj.id / f_obj.obj.argument : ', f_obj.id, f_obj.obj.argument)
+                                if f_obj.obj.transcription is not None and len(f_obj.obj.transcription) >0:
+                                    f_obj.obj.transcription = remove_html_tags(f_obj.obj.transcription)
+                                    print('f_obj.id / f_obj.obj.transcription : ', f_obj.id, f_obj.obj.transcription)
+                                f_obj.reindex("insert", propagate=False)
+                            else:
+                                f_obj.reindex("insert", propagate=False)
                         except AuthorizationException:
                             reset_readonly()
                             f_obj.reindex("insert", propagate=False)

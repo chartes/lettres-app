@@ -97,6 +97,8 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
                 "description": self.obj.description,
                 "nb_docs": len(self.obj.documents_including_children),
                 "nb_pub_docs": len(self.obj.published_including_children),
+                #"parents": [c.id for c in self.obj.parents],
+                #"childrens": [c.id for c in self.obj.children_including_children],
                 "date_min": date_min,
                 "date_max": date_max
             },

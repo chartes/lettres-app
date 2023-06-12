@@ -13,30 +13,18 @@
         },
         "title": {
           "type": "text",
-          "fields": {
-            "keyword": {
-              "type": "keyword",
-              "ignore_above": 32766
-            }
-          }
+          "analyzer": "folding",
+          "term_vector": "with_positions_offsets"
         },
         "argument": {
           "type": "text",
-          "fields": {
-            "keyword": {
-              "type": "keyword",
-              "ignore_above": 32766
-            }
-          }
+          "analyzer": "folding",
+          "term_vector": "with_positions_offsets"
         },
         "transcription": {
           "type": "text",
-          "fields": {
-            "keyword": {
-              "type": "keyword",
-              "ignore_above": 32766
-            }
-          }
+          "analyzer": "folding",
+          "term_vector": "with_positions_offsets"
         },
         "senders": {
           "properties": {

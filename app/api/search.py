@@ -6,9 +6,14 @@ from flask import current_app
 class SearchIndexManager(object):
 
     @staticmethod
-    def query_index(index, query, ranges=(), groupby=None, sort_criteriae=None, page=None, per_page=None, after=None):
+    def query_index(index, query, ranges=(), groupby=None, sort_criteriae=None, highlight=False, page=None, per_page=None, after=None):
         if sort_criteriae is None:
             sort_criteriae = []
+
+        if groupby:
+            highlight = False
+        #highlight = type(highlight) == str
+        print('query_index highlight row 16', highlight)
         if hasattr(current_app, 'elasticsearch'):
             body = {
                 "query": {
@@ -36,6 +41,20 @@ class SearchIndexManager(object):
                 for range in ranges:
                     body["query"]["bool"]["must"].append({"range": range})
 
+            if highlight:
+                print('for query : ',query, groupby,', highlight : ', highlight)
+                body["highlight"] = {
+                    "type": "fvh",
+                    "fields": {
+                        "argument": {},
+                        "title": {},
+                        "transcription": {}
+                    },
+                    "number_of_fragments": 100,
+                    "options": {"return_offsets": False}
+                }
+                print('\nbody["highlight"] : ', body["highlight"],'\n')
+
             if groupby is not None:
                 body["aggregations"] = {
                     "items": {
@@ -56,7 +75,12 @@ class SearchIndexManager(object):
                         "cardinality": {
                             "field": "id"
                         }
-                    }
+                    },
+                    "bucket_count": {
+                        "cardinality": {
+                            "field": groupby
+                        },
+                    },
                 }
                 body["size"] = 0
 
@@ -100,11 +124,24 @@ class SearchIndexManager(object):
                 # scan = Elasticsearch.helpers.scan(client=current_app.elasticsearch, index=index, doc_type="_doc", body=body)
 
                 from collections import namedtuple
-                Result = namedtuple("Result", "index id type score")
+                results = []
+                if highlight:
+                    Result = namedtuple("Result", "index id type score highlight")
+                    #print("search['hits']['total'] : ", search['hits']['total'])
+                    if search['hits']['total'] > 0:
+                        for hit in search['hits']['hits']:
+                            results = [Result(str(hit['_index']), str(hit['_id']), str(hit['_source']["type"]),
+                                              str(hit['_score']), hit.get('highlight'))
+                                       for hit in search['hits']['hits']]
 
-                results = [Result(str(hit['_index']), str(hit['_id']), str(hit['_source']["type"]),
-                                  str(hit['_score']))
-                           for hit in search['hits']['hits']]
+                    print('results : ',results)
+                else:
+                    print('tada')
+                    Result = namedtuple("Result", "index id type score")
+
+                    results = [Result(str(hit['_index']), str(hit['_id']), str(hit['_source']["type"]),
+                                      str(hit['_score']))
+                               for hit in search['hits']['hits']]
 
                 buckets = []
                 after_key = None
@@ -121,10 +158,12 @@ class SearchIndexManager(object):
                     #print("aggregations: {0} buckets; after_key: {1}".format(len(buckets), after_key))
                     # pprint.pprint(buckets)
                     count = search["aggregations"]["type_count"]["value"]
-
-                return results, buckets, after_key, count
+                    return results, buckets, after_key, count
+                else:
+                    return results, buckets, after_key, count
 
             except Exception as e:
+                print('query_index error')
                 raise e
 
     @staticmethod

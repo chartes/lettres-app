@@ -287,7 +287,7 @@ class JSONAPIRouteRegistrar(object):
         print("ranges params:", ranges)
         return ranges
 
-    def search(self, index, query, ranges, groupby, sort_criteriae, page_id, page_size, page_after):
+    def search(self, index, query, ranges, groupby, sort_criteriae, highlight, page_id, page_size, page_after):
         # query the search engine
         results, buckets, after_key, total = SearchIndexManager.query_index(
             index=index,
@@ -295,12 +295,17 @@ class JSONAPIRouteRegistrar(object):
             ranges=ranges,
             groupby=groupby,
             sort_criteriae=sort_criteriae,
+            highlight=highlight,
             page=page_id,
             after=page_after,
             per_page=page_size
         )
+        #print('def search total from query_index :', total)
         if total == 0:
-            return [], {}, {"total": 0}
+            if highlight:
+                return [], [], {}, {"total": 0}
+            else:
+                return [], {}, {"total": 0}
 
         res_dict = {}
         if groupby is None:
@@ -346,8 +351,10 @@ class JSONAPIRouteRegistrar(object):
 
         print("res_dict: ", res_dict)
         print({"total": total, "after": after_key})
-        return [r.id for r in results], res_dict, {"total": total, "after": after_key}
-
+        if highlight:
+            return [r.id for r in results], [{"id": int(r.id), "highlight": r.highlight} for r in results], res_dict, {"total": total, "after": after_key}
+        else:
+            return [r.id for r in results], res_dict, {"total": total, "after": after_key}
     def register_search_route(self, decorators=()):
 
         search_rule = '/api/{api_version}/search'.format(api_version=self.api_version)
@@ -367,6 +374,8 @@ class JSONAPIRouteRegistrar(object):
             query = request.args["query"]
             ranges = JSONAPIRouteRegistrar.parse_range_parameter()
             groupby = request.args["groupby[field]"] if "groupby[field]" in request.args else None
+            highlight = request.args["highlight"] if "highlight" in request.args else False
+            print('search_endpoint highlight', request.args["highlight"] if "highlight" in request.args else False)
             #print('groupby', groupby)
             # if request has pagination parameters
             # add links to the top-level object
@@ -401,16 +410,30 @@ class JSONAPIRouteRegistrar(object):
                     sort_criteriae.append({criteria: {"order": sort_order}})
 
             try:
-                sorted_ids_list, res, meta = self.search(
-                    index=index,
-                    query=query,
-                    ranges=ranges,
-                    groupby=groupby,
-                    sort_criteriae=sort_criteriae,
-                    page_id=num_page,
-                    page_after=request.args["page[after]"] if "page[after]" in request.args else None,
-                    page_size=page_size
-                )
+                if highlight:
+                    sorted_ids_list, sorted_highlights, res, meta = self.search(
+                        index=index,
+                        query=query,
+                        ranges=ranges,
+                        groupby=groupby,
+                        sort_criteriae=sort_criteriae,
+                        highlight=highlight,
+                        page_id=num_page,
+                        page_after=request.args["page[after]"] if "page[after]" in request.args else None,
+                        page_size=page_size
+                    )
+                else:
+                    sorted_ids_list, res, meta = self.search(
+                        index=index,
+                        query=query,
+                        ranges=ranges,
+                        groupby=groupby,
+                        sort_criteriae=sort_criteriae,
+                        highlight=highlight,
+                        page_id=num_page,
+                        page_after=request.args["page[after]"] if "page[after]" in request.args else None,
+                        page_size=page_size
+                    )
                 #print('sorted_ids_list, res, meta', sorted_ids_list, res, meta)
             except Exception as e:
                 # raise e
@@ -562,6 +585,33 @@ class JSONAPIRouteRegistrar(object):
                         # included_resources.extend(included_res)
 
             resources = [f.resource for f in sorted_facade_objs]
+
+            if highlight:
+                print('\nsorted_highlights : ', sorted_highlights, '\n')
+                for resource in resources:
+                    if resource['type'] == 'document':
+                        print('\nresource["type"] & resource["id"]', resource["type"], resource["id"], '\n')
+                        for sorted_highlight in sorted_highlights:
+                            if resource["id"] == sorted_highlight["id"]:
+                                if sorted_highlight["highlight"]:
+                                    for res_attrib in sorted_highlight["highlight"]:
+                                        if res_attrib == "transcription":
+                                            print('\nsorted_highlight["highlight"][res_attrib] : ', sorted_highlight["highlight"][res_attrib])
+                                            resource["attributes"][res_attrib] = {'highlight': sorted_highlight["highlight"][res_attrib]}
+
+                                        '''else:
+                                            if res_attrib in resource["attributes"]:
+                                                print('\nres_attrib : ', res_attrib)
+                                                #print('\nresource["attributes"][res_attrib] : ', resource["attributes"][res_attrib])
+                                                #print('\ntype(resource["attributes"][res_attrib]) : ', type(resource["attributes"][res_attrib]))
+                                                #print('\nsorted_highlight["highlight"][res_attrib] : ', sorted_highlight["highlight"][res_attrib])
+                                                #print('\nsorted_highlight["highlight"][res_attrib] : ', sorted_highlight["highlight"][res_attrib])
+                                                #print('\nsorted_highlight["highlight"][res_attrib][0] : ', sorted_highlight["highlight"][res_attrib][0])
+                                                resource["attributes"][res_attrib] = {'raw':resource["attributes"][res_attrib], 'highlight':sorted_highlight["highlight"][res_attrib]}
+                                        '''
+
+
+            print('\nRESOURCE : ', resources,'\n')
             res_meta = {
                 "total-count": meta["total"],
                 "duration": float('%.4f' % (time.time() - start_time))
