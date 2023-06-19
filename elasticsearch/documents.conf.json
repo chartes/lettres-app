@@ -54,6 +54,20 @@
             }
           }
         },
+        "person-inlined": {
+          "properties": {
+            "label": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "text",
+                  "analyzer": "keyword",
+                  "fielddata": "true"
+                }
+              }
+            }
+          }
+        },
         "persons": {
           "properties": {
             "label": {
@@ -83,6 +97,20 @@
           }
         },
         "location-date-to": {
+          "properties": {
+            "label": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "text",
+                  "analyzer": "keyword",
+                  "fielddata": "true"
+                }
+              }
+            }
+          }
+        },
+        "location-inlined": {
           "properties": {
             "label": {
               "type": "text",
