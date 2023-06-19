@@ -1,10 +1,15 @@
 import requests
+import re
 from flask import current_app, request
 
 from app.api.abstract_facade import JSONAPIAbstractChangeloggedFacade
 from app.api.witness.facade import WitnessFacade
 from app.models import Document, WITNESS_STATUS_VALUES
 
+clean_tags = re.compile('<.*?>')
+
+def remove_html_tags(text):
+    return re.sub(clean_tags, ' ', text)
 
 class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
     """
@@ -263,10 +268,10 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
             "creation": self.obj.creation,
             "creation-not-after": self.obj.creation_not_after,
 
-            "title": self.obj.title,
-            "argument": self.obj.argument,
-            "transcription": self.obj.transcription,
-            "address": self.obj.address,
+            "title": remove_html_tags(self.obj.title),
+            "argument": remove_html_tags(self.obj.argument),
+            "transcription": remove_html_tags(self.obj.transcription),
+            "address": remove_html_tags(self.obj.address),
 
             "witnesses": [{"id": w.id, "content": w.content, "classification-mark": w.classification_mark} for w in self.obj.witnesses],
             "languages": [{"id": l.id, "code": l.code} for l in self.obj.languages],
