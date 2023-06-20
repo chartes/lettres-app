@@ -7,9 +7,17 @@ from app.api.witness.facade import WitnessFacade
 from app.models import Document, WITNESS_STATUS_VALUES
 
 clean_tags = re.compile('<.*?>')
+clean_notes = re.compile('\[\d+\]')
+clean_page_breaks = re.compile('\[p\.?\s?\d+\]')
 
 def remove_html_tags(text):
-    return re.sub(clean_tags, ' ', text)
+    without_unbreakable_space = text.replace('\ufeff','') if text else None
+    without_html_content = re.sub(clean_tags,'', without_unbreakable_space) if text else None
+    without_without_notes = without_html_content.replace("[note]","").strip() if without_html_content else None
+    without_numbered_notes = re.sub(clean_notes,' ', without_without_notes) if without_without_notes else None
+    without_page_breaks = re.sub(clean_page_breaks,' ', without_numbered_notes) if without_numbered_notes else None
+    cleaned = re.sub(' +', ' ', without_page_breaks) if without_page_breaks else None
+    return cleaned
 
 class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
     """
@@ -360,6 +368,14 @@ class DocumentSearchFacade(DocumentFacade):
         remove the thumbnail generation from the attributes
         :return:
         """
+        """TODO: send directly senders etc in response ? "senders": [
+                            {
+                                "id": c_h_r.person.id,
+                                "label": c_h_r.person.label,
+                                "ref": c_h_r.person.ref
+                            }
+                            for c_h_r in self.obj.persons_having_roles if c_h_r.person_role.label == 'sender'
+                        ],"""
         resource = {
             **self.resource_identifier,
             "attributes": {
@@ -368,14 +384,6 @@ class DocumentSearchFacade(DocumentFacade):
                 "creation": self.obj.creation,
                 "creation-not-after": self.obj.creation_not_after,
                 "creation-label": self.obj.creation_label,
-                """TODO: send directly senders etc in response ? "senders": [
-                    {
-                        "id": c_h_r.person.id,
-                        "label": c_h_r.person.label,
-                        "ref": c_h_r.person.ref
-                    }
-                    for c_h_r in self.obj.persons_having_roles if c_h_r.person_role.label == 'sender'
-                ],"""
                 #"transcription": self.obj.transcription,
                 #"address": self.obj.address,
                 "is-published": False if self.obj.is_published is None else self.obj.is_published,
