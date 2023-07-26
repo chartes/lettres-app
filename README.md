@@ -18,7 +18,15 @@ pip install -r requirements.txt
 
 
 ## Indexation
-Installer la version Elasticsearch conforme aux spécifications
+
+Installer la version Elasticsearch conforme aux spécifications.
+Avec docker cela donne :
+
+```bash
+docker run --name es-lettres -d -p 9200:9200  elasticsearch:6.8.22
+docker exec es-lettres bash -c "bin/elasticsearch-plugin install analysis-icu"
+docker restart es-lettres
+```
 
 Depuis le répertoire d'accueil de l'application, exécuter :
 `python3 manage.py db-reindex --host=http://yourhost`
