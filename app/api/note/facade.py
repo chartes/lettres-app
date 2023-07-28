@@ -34,6 +34,7 @@ class NoteFacade(JSONAPIAbstractChangeloggedFacade):
             **self.resource_identifier,
             "attributes": {
                 "content": self.obj.content,
+                "occurences": self.obj.occurences,
             },
             "meta": self.meta,
             "links": {

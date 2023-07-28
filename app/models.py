@@ -160,6 +160,7 @@ class Note(db.Model, ChangesMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     content = db.Column(db.String, nullable=False)
     document_id = db.Column(db.Integer, db.ForeignKey('document.id', ondelete='CASCADE'), nullable=False, index=True)
+    occurences = db.Column(db.Integer, default=1, nullable=False)
 
 
 TRADITION_VALUES = ('autographe', 'original', 'minute', 'copie', 'édition')
