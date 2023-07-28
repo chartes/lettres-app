@@ -1,3 +1,5 @@
+from flask import jsonify, current_app
+
 from app.api.decorators import api_require_roles
 from app.api.document.decorators import manage_publication_status
 from app.api.document.facade import DocumentFacade
@@ -36,3 +38,8 @@ def register_document_api_urls(app):
                 'next-document'):
         registrar.register_relationship_delete_route(DocumentFacade, rel, [api_require_roles("contributor")])
 
+    @current_app.route('/api/<api_version>/all-documents')
+    def all_documents(api_version):
+        documents = Document.query.with_entities(Document.id, Document.is_published).distinct().order_by(Document.id).all()
+        response = jsonify({"data": [{"id": d[0], "is_published": d[1]} for d in documents]})
+        return response, 200
