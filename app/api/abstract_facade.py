@@ -206,11 +206,11 @@ class JSONAPIAbstractFacade(object):
                 raise Exception("Object is None")
             print('patch_resource init')
             resource = JSONAPIAbstractFacade.patch_resource(obj, obj_type, attributes, related_resources, append)
-            print('JSONAPIAbstractFacade.patch_resource failed')
+            #print('patch_resource', resource)
             db.session.add(resource)
             db.session.commit()
         except Exception as e:
-            print(e)
+            print('JSONAPIAbstractFacade.patch_resource failed : ', e)
             errors = {
                 "status": 404 if obj is None else 400,
                 "title": "Error updating resource '%s' with data: %s" % (

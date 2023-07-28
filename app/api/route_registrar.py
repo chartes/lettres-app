@@ -1129,6 +1129,7 @@ class JSONAPIRouteRegistrar(object):
                         )
 
                 attributes = d["attributes"] if "attributes" in d else {}
+                #print("register_post_routes request data", d)
                 relationships = d["relationships"] if "relationships" in d else {}
 
                 # Test if the relationships are correctly formed and if the related resources exist
@@ -1355,7 +1356,8 @@ class JSONAPIRouteRegistrar(object):
 
                 attributes = d["attributes"] if "attributes" in d else {}
                 relationships = d["relationships"] if "relationships" in d else {}
-
+                #print("register_patch_routes request data", d)
+                #print("register_patch_routes request data attributes", d["attributes"])
                 # Test if the relationships are correctly formed and the if the related resources exist
                 related_resources = {}
                 for rel_name, rel in relationships.items():
