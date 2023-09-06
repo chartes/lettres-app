@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import sqlite3
+import os
 from lxml import etree
 from lxml.etree import tostring
 import io
@@ -54,28 +55,41 @@ def insert_letter(db, cursor, xml_file):
 
     # FAKE DATA, pour insertion test
     language_id = 1  # frm
-    collection_id = 3  # Lettres de Henri IV
+    collection_id = 96  # Lettres de Henri IV suite
     correspondant_id = 77  # Henri IV
     correspondant_role_id = 1  # expéditeur
 
-    file = '../../../lettres/xml/'+xml_file
+    files_dir = '../../../Documents/LettresDoc/Numérisations/'
+    file = files_dir+xml_file
+    files = [f for f in os.listdir(files_dir) if os.path.isfile(os.path.join(files_dir, f))]
+    print('files : ', files)
+    print('file : ', file)
     tree = etree.parse(file)
-
+    #for node in tree.iter():
+    #    print("node.tag: ", node.tag)
+    print("tree : ", tree)
+    ns = {"tei" : "http://www.tei-c.org/ns/1.0"}
+    #bibl_test = tree.getroot().findall(ns+'teiHeader')
+    #print("bibl_test :", bibl_test)
     # la référence du volume (on considère que cette réf est un temoin de type édition,
     # qu’on insérera juste avant les témoins
-    bibl = tostring(tree.xpath('/TEI/teiHeader/fileDesc/sourceDesc/bibl')[0], encoding='unicode')
+    #print("tree.xpath('TEI/teiHeader/fileDesc/sourceDesc/bibl', namespaces=ns) : ", tree.xpath('//tei:teiHeader/tei:fileDesc/tei:sourceDesc/tei:bibl', namespaces=ns))
+    bibl = tostring(tree.xpath('teiHeader/fileDesc/sourceDesc/bibl')[0], encoding='unicode')
+    print('bibl1 :', bibl)
     bibl = re.sub('<(/?)title>', '<\\1cite>', bibl)
     bibl = re.sub('<ref target="([^"]+)">', '<a href="\\1">', bibl)
     bibl = bibl.replace('</ref>', '</a>')
     bibl = bibl[6:-14]
+    print('bibl2 :', bibl)
 
-    for div in tree.xpath('/TEI/text/body/div'):
+    for div in tree.xpath('text/body/div'):
         letter = {}
 
         letter['id'] = div.get('id')
 
         letter['title'] = normalize_punctuation(tei2html(div.xpath('head')[0]))
         letter['title'] = letter['title'].rstrip('.')
+        letter['function'] = normalize_punctuation(tei2html(div.xpath('head')[1]))
 
         # première page avant le début de la lettre, si le saut de page ne précède pas le tout début de celle-ci
         # on teste si la div commence par un pb
@@ -109,6 +123,7 @@ def insert_letter(db, cursor, xml_file):
         letter['transcription'] = tei2html(letter['transcription'])
         letter['transcription'] = format_html(letter['transcription'])
 
+        print('{letter} : ', letter)
 
         # INSERTIONS
         try:
