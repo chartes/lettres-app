@@ -33,24 +33,37 @@ def add_default_users(db):
 
 def load_elastic_conf(conf_name, index_name, rebuild=False):
     url = '/'.join([app.config['ELASTICSEARCH_URL'], index_name])
+    print("url", url)
     res = None
     try:
         if rebuild:
-            res = requests.delete(url)
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36',
+                "Upgrade-Insecure-Requests": "1", "DNT": "1",
+                "Content-Type": "application/json",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                "Accept-Language": "en-US,en;q=0.5", "Accept-Encoding": "gzip, deflate"}
+            res = requests.delete(url, headers=headers)
+            #res = requests.delete(url)
+            print("res delete: ", res)
 
             with open('elasticsearch/_settings.conf.json', 'r') as _settings:
                 settings = json.load(_settings)
+                print("settings : ", settings)
 
+                print("'elasticsearch/%s.conf.json' % conf_name : ", 'elasticsearch/%s.conf.json' % conf_name)
                 with open('elasticsearch/%s.conf.json' % conf_name, 'r') as f:
                     payload = json.load(f)
+                    print("payload : ", payload)
                     payload["settings"] = settings
+                    print("payload : ", payload)
                     res = requests.put(url, json=payload)
                     assert str(res.status_code).startswith("20")
 
     except FileNotFoundError as e:
         print("no conf...", flush=True, end=" ")
     except Exception as e:
-        print(res.text, str(e), flush=True, end=" ")
+        print("res.text error : ", str(e), flush=True, end=" ")
         raise e
 
 
@@ -181,15 +194,16 @@ def make_cli():
                         f_obj = info["facade"](prefix, obj)
                         try:
                             if index_name == "lettres__development__documents":
+                                #print("Rebuilding ", index_name)
                                 if f_obj.obj.title is not None and len(f_obj.obj.title) >0:
                                     f_obj.obj.title = remove_html_tags(f_obj.obj.title)
-                                    print('f_obj.id / f_obj.obj.title : ', f_obj.id, f_obj.obj.title)
+                                    #print('f_obj.id / f_obj.obj.title : ', f_obj.id, f_obj.obj.title)
                                 if f_obj.obj.argument is not None and len(f_obj.obj.argument) >0:
                                     f_obj.obj.argument = remove_html_tags(f_obj.obj.argument)
                                     #print('f_obj.id / f_obj.obj.argument : ', f_obj.id, f_obj.obj.argument)
                                 if f_obj.obj.transcription is not None and len(f_obj.obj.transcription) >0:
                                     f_obj.obj.transcription = remove_html_tags(f_obj.obj.transcription)
-                                    print('f_obj.id / f_obj.obj.transcription : ', f_obj.id, f_obj.obj.transcription)
+                                    #print('f_obj.id / f_obj.obj.transcription : ', f_obj.id, f_obj.obj.transcription)
                                 f_obj.reindex("insert", propagate=False)
                             else:
                                 f_obj.reindex("insert", propagate=False)
