@@ -2,6 +2,9 @@
   "mappings": {
     "_doc": {
       "properties": {
+        "id": {
+          "type" : "keyword"
+        },
         "is-published": {
           "type": "boolean"
         },
@@ -21,6 +24,11 @@
           "analyzer": "folding",
           "term_vector": "with_positions_offsets"
         },
+        "address": {
+          "type": "text",
+          "analyzer": "folding",
+          "term_vector": "with_positions_offsets"
+        },
         "transcription": {
           "type": "text",
           "analyzer": "folding",
@@ -28,13 +36,15 @@
         },
         "senders": {
           "properties": {
+            "id": {
+              "type" : "keyword"
+            },
             "label": {
-              "type": "text",
-              "fields": {
-                "keyword": {
-                  "type": "text",
-                  "analyzer": "keyword",
-                  "fielddata": "true"
+              "type" : "text",
+              "fields" : {
+                "keyword" : {
+                  "type" : "keyword",
+                  "ignore_above" : 256
                 }
               }
             }
@@ -42,13 +52,15 @@
         },
         "recipients": {
           "properties": {
+            "id": {
+              "type" : "keyword"
+            },
             "label": {
-              "type": "text",
-              "fields": {
-                "keyword": {
-                  "type": "text",
-                  "analyzer": "keyword",
-                  "fielddata": "true"
+              "type" : "text",
+              "fields" : {
+                "keyword" : {
+                  "type" : "keyword",
+                  "ignore_above" : 256
                 }
               }
             }
@@ -56,27 +68,15 @@
         },
         "person-inlined": {
           "properties": {
+            "id": {
+              "type" : "keyword"
+            },
             "label": {
-              "type": "text",
-              "fields": {
-                "keyword": {
-                  "type": "text",
-                  "analyzer": "keyword",
-                  "fielddata": "true"
-                }
-              }
-            }
-          }
-        },
-        "persons": {
-          "properties": {
-            "label": {
-              "type": "text",
-              "fields": {
-                "keyword": {
-                  "type": "text",
-                  "analyzer": "keyword",
-                  "fielddata": "true"
+              "type" : "text",
+              "fields" : {
+                "keyword" : {
+                  "type" : "keyword",
+                  "ignore_above" : 256
                 }
               }
             }
@@ -84,13 +84,15 @@
         },
         "location-date-from": {
           "properties": {
+            "id": {
+              "type" : "keyword"
+            },
             "label": {
-              "type": "text",
-              "fields": {
-                "keyword": {
-                  "type": "text",
-                  "analyzer": "keyword",
-                  "fielddata": "true"
+              "type" : "text",
+              "fields" : {
+                "keyword" : {
+                  "type" : "keyword",
+                  "ignore_above" : 256
                 }
               }
             }
@@ -98,13 +100,15 @@
         },
         "location-date-to": {
           "properties": {
+            "id": {
+              "type" : "keyword"
+            },
             "label": {
-              "type": "text",
-              "fields": {
-                "keyword": {
-                  "type": "text",
-                  "analyzer": "keyword",
-                  "fielddata": "true"
+              "type" : "text",
+              "fields" : {
+                "keyword" : {
+                  "type" : "keyword",
+                  "ignore_above" : 256
                 }
               }
             }
@@ -112,13 +116,15 @@
         },
         "location-inlined": {
           "properties": {
+            "id": {
+              "type" : "keyword"
+            },
             "label": {
-              "type": "text",
-              "fields": {
-                "keyword": {
-                  "type": "text",
-                  "analyzer": "keyword",
-                  "fielddata": "true"
+              "type" : "text",
+              "fields" : {
+                "keyword" : {
+                  "type" : "keyword",
+                  "ignore_above" : 256
                 }
               }
             }

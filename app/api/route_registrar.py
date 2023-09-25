@@ -287,7 +287,7 @@ class JSONAPIRouteRegistrar(object):
         print("ranges params:", ranges)
         return ranges
 
-    def search(self, index, query, ranges, groupby, sort_criteriae, highlight, page_id, page_size, page_after, aggregated_test=False):
+    def search(self, index, query, ranges, groupby, sort_criteriae, highlight, page_id, page_size, page_after, aggregated_test=False, searchtype="fulltext"):
         # query the search engine
         if aggregated_test:
             search =  SearchIndexManager.query_index(
@@ -296,6 +296,7 @@ class JSONAPIRouteRegistrar(object):
             ranges=ranges,
             groupby=groupby,
             sort_criteriae=sort_criteriae,
+            searchtype=searchtype,
             aggregated_test=aggregated_test,
             highlight=highlight,
             page=page_id,
@@ -310,6 +311,7 @@ class JSONAPIRouteRegistrar(object):
                 ranges=ranges,
                 groupby=groupby,
                 sort_criteriae=sort_criteriae,
+                searchtype=searchtype,
                 aggregated_test=aggregated_test,
                 highlight=highlight,
                 page=page_id,
@@ -388,11 +390,13 @@ class JSONAPIRouteRegistrar(object):
             # PARAMETERS
             index = request.args.get("index", None)
             query = request.args["query"]
+            searchtype = request.args["searchtype"] if "searchtype" in request.args else False
             ranges = JSONAPIRouteRegistrar.parse_range_parameter()
             groupby = request.args["groupby[field]"] if "groupby[field]" in request.args else None
             highlight = request.args["highlight"] if "highlight" in request.args else False
             aggregated_test = request.args["aggregated_test"] if "aggregated_test" in request.args else False
             print('search_endpoint highlight', request.args["highlight"] if "highlight" in request.args else False)
+            print('search_endpoint searchtype', request.args["searchtype"] if "searchtype" in request.args else False)
             print('search_endpoint aggregated_test', request.args["aggregated_test"] if "aggregated_test" in request.args else False)
             #print('groupby', groupby)
             # if request has pagination parameters
@@ -449,6 +453,7 @@ class JSONAPIRouteRegistrar(object):
                         ranges=ranges,
                         groupby=groupby,
                         sort_criteriae=sort_criteriae,
+                        searchtype=searchtype,
                         highlight=highlight,
                         page_id=num_page,
                         page_after=request.args["page[after]"] if "page[after]" in request.args else None,
@@ -461,6 +466,7 @@ class JSONAPIRouteRegistrar(object):
                         ranges=ranges,
                         groupby=groupby,
                         sort_criteriae=sort_criteriae,
+                        searchtype=searchtype,
                         highlight=highlight,
                         page_id=num_page,
                         page_after=request.args["page[after]"] if "page[after]" in request.args else None,
@@ -657,9 +663,12 @@ class JSONAPIRouteRegistrar(object):
                                 if resource["id"] == sorted_highlight["id"]:
                                     if sorted_highlight["highlight"]:
                                         for res_attrib in sorted_highlight["highlight"]:
-                                            if res_attrib == "transcription":
+                                            if res_attrib == "transcription" or res_attrib == "address":
+                                                if not "transcription" in resource["attributes"]:
+                                                    resource["attributes"]["transcription"]={"highlight": []}
                                                 print('\nsorted_highlight["highlight"][res_attrib] : ', sorted_highlight["highlight"][res_attrib])
-                                                resource["attributes"][res_attrib] = {'highlight': sorted_highlight["highlight"][res_attrib]}
+                                                for index, item in enumerate(sorted_highlight["highlight"][res_attrib]):
+                                                    resource["attributes"]["transcription"]["highlight"].append(sorted_highlight["highlight"][res_attrib][index])
 
                                             '''else:
                                                 if res_attrib in resource["attributes"]:

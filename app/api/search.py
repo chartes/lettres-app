@@ -6,7 +6,7 @@ from flask import current_app
 class SearchIndexManager(object):
 
     @staticmethod
-    def query_index(index, query, ranges=(), groupby=None, sort_criteriae=None, aggregated_test=False, highlight=False, page=None, per_page=None, after=None):
+    def query_index(index, query, ranges=(), groupby=None, sort_criteriae=None, searchtype="fulltext", aggregated_test=False, highlight=False, page=None, per_page=None, after=None):
         if sort_criteriae is None:
             sort_criteriae = []
 
@@ -19,8 +19,9 @@ class SearchIndexManager(object):
                                 {
                                     "query_string": {
                                         "query": query,
-                                        "default_operator": "AND"
-                                    }
+                                        "default_operator": "AND",
+
+                                    },
                                 }
                             ]
                         },
@@ -28,51 +29,37 @@ class SearchIndexManager(object):
                     "aggregations": {
                         "collection": {
                             "terms": {
-                                "script": "doc['collections.id'].value + ':' + doc['collections.title.keyword'].value"
-                            }
-                        }
-                    },
-                    "aggregations": {
-                        "collection": {
-                            "terms": {
-                                "field": "collections.id",
+                                "field": "collections.title.keyword",
                             },
-                            "aggs": {
-                                "name": {
-                                    "terms": {
-                                        "field": "collections.title.keyword",
-                                    }
-                                }
-                            }
                         },
                         "sender": {
                             "terms": {
-                                "script": "doc['senders.id'].value + ':' + doc['senders.label.keyword'].value"
+                                "field": "senders.label.keyword"
                             }
                         },
                         "recipient": {
                             "terms": {
-                                "script": "doc['recipients.id'].value + ':' + doc['recipients.label.keyword'].value"
+                                "field": "recipients.label.keyword"
                             }
                         },
                         "person-inlined": {
                             "terms": {
-                                "script": "doc['person-inlined.id'].value + ':' + doc['person-inlined.label.keyword'].value"
+                                "field": "person-inlined.label.keyword"
                             }
                         },
                         "location-date-from": {
                             "terms": {
-                                "script": "doc['location-date-from.id'].value + ':' + doc['location-date-from.label.keyword'].value"
+                                "field": "location-date-from.label.keyword"
                             }
                         },
                         "location-date-to": {
                             "terms": {
-                                "script": "doc['location-date-to.id'].value + ':' + doc['location-date-to.label.keyword'].value"
+                                "field": "location-date-to.label.keyword"
                             }
                         },
                         "location-inlined": {
                             "terms": {
-                                "script": "doc['location-inlined.id'].value + ':' + doc['location-inlined.label.keyword'].value"
+                                "field": "location-inlined.label.keyword"
                             }
                         }
                     },
@@ -255,24 +242,63 @@ class SearchIndexManager(object):
         if groupby:
             highlight = False
         #highlight = type(highlight) == str
-        print('query_index highlight row 16', highlight)
-        if hasattr(current_app, 'elasticsearch'):
-            body = {
-                "query": {
+        print('query_index highlight row 245', highlight)
+
+        if not searchtype:
+            searchtype = "fulltext"
+
+        if searchtype  == "fulltext":
+            body_query = {
                     "bool": {
                         "must": [
                             {
                                 "query_string": {
                                     "query": query,
-                                    "default_operator": "AND"
+                                    "default_operator": "AND",
+                                    "fields": ["transcription", "address"]
                                 }
                             }
                         ]
                     },
+                }
+            body_highlight = {
+                    "type": "fvh",
+                    "fields": {
+                        "address": {},
+                        "transcription": {}
+                    },
+                    "number_of_fragments": 100,
+                    "options": {"return_offsets": False}
+                }
+        elif searchtype == "paratext":
+            body_query = {
+                    "bool": {
+                        "must": [
+                            {
+                                "query_string": {
+                                    "query": query,
+                                    "default_operator": "AND",
+                                    "fields": ["title", "argument"]
+                                }
+                            }
+                        ]
+                    },
+                }
+            body_highlight = {
+                "type": "fvh",
+                "fields": {
+                    "argument": {},
                 },
+                "number_of_fragments": 100,
+                "options": {"return_offsets": False}
+            }
+        if hasattr(current_app, 'elasticsearch'):
+            body = {
+                "query": body_query,
                 "aggregations": {
 
                 },
+                "highlight": body_highlight,
                 "sort": [
                     #  {"creation": {"order": "desc"}}
                     *sort_criteriae
@@ -284,7 +310,7 @@ class SearchIndexManager(object):
                 for range in ranges:
                     body["query"]["bool"]["must"].append({"range": range})
 
-            if highlight:
+            '''if highlight:
                 print('for query : ',query, groupby,', highlight : ', highlight)
                 body["highlight"] = {
                     "type": "fvh",
@@ -296,7 +322,7 @@ class SearchIndexManager(object):
                     "number_of_fragments": 100,
                     "options": {"return_offsets": False}
                 }
-                print('\nbody["highlight"] : ', body["highlight"],'\n')
+                print('\nbody["highlight"] : ', body["highlight"],'\n')'''
 
             if groupby is not None:
                 body["aggregations"] = {
@@ -360,8 +386,8 @@ class SearchIndexManager(object):
             try:
                 if index is None or len(index) == 0:
                     index = current_app.config["DEFAULT_INDEX_NAME"]
-
-                #pprint.pprint(body)
+                print("\nboby : \n")
+                pprint.pprint(body)
                 search = current_app.elasticsearch.search(index=index, doc_type="_doc", body=body)
                 # from elasticsearch import Elasticsearch
                 # scan = Elasticsearch.helpers.scan(client=current_app.elasticsearch, index=index, doc_type="_doc", body=body)
@@ -377,14 +403,14 @@ class SearchIndexManager(object):
                                               str(hit['_score']), hit.get('highlight'))
                                        for hit in search['hits']['hits']]
 
-                    print('results : ',results)
+                    #print('results : ',results)
                 else:
-                    print('tada')
                     Result = namedtuple("Result", "index id type score")
 
                     results = [Result(str(hit['_index']), str(hit['_id']), str(hit['_source']["type"]),
                                       str(hit['_score']))
                                for hit in search['hits']['hits']]
+                    print('results : ', results)
 
                 buckets = []
                 after_key = None
