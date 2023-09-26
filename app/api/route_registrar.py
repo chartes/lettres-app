@@ -287,6 +287,7 @@ class JSONAPIRouteRegistrar(object):
         print("ranges params:", ranges)
         return ranges
 
+
     # TODO Victor check if searchtype="fulltext" should be changed to "paratext" as default in backend
     def search(self, index, query, ranges, groupby, sort_criteriae, highlight, page_id, page_size, page_after, searchtype="fulltext"):
         # query the search engine
