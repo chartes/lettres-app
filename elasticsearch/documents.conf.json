@@ -34,6 +34,47 @@
           "analyzer": "folding",
           "term_vector": "with_positions_offsets"
         },
+        "persons": {
+          "properties": {
+            "id": {
+              "type" : "keyword"
+            },
+            "label": {
+              "type" : "text",
+              "fields" : {
+                "keyword" : {
+                  "type" : "keyword",
+                  "ignore_above" : 256
+                }
+              }
+            }
+          }
+        },
+        "collections": {
+          "properties": {
+            "id": {
+              "type" : "keyword"
+            },
+            "title": {
+              "type" : "text",
+              "fields" : {
+                "keyword" : {
+                  "type" : "keyword",
+                  "ignore_above" : 256
+                }
+              }
+            },
+            "parents": {
+              "type" : "text",
+              "fields" : {
+                "keyword" : {
+                  "type" : "keyword",
+                  "ignore_above" : 256
+                }
+              }
+            }
+          }
+        },
         "senders": {
           "properties": {
             "id": {
@@ -66,7 +107,7 @@
             }
           }
         },
-        "person-inlined": {
+        "persons_inlined": {
           "properties": {
             "id": {
               "type" : "keyword"
@@ -82,7 +123,7 @@
             }
           }
         },
-        "location-date-from": {
+        "location_dates_from": {
           "properties": {
             "id": {
               "type" : "keyword"
@@ -98,7 +139,7 @@
             }
           }
         },
-        "location-date-to": {
+        "location_dates_to": {
           "properties": {
             "id": {
               "type" : "keyword"
@@ -114,7 +155,7 @@
             }
           }
         },
-        "location-inlined": {
+        "locations_inlined": {
           "properties": {
             "id": {
               "type" : "keyword"

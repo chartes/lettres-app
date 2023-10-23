@@ -283,7 +283,7 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
 
             "witnesses": [{"id": w.id, "content": w.content, "classification-mark": w.classification_mark} for w in self.obj.witnesses],
             "languages": [{"id": l.id, "code": l.code} for l in self.obj.languages],
-            "collections": [{"id": c.id, "title": c.title} for c in self.obj.collections],
+            "collections": [{"id": c.id, "title": c.title, "parents": [parent.id for parent in c.parents] if c.parents else None} for c in self.obj.collections],
             "persons": [
                 {
                     "id": c_h_r.person.id,
@@ -308,7 +308,7 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
                 }
                 for c_h_r in self.obj.persons_having_roles if c_h_r.person_role.label == 'sender'
             ],
-            "person-inlined": [
+            "persons_inlined": [
                 {
                     "id": c_h_r.person.id,
                     "label": c_h_r.person.label,
@@ -324,7 +324,7 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
                 }
                 for c_h_r in self.obj.placenames_having_roles
             ],
-            "location-date-from": [
+            "location_dates_from": [
                 {
                     "id": c_h_r.placename.id,
                     "label": c_h_r.placename.label,
@@ -332,7 +332,7 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
                 }
                 for c_h_r in self.obj.placenames_having_roles if c_h_r.placename_role.label == 'location-date-from'
             ],
-            "location-date-to": [
+            "location_dates_to": [
                 {
                     "id": c_h_r.placename.id,
                     "label": c_h_r.placename.label,
@@ -340,7 +340,7 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
                 }
                 for c_h_r in self.obj.placenames_having_roles if c_h_r.placename_role.label == 'location-date-to'
             ],
-            "location-inlined": [
+            "locations_inlined": [
                 {
                     "id": c_h_r.placename.id,
                     "label": c_h_r.placename.label,
@@ -368,25 +368,49 @@ class DocumentSearchFacade(DocumentFacade):
         remove the thumbnail generation from the attributes
         :return:
         """
-        """TODO: send directly senders etc in response ? "senders": [
-                            {
-                                "id": c_h_r.person.id,
-                                "label": c_h_r.person.label,
-                                "ref": c_h_r.person.ref
-                            }
-                            for c_h_r in self.obj.persons_having_roles if c_h_r.person_role.label == 'sender'
-                        ],"""
         resource = {
             **self.resource_identifier,
             "attributes": {
                 "title": self.obj.title,
                 "argument": self.obj.argument,
                 "creation": self.obj.creation,
-                "creation-not-after": self.obj.creation_not_after,
-                "creation-label": self.obj.creation_label,
-                #"transcription": self.obj.transcription,
-                #"address": self.obj.address,
+                #"creation-not-after": self.obj.creation_not_after,
+                #"creation-label": self.obj.creation_label,
+                "transcription": self.obj.transcription,
+                "address": self.obj.address,
                 "is-published": False if self.obj.is_published is None else self.obj.is_published,
+                "senders": [
+                    {
+                        "id": c_h_r.person.id,
+                        "label": c_h_r.person.label,
+                        "ref": c_h_r.person.ref
+                    }
+                    for c_h_r in self.obj.persons_having_roles if c_h_r.person_role.label == 'sender'
+                ],
+                "recipients": [
+                    {
+                        "id": c_h_r.person.id,
+                        "label": c_h_r.person.label,
+                        "ref": c_h_r.person.ref
+                    }
+                    for c_h_r in self.obj.persons_having_roles if c_h_r.person_role.label == 'recipient'
+                ],
+                "location_dates_from": [
+                    {
+                        "id": c_h_r.placename.id,
+                        "label": c_h_r.placename.label,
+                        "ref": c_h_r.placename.ref
+                    }
+                    for c_h_r in self.obj.placenames_having_roles if c_h_r.placename_role.label == 'location-date-from'
+                ],
+                "location_dates_to": [
+                    {
+                        "id": c_h_r.placename.id,
+                        "label": c_h_r.placename.label,
+                        "ref": c_h_r.placename.ref
+                    }
+                    for c_h_r in self.obj.placenames_having_roles if c_h_r.placename_role.label == 'location-date-to'
+                ]
                 #"iiif-thumbnail-url": self.get_iiif_thumbnail()
             },
             "meta": self.meta,

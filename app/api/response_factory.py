@@ -9,13 +9,15 @@ class JSONAPIResponseFactory:
                "Access-Control-Allow-Methods": ["GET", "POST", "DELETE", "PATCH"]}
 
     @classmethod
-    def encapsulate(cls, toplevel, resource, links=None, included_resources=None, meta=None):
+    def encapsulate(cls, toplevel, resource, buckets=None, links=None, included_resources=None, meta=None):
         document = {
             toplevel: resource,
             "jsonapi": {
                 "version": "1.0"
             }
         }
+        if buckets is not None:
+            document["buckets"] = buckets
         if meta is not None:
             document["meta"] = meta
         if links is not None:
@@ -25,8 +27,8 @@ class JSONAPIResponseFactory:
         return document
 
     @classmethod
-    def encapsulate_data(cls, resource, links, included_resources, meta):
-        return JSONAPIResponseFactory.encapsulate("data", resource, links, included_resources, meta)
+    def encapsulate_data(cls, resource, buckets, links, included_resources, meta):
+        return JSONAPIResponseFactory.encapsulate("data", resource, buckets, links, included_resources, meta)
 
     @classmethod
     def encapsulate_errors(cls, resource, links):
@@ -59,8 +61,8 @@ class JSONAPIResponseFactory:
         )
 
     @classmethod
-    def make_data_response(cls, data_resource, links, included_resources, meta, **kwargs):
-        resource = JSONAPIResponseFactory.encapsulate_data(data_resource, links, included_resources, meta)
+    def make_data_response(cls, data_resource, links, included_resources, meta, buckets=None, **kwargs):
+        resource = JSONAPIResponseFactory.encapsulate_data(data_resource, buckets, links, included_resources, meta)
         return JSONAPIResponseFactory.make_response(resource, **kwargs)
 
     @classmethod
