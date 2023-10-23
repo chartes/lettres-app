@@ -162,9 +162,7 @@ def make_cli():
     #            upload_collection(tmp_filename, collection, upload=upload)
     #            print('OK')
 
-    @click.command(
-(lettresenv) jboby@PORT-RECH01:~/Projets/Lettres/lettres-app$
-"db-reindex")
+    @click.command("db-reindex")
     @click.option('--indexes', default="all")
     @click.option('--host', required=True)
     @click.option('--rebuild', is_flag=True, help="truncate the index before updating its configuration")
