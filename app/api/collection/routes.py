@@ -1,4 +1,5 @@
 from flask import jsonify, current_app
+from sqlalchemy import or_
 
 from app.api.decorators import api_require_roles
 from app.api.collection.facade import CollectionFacade
@@ -43,6 +44,11 @@ def register_collection_role_api_urls(app):
 
     @current_app.route('/api/<api_version>/published-collections')
     def published_collections(api_version):
-        published_collections = Collection.query.with_entities(Collection.title).distinct().order_by(Collection.title).filter(Collection.documents.any(Document.is_published == True)).all()
+        published_collections = Collection.query.with_entities(Collection.title).distinct().order_by(Collection.title).filter(or_(Collection.documents.any(Document.is_published == True), Collection.children.any(Collection.documents.any(Document.is_published == True)))).all()
         response = jsonify({"data": [p[0] for p in published_collections]})
+        return response, 200
+    @current_app.route('/api/<api_version>/all-collections')
+    def all_collections(api_version):
+        all_collections = Collection.query.with_entities(Collection.title).distinct().order_by(Collection.title).all()
+        response = jsonify({"data": [p[0] for p in all_collections]})
         return response, 200
