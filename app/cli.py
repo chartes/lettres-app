@@ -21,9 +21,18 @@ from app.models import UserRole, User, Document, Collection, Language, Witness, 
 
 app = None
 
+
 clean_tags = re.compile('<.*?>')
+clean_notes = re.compile('\[\d+\]')
+clean_page_breaks = re.compile('\[p\.?\s?\d+\]')
 def remove_html_tags(text):
-    return re.sub(clean_tags, ' ', text)
+    without_unbreakable_space = text.replace('\ufeff','') if text else None
+    without_html_content = re.sub(clean_tags,'', without_unbreakable_space) if text else None
+    without_without_notes = without_html_content.replace("[note]","").strip() if without_html_content else None
+    without_numbered_notes = re.sub(clean_notes,' ', without_without_notes) if without_without_notes else None
+    without_page_breaks = re.sub(clean_page_breaks,' ', without_numbered_notes) if without_numbered_notes else None
+    cleaned = re.sub(' +', ' ', without_page_breaks) if without_page_breaks else None
+    return cleaned
 
 def add_default_users(db):
     UserRole.add_default_roles()
