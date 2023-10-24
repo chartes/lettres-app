@@ -8,7 +8,7 @@ from flask import current_app
 class SearchIndexManager(object):
 
     @staticmethod
-    def query_index(index, query, published=False, personsfacets=False, placesfacets=False, ranges=(), groupby=None, sort_criteriae=None, searchtype=False, highlight=False, page=None, per_page=None, after=None):
+    def query_index(index, query, published=False, collectionsfacets=False, personsfacets=False, placesfacets=False, ranges=(), groupby=None, sort_criteriae=None, searchtype=False, highlight=False, page=None, per_page=None, after=None):
         if sort_criteriae is None:
             sort_criteriae = []
 
@@ -151,6 +151,13 @@ class SearchIndexManager(object):
             print("\npublished check : \n", published)
             if published:
                 body["query"]["bool"]["must"].append({"term": {"is-published": True}})
+            if collectionsfacets:
+                if len(json.loads(collectionsfacets)["collections"]) > 0:
+                    print("\nlen(json.loads(collectionsfacets)['collections']) :\n", len(json.loads(collectionsfacets)["collections"]))
+                    body["query"]["bool"]["must"].append({"terms": {f"collections.title.keyword": json.loads(collectionsfacets)["collections"]}})
+                    #for collection in json.loads(collectionsfacets)["collections"]:
+                    #    print("\ncollection :\n", collection)
+                    #    body["query"]["bool"]["must"].append({"term": {f"collections.label.keyword": collection}})
 
             if personsfacets:
                 for facet_name, facets in json.loads(personsfacets).items():

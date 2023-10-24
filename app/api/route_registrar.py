@@ -287,29 +287,14 @@ class JSONAPIRouteRegistrar(object):
         print("ranges params:", ranges)
         return ranges
 
-    def search(self, index, query, ranges, groupby, sort_criteriae, page_id, page_size, page_after, highlight=None, searchtype=None, published=None, personsfacets=None, placesfacets=None):
+    def search(self, index, query, ranges, groupby, sort_criteriae, page_id, page_size, page_after, highlight=None, searchtype=None, published=None, collectionsfacets=None, personsfacets=None, placesfacets=None):
         # query the search engine
-        print("\ndef search published / personsfacets / placesfacets : \n", published, personsfacets, placesfacets)
-        ESresponse = SearchIndexManager.query_index(
-            index=index,
-            query=query,
-            published=published,
-            personsfacets=personsfacets,
-            placesfacets=placesfacets,
-            ranges=ranges,
-            groupby=groupby,
-            sort_criteriae=sort_criteriae,
-            searchtype=searchtype,
-            highlight=highlight,
-            page=page_id,
-            after=page_after,
-            per_page=page_size
-        )
-        print("\nESresponse :\n", ESresponse)
+        print("\ndef search published / collectionsfacets / personsfacets / placesfacets : \n", published, collectionsfacets, personsfacets, placesfacets)
         results, buckets, after_key, total = SearchIndexManager.query_index(
             index=index,
             query=query,
             published=published,
+            collectionsfacets=collectionsfacets,
             personsfacets=personsfacets,
             placesfacets=placesfacets,
             ranges=ranges,
@@ -321,6 +306,7 @@ class JSONAPIRouteRegistrar(object):
             after=page_after,
             per_page=page_size
         )
+        print("\nESresponse :\n", (results, buckets, after_key, total))
         #print('def search total from query_index :', total)
         if total == 0:
             if searchtype and highlight:
@@ -329,7 +315,7 @@ class JSONAPIRouteRegistrar(object):
                 return [], [], [], {}, {"total": 0}
             else:
                 print("total == 0 no highlights")
-                return [], {}, {"total": 0}
+                return [], [], {}, {"total": 0}
 
         res_dict = {}
         if groupby is None:
@@ -398,6 +384,7 @@ class JSONAPIRouteRegistrar(object):
             index = request.args.get("index", None)
             query = request.args["query"]
             published = request.args["published"] if "published" in request.args else False
+            collectionsfacets = request.args["collectionsfacets"] if "collectionsfacets" in request.args else False
             personsfacets = request.args["personsfacets"] if "personsfacets" in request.args else False
             placesfacets = request.args["placesfacets"] if "placesfacets" in request.args else False
             print('\nregister_search_route published / personsfacets / placesfacets :\n', published, personsfacets, placesfacets)
@@ -448,6 +435,7 @@ class JSONAPIRouteRegistrar(object):
                         index=index,
                         query=query,
                         published=published,
+                        collectionsfacets=collectionsfacets,
                         personsfacets=personsfacets,
                         placesfacets=placesfacets,
                         ranges=ranges,
@@ -464,6 +452,7 @@ class JSONAPIRouteRegistrar(object):
                         index=index,
                         query=query,
                         published=published,
+                        collectionsfacets=collectionsfacets,
                         personsfacets=personsfacets,
                         placesfacets=placesfacets,
                         ranges=ranges,
@@ -628,6 +617,18 @@ class JSONAPIRouteRegistrar(object):
             resources = [f.resource for f in sorted_facade_objs]
 
             if searchtype:
+                if not buckets:
+                    buckets = {
+                        "persons": [],
+                        "collections": [],
+                        "senders": [],
+                        "recipients": [],
+                        "persons_inlined": [],
+                        "location_dates_from": [],
+                        "location_dates_to": [],
+                        "locations_inlined": []
+                    }
+
                 print('\nsorted_highlights : ', sorted_highlights, '\n')
                 for resource in resources:
                     if resource['type'] == 'document':
