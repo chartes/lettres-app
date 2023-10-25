@@ -36,9 +36,7 @@ class SearchIndexManager(object):
             }
 
         else:
-            if not searchtype:
-                searchtype = "fulltext"
-            if searchtype  == "fulltext" and query !="*":
+            if searchtype == "fulltext": # and query !="*"
                 body_query = {
                         "bool": {
                             "must": [
@@ -61,7 +59,7 @@ class SearchIndexManager(object):
                         "number_of_fragments": 100,
                         "options": {"return_offsets": False}
                     }
-            elif searchtype == "paratext" and query !="*":
+            elif searchtype == "paratext": # and query !="*"
                 body_query = {
                         "bool": {
                             "must": [
@@ -83,12 +81,34 @@ class SearchIndexManager(object):
                     "number_of_fragments": 100,
                     "options": {"return_offsets": False}
                 }
+            else:
+                body_query = {
+                    "bool": {
+                        "must": [
+                            {
+                                "query_string": {
+                                    "query": query,
+                                    "default_operator": "AND",
+                                }
+                            }
+                        ]
+                    }
+                }
+                body_highlight = {
+                }
+
         body_aggregations = {}
-        if not groupby:
+        if searchtype:
             body_aggregations = {
                     "collections": {
                         "terms": {
                             "field": "collections.title.keyword",
+                            "size": 100000
+                        },
+                    },
+                    "collections_script": {
+                        "terms": {
+                            "field": "collections.facet_key.keyword",
                             "size": 100000
                         },
                     },
@@ -101,6 +121,12 @@ class SearchIndexManager(object):
                     "senders": {
                         "terms": {
                             "field": "senders.label.keyword",
+                            "size": 100000
+                        }
+                    },
+                    "senders_script": {
+                        "terms": {
+                            "script": "doc['senders.id'].value + ':' + doc['senders.label.keyword'].value",
                             "size": 100000
                         }
                     },
@@ -254,7 +280,8 @@ class SearchIndexManager(object):
             try:
                 if index is None or len(index) == 0:
                     index = current_app.config["DEFAULT_INDEX_NAME"]
-                print("\nboby : \n")
+                print("\nindex / boby : \n")
+                print(index)
                 pprint.pprint(body)
                 search = current_app.elasticsearch.search(index=index, doc_type="_doc", body=body)
                 # from elasticsearch import Elasticsearch

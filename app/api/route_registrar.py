@@ -289,7 +289,7 @@ class JSONAPIRouteRegistrar(object):
 
     def search(self, index, query, ranges, groupby, sort_criteriae, page_id, page_size, page_after, highlight=None, searchtype=None, published=None, collectionsfacets=None, personsfacets=None, placesfacets=None):
         # query the search engine
-        print("\ndef search published / collectionsfacets / personsfacets / placesfacets : \n", published, collectionsfacets, personsfacets, placesfacets)
+        print("\ndef search published index / collectionsfacets / personsfacets / placesfacets : \n", index, published, collectionsfacets, personsfacets, placesfacets)
         results, buckets, after_key, total = SearchIndexManager.query_index(
             index=index,
             query=query,

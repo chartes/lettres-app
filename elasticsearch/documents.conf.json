@@ -52,6 +52,15 @@
         },
         "collections": {
           "properties": {
+            "facet_key":  {
+              "type" : "text",
+              "fields" : {
+                "keyword" : {
+                  "type" : "keyword",
+                  "ignore_above" : 256
+                }
+              }
+            },
             "id": {
               "type" : "keyword"
             },
