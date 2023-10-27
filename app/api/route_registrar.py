@@ -284,7 +284,7 @@ class JSONAPIRouteRegistrar(object):
                     range[key][op] = value
                 #return range
                 ranges.append(range)
-        print("ranges params:", ranges)
+        print("\nparse_range_parameter ranges params : \n", ranges)
         return ranges
 
     def search(self, index, query, ranges, groupby, sort_criteriae, page_id, page_size, page_after, highlight=None, searchtype=None, published=None, collectionsfacets=None, personsfacets=None, placesfacets=None):
@@ -362,9 +362,11 @@ class JSONAPIRouteRegistrar(object):
 
         print("res_dict: ", res_dict)
         print({"total": total, "after": after_key})
-        if searchtype and highlight:
-            return [r.id for r in results], buckets, [{"id": int(r.id), "highlight": r.highlight} for r in results], res_dict, {"total": total, "after": after_key}
+        if (searchtype and query) or (highlight and query):
+            print("\nreturn highlights and scores : \n", (searchtype and query) or (highlight and query))
+            return [r.id for r in results], buckets, [{"id": int(r.id), "score": r.score, "highlight": r.highlight} for r in results], res_dict, {"total": total, "after": after_key}
         else:
+            print("\nreturn no highlight nor scores : \n", (searchtype and query) or (highlight and query))
             return [r.id for r in results], buckets, res_dict, {"total": total, "after": after_key}
     def register_search_route(self, decorators=()):
 
@@ -382,7 +384,9 @@ class JSONAPIRouteRegistrar(object):
 
             # PARAMETERS
             index = request.args.get("index", None)
-            query = request.args["query"]
+            query = request.args["query"] if "query" in request.args else False
+            if (len(query) == 0):
+                query = False
             published = request.args["published"] if "published" in request.args else False
             collectionsfacets = request.args["collectionsfacets"] if "collectionsfacets" in request.args else False
             personsfacets = request.args["personsfacets"] if "personsfacets" in request.args else False
@@ -418,7 +422,7 @@ class JSONAPIRouteRegistrar(object):
 
             # Search, retrieve, filter, sort and paginate objs
             sort_criteriae = None
-            if "sort" in request.args:
+            if "sort" in request.args and request.args["sort"]:
                 sort_criteriae = []
                 for criteria in request.args["sort"].split(','):
                     if criteria.startswith('-'):
@@ -430,7 +434,7 @@ class JSONAPIRouteRegistrar(object):
                     sort_criteriae.append({criteria: {"order": sort_order}})
 
             try:
-                if searchtype:
+                if (searchtype and query) or (highlight and query):
                     sorted_ids_list, buckets, sorted_highlights, res, meta = self.search(
                         index=index,
                         query=query,
@@ -447,6 +451,7 @@ class JSONAPIRouteRegistrar(object):
                         page_after=request.args["page[after]"] if "page[after]" in request.args else None,
                         page_size=page_size
                     )
+                    print("\nroute_registrar.py search_endpoint searchtype ressource one : \n", sorted_ids_list[0] if len(sorted_ids_list) > 0 else "No sorted_ids_list")
                 else:
                     sorted_ids_list, buckets, res, meta = self.search(
                         index=index,
@@ -628,7 +633,7 @@ class JSONAPIRouteRegistrar(object):
                         "location_dates_to": [],
                         "locations_inlined": []
                     }
-
+            if (searchtype and query) or (highlight and query):
                 print('\nsorted_highlights : ', sorted_highlights, '\n')
                 for resource in resources:
                     if resource['type'] == 'document':
@@ -661,9 +666,10 @@ class JSONAPIRouteRegistrar(object):
                                                 resource["attributes"]["argument"] = {'raw': resource["attributes"]["argument"], 'highlight': []}
                                                 for index, item in enumerate(sorted_highlight["highlight"][res_attrib]):
                                                     resource["attributes"]["argument"]["highlight"].append(sorted_highlight["highlight"][res_attrib][index])
+                                if sorted_highlight["score"]:
+                                    resource["score"] = sorted_highlight["score"]
 
-
-            print('\nRESOURCE : ', resources,'\n')
+            print('\nRESOURCE sample (first) : ', resources[0] if len(resources) > 0 else "No ressource",'\n')
             res_meta = {
                 "total-count": meta["total"],
                 "duration": float('%.4f' % (time.time() - start_time))

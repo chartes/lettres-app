@@ -9,32 +9,24 @@ class SearchIndexManager(object):
 
     @staticmethod
     def query_index(index, query, published=False, collectionsfacets=False, personsfacets=False, placesfacets=False, ranges=(), groupby=None, sort_criteriae=None, searchtype=False, highlight=False, page=None, per_page=None, after=None):
-        if sort_criteriae is None:
-            sort_criteriae = []
+        if not sort_criteriae:
+            sort_criteriae = ["_score"]
 
         if groupby:
             searchtype = None
             highlight = False
         #highlight = type(highlight) == str
         print('query_index searchtype row 245', searchtype, highlight)
-        if query.startswith("*"):
-            print('query.startswith("*")', searchtype, highlight)
-            searchtype = False
+
+        if not query:
+            print('\nNO QUERY STRING / searchtype, highlight :\n', searchtype, highlight)
+            #searchtype = False
             body_query = {
-                  "bool": {
-                     "must": [
-                         {
-                             "query_string": {
-                                 "query": query,
-                                 "default_operator": "AND",
-                             }
-                         }
-                     ]
-                  }
+                    "match_all": {}
             }
             body_highlight = {
             }
-
+            print('\nNO QUERY STRING / body_query, body_highlight :\n', body_query, body_highlight)
         else:
             if searchtype == "fulltext": # and query !="*"
                 body_query = {
@@ -289,7 +281,7 @@ class SearchIndexManager(object):
 
                 from collections import namedtuple
                 results = []
-                if highlight:
+                if searchtype or highlight:
                     Result = namedtuple("Result", "index id type score highlight")
                     #print("search['hits']['total'] : ", search['hits']['total'])
                     if search['hits']['total'] > 0:
@@ -298,14 +290,14 @@ class SearchIndexManager(object):
                                               str(hit['_score']), hit.get('highlight'))
                                        for hit in search['hits']['hits']]
 
-                    #print('results : ',results)
+                    print('\nsearch.py query_index results searchtype or highlights : \n', results[0] if len(results) > 0 else "No result")
                 else:
                     Result = namedtuple("Result", "index id type score")
 
                     results = [Result(str(hit['_index']), str(hit['_id']), str(hit['_source']["type"]),
                                       str(hit['_score']))
                                for hit in search['hits']['hits']]
-                    #print('results : ', results)
+                    print('\nsearch.py query_index results no highlights : \n', results[0] if len(results) > 0 else "No result")
 
                 buckets = []
                 after_key = None
