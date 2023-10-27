@@ -267,6 +267,17 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
 
     def get_data_to_index_when_added(self, propagate):
         #_res = self.resource
+        date_range = {}
+        if self.obj.creation:
+            date_range["lte"] = self.obj.creation
+            date_range["gte"] = self.obj.creation
+        else:
+            if self.obj.creation_not_after:
+                date_range["lte"] = self.obj.creation_not_after
+            # after implementation of creation_not_before in model & data
+            # if self.obj.creation_not_before:
+                # date_range["gte"] = self.obj.creation_not_before
+
         payload = {
             "id": self.id,
             "type": self.TYPE,
@@ -274,6 +285,7 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
             "is-published": False if self.obj.is_published is None else self.obj.is_published,
 
             "creation": self.obj.creation,
+            "creation_range": date_range,
             "creation-not-after": self.obj.creation_not_after,
 
             "title": remove_html_tags(self.obj.title),
@@ -283,33 +295,36 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
 
             "witnesses": [{"id": w.id, "content": w.content, "classification-mark": w.classification_mark} for w in self.obj.witnesses],
             "languages": [{"id": l.id, "code": l.code} for l in self.obj.languages],
-            "collections": [{"facet_key": f'{c.id}|{c.title}', "id": c.id, "title": c.title, "parents": [parent.id for parent in c.parents] if c.parents else None} for c in self.obj.collections],
+            "collections": [{"facet_key": f'{c.id}###{c.title}', "id": c.id, "title": c.title, "parents": [parent.id for parent in c.parents] if c.parents else None} for c in self.obj.collections],
             "persons": [
                 {
                     "id": c_h_r.person.id,
-                    "label": c_h_r.person.label,
-                    "ref": c_h_r.person.ref
+                    #"label": c_h_r.person.label,
+                    #"ref": c_h_r.person.ref
                 }
                 for c_h_r in self.obj.persons_having_roles
             ],
-            "recipients": [
-                {
-                    "id": c_h_r.person.id,
-                    "label": c_h_r.person.label,
-                    "ref": c_h_r.person.ref
-                }
-                for c_h_r in self.obj.persons_having_roles if c_h_r.person_role.label == 'recipient'
-            ],
             "senders": [
                 {
+                    "facet_key": f'{c_h_r.person.id}###{c_h_r.person.label}',
                     "id": c_h_r.person.id,
                     "label": c_h_r.person.label,
                     "ref": c_h_r.person.ref
                 }
                 for c_h_r in self.obj.persons_having_roles if c_h_r.person_role.label == 'sender'
             ],
+            "recipients": [
+                {
+                    "facet_key": f'{c_h_r.person.id}###{c_h_r.person.label}',
+                    "id": c_h_r.person.id,
+                    "label": c_h_r.person.label,
+                    "ref": c_h_r.person.ref
+                }
+                for c_h_r in self.obj.persons_having_roles if c_h_r.person_role.label == 'recipient'
+            ],
             "persons_inlined": [
                 {
+                    "facet_key": f'{c_h_r.person.id}###{c_h_r.person.label}',
                     "id": c_h_r.person.id,
                     "label": c_h_r.person.label,
                     "ref": c_h_r.person.ref
@@ -319,13 +334,14 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
             "placenames": [
                 {
                     "id": c_h_r.placename.id,
-                    "label": c_h_r.placename.label,
-                    "ref": c_h_r.placename.ref
+                    #"label": c_h_r.placename.label,
+                    #"ref": c_h_r.placename.ref
                 }
                 for c_h_r in self.obj.placenames_having_roles
             ],
             "location_dates_from": [
                 {
+                    "facet_key": f'{c_h_r.placename.id}###{c_h_r.placename.label}',
                     "id": c_h_r.placename.id,
                     "label": c_h_r.placename.label,
                     "ref": c_h_r.placename.ref
@@ -334,6 +350,7 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
             ],
             "location_dates_to": [
                 {
+                    "facet_key": f'{c_h_r.placename.id}###{c_h_r.placename.label}',
                     "id": c_h_r.placename.id,
                     "label": c_h_r.placename.label,
                     "ref": c_h_r.placename.ref
@@ -342,6 +359,7 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
             ],
             "locations_inlined": [
                 {
+                    "facet_key": f'{c_h_r.placename.id}###{c_h_r.placename.label}',
                     "id": c_h_r.placename.id,
                     "label": c_h_r.placename.label,
                     "ref": c_h_r.placename.ref
