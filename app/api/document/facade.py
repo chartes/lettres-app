@@ -268,12 +268,13 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
     def get_data_to_index_when_added(self, propagate):
         #_res = self.resource
         date_range = {}
-        if self.obj.creation:
+        if self.obj.creation and not self.obj.creation_not_after:
             date_range["lte"] = self.obj.creation
             date_range["gte"] = self.obj.creation
         else:
             if self.obj.creation_not_after:
                 date_range["lte"] = self.obj.creation_not_after
+                date_range["gte"] = self.obj.creation if self.obj.creation else None
             # after implementation of creation_not_before in model & data
             # if self.obj.creation_not_before:
                 # date_range["gte"] = self.obj.creation_not_before
