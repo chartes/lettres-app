@@ -11,8 +11,9 @@
         "creation": {
           "type": "date"
         },
-        "creation-range" : {
-          "type": "date_range"
+        "creation_range" : {
+          "type": "date_range",
+          "format": "yyyy-MM-dd||yyyy-MM||yyyy"
         },
         "title": {
           "type": "text",
