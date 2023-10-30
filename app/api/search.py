@@ -15,20 +15,26 @@ class SearchIndexManager(object):
         if groupby:
             searchtype = None
             highlight = False
-        #highlight = type(highlight) == str
-        print('query_index searchtype row 245', searchtype, highlight)
+        print('query_index searchtype row 18', searchtype, highlight)
 
         if not query:
-            print('\nNO QUERY STRING / searchtype, highlight :\n', searchtype, highlight)
-            #searchtype = False
+            #if search is without a searched string, than match all, regardless of search type (API, frontend searches)
+            print('\nquery_index NO QUERY STRING / searchtype, highlight :\n', searchtype, highlight)
             body_query = {
-                    "match_all": {}
+                "bool": {
+                    "must": [{
+                        "match_all": {}
+                    }]
+                }
             }
             body_highlight = {
             }
-            print('\nNO QUERY STRING / body_query, body_highlight :\n', body_query, body_highlight)
+            print('\nquery_index NO QUERY STRING / body_query, body_highlight :\n', body_query, body_highlight)
         else:
-            if searchtype == "fulltext": # and query !="*"
+            #if search has a searched string, check where to match the searched string based on search type (frontend fulltext or paratext or else)
+            if searchtype == "fulltext":
+                #fulltext is always provided with a query from the front-end
+                #if searchtype is fulltext, we search only in fields transcription & address
                 body_query = {
                         "bool": {
                             "must": [
@@ -51,7 +57,8 @@ class SearchIndexManager(object):
                         "number_of_fragments": 100,
                         "options": {"return_offsets": False}
                     }
-            elif searchtype == "paratext": # and query !="*"
+            elif searchtype == "paratext":
+                #if searchtype is paratext, we search only in fields title & argument
                 body_query = {
                         "bool": {
                             "must": [
@@ -74,6 +81,7 @@ class SearchIndexManager(object):
                     "options": {"return_offsets": False}
                 }
             else:
+                #if no frontend types (fulltext or paratext) is provided, we do not return highlights by default
                 body_query = {
                     "bool": {
                         "must": [
@@ -91,6 +99,7 @@ class SearchIndexManager(object):
 
         body_aggregations = {}
         if searchtype:
+            #for frontend searches on /search, searchtype is either fulltext/paratext and response require facets, obtained via aggregations
             body_aggregations = {
                     "collections": {
                         "terms": {
@@ -156,6 +165,7 @@ class SearchIndexManager(object):
 
 
         if hasattr(current_app, 'elasticsearch'):
+            #start building ES query body
             body = {
                 "query": body_query,
                 "aggregations": body_aggregations,
@@ -166,16 +176,15 @@ class SearchIndexManager(object):
                 ],
                 "track_scores": True
             }
+            #check for additionnal filters and facets
             print("\npublished check : \n", published)
             if published:
                 body["query"]["bool"]["must"].append({"term": {"is-published": True}})
+
             if collectionsfacets:
                 if len(json.loads(collectionsfacets)["collections"]) > 0:
                     print("\nlen(json.loads(collectionsfacets)['collections']) :\n", len(json.loads(collectionsfacets)["collections"]))
                     body["query"]["bool"]["must"].append({"terms": {f"collections.title.keyword": json.loads(collectionsfacets)["collections"]}})
-                    #for collection in json.loads(collectionsfacets)["collections"]:
-                    #    print("\ncollection :\n", collection)
-                    #    body["query"]["bool"]["must"].append({"term": {f"collections.label.keyword": collection}})
 
             if personsfacets:
                 for facet_name, facets in json.loads(personsfacets).items():
@@ -192,23 +201,29 @@ class SearchIndexManager(object):
 
             if len(ranges) > 0:
                 for range in ranges:
-                    print("\nranges : ", ranges)
+                    range["creation_range"]["format"] = "yyyy"
+                    #print("\nranges : \n", ranges)
+                    #print("\nbody['query'] before ranges : \n", body["query"])
+                    #body["query"]["bool"]["filter"] = {"range": range} filter also works but may clash with already defined filters
                     body["query"]["bool"]["must"].append({"range": range})
-                    print("\nbody['query'] \n : ", body["query"])
 
-            '''if highlight:
-                print('for query : ',query, groupby,', highlight : ', highlight)
+                    print("\nbody['query'] after ranges : \n ", body["query"])
+
+            if highlight:
+                #for API usage, allow getting highlights on transcription & address only
+                print('\nif highlight / query : ', query, '\ngroupby : ', groupby, '\nhighlight : ', highlight)
                 body["highlight"] = {
                     "type": "fvh",
                     "fields": {
-                        "argument": {},
-                        "title": {},
-                        "transcription": {}
+                        #"argument": {},
+                        #"title": {},
+                        "transcription": {},
+                        "address": {}
                     },
                     "number_of_fragments": 100,
                     "options": {"return_offsets": False}
                 }
-                print('\nbody["highlight"] : ', body["highlight"],'\n')'''
+                print('\nif highlight / body["highlight"] : ', body["highlight"], '\n')
 
             if groupby is not None:
                 body["aggregations"] = {
@@ -258,6 +273,7 @@ class SearchIndexManager(object):
                                                                            zip(sources_keys, after.split(','))}
                     #print(sources_keys, after, {key: value for key, value in zip(sources_keys, after.split(','))})
 
+            #finalise building ES query body
             if per_page is not None:
                 if page is None or groupby is not None:
                     page = 0
@@ -269,11 +285,12 @@ class SearchIndexManager(object):
                 body["from"] = 0 * per_page
                 body["size"] = per_page
                 # print("WARNING: /!\ for debug purposes the query size is limited to", body["size"])
+
+            #check index and launch ES search
             try:
                 if index is None or len(index) == 0:
                     index = current_app.config["DEFAULT_INDEX_NAME"]
-                print("\nindex / boby : \n")
-                print(index)
+                print("\nindex : ", index, "\nbody : \n")
                 pprint.pprint(body)
                 search = current_app.elasticsearch.search(index=index, doc_type="_doc", body=body)
                 # from elasticsearch import Elasticsearch

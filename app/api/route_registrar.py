@@ -309,7 +309,7 @@ class JSONAPIRouteRegistrar(object):
         print("\nESresponse :\n", (results, buckets, after_key, total))
         #print('def search total from query_index :', total)
         if total == 0:
-            if searchtype and highlight:
+            if (searchtype and query) or (highlight and query):
                 print("Plaintext search with no results total == 0")
                 # Plaintext search with no results : return empty results, empty facets, empty ES highlights, no after_key and a total of 0
                 return [], [], [], {}, {"total": 0}
@@ -651,21 +651,17 @@ class JSONAPIRouteRegistrar(object):
                                                     resource["attributes"]["transcription"]["highlight"].append(sorted_highlight["highlight"][res_attrib][index])
                                                     #print("\n resource['attributes']['transcription']['highlight']: \n", resource["attributes"]["transcription"]["highlight"])
 
-                                            '''else:
-                                                if res_attrib in resource["attributes"]:
-                                                    print('\nres_attrib : ', res_attrib)
-                                                    #print('\nresource["attributes"][res_attrib] : ', resource["attributes"][res_attrib])
-                                                    #print('\ntype(resource["attributes"][res_attrib]) : ', type(resource["attributes"][res_attrib]))
-                                                    #print('\nsorted_highlight["highlight"][res_attrib] : ', sorted_highlight["highlight"][res_attrib])
-                                                    #print('\nsorted_highlight["highlight"][res_attrib] : ', sorted_highlight["highlight"][res_attrib])
-                                                    #print('\nsorted_highlight["highlight"][res_attrib][0] : ', sorted_highlight["highlight"][res_attrib][0])
-                                                    resource["attributes"][res_attrib] = {'raw':resource["attributes"][res_attrib], 'highlight':sorted_highlight["highlight"][res_attrib]}
-                                            '''
-                                        else:
+                                        elif searchtype == "paratext":
                                             if res_attrib == "argument":
                                                 resource["attributes"]["argument"] = {'raw': resource["attributes"]["argument"], 'highlight': []}
                                                 for index, item in enumerate(sorted_highlight["highlight"][res_attrib]):
                                                     resource["attributes"]["argument"]["highlight"].append(sorted_highlight["highlight"][res_attrib][index])
+                                        else:
+                                            if res_attrib in resource["attributes"]:
+                                                resource["attributes"][res_attrib] = {
+                                                    'raw': resource["attributes"][res_attrib],
+                                                    'highlight': sorted_highlight["highlight"][res_attrib]
+                                                }
                                 if sorted_highlight["score"]:
                                     resource["score"] = sorted_highlight["score"]
 
