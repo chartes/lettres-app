@@ -42,7 +42,8 @@ class ChangesMixin:
         return db.relationship("Changelog",
                                primaryjoin="and_({0}.id==foreign(Changelog.object_id),"
                                            "Changelog.object_type=='{1}')".format(self.__name__,  self.__tablename__),
-                               cascade="all, delete-orphan")
+                               cascade="all, delete-orphan",
+                               overlaps="changes")
 
 
 class Document(db.Model, ChangesMixin):
