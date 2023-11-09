@@ -268,13 +268,21 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
     def get_data_to_index_when_added(self, propagate):
         #_res = self.resource
         date_range = {}
+        sort_date = None
         if self.obj.creation and not self.obj.creation_not_after:
             date_range["lte"] = self.obj.creation
             date_range["gte"] = self.obj.creation
+            sort_date = self.obj.creation
         else:
             if self.obj.creation_not_after:
                 date_range["lte"] = self.obj.creation_not_after
-                date_range["gte"] = self.obj.creation if self.obj.creation else None
+                sort_date = self.obj.creation_not_after
+            # for now, if creation_not_after is filled, it means that creation
+            # is used as a "creation_not_before"
+            if self.obj.creation:
+                date_range["gte"] = self.obj.creation
+                if sort_date is None:
+                    sort_date = self.obj.creation
             # after implementation of creation_not_before in model & data
             # if self.obj.creation_not_before:
                 # date_range["gte"] = self.obj.creation_not_before
@@ -285,7 +293,7 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
 
             "is-published": False if self.obj.is_published is None else self.obj.is_published,
 
-            "creation": self.obj.creation,
+            "creation": sort_date,
             "creation_range": date_range,
             "creation-not-after": self.obj.creation_not_after,
 
