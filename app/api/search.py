@@ -8,7 +8,7 @@ from flask import current_app
 class SearchIndexManager(object):
 
     @staticmethod
-    def query_index(index, query, published=False, collectionsfacets=False, personsfacets=False, placesfacets=False, ranges=(), groupby=None, sort_criteriae=None, searchtype=False, highlight=False, page=None, per_page=None, after=None):
+    def query_index(index, query, published=False, collectionsfacets=False, senders_facets=False, recipients_facets=False, persons_inlined_facets=False, location_dates_from_facets=False, location_dates_to_facets=False, locations_inlined_facets=False, ranges=(), groupby=None, sort_criteriae=None, searchtype=False, highlight=False, page=None, per_page=None, after=None):
         if not sort_criteriae:
             sort_criteriae = ["_score"]
 
@@ -186,17 +186,24 @@ class SearchIndexManager(object):
                     print("\nlen(json.loads(collectionsfacets)['collections']) :\n", len(json.loads(collectionsfacets)["collections"]))
                     body["query"]["bool"]["must"].append({"terms": {f"collections.title.keyword": json.loads(collectionsfacets)["collections"]}})
 
-            if personsfacets:
-                for facet_name, facets in json.loads(personsfacets).items():
-                    if len(facets) > 0:
-                        for person in facets:
-                            body["query"]["bool"]["must"].append({"term": {f"{facet_name}.label.keyword": person}})
+            if senders_facets:
+                body["query"]["bool"]["must"].append({"term": {"senders.label.keyword": senders_facets}})
 
-            if placesfacets:
-                for facet_name, facets in json.loads(placesfacets).items():
-                    if len(facets) > 0:
-                        for place in facets:
-                            body["query"]["bool"]["must"].append({"term": {f"{facet_name}.label.keyword": place}})
+            if recipients_facets:
+                body["query"]["bool"]["must"].append({"term": {"recipients.label.keyword": recipients_facets}})
+
+            if persons_inlined_facets:
+                body["query"]["bool"]["must"].append({"term": {"persons_inlined.label.keyword": persons_inlined_facets}})
+
+            if location_dates_from_facets:
+                body["query"]["bool"]["must"].append({"term": {"location_dates_from.label.keyword": location_dates_from_facets}})
+
+            if location_dates_to_facets:
+                body["query"]["bool"]["must"].append({"term": {"location_dates_to.label.keyword": location_dates_to_facets}})
+
+            if locations_inlined_facets:
+                body["query"]["bool"]["must"].append({"term": {"locations_inlined.label.keyword": locations_inlined_facets}})
+
             print("\nfacets checks : \n", body["query"])
 
             if len(ranges) > 0:

@@ -287,16 +287,21 @@ class JSONAPIRouteRegistrar(object):
         print("\nparse_range_parameter ranges params : \n", ranges)
         return ranges
 
-    def search(self, index, query, ranges, groupby, sort_criteriae, page_id, page_size, page_after, highlight=None, searchtype=None, published=None, collectionsfacets=None, personsfacets=None, placesfacets=None):
+    def search(self, index, query, ranges, groupby, sort_criteriae, page_id, page_size, page_after, highlight=None, searchtype=None, published=None, collectionsfacets=None, senders_facets=None, recipients_facets=None, persons_inlined_facets=None, location_dates_from_facets=None, location_dates_to_facets=None, locations_inlined_facets=None):
         # query the search engine
-        print("\ndef search published index / collectionsfacets / personsfacets / placesfacets : \n", index, published, collectionsfacets, personsfacets, placesfacets)
+        print("\ndef search published index / collectionsfacets / senders_facets, recipients_facets, persons_inlined_facets, location_dates_from_facets, location_dates_to_facets, locations_inlined_facets : \n", index, published, collectionsfacets, senders_facets, recipients_facets, persons_inlined_facets, location_dates_from_facets, location_dates_to_facets, locations_inlined_facets)
+
         results, buckets, after_key, total = SearchIndexManager.query_index(
             index=index,
             query=query,
             published=published,
             collectionsfacets=collectionsfacets,
-            personsfacets=personsfacets,
-            placesfacets=placesfacets,
+            senders_facets=senders_facets,
+            recipients_facets=recipients_facets,
+            persons_inlined_facets=persons_inlined_facets,
+            location_dates_from_facets=location_dates_from_facets,
+            location_dates_to_facets=location_dates_to_facets,
+            locations_inlined_facets=locations_inlined_facets,
             ranges=ranges,
             groupby=groupby,
             sort_criteriae=sort_criteriae,
@@ -308,14 +313,9 @@ class JSONAPIRouteRegistrar(object):
         )
         print("\nESresponse :\n", (results, buckets, after_key, total))
         #print('def search total from query_index :', total)
+
         if total == 0:
-            if (searchtype and query) or (highlight and query):
-                print("Plaintext search with no results total == 0")
-                # Plaintext search with no results : return empty results, empty facets, empty ES highlights, no after_key and a total of 0
-                return [], [], [], {}, {"total": 0}
-            else:
-                print("total == 0 no highlights")
-                return [], [], {}, {"total": 0}
+            return [], [], [], {}, {"total": 0}
 
         res_dict = {}
         if groupby is None:
@@ -359,15 +359,15 @@ class JSONAPIRouteRegistrar(object):
             res_dict[res_type] = db.session.query(m).filter(m.id.in_(res_ids))
             if len(when) > 0:
                 res_dict[res_type] = res_dict[res_type].order_by(db.case(when, value=m.id))
-
         print("res_dict: ", res_dict)
         print({"total": total, "after": after_key})
+
         if (searchtype and query) or (highlight and query):
             print("\nreturn highlights and scores : \n", (searchtype and query) or (highlight and query))
             return [r.id for r in results], buckets, [{"id": int(r.id), "score": r.score, "highlight": r.highlight} for r in results], res_dict, {"total": total, "after": after_key}
         else:
             print("\nreturn no highlight nor scores : \n", (searchtype and query) or (highlight and query))
-            return [r.id for r in results], buckets, res_dict, {"total": total, "after": after_key}
+            return [r.id for r in results], buckets, [], res_dict, {"total": total, "after": after_key}
     def register_search_route(self, decorators=()):
 
         search_rule = '/api/{api_version}/search'.format(api_version=self.api_version)
@@ -388,17 +388,26 @@ class JSONAPIRouteRegistrar(object):
             if (len(query) == 0):
                 query = False
             published = request.args["published"] if "published" in request.args else False
+
             collectionsfacets = request.args["collectionsfacets"] if "collectionsfacets" in request.args else False
-            personsfacets = request.args["personsfacets"] if "personsfacets" in request.args else False
-            placesfacets = request.args["placesfacets"] if "placesfacets" in request.args else False
-            print('\nregister_search_route published / personsfacets / placesfacets :\n', published, personsfacets, placesfacets)
+            senders_facets = request.args["senders"] if "senders" in request.args else False
+            recipients_facets = request.args["recipients"] if "recipients" in request.args else False
+            persons_inlined_facets = request.args["persons_inlined"] if "persons_inlined" in request.args else False
+            location_dates_to_facets = request.args["location_dates_to"] if "location_dates_to" in request.args else False
+            location_dates_from_facets = request.args["location_dates_from"] if "location_dates_from" in request.args else False
+            locations_inlined_facets = request.args["locations_inlined"] if "locations_inlined" in request.args else False
+            print('\nregister_search_route published / senders_facets / recipients_facets / persons_inlined_facets / location_dates_to_facets / location_dates_from_facets / locations_inlined_facets :\n', published, senders_facets, recipients_facets, persons_inlined_facets, location_dates_from_facets, location_dates_to_facets, locations_inlined_facets)
+
             searchtype = request.args["searchtype"] if "searchtype" in request.args else False
+            print('search_endpoint searchtype : ', request.args["searchtype"] if "searchtype" in request.args else False)
+
             ranges = JSONAPIRouteRegistrar.parse_range_parameter()
             groupby = request.args["groupby[field]"] if "groupby[field]" in request.args else None
+            #print('groupby', groupby)
+
             highlight = request.args["highlight"] if "highlight" in request.args else False
             #print('search_endpoint highlight', request.args["highlight"] if "highlight" in request.args else False)
-            print('search_endpoint searchtype : ', request.args["searchtype"] if "searchtype" in request.args else False)
-            #print('groupby', groupby)
+
             # if request has pagination parameters
             # add links to the top-level object
             if groupby:
@@ -434,42 +443,29 @@ class JSONAPIRouteRegistrar(object):
                     sort_criteriae.append({criteria: {"order": sort_order}})
 
             try:
-                if (searchtype and query) or (highlight and query):
-                    sorted_ids_list, buckets, sorted_highlights, res, meta = self.search(
-                        index=index,
-                        query=query,
-                        published=published,
-                        collectionsfacets=collectionsfacets,
-                        personsfacets=personsfacets,
-                        placesfacets=placesfacets,
-                        ranges=ranges,
-                        groupby=groupby,
-                        sort_criteriae=sort_criteriae,
-                        searchtype=searchtype,
-                        highlight=highlight,
-                        page_id=num_page,
-                        page_after=request.args["page[after]"] if "page[after]" in request.args else None,
-                        page_size=page_size
-                    )
-                    print("\nroute_registrar.py search_endpoint searchtype ressource one : \n", sorted_ids_list[0] if len(sorted_ids_list) > 0 else "No sorted_ids_list")
-                else:
-                    sorted_ids_list, buckets, res, meta = self.search(
-                        index=index,
-                        query=query,
-                        published=published,
-                        collectionsfacets=collectionsfacets,
-                        personsfacets=personsfacets,
-                        placesfacets=placesfacets,
-                        ranges=ranges,
-                        groupby=groupby,
-                        sort_criteriae=sort_criteriae,
-                        searchtype=searchtype,
-                        highlight=highlight,
-                        page_id=num_page,
-                        page_after=request.args["page[after]"] if "page[after]" in request.args else None,
-                        page_size=page_size
-                    )
-                #print('sorted_ids_list, res, meta', sorted_ids_list, res, meta)
+                sorted_ids_list, buckets, sorted_highlights, res, meta = self.search(
+                    index=index,
+                    query=query,
+                    published=published,
+                    collectionsfacets=collectionsfacets,
+                    senders_facets=senders_facets,
+                    recipients_facets=recipients_facets,
+                    persons_inlined_facets=persons_inlined_facets,
+                    location_dates_from_facets=location_dates_from_facets,
+                    location_dates_to_facets=location_dates_to_facets,
+                    locations_inlined_facets=locations_inlined_facets,
+                    ranges=ranges,
+                    groupby=groupby,
+                    sort_criteriae=sort_criteriae,
+                    searchtype=searchtype,
+                    highlight=highlight,
+                    page_id=num_page,
+                    page_after=request.args["page[after]"] if "page[after]" in request.args else None,
+                    page_size=page_size
+                )
+                print("\nroute_registrar.py search_endpoint searchtype ressource one : \n",
+                      sorted_ids_list[0] if len(sorted_ids_list) > 0 else "No sorted_ids_list")
+
             except Exception as e:
                 # raise e
                 return JSONAPIResponseFactory.make_errors_response({
