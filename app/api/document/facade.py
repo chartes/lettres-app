@@ -151,6 +151,13 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
         f_obj, errors, kwargs = WitnessFacade.get_facade('', w[0])
         return f_obj.get_iiif_manifest_url()
 
+    def get_witness_manifest_url(self, id):
+        w = [x for x in self.obj.witnesses if x.id == id]
+        if len(w) == 0:
+            return None
+        f_obj, errors, kwargs = WitnessFacade.get_facade('', w[0])
+        return f_obj.get_iiif_manifest_url()
+
     def get_iiif_collection_url(self):
         #return "https://iiif.chartes.psl.eu/collections/encpos/encpos_1892.json"
         host = request.host_url[:-1]
@@ -398,6 +405,7 @@ class DocumentSearchFacade(DocumentFacade):
                 "transcription": self.obj.transcription,
                 "address": self.obj.address,
                 "is-published": False if self.obj.is_published is None else self.obj.is_published,
+                "witnesses": [{"id": w.id, "content": w.content, "classification-mark": w.classification_mark, "manifest_url": self.get_witness_manifest_url(w.id)} for w in self.obj.witnesses],
                 "senders": [
                     {
                         "id": c_h_r.person.id,
