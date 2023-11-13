@@ -399,10 +399,29 @@ class JSONAPIRouteRegistrar(object):
             except json.JSONDecodeError:
                 recipients_facets = None
 
-            persons_inlined_facets = request.args["persons_inlined"] if "persons_inlined" in request.args else False
-            location_dates_to_facets = request.args["location_dates_to"] if "location_dates_to" in request.args else False
+            try:
+                persons_inlined_facets = (
+                    json.loads(request.args["persons_inlined"]) if "persons_inlined" in request.args else False
+                )
+            except json.JSONDecodeError:
+                persons_inlined_facets = None
+
             location_dates_from_facets = request.args["location_dates_from"] if "location_dates_from" in request.args else False
-            locations_inlined_facets = request.args["locations_inlined"] if "locations_inlined" in request.args else False
+
+            try:
+                location_dates_to_facets = (
+                    json.loads(request.args["location_dates_to"]) if "location_dates_to" in request.args else False
+                )
+            except json.JSONDecodeError:
+                location_dates_to_facets = None
+
+            try:
+                locations_inlined_facets = (
+                    json.loads(request.args["locations_inlined"]) if "locations_inlined" in request.args else False
+                )
+            except json.JSONDecodeError:
+                locations_inlined_facets = None
+
             print('\nregister_search_route published / senders_facets / recipients_facets / persons_inlined_facets / location_dates_to_facets / location_dates_from_facets / locations_inlined_facets :\n', published, senders_facets, recipients_facets, persons_inlined_facets, location_dates_from_facets, location_dates_to_facets, locations_inlined_facets)
 
             searchtype = request.args["searchtype"] if "searchtype" in request.args else False

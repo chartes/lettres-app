@@ -194,16 +194,19 @@ class SearchIndexManager(object):
                     body["query"]["bool"]["must"].append({"term": {"recipients.label.keyword": recipient}})
 
             if persons_inlined_facets:
-                body["query"]["bool"]["must"].append({"term": {"persons_inlined.label.keyword": persons_inlined_facets}})
+                for person in persons_inlined_facets:
+                    body["query"]["bool"]["must"].append({"term": {"persons_inlined.label.keyword": person}})
 
             if location_dates_from_facets:
                 body["query"]["bool"]["must"].append({"term": {"location_dates_from.label.keyword": location_dates_from_facets}})
 
             if location_dates_to_facets:
-                body["query"]["bool"]["must"].append({"term": {"location_dates_to.label.keyword": location_dates_to_facets}})
+                for location_to in location_dates_to_facets:
+                    body["query"]["bool"]["must"].append({"term": {"location_dates_to.label.keyword": location_to}})
 
             if locations_inlined_facets:
-                body["query"]["bool"]["must"].append({"term": {"locations_inlined.label.keyword": locations_inlined_facets}})
+                for location_inlined in locations_inlined_facets:
+                    body["query"]["bool"]["must"].append({"term": {"locations_inlined.label.keyword": location_inlined}})
 
             print("\nfacets checks : \n", body["query"])
 
