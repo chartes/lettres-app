@@ -190,7 +190,8 @@ class SearchIndexManager(object):
                 body["query"]["bool"]["must"].append({"term": {"senders.label.keyword": senders_facets}})
 
             if recipients_facets:
-                body["query"]["bool"]["must"].append({"term": {"recipients.label.keyword": recipients_facets}})
+                for recipient in recipients_facets:
+                    body["query"]["bool"]["must"].append({"term": {"recipients.label.keyword": recipient}})
 
             if persons_inlined_facets:
                 body["query"]["bool"]["must"].append({"term": {"persons_inlined.label.keyword": persons_inlined_facets}})

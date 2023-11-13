@@ -391,7 +391,14 @@ class JSONAPIRouteRegistrar(object):
 
             collectionsfacets = request.args["collectionsfacets"] if "collectionsfacets" in request.args else False
             senders_facets = request.args["senders"] if "senders" in request.args else False
-            recipients_facets = request.args["recipients"] if "recipients" in request.args else False
+
+            try:
+                recipients_facets = (
+                    json.loads(request.args["recipients"]) if "recipients" in request.args else False
+                )
+            except json.JSONDecodeError:
+                recipients_facets = None
+
             persons_inlined_facets = request.args["persons_inlined"] if "persons_inlined" in request.args else False
             location_dates_to_facets = request.args["location_dates_to"] if "location_dates_to" in request.args else False
             location_dates_from_facets = request.args["location_dates_from"] if "location_dates_from" in request.args else False
