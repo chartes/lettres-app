@@ -390,6 +390,18 @@ class JSONAPIRouteRegistrar(object):
                         "cardinality": {
                             "field": "placenames.id"
                         }
+                    },
+                    "collections": {
+                        "terms": {
+                            "field": "collections.id",
+                            "size": 100000
+                        }
+                    },
+                    "parents": {
+                        "terms": {
+                            "field": "collections.parents.keyword",
+                            "size": 100000
+                        }
                     }
                 }
             }
@@ -398,11 +410,20 @@ class JSONAPIRouteRegistrar(object):
                     "term": { "is-published": True }
                 }
             search = current_app.elasticsearch.search(index=index, body=query_body)
+
+            collection_set = set([x["key"] for x in search["aggregations"]["collections"]["buckets"]])
+            parent_set = set([x["key"] for x in search["aggregations"]["parents"]["buckets"]])
+            collection_count = len(collection_set.union(parent_set))
+
+            if published:
+                collection_count -= 1 # Remove "Non-triées" from collection list
+
             response = JSONAPIResponseFactory.make_response(
                 {
                     "documents": search["hits"]["total"],
                     "persons": search["aggregations"]["person_count"]["value"],
-                    "placenames": search["aggregations"]["place_count"]["value"]
+                    "placenames": search["aggregations"]["place_count"]["value"],
+                    "collections" : collection_count
                 }
             )
             return response
