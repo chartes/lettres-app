@@ -107,57 +107,39 @@ class SearchIndexManager(object):
                             "size": 100000
                         },
                     },
-                    "collections_script": {
-                        "terms": {
-                            "field": "collections.facet_key.keyword",
-                            "size": 100000
-                        },
-                    },
-                    "persons": {
-                        "terms": {
-                            "field": "persons.label.keyword",
-                            "size": 100000
-                        }
-                    },
                     "senders": {
                         "terms": {
-                            "field": "senders.label.keyword",
-                            "size": 100000
-                        }
-                    },
-                    "senders_script": {
-                        "terms": {
-                            "script": "doc['senders.id'].value + ':' + doc['senders.label.keyword'].value",
+                            "field": "senders.facet_key",
                             "size": 100000
                         }
                     },
                     "recipients": {
                         "terms": {
-                            "field": "recipients.label.keyword",
+                            "field": "recipients.facet_key",
                             "size": 100000
                         }
                     },
                     "persons_inlined": {
                         "terms": {
-                            "field": "persons_inlined.label.keyword",
+                            "field": "persons_inlined.facet_key",
                             "size": 100000
                         }
                     },
                     "location_dates_from": {
                         "terms": {
-                            "field": "location_dates_from.label.keyword",
+                            "field": "location_dates_from.facet_key",
                             "size": 100000
                         }
                     },
                     "location_dates_to": {
                         "terms": {
-                            "field": "location_dates_to.label.keyword",
+                            "field": "location_dates_to.facet_key",
                             "size": 100000
                         }
                     },
                     "locations_inlined": {
                         "terms": {
-                            "field": "locations_inlined.label.keyword",
+                            "field": "locations_inlined.facet_key",
                             "size": 100000
                         }
                     }
@@ -187,22 +169,26 @@ class SearchIndexManager(object):
                     body["query"]["bool"]["must"].append({"terms": {f"collections.title.keyword": json.loads(collectionsfacets)["collections"]}})
 
             if senders_facets:
-                body["query"]["bool"]["must"].append({"term": {"senders.label.keyword": senders_facets}})
+                body["query"]["bool"]["must"].append({"term": {"senders.facet_key": senders_facets}})
 
             if recipients_facets:
-                body["query"]["bool"]["must"].append({"term": {"recipients.label.keyword": recipients_facets}})
+                for recipient in recipients_facets:
+                    body["query"]["bool"]["must"].append({"term": {"recipients.facet_key": recipient}})
 
             if persons_inlined_facets:
-                body["query"]["bool"]["must"].append({"term": {"persons_inlined.label.keyword": persons_inlined_facets}})
+                for person in persons_inlined_facets:
+                    body["query"]["bool"]["must"].append({"term": {"persons_inlined.facet_key": person}})
 
             if location_dates_from_facets:
-                body["query"]["bool"]["must"].append({"term": {"location_dates_from.label.keyword": location_dates_from_facets}})
+                body["query"]["bool"]["must"].append({"term": {"location_dates_from.facet_key": location_dates_from_facets}})
 
             if location_dates_to_facets:
-                body["query"]["bool"]["must"].append({"term": {"location_dates_to.label.keyword": location_dates_to_facets}})
+                for location_to in location_dates_to_facets:
+                    body["query"]["bool"]["must"].append({"term": {"location_dates_to.facet_key": location_to}})
 
             if locations_inlined_facets:
-                body["query"]["bool"]["must"].append({"term": {"locations_inlined.label.keyword": locations_inlined_facets}})
+                for location_inlined in locations_inlined_facets:
+                    body["query"]["bool"]["must"].append({"term": {"locations_inlined.facet_key": location_inlined}})
 
             print("\nfacets checks : \n", body["query"])
 
@@ -332,9 +318,23 @@ class SearchIndexManager(object):
                 if not groupby and 'aggregations' in search:
                     buckets = {}
                     for key, value in search["aggregations"].items():
-                        facette = [v for k, v in value.items() if k == 'buckets'][0]
+                        facette = value["buckets"] if "buckets" in value else []
                         buckets[key] = facette
-                    #buckets = search["aggregations"]
+
+                    if "senders" in buckets and senders_facets:
+                        buckets["senders"] = [x for x in buckets["senders"] if x["key"] != senders_facets]
+                    if "recipients" in buckets and recipients_facets:
+                        buckets["recipients"] = [x for x in buckets["recipients"] if x["key"] not in recipients_facets]
+                    if "persons_inlined" in buckets and persons_inlined_facets:
+                        buckets["persons_inlined"] = [x for x in buckets["persons_inlined"] if x["key"] not in persons_inlined_facets]
+
+                    if "location_dates_from" in buckets and location_dates_from_facets:
+                        buckets["location_dates_from"] = [x for x in buckets["location_dates_from"] if x["key"] != location_dates_from_facets]
+                    if "location_dates_to" in buckets and location_dates_to_facets:
+                        buckets["location_dates_to"] = [x for x in buckets["location_dates_to"] if x["key"] not in location_dates_to_facets]
+                    if "locations_inlined" in buckets and locations_inlined_facets:
+                        buckets["locations_inlined"] = [x for x in buckets["locations_inlined"] if x["key"] not in locations_inlined_facets]
+
                     return results, buckets, after_key, count
                 elif groupby and 'aggregations' in search:
                     buckets = search["aggregations"]["items"]["buckets"]
