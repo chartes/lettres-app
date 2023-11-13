@@ -368,6 +368,49 @@ class JSONAPIRouteRegistrar(object):
         else:
             print("\nreturn no highlight nor scores : \n", (searchtype and query) or (highlight and query))
             return [r.id for r in results], buckets, [], res_dict, {"total": total, "after": after_key}
+
+    def register_count_route(self):
+        count_rule = '/api/{api_version}/count'.format(api_version=self.api_version)
+
+        def count_search():
+            index = current_app.config["DEFAULT_INDEX_NAME"]
+            published = request.args["published"] if "published" in request.args else False
+            query_body={
+                "query": {
+                    "match_all": {}
+                },
+                "size": 0,
+                "aggregations": {
+                    "person_count": {
+                        "cardinality": {
+                            "field": "persons.id"
+                        }
+                    },
+                    "place_count": {
+                        "cardinality": {
+                            "field": "placenames.id"
+                        }
+                    }
+                }
+            }
+            if published:
+                query_body["query"] = {
+                    "term": { "is-published": True }
+                }
+            search = current_app.elasticsearch.search(index=index, body=query_body)
+            response = JSONAPIResponseFactory.make_response(
+                {
+                    "documents": search["hits"]["total"],
+                    "persons": search["aggregations"]["person_count"]["value"],
+                    "placenames": search["aggregations"]["place_count"]["value"]
+                }
+            )
+            return response
+
+        # register the rule
+        current_app.add_url_rule(count_rule,  view_func=count_search)
+
+
     def register_search_route(self, decorators=()):
 
         search_rule = '/api/{api_version}/search'.format(api_version=self.api_version)
