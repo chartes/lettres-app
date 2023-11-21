@@ -18,11 +18,29 @@ pip install -r requirements.txt
 
 
 ## Indexation
-Installer la version Elasticsearch conforme aux spécifications
 
-Depuis le répertoire d'accueil de l'application, exécuter :
-`python3 manage.py db-reindex --host=http://yourhost`
-(ex: python3 manage.py db-reindex --host=http://localhost:5004)
+Installer la version Elasticsearch conforme aux spécifications.
+Avec docker cela donne :
+
+```bash
+docker run --name es-lettres -d -p 9200:9200  elasticsearch:6.8.22
+docker exec es-lettres bash -c "bin/elasticsearch-plugin install analysis-icu"
+docker restart es-lettres
+```
+
+Lors de la première indexation, en supposant que l'application tourne en local
+sur le port 5004, utiliser la commande :
+
+```bash
+python3 manage.py db-reindex --rebuild --host=http://localhost:5004
+```
+Cette commande s'occupe de créer les index de l'application avec les bons
+mappings.
+
+Pour les indexations suivantes, exécuter :
+```bash
+python3 manage.py db-reindex --host=http://localhost:5004
+```
 
 ## Ajouter un utilisateur
 
