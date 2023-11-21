@@ -73,3 +73,23 @@ def api_require_roles(*required_roles):
         return _verify
 
     return token_required_wrapper
+
+
+def profile(view_function):
+    """Decorator which perform profiling on the provided function when it is
+    called. It uses a sampling/statistical profiler (PyInstrument) which opens
+    a browser window once finished.
+    You should avoid using this decorator on function called too frequently.
+    """
+    from pyinstrument import Profiler
+
+    @wraps(view_function)
+    def wrapped(*args, **kwargs):
+        profiler = Profiler()
+        profiler.start()
+        print(f"Starting profiling {view_function.__name__}")
+        ret = view_function(*args, **kwargs)
+        profiler.stop()
+        profiler.open_in_browser()
+        return ret
+    return wrapped
