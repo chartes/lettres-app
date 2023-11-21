@@ -3,7 +3,7 @@
     "_doc": {
       "properties": {
         "id": {
-          "type" : "keyword"
+          "type": "integer"
         },
         "is-published": {
           "type": "boolean"
@@ -11,8 +11,9 @@
         "creation": {
           "type": "date"
         },
-        "creation-not-after": {
-          "type": "date"
+        "creation_range" : {
+          "type": "date_range",
+          "format": "yyyy-MM-dd||yyyy-MM||yyyy"
         },
         "title": {
           "type": "text",
@@ -34,8 +35,46 @@
           "analyzer": "folding",
           "term_vector": "with_positions_offsets"
         },
+        "collections": {
+          "properties": {
+            "facet_key":  {
+              "type" : "keyword"
+            },
+            "id": {
+              "type" : "keyword"
+            },
+            "title": {
+              "type" : "text",
+              "fields" : {
+                "keyword" : {
+                  "type" : "keyword",
+                  "ignore_above" : 256
+                }
+              }
+            },
+            "parents": {
+              "type" : "text",
+              "fields" : {
+                "keyword" : {
+                  "type" : "keyword",
+                  "ignore_above" : 256
+                }
+              }
+            }
+          }
+        },
+        "persons": {
+          "properties": {
+            "id": {
+              "type" : "keyword"
+            }
+          }
+        },
         "senders": {
           "properties": {
+            "facet_key":  {
+              "type" : "keyword"
+            },
             "id": {
               "type" : "keyword"
             },
@@ -45,6 +84,11 @@
                 "keyword" : {
                   "type" : "keyword",
                   "ignore_above" : 256
+                },
+                "keyword_sort": {
+                  "type": "text",
+                  "analyzer": "keyword",
+                  "fielddata": "true"
                 }
               }
             }
@@ -52,6 +96,33 @@
         },
         "recipients": {
           "properties": {
+            "facet_key":  {
+              "type" : "keyword"
+            },
+            "id": {
+              "type" : "keyword"
+            },
+            "label": {
+              "type" : "text",
+              "fields" : {
+                "keyword" : {
+                  "type" : "keyword",
+                  "ignore_above" : 256
+                },
+                "keyword_sort": {
+                  "type": "text",
+                  "analyzer": "keyword",
+                  "fielddata": "true"
+                }
+              }
+            }
+          }
+        },
+        "persons_inlined": {
+          "properties": {
+            "facet_key":  {
+              "type" : "keyword"
+            },
             "id": {
               "type" : "keyword"
             },
@@ -66,8 +137,18 @@
             }
           }
         },
-        "person-inlined": {
+        "placenames": {
           "properties": {
+            "id": {
+              "type": "keyword"
+            }
+          }
+        },
+        "location_dates_from": {
+          "properties": {
+            "facet_key":  {
+              "type" : "keyword"
+            },
             "id": {
               "type" : "keyword"
             },
@@ -77,13 +158,21 @@
                 "keyword" : {
                   "type" : "keyword",
                   "ignore_above" : 256
+                },
+                "keyword_sort": {
+                  "type": "text",
+                  "analyzer": "keyword",
+                  "fielddata": "true"
                 }
               }
             }
           }
         },
-        "location-date-from": {
+        "location_dates_to": {
           "properties": {
+            "facet_key":  {
+              "type" : "keyword"
+            },
             "id": {
               "type" : "keyword"
             },
@@ -93,29 +182,21 @@
                 "keyword" : {
                   "type" : "keyword",
                   "ignore_above" : 256
+                },
+                "keyword_sort": {
+                  "type": "text",
+                  "analyzer": "keyword",
+                  "fielddata": "true"
                 }
               }
             }
           }
         },
-        "location-date-to": {
+        "locations_inlined": {
           "properties": {
-            "id": {
+            "facet_key":  {
               "type" : "keyword"
             },
-            "label": {
-              "type" : "text",
-              "fields" : {
-                "keyword" : {
-                  "type" : "keyword",
-                  "ignore_above" : 256
-                }
-              }
-            }
-          }
-        },
-        "location-inlined": {
-          "properties": {
             "id": {
               "type" : "keyword"
             },

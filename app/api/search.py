@@ -1,3 +1,5 @@
+import json
+
 import elasticsearch
 import pprint
 from flask import current_app
@@ -6,69 +8,149 @@ from flask import current_app
 class SearchIndexManager(object):
     #TODO Victor check if searchtype="fulltext" should be changed to "paratext" as default in backend
     @staticmethod
-    def query_index(index, query, ranges=(), groupby=None, sort_criteriae=None, searchtype="fulltext", highlight=False, page=None, per_page=None, after=None):
-        if sort_criteriae is None:
-            sort_criteriae = []
+    def query_index(index, query, published=False, collectionsfacets=False, senders_facets=False, recipients_facets=False, persons_inlined_facets=False, location_dates_from_facets=False, location_dates_to_facets=False, locations_inlined_facets=False, ranges=(), groupby=None, sort_criteriae=None, searchtype=False, highlight=False, page=None, per_page=None, after=None):
+        if not sort_criteriae:
+            sort_criteriae = ["_score"]
 
         if groupby:
+            searchtype = None
             highlight = False
-        #highlight = type(highlight) == str
-        print('query_index highlight row 16', highlight)
+        print('query_index searchtype row 18', searchtype, highlight)
 
-        if not searchtype:
-            searchtype = "fulltext"
-
-        if searchtype  == "fulltext":
+        if not query:
+            #if search is without a searched string, than match all, regardless of search type (API, frontend searches)
+            print('\nquery_index NO QUERY STRING / searchtype, highlight :\n', searchtype, highlight)
             body_query = {
-                    "bool": {
-                        "must": [
-                            {
-                                "query_string": {
-                                    "query": query,
-                                    "default_operator": "AND",
-                                    "fields": ["transcription", "address"]
-                                }
-                            }
-                        ]
-                    },
+                "bool": {
+                    "must": [{
+                        "match_all": {}
+                    }]
                 }
+            }
             body_highlight = {
+            }
+            print('\nquery_index NO QUERY STRING / body_query, body_highlight :\n', body_query, body_highlight)
+        else:
+            #if search has a searched string, check where to match the searched string based on search type (frontend fulltext or paratext or else)
+            if searchtype == "fulltext":
+                #fulltext is always provided with a query from the front-end
+                #if searchtype is fulltext, we search only in fields transcription & address
+                body_query = {
+                        "bool": {
+                            "must": [
+                                {
+                                    "query_string": {
+                                        "query": query,
+                                        "default_operator": "AND",
+                                        "fields": ["transcription", "address"]
+                                    }
+                                }
+                            ]
+                        },
+                    }
+                body_highlight = {
+                        "type": "fvh",
+                        "fields": {
+                            "address": {},
+                            "transcription": {}
+                        },
+                        "number_of_fragments": 100,
+                        "options": {"return_offsets": False}
+                    }
+            elif searchtype == "paratext":
+                #if searchtype is paratext, we search only in fields title & argument
+                body_query = {
+                        "bool": {
+                            "must": [
+                                {
+                                    "query_string": {
+                                        "query": query,
+                                        "default_operator": "AND",
+                                        "fields": ["title", "argument"]
+                                    }
+                                }
+                            ]
+                        },
+                    }
+                body_highlight = {
                     "type": "fvh",
                     "fields": {
-                        "address": {},
-                        "transcription": {}
+                        "argument": {},
                     },
                     "number_of_fragments": 100,
                     "options": {"return_offsets": False}
                 }
-        elif searchtype == "paratext":
-            body_query = {
+            else:
+                #if no frontend types (fulltext or paratext) is provided, we do not return highlights by default
+                body_query = {
                     "bool": {
                         "must": [
                             {
                                 "query_string": {
                                     "query": query,
                                     "default_operator": "AND",
-                                    "fields": ["title", "argument"]
                                 }
                             }
                         ]
-                    },
+                    }
                 }
-            body_highlight = {
-                "type": "fvh",
-                "fields": {
-                    "argument": {},
-                },
-                "number_of_fragments": 100,
-                "options": {"return_offsets": False}
+                body_highlight = {
+                }
+
+        body_aggregations = {}
+        if searchtype:
+            #for frontend searches on /search, searchtype is either fulltext/paratext and response require facets, obtained via aggregations
+            body_aggregations = {
+                    "collections": {
+                        "terms": {
+                            "field": "collections.title.keyword",
+                            "size": 100000
+                        },
+                    },
+                    "senders": {
+                        "terms": {
+                            "field": "senders.facet_key",
+                            "size": 100000
+                        }
+                    },
+                    "recipients": {
+                        "terms": {
+                            "field": "recipients.facet_key",
+                            "size": 100000
+                        }
+                    },
+                    "persons_inlined": {
+                        "terms": {
+                            "field": "persons_inlined.facet_key",
+                            "size": 100000
+                        }
+                    },
+                    "location_dates_from": {
+                        "terms": {
+                            "field": "location_dates_from.facet_key",
+                            "size": 100000
+                        }
+                    },
+                    "location_dates_to": {
+                        "terms": {
+                            "field": "location_dates_to.facet_key",
+                            "size": 100000
+                        }
+                    },
+                    "locations_inlined": {
+                        "terms": {
+                            "field": "locations_inlined.facet_key",
+                            "size": 100000
+                        }
+                    }
             }
+
+
         if hasattr(current_app, 'elasticsearch'):
+            #start building ES query body
             body = {
                 "query": body_query,
-                "aggregations": {
-
-                },
+                "aggregations": body_aggregations,
                 "highlight": body_highlight,
                 "sort": [
                     #  {"creation": {"order": "desc"}}
@@ -76,24 +158,65 @@ class SearchIndexManager(object):
                 ],
                 "track_scores": True
             }
+            #check for additionnal filters and facets
+            print("\npublished check : \n", published)
+            if published:
+                body["query"]["bool"]["must"].append({"term": {"is-published": True}})
+
+            if collectionsfacets:
+                if len(json.loads(collectionsfacets)["collections"]) > 0:
+                    print("\nlen(json.loads(collectionsfacets)['collections']) :\n", len(json.loads(collectionsfacets)["collections"]))
+                    body["query"]["bool"]["must"].append({"terms": {f"collections.title.keyword": json.loads(collectionsfacets)["collections"]}})
+
+            if senders_facets:
+                body["query"]["bool"]["must"].append({"term": {"senders.facet_key": senders_facets}})
+
+            if recipients_facets:
+                for recipient in recipients_facets:
+                    body["query"]["bool"]["must"].append({"term": {"recipients.facet_key": recipient}})
+
+            if persons_inlined_facets:
+                for person in persons_inlined_facets:
+                    body["query"]["bool"]["must"].append({"term": {"persons_inlined.facet_key": person}})
+
+            if location_dates_from_facets:
+                body["query"]["bool"]["must"].append({"term": {"location_dates_from.facet_key": location_dates_from_facets}})
+
+            if location_dates_to_facets:
+                for location_to in location_dates_to_facets:
+                    body["query"]["bool"]["must"].append({"term": {"location_dates_to.facet_key": location_to}})
+
+            if locations_inlined_facets:
+                for location_inlined in locations_inlined_facets:
+                    body["query"]["bool"]["must"].append({"term": {"locations_inlined.facet_key": location_inlined}})
+
+            print("\nfacets checks : \n", body["query"])
 
             if len(ranges) > 0:
                 for range in ranges:
+                    range["creation_range"]["format"] = "yyyy"
+                    #print("\nranges : \n", ranges)
+                    #print("\nbody['query'] before ranges : \n", body["query"])
+                    #body["query"]["bool"]["filter"] = {"range": range} filter also works but may clash with already defined filters
                     body["query"]["bool"]["must"].append({"range": range})
 
-            '''if highlight:
-                print('for query : ',query, groupby,', highlight : ', highlight)
+                    print("\nbody['query'] after ranges : \n ", body["query"])
+
+            if highlight:
+                #for API usage, allow getting highlights on transcription & address only
+                print('\nif highlight / query : ', query, '\ngroupby : ', groupby, '\nhighlight : ', highlight)
                 body["highlight"] = {
                     "type": "fvh",
                     "fields": {
-                        "argument": {},
-                        "title": {},
-                        "transcription": {}
+                        #"argument": {},
+                        #"title": {},
+                        "transcription": {},
+                        "address": {}
                     },
                     "number_of_fragments": 100,
                     "options": {"return_offsets": False}
                 }
-                print('\nbody["highlight"] : ', body["highlight"],'\n')'''
+                print('\nif highlight / body["highlight"] : ', body["highlight"], '\n')
 
             if groupby is not None:
                 body["aggregations"] = {
@@ -143,6 +266,7 @@ class SearchIndexManager(object):
                                                                            zip(sources_keys, after.split(','))}
                     #print(sources_keys, after, {key: value for key, value in zip(sources_keys, after.split(','))})
 
+            #finalise building ES query body
             if per_page is not None:
                 if page is None or groupby is not None:
                     page = 0
@@ -154,10 +278,12 @@ class SearchIndexManager(object):
                 body["from"] = 0 * per_page
                 body["size"] = per_page
                 # print("WARNING: /!\ for debug purposes the query size is limited to", body["size"])
+
+            #check index and launch ES search
             try:
                 if index is None or len(index) == 0:
                     index = current_app.config["DEFAULT_INDEX_NAME"]
-                print("\nboby : \n")
+                print("\nindex : ", index, "\nbody : \n")
                 pprint.pprint(body)
                 search = current_app.elasticsearch.search(index=index, doc_type="_doc", body=body)
                 # from elasticsearch import Elasticsearch
@@ -165,7 +291,7 @@ class SearchIndexManager(object):
 
                 from collections import namedtuple
                 results = []
-                if highlight:
+                if searchtype or highlight:
                     Result = namedtuple("Result", "index id type score highlight")
                     #print("search['hits']['total'] : ", search['hits']['total'])
                     if search['hits']['total'] > 0:
@@ -174,23 +300,45 @@ class SearchIndexManager(object):
                                               str(hit['_score']), hit.get('highlight'))
                                        for hit in search['hits']['hits']]
 
-                    print('\nif highlight results : \n',results)
+                    print('\nsearch.py query_index results searchtype or highlights : \n', results[0] if len(results) > 0 else "No result")
                 else:
                     Result = namedtuple("Result", "index id type score")
 
                     results = [Result(str(hit['_index']), str(hit['_id']), str(hit['_source']["type"]),
                                       str(hit['_score']))
                                for hit in search['hits']['hits']]
-                    print('\n not highlight results : \n', results)
+                    print('\nsearch.py query_index results no highlights : \n', results[0] if len(results) > 0 else "No result")
 
                 buckets = []
                 after_key = None
                 count = search['hits']['total']
 
                 # print(body, len(results), search['hits']['total'], index)
-                # pprint.pprint(search)
-                if 'aggregations' in search:
+                #pprint.pprint(search)
+                if not groupby and 'aggregations' in search:
+                    buckets = {}
+                    for key, value in search["aggregations"].items():
+                        facette = value["buckets"] if "buckets" in value else []
+                        buckets[key] = facette
+
+                    if "senders" in buckets and senders_facets:
+                        buckets["senders"] = [x for x in buckets["senders"] if x["key"] != senders_facets]
+                    if "recipients" in buckets and recipients_facets:
+                        buckets["recipients"] = [x for x in buckets["recipients"] if x["key"] not in recipients_facets]
+                    if "persons_inlined" in buckets and persons_inlined_facets:
+                        buckets["persons_inlined"] = [x for x in buckets["persons_inlined"] if x["key"] not in persons_inlined_facets]
+
+                    if "location_dates_from" in buckets and location_dates_from_facets:
+                        buckets["location_dates_from"] = [x for x in buckets["location_dates_from"] if x["key"] != location_dates_from_facets]
+                    if "location_dates_to" in buckets and location_dates_to_facets:
+                        buckets["location_dates_to"] = [x for x in buckets["location_dates_to"] if x["key"] not in location_dates_to_facets]
+                    if "locations_inlined" in buckets and locations_inlined_facets:
+                        buckets["locations_inlined"] = [x for x in buckets["locations_inlined"] if x["key"] not in locations_inlined_facets]
+
+                    return results, buckets, after_key, count
+                elif groupby and 'aggregations' in search:
                     buckets = search["aggregations"]["items"]["buckets"]
+
 
                     # grab the after_key returned by ES for future queries
                     if "after_key" in search["aggregations"]["items"]:

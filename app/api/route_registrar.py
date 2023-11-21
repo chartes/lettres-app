@@ -231,7 +231,7 @@ class JSONAPIRouteRegistrar(object):
                             criteriae = []
                         else:
                             criteriae = request.args[p].split(',')
-                        print("prop criteriae:", criteriae)
+                        print("p, p_field, prop criteriae:", p, p_field, criteriae)
                         if not not_null_operator:
                             if len(criteriae) == 0:
                                 if getattr(obj, p_field,
@@ -284,16 +284,25 @@ class JSONAPIRouteRegistrar(object):
                     range[key][op] = value
                 #return range
                 ranges.append(range)
-        print("ranges params:", ranges)
+        print("\nparse_range_parameter ranges params : \n", ranges)
         return ranges
 
 
-    # TODO Victor check if searchtype="fulltext" should be changed to "paratext" as default in backend
-    def search(self, index, query, ranges, groupby, sort_criteriae, highlight, page_id, page_size, page_after, searchtype="fulltext"):
+    def search(self, index, query, ranges, groupby, sort_criteriae, page_id, page_size, page_after, highlight=None, searchtype=None, published=None, collectionsfacets=None, senders_facets=None, recipients_facets=None, persons_inlined_facets=None, location_dates_from_facets=None, location_dates_to_facets=None, locations_inlined_facets=None):
         # query the search engine
+        print("\ndef search published index / collectionsfacets / senders_facets, recipients_facets, persons_inlined_facets, location_dates_from_facets, location_dates_to_facets, locations_inlined_facets : \n", index, published, collectionsfacets, senders_facets, recipients_facets, persons_inlined_facets, location_dates_from_facets, location_dates_to_facets, locations_inlined_facets)
+
         results, buckets, after_key, total = SearchIndexManager.query_index(
             index=index,
             query=query,
+            published=published,
+            collectionsfacets=collectionsfacets,
+            senders_facets=senders_facets,
+            recipients_facets=recipients_facets,
+            persons_inlined_facets=persons_inlined_facets,
+            location_dates_from_facets=location_dates_from_facets,
+            location_dates_to_facets=location_dates_to_facets,
+            locations_inlined_facets=locations_inlined_facets,
             ranges=ranges,
             groupby=groupby,
             sort_criteriae=sort_criteriae,
@@ -303,12 +312,11 @@ class JSONAPIRouteRegistrar(object):
             after=page_after,
             per_page=page_size
         )
+        print("\nESresponse :\n", (results, buckets, after_key, total))
         #print('def search total from query_index :', total)
+
         if total == 0:
-            if highlight:
-                return [], [], {}, {"total": 0}
-            else:
-                return [], {}, {"total": 0}
+            return [], [], [], {}, {"total": 0}
 
         res_dict = {}
         if groupby is None:
@@ -327,6 +335,7 @@ class JSONAPIRouteRegistrar(object):
                 mapper_name = "default"
 
             res_dict[res_type] = []
+            print("\ngroupby debug buckets : \n", buckets)
             for bucket in buckets:
                 # transform the id if needed
                 if res_type in JSONAPIFacadeManager.IDMapper:
@@ -351,13 +360,79 @@ class JSONAPIRouteRegistrar(object):
             res_dict[res_type] = db.session.query(m).filter(m.id.in_(res_ids))
             if len(when) > 0:
                 res_dict[res_type] = res_dict[res_type].order_by(db.case(when, value=m.id))
-
         print("res_dict: ", res_dict)
         print({"total": total, "after": after_key})
-        if highlight:
-            return [r.id for r in results], [{"id": int(r.id), "highlight": r.highlight} for r in results], res_dict, {"total": total, "after": after_key}
+
+        if (searchtype and query) or (highlight and query):
+            print("\nreturn highlights and scores : \n", (searchtype and query) or (highlight and query))
+            return [r.id for r in results], buckets, [{"id": int(r.id), "score": r.score, "highlight": r.highlight} for r in results], res_dict, {"total": total, "after": after_key}
         else:
-            return [r.id for r in results], res_dict, {"total": total, "after": after_key}
+            print("\nreturn no highlight nor scores : \n", (searchtype and query) or (highlight and query))
+            return [r.id for r in results], buckets, [], res_dict, {"total": total, "after": after_key}
+
+    def register_count_route(self):
+        count_rule = '/api/{api_version}/count'.format(api_version=self.api_version)
+
+        def count_search():
+            index = current_app.config["DEFAULT_INDEX_NAME"]
+            published = request.args["published"] if "published" in request.args else False
+            query_body={
+                "query": {
+                    "match_all": {}
+                },
+                "size": 0,
+                "aggregations": {
+                    "person_count": {
+                        "cardinality": {
+                            "field": "persons.id"
+                        }
+                    },
+                    "place_count": {
+                        "cardinality": {
+                            "field": "placenames.id"
+                        }
+                    },
+                    "collections": {
+                        "terms": {
+                            "field": "collections.id",
+                            "size": 100000
+                        }
+                    },
+                    "parents": {
+                        "terms": {
+                            "field": "collections.parents.keyword",
+                            "size": 100000
+                        }
+                    }
+                }
+            }
+            if published:
+                query_body["query"] = {
+                    "term": { "is-published": True }
+                }
+            search = current_app.elasticsearch.search(index=index, body=query_body)
+
+            collection_set = set([x["key"] for x in search["aggregations"]["collections"]["buckets"]])
+            parent_set = set([x["key"] for x in search["aggregations"]["parents"]["buckets"]])
+            collection_count = len(collection_set.union(parent_set))
+
+            if published:
+                collection_count -= 1 # Remove "Non-triées" from collection list
+
+            response = JSONAPIResponseFactory.make_response(
+                {
+                    "documents": search["hits"]["total"],
+                    "persons": search["aggregations"]["person_count"]["value"],
+                    "placenames": search["aggregations"]["place_count"]["value"],
+                    "collections" : collection_count
+                }
+            )
+            return response
+
+        # register the rule
+        current_app.add_url_rule(count_rule,  view_func=count_search)
+
+
     def register_search_route(self, decorators=()):
 
         search_rule = '/api/{api_version}/search'.format(api_version=self.api_version)
@@ -374,17 +449,61 @@ class JSONAPIRouteRegistrar(object):
 
             # PARAMETERS
             index = request.args.get("index", None)
-            query = request.args["query"]
+            query = request.args["query"] if "query" in request.args else False
+            if (len(query) == 0):
+                query = False
+            published = request.args["published"] if "published" in request.args else False
+
+            collectionsfacets = request.args["collectionsfacets"] if "collectionsfacets" in request.args else False
+            senders_facets = request.args["senders"] if "senders" in request.args else False
+
+            try:
+                recipients_facets = (
+                    json.loads(request.args["recipients"]) if "recipients" in request.args else False
+                )
+            except json.JSONDecodeError:
+                recipients_facets = None
+
+            try:
+                persons_inlined_facets = (
+                    json.loads(request.args["persons_inlined"]) if "persons_inlined" in request.args else False
+                )
+            except json.JSONDecodeError:
+                persons_inlined_facets = None
+
+            location_dates_from_facets = request.args["location_dates_from"] if "location_dates_from" in request.args else False
+
+            try:
+                location_dates_to_facets = (
+                    json.loads(request.args["location_dates_to"]) if "location_dates_to" in request.args else False
+                )
+            except json.JSONDecodeError:
+                location_dates_to_facets = None
+
+            try:
+                locations_inlined_facets = (
+                    json.loads(request.args["locations_inlined"]) if "locations_inlined" in request.args else False
+                )
+            except json.JSONDecodeError:
+                locations_inlined_facets = None
+
+            print('\nregister_search_route published / senders_facets / recipients_facets / persons_inlined_facets / location_dates_to_facets / location_dates_from_facets / locations_inlined_facets :\n', published, senders_facets, recipients_facets, persons_inlined_facets, location_dates_from_facets, location_dates_to_facets, locations_inlined_facets)
+
             searchtype = request.args["searchtype"] if "searchtype" in request.args else False
+            print('search_endpoint searchtype : ', request.args["searchtype"] if "searchtype" in request.args else False)
+
             ranges = JSONAPIRouteRegistrar.parse_range_parameter()
             groupby = request.args["groupby[field]"] if "groupby[field]" in request.args else None
-            highlight = request.args["highlight"] if "highlight" in request.args else False
-            print('search_endpoint highlight', request.args["highlight"] if "highlight" in request.args else False)
-            print('search_endpoint searchtype', request.args["searchtype"] if "searchtype" in request.args else False)
             #print('groupby', groupby)
+
+            highlight = request.args["highlight"] if "highlight" in request.args else False
+            #print('search_endpoint highlight', request.args["highlight"] if "highlight" in request.args else False)
+
             # if request has pagination parameters
             # add links to the top-level object
             if groupby:
+                searchtype = None
+                highlight = False
                 num_page = 1
                 page_size = 6616
             else:
@@ -403,7 +522,7 @@ class JSONAPIRouteRegistrar(object):
 
             # Search, retrieve, filter, sort and paginate objs
             sort_criteriae = None
-            if "sort" in request.args:
+            if "sort" in request.args and request.args["sort"]:
                 sort_criteriae = []
                 for criteria in request.args["sort"].split(','):
                     if criteria.startswith('-'):
@@ -415,33 +534,29 @@ class JSONAPIRouteRegistrar(object):
                     sort_criteriae.append({criteria: {"order": sort_order}})
 
             try:
-                if highlight:
-                    sorted_ids_list, sorted_highlights, res, meta = self.search(
-                        index=index,
-                        query=query,
-                        ranges=ranges,
-                        groupby=groupby,
-                        sort_criteriae=sort_criteriae,
-                        searchtype=searchtype,
-                        highlight=highlight,
-                        page_id=num_page,
-                        page_after=request.args["page[after]"] if "page[after]" in request.args else None,
-                        page_size=page_size
-                    )
-                else:
-                    sorted_ids_list, res, meta = self.search(
-                        index=index,
-                        query=query,
-                        ranges=ranges,
-                        groupby=groupby,
-                        sort_criteriae=sort_criteriae,
-                        searchtype=searchtype,
-                        highlight=highlight,
-                        page_id=num_page,
-                        page_after=request.args["page[after]"] if "page[after]" in request.args else None,
-                        page_size=page_size
-                    )
-                #print('sorted_ids_list, res, meta', sorted_ids_list, res, meta)
+                sorted_ids_list, buckets, sorted_highlights, res, meta = self.search(
+                    index=index,
+                    query=query,
+                    published=published,
+                    collectionsfacets=collectionsfacets,
+                    senders_facets=senders_facets,
+                    recipients_facets=recipients_facets,
+                    persons_inlined_facets=persons_inlined_facets,
+                    location_dates_from_facets=location_dates_from_facets,
+                    location_dates_to_facets=location_dates_to_facets,
+                    locations_inlined_facets=locations_inlined_facets,
+                    ranges=ranges,
+                    groupby=groupby,
+                    sort_criteriae=sort_criteriae,
+                    searchtype=searchtype,
+                    highlight=highlight,
+                    page_id=num_page,
+                    page_after=request.args["page[after]"] if "page[after]" in request.args else None,
+                    page_size=page_size
+                )
+                print("\nroute_registrar.py search_endpoint searchtype ressource one : \n",
+                      sorted_ids_list[0] if len(sorted_ids_list) > 0 else "No sorted_ids_list")
+
             except Exception as e:
                 # raise e
                 return JSONAPIResponseFactory.make_errors_response({
@@ -593,7 +708,19 @@ class JSONAPIRouteRegistrar(object):
 
             resources = [f.resource for f in sorted_facade_objs]
 
-            if highlight:
+            if searchtype:
+                if not buckets:
+                    buckets = {
+                        "persons": [],
+                        "collections": [],
+                        "senders": [],
+                        "recipients": [],
+                        "persons_inlined": [],
+                        "location_dates_from": [],
+                        "location_dates_to": [],
+                        "locations_inlined": []
+                    }
+            if (searchtype and query) or (highlight and query):
                 print('\nsorted_highlights : ', sorted_highlights, '\n')
                 for resource in resources:
                     if resource['type'] == 'document':
@@ -602,27 +729,30 @@ class JSONAPIRouteRegistrar(object):
                             if resource["id"] == sorted_highlight["id"]:
                                 if sorted_highlight["highlight"]:
                                     for res_attrib in sorted_highlight["highlight"]:
-                                        if res_attrib == "transcription" or res_attrib == "address":
-                                            if not "transcription" in resource["attributes"]:
-                                                resource["attributes"]["transcription"] = {"highlight": []}
-                                            print('\nsorted_highlight["highlight"][res_attrib] : ',
-                                                  sorted_highlight["highlight"][res_attrib])
-                                            for index, item in enumerate(sorted_highlight["highlight"][res_attrib]):
-                                                resource["attributes"]["transcription"]["highlight"].append(
-                                                    sorted_highlight["highlight"][res_attrib][index])
-                                        '''else:
+                                        if searchtype == "fulltext":
+                                            if res_attrib == "transcription" or res_attrib == "address":
+                                                if not isinstance(resource["attributes"]["transcription"], dict):
+                                                    resource["attributes"]["transcription"] = {'raw': resource["attributes"]["transcription"], 'highlight': []}
+                                                #print('\nsorted_highlight["highlight"][res_attrib] : ', sorted_highlight["highlight"][res_attrib])
+                                                for index, item in enumerate(sorted_highlight["highlight"][res_attrib]):
+                                                    resource["attributes"]["transcription"]["highlight"].append(sorted_highlight["highlight"][res_attrib][index])
+                                                    #print("\n resource['attributes']['transcription']['highlight']: \n", resource["attributes"]["transcription"]["highlight"])
+
+                                        elif searchtype == "paratext":
+                                            if res_attrib == "argument":
+                                                resource["attributes"]["argument"] = {'raw': resource["attributes"]["argument"], 'highlight': []}
+                                                for index, item in enumerate(sorted_highlight["highlight"][res_attrib]):
+                                                    resource["attributes"]["argument"]["highlight"].append(sorted_highlight["highlight"][res_attrib][index])
+                                        else:
                                             if res_attrib in resource["attributes"]:
-                                                print('\nres_attrib : ', res_attrib)
-                                                #print('\nresource["attributes"][res_attrib] : ', resource["attributes"][res_attrib])
-                                                #print('\ntype(resource["attributes"][res_attrib]) : ', type(resource["attributes"][res_attrib]))
-                                                #print('\nsorted_highlight["highlight"][res_attrib] : ', sorted_highlight["highlight"][res_attrib])
-                                                #print('\nsorted_highlight["highlight"][res_attrib] : ', sorted_highlight["highlight"][res_attrib])
-                                                #print('\nsorted_highlight["highlight"][res_attrib][0] : ', sorted_highlight["highlight"][res_attrib][0])
-                                                resource["attributes"][res_attrib] = {'raw':resource["attributes"][res_attrib], 'highlight':sorted_highlight["highlight"][res_attrib]}
-                                        '''
+                                                resource["attributes"][res_attrib] = {
+                                                    'raw': resource["attributes"][res_attrib],
+                                                    'highlight': sorted_highlight["highlight"][res_attrib]
+                                                }
+                                if sorted_highlight["score"]:
+                                    resource["score"] = sorted_highlight["score"]
 
-
-            print('\nRESOURCE : ', resources,'\n')
+            print('\nRESOURCE sample (first) : ', resources[0] if len(resources) > 0 else "No ressource",'\n')
             res_meta = {
                 "total-count": meta["total"],
                 "duration": float('%.4f' % (time.time() - start_time))
@@ -632,6 +762,7 @@ class JSONAPIRouteRegistrar(object):
 
             response = JSONAPIResponseFactory.make_data_response(
                 resources,
+                buckets=buckets,
                 links=links,
                 included_resources=included_resources,
                 meta=res_meta

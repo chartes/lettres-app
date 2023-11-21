@@ -42,7 +42,8 @@ class ChangesMixin:
         return db.relationship("Changelog",
                                primaryjoin="and_({0}.id==foreign(Changelog.object_id),"
                                            "Changelog.object_type=='{1}')".format(self.__name__,  self.__tablename__),
-                               cascade="all, delete-orphan")
+                               cascade="all, delete-orphan",
+                               overlaps="changes")
 
 
 class Document(db.Model, ChangesMixin):
@@ -226,7 +227,7 @@ class Placename(db.Model, ChangesMixin):
     __tablename__ = 'placename'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    label = db.Column(db.String, nullable=False, unique=True)
+    label = db.Column(db.String, nullable=False)
     long = db.Column(db.String)
     lat = db.Column(db.String)
     ref = db.Column(db.String, unique=True)
@@ -272,7 +273,7 @@ class Person(db.Model, ChangesMixin):
     __tablename__ = 'person'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    label = db.Column(db.String, nullable=False, unique=True)
+    label = db.Column(db.String, nullable=False)
     ref = db.Column(db.String, unique=True)
 
 
