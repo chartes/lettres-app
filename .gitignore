@@ -8,6 +8,7 @@ venv
 tests/data/lettres-test.sqlite
 app/client/node_modules/
 app/static/js/main.build.*
+*.sqlite
 # Frontend directories and files
 
 node_modules/
@@ -21,3 +22,4 @@ production.env
 db/lettres.dev.sqlite db/lettres.png
 db/collection_lettres_lot01.sql
 db/lettres.dev.sqlite
+db/lettres.dev_forProd.sqlite
