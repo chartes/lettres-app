@@ -6,7 +6,7 @@ from flask import current_app
 
 
 class SearchIndexManager(object):
-
+    #TODO Victor check if searchtype="fulltext" should be changed to "paratext" as default in backend
     @staticmethod
     def query_index(index, query, published=False, collectionsfacets=False, senders_facets=False, recipients_facets=False, persons_inlined_facets=False, location_dates_from_facets=False, location_dates_to_facets=False, locations_inlined_facets=False, ranges=(), groupby=None, sort_criteriae=None, searchtype=False, highlight=False, page=None, per_page=None, after=None):
         if not sort_criteriae:

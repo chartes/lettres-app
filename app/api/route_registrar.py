@@ -287,6 +287,7 @@ class JSONAPIRouteRegistrar(object):
         print("\nparse_range_parameter ranges params : \n", ranges)
         return ranges
 
+
     def search(self, index, query, ranges, groupby, sort_criteriae, page_id, page_size, page_after, highlight=None, searchtype=None, published=None, collectionsfacets=None, senders_facets=None, recipients_facets=None, persons_inlined_facets=None, location_dates_from_facets=None, location_dates_to_facets=None, locations_inlined_facets=None):
         # query the search engine
         print("\ndef search published index / collectionsfacets / senders_facets, recipients_facets, persons_inlined_facets, location_dates_from_facets, location_dates_to_facets, locations_inlined_facets : \n", index, published, collectionsfacets, senders_facets, recipients_facets, persons_inlined_facets, location_dates_from_facets, location_dates_to_facets, locations_inlined_facets)
