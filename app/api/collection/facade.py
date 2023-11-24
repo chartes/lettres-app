@@ -183,6 +183,13 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
                     data["payload"]["collections"] = [l for l in data["payload"]["collections"] if l.get("id") != self.id]
                     SearchIndexManager.add_to_index(index=data["index"], id=data["id"], payload=data["payload"])
 
+    def reindex(self, op, propagate=False):
+        if op == "update":
+            # Updates of collection metadata shouldn't impact linked documents
+            self.add_to_index(False)
+        else:
+            super().reindex(op, propagate)
+
     @staticmethod
     def delete_resource(obj):
         default_col_title = current_app.config["UNSORTED_DOCUMENTS_COLLECTION_TITLE"]
