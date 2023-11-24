@@ -103,7 +103,7 @@ class SearchIndexManager(object):
             body_aggregations = {
                     "collections": {
                         "terms": {
-                            "field": "collections.title.keyword",
+                            "field": "collections.id",
                             "size": 100000
                         },
                     },
@@ -166,7 +166,7 @@ class SearchIndexManager(object):
             if collectionsfacets:
                 if len(json.loads(collectionsfacets)["collections"]) > 0:
                     print("\nlen(json.loads(collectionsfacets)['collections']) :\n", len(json.loads(collectionsfacets)["collections"]))
-                    body["query"]["bool"]["must"].append({"terms": {f"collections.title.keyword": json.loads(collectionsfacets)["collections"]}})
+                    body["query"]["bool"]["must"].append({"terms": {f"collections.id": json.loads(collectionsfacets)["collections"]}})
 
             if senders_facets:
                 body["query"]["bool"]["must"].append({"term": {"senders.facet_key": senders_facets}})

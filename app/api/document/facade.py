@@ -311,7 +311,13 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
 
             "witnesses": [{"id": w.id, "content": w.content, "classification-mark": w.classification_mark} for w in self.obj.witnesses],
             "languages": [{"id": l.id, "code": l.code} for l in self.obj.languages],
-            "collections": [{"facet_key": f'{c.id}###{c.title}', "id": c.id, "title": c.title, "parents": [parent.id for parent in c.parents] if c.parents else None} for c in self.obj.collections],
+            "collections": [
+                {
+                    "id": c.id,
+                    "parents": [parent.id for parent in c.parents] if c.parents else None
+                }
+                for c in self.obj.collections
+            ],
             "persons": [
                 {
                     "id": c_h_r.person.id,
