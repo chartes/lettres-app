@@ -79,15 +79,15 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
                 doc.creation for doc in self.obj.published_including_children
                 if doc.creation
             ]
-            date_min = min(creation)
-            date_max = max(creation)
+            date_min = min(creation) if creation else None
+            date_max = max(creation) if creation else None
         else:
             creation = [
                 doc.creation for doc in self.obj.documents_including_children
                 if doc.creation
             ]
-            date_min = min(creation)
-            date_max = max(creation)
+            date_min = min(creation) if creation else None
+            date_max = max(creation) if creation else None
 
         resource = {
             **self.resource_identifier,
