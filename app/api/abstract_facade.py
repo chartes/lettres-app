@@ -181,19 +181,11 @@ class JSONAPIAbstractFacade(object):
                     except Exception:
                         setattr(obj, rel_name, rel_data[0])
                 else:
-                    try:
-                        print('getattr(obj, rel_name) : ', getattr(obj, rel_name), 'type getattr(obj, rel_name) : ',
-                              type(getattr(obj, rel_name)))
-                        print('rel_data : ', rel_data, 'type rel_data : ', type(rel_data))
-                        setattr(obj, rel_name, getattr(obj, rel_name, []) + rel_data) # failing on blank database & add collection to document, use instead :
-                        # setattr(obj, rel_name, getattr(obj, rel_name, []).all() + rel_data)
-                    except Exception as e:
-                        print("patch append error e", e)
-                        print('getattr(obj, rel_name, []) : ', getattr(obj, rel_name, []),
-                              'type getattr(obj, rel_name, []) : ', type(getattr(obj, rel_name, [])))
-                        print('rel_data[0] : ', rel_data[0], 'type rel_data[0] : ', type(rel_data[0]))
-                        # failing on blank database, use instead : setattr(obj, rel_name, getattr(obj, rel_name, []).all() + rel_data[0])
-                        setattr(obj, rel_name, getattr(obj, rel_name, []) + rel_data[0])
+                    if isinstance(rel_data, list):
+                        for item in rel_data:
+                            getattr(obj, rel_name).append(item)
+                    else:
+                        getattr(obj, rel_name).append(rel_data)
             else:
                 raise AttributeError("Relationship %s does not exist" % rel_name)
         return obj
