@@ -101,7 +101,7 @@ def invite_user(api_version):
     json = request.get_json(force=True)
 
     email = json.get('email', None)
-    role = json.get('role', 'student')
+    role = json.get('role', 'contributor')
 
     if email is None:
         print("Email unknown")
@@ -139,7 +139,7 @@ def invite_user(api_version):
         return make_400("Cannot invite user: %s" % str(e))
 
     mail.send(msg)
-    return make_200(msg)
+    return make_200("User invited with role: " + role)
 
 
 #
