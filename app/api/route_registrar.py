@@ -421,7 +421,7 @@ class JSONAPIRouteRegistrar(object):
 
             response = JSONAPIResponseFactory.make_response(
                 {
-                    "documents": search["hits"]["total"],
+                    "documents": search["hits"]["total"]["value"],
                     "persons": search["aggregations"]["person_count"]["value"],
                     "placenames": search["aggregations"]["place_count"]["value"],
                     "collections" : collection_count
