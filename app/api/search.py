@@ -294,7 +294,7 @@ class SearchIndexManager(object):
                 if searchtype or highlight:
                     Result = namedtuple("Result", "index id type score highlight")
                     #print("search['hits']['total'] : ", search['hits']['total'])
-                    if search['hits']['total'] > 0:
+                    if search['hits']['total']['value'] > 0:
                         for hit in search['hits']['hits']:
                             results = [Result(str(hit['_index']), str(hit['_id']), str(hit['_source']["type"]),
                                               str(hit['_score']), hit.get('highlight'))
@@ -311,7 +311,7 @@ class SearchIndexManager(object):
 
                 buckets = []
                 after_key = None
-                count = search['hits']['total']
+                count = search['hits']['total']['value']
 
                 # print(body, len(results), search['hits']['total'], index)
                 #pprint.pprint(search)
