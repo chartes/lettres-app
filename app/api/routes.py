@@ -110,8 +110,8 @@ def invite_user(api_version):
     username = email.split('@')[0]
     password = ''.join(choice(string.ascii_letters) for i in range(5)) + str(randint(1, 100)).zfill(3)
 
-    msg = Message('Contribute to Lettres', sender=current_app.config['MAIL_USERNAME'], recipients=[email])
-    msg.body = "Vous avez été invité(e) à contribuer au projet Lettres (" \
+    msg = Message("Contribuer à l'application Ecco", sender=current_app.config['MAIL_USERNAME'], recipients=[email])
+    msg.body = "Vous avez été invité(e) à contribuer au projet Ecco (" \
                "https://dev.chartes.psl.eu/adele/profile).\nIdentifiant: %s\nMot de passe: %s\nN'oubliez pas de " \
                "changer votre mot de passe après votre première connexion !" % (email, password)
 
@@ -214,7 +214,7 @@ def send_password_reset_link(api_version):
     link = current_app.with_url_prefix(f"/reset-password?token={token}")
 
     msg = Message(
-        'Lettres - Demande de récupération de mot de passe',
+        'Ecco - Demande de récupération de mot de passe',
         sender=current_app.config['MAIL_USERNAME'],
         recipients=[email]
     )
