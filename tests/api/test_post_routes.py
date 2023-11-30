@@ -103,7 +103,7 @@ class TestPostRoutes(TestBaseServer):
                 "type": "image",
                 "attributes": {
                     "canvas-idx": 1,
-                    "manifest-url": "http://burgess.biz/"
+                    "manifest_url": "http://burgess.biz/"
                 },
                 "relationships": {
                     "witness": {
@@ -122,7 +122,7 @@ class TestPostRoutes(TestBaseServer):
             "data": {
                 "type": "image",
                 "attributes": {
-                    "manifest-url": "http://burgess.biz/"
+                    "manifest_url": "http://burgess.biz/"
                 },
                 "relationships": {
                     "witness": {
@@ -141,7 +141,7 @@ class TestPostRoutes(TestBaseServer):
             "data": {
                 "type": "image",
                 "attributes": {
-                    "manifest-url": "http://burgess.biz/"
+                    "manifest_url": "http://burgess.biz/"
                 },
                 "relationships": {
                     "witness": {
