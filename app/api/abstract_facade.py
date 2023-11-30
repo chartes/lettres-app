@@ -232,11 +232,11 @@ class JSONAPIAbstractFacade(object):
                     # print(obj, rel_name, [r for r in getattr(obj, rel_name)
                     #                            if r.id not in
                     #                            [rd.id for rd in rel_data]])
-                    try:
-                        setattr(obj, rel_name, [r for r in getattr(obj, rel_name)
-                                                if r.id not in
-                                                [rd.id for rd in rel_data]])
-                    except Exception:
+                    rel_collection =  getattr(obj, rel_name)
+                    if hasattr(rel_collection, 'remove'):
+                        for item in rel_data:
+                            rel_collection.remove(item)
+                    else:
                         setattr(obj, rel_name, None)
                 else:
                     raise AttributeError("Relationship %s does not exist" % rel_name)
