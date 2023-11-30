@@ -1,7 +1,9 @@
+from logging import getLogger
 from flask import current_app, request
 
 from app import db
 
+logger = getLogger(__name__)
 
 class JSONAPIAbstractFacade(object):
     """
@@ -242,7 +244,7 @@ class JSONAPIAbstractFacade(object):
             db.session.add(obj)
             db.session.commit()
         except Exception as e:
-            print(e)
+            logger.exception(e)
             errors = {
                 "status": 404 if obj is None else 400,
                 "title": "Error deleting related resource from '%s' with data: %s" % (
