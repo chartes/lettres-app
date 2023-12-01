@@ -115,33 +115,19 @@ class Collection(db.Model, ChangesMixin):
 
     @property
     def documents_including_children(self):
-        docs = []
+        docs = set()
         for c in self.children:
-            docs += c.documents_including_children
-        docs += self.documents.distinct()
-        unique_docs = []
-        seen = set()
-        for doc_obj in docs:
-            if doc_obj.id not in seen:
-                unique_docs.append(doc_obj)
-                seen.add(doc_obj.id)
-        return unique_docs
+            docs |= c.documents_including_children
+        docs.update(self.documents.all())
+        return docs
 
     @property
     def published_including_children(self):
-        pub_docs = []
+        pub_docs = set()
         for c in self.children:
-            pub_docs += c.published_including_children
-        pub_docs += self.documents.filter_by(is_published=True).distinct()
-        unique_pub_docs = []
-        seen = set()
-        for doc_obj in pub_docs:
-            if doc_obj.id not in seen:
-                unique_pub_docs.append(doc_obj)
-                seen.add(doc_obj.id)
-        #print("pub_docs", pub_docs)
-        #print("unique_pub_docs", unique_pub_docs)
-        return unique_pub_docs
+            pub_docs |= c.published_including_children
+        pub_docs |= set(self.documents.filter(Document.is_published).distinct().all())
+        return pub_docs
 
     @property
     def children_including_children(self):
