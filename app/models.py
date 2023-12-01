@@ -74,7 +74,8 @@ class Document(db.Model, ChangesMixin):
                                 backref=db.backref('documents', ))
     collections = db.relationship("Collection",
                                 secondary=association_document_has_collection,
-                                backref=db.backref('documents', lazy='dynamic'), lazy='dynamic')
+                                back_populates="documents",
+                                lazy='dynamic')
     next_document = db.relationship("Document", backref=db.backref('prev_document', remote_side=id), uselist=False)
 
     locks = db.relationship("Lock",
@@ -106,6 +107,10 @@ class Collection(db.Model, ChangesMixin):
 
     admin_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
+    documents = db.relationship("Document",
+                                secondary=association_document_has_collection,
+                                back_populates="collections",
+                                lazy="dynamic")
     children = db.relationship("Collection", backref=db.backref('parent', remote_side=id))
 
     @property
