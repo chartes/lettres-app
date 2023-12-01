@@ -1,9 +1,10 @@
 import datetime
 from flask_user import UserMixin
-from sqlalchemy import Enum, DateTime, func
+from sqlalchemy import Enum, DateTime, func, event
 from sqlalchemy.ext.declarative import declared_attr
 from werkzeug.security import check_password_hash
 
+from flask import current_app
 from app import db
 
 
@@ -75,7 +76,7 @@ class Document(db.Model, ChangesMixin):
     collections = db.relationship("Collection",
                                 secondary=association_document_has_collection,
                                 back_populates="documents",
-                                lazy='dynamic')
+                                lazy='select')
     next_document = db.relationship("Document", backref=db.backref('prev_document', remote_side=id), uselist=False)
 
     locks = db.relationship("Lock",
@@ -112,6 +113,11 @@ class Collection(db.Model, ChangesMixin):
                                 back_populates="collections",
                                 lazy="dynamic")
     children = db.relationship("Collection", backref=db.backref('parent', remote_side=id))
+
+    @staticmethod
+    def get_triage_collection():
+        triage_collection_title = current_app.config["UNSORTED_DOCUMENTS_COLLECTION_TITLE"]
+        return Collection.query.filter(Collection.title == triage_collection_title).one()
 
     @property
     def documents_including_children(self):
@@ -466,6 +472,25 @@ class Changelog(db.Model):
     description = db.Column(db.String, nullable=True)
 
     user = db.relationship('User', backref=db.backref("changes", uselist=True),  single_parent=True)
+
+
+# ====================================
+# Hooks
+# ====================================
+
+@event.listens_for(Document.collections, 'append')
+def remove_documents_from_triage_collection(target, value, initiator):
+    triage = Collection.get_triage_collection()
+    if (value != triage) and (triage in target.collections):
+        target.collections.remove(triage)
+
+
+@event.listens_for(Document.collections, 'remove')
+def move_orphan_documents_to_triage_collection(target, value, initiator):
+    triage = Collection.get_triage_collection()
+    if (value != triage) and (len(target.collections) == 1):
+        target.collections.append(triage)
+
 
 
 MODELS = {
