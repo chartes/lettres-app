@@ -155,6 +155,10 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
         w = [x for x in self.obj.witnesses if x.id == id]
         if len(w) == 0:
             return None
+        # do not return a manifest if it has no images
+        canvas_ids = [img.canvas_id for img in w[0].images]
+        if len(canvas_ids) == 0:
+            return None
         f_obj, errors, kwargs = WitnessFacade.get_facade('', w[0])
         return f_obj.get_iiif_manifest_url()
 
