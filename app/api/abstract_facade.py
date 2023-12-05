@@ -1,6 +1,7 @@
 from flask import current_app, request
 
 from app import db
+from app.models import Collection
 
 
 class JSONAPIAbstractFacade(object):
@@ -181,6 +182,12 @@ class JSONAPIAbstractFacade(object):
                     except Exception:
                         setattr(obj, rel_name, rel_data[0])
                 else:
+                    if rel_name == 'collections':
+                        triage_collection_title = current_app.config["UNSORTED_DOCUMENTS_COLLECTION_TITLE"]
+                        triage_collection = Collection.query.filter(Collection.title == triage_collection_title).one()
+                        if triage_collection in getattr(obj, rel_name).all():
+                            getattr(obj, rel_name).remove(triage_collection)
+
                     if isinstance(rel_data, list):
                         for item in rel_data:
                             getattr(obj, rel_name).append(item)
@@ -230,12 +237,16 @@ class JSONAPIAbstractFacade(object):
                     # print(obj, rel_name, [r for r in getattr(obj, rel_name)
                     #                            if r.id not in
                     #                            [rd.id for rd in rel_data]])
-                    try:
-                        setattr(obj, rel_name, [r for r in getattr(obj, rel_name)
-                                                if r.id not in
-                                                [rd.id for rd in rel_data]])
-                    except Exception:
+                    rel_collection = getattr(obj, rel_name)
+                    if hasattr(rel_collection, 'remove'):
+                        for item in rel_data:
+                            rel_collection.remove(item)
+                    else:
                         setattr(obj, rel_name, None)
+                    if rel_name == 'collections' and len(rel_collection.all()) == 0:
+                        triage_collection_title = current_app.config["UNSORTED_DOCUMENTS_COLLECTION_TITLE"]
+                        triage_collection = Collection.query.filter(Collection.title == triage_collection_title).one()
+                        rel_collection.append(triage_collection)
                 else:
                     raise AttributeError("Relationship %s does not exist" % rel_name)
 
