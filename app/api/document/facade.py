@@ -4,7 +4,7 @@ from flask import current_app, request
 
 from app.api.abstract_facade import JSONAPIAbstractChangeloggedFacade
 from app.api.witness.facade import WitnessFacade
-from app.models import Document, WITNESS_STATUS_VALUES
+from app.models import Document, WITNESS_STATUS_VALUES, datetime_to_str
 
 clean_tags = re.compile('<.*?>')
 clean_notes = re.compile('\[\d+\]')
@@ -391,7 +391,18 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
                     "ref": c_h_r.placename.ref
                 }
                 for c_h_r in self.obj.placenames_having_roles if c_h_r.placename_role.label == 'inlined'
-            ]
+            ],
+            "lock":
+                [
+                    {
+                        "id": self.obj.locks[0].id,
+                        "user_id": self.obj.locks[0].user.id,
+                        "username": self.obj.locks[0].user.username,
+                        "description": self.obj.locks[0].description,
+                        "event_date": datetime_to_str(self.obj.locks[0].event_date)[:10],
+                        "expiration_date": datetime_to_str(self.obj.locks[0].expiration_date)[:10],
+                    }
+                    if self.obj.locks else None]
         }
         return [{"id": self.obj.id, "index": self.get_index_name(), "payload": payload}]
 
@@ -467,6 +478,39 @@ class DocumentSearchFacade(DocumentFacade):
             resource["relationships"] = self.get_exposed_relationships()
         return resource
 
+class DocumentLockFacade(DocumentFacade):
+    def __init__(self, *args, **kwargs):
+        super(DocumentLockFacade, self).__init__(*args, **kwargs)
+
+    @property
+    def resource(self):
+        resource = {
+            **self.resource_identifier,
+            "attributes": {
+                "is-published": False if self.obj.is_published is None else self.obj.is_published,
+                "witnesses": [{"id": w.id, "content": w.content, "classification-mark": w.classification_mark,
+                               "manifest_url": self.get_witness_manifest_url(w.id)} for w in self.obj.witnesses],
+                "collections": [{'id': c.id, 'title': c.title} for c in self.obj.collections if self.obj.collections],
+                "lock": [
+                    {
+                        "id": self.obj.locks[0].id,
+                        "is_active": self.obj.locks[0].is_active,
+                        "user_id": self.obj.locks[0].user.id,
+                        "username": self.obj.locks[0].user.username,
+                        "description": self.obj.locks[0].description,
+                        "event_date": datetime_to_str(self.obj.locks[0].event_date),
+                        "expiration_date": datetime_to_str(self.obj.locks[0].expiration_date),
+                    }
+                    if self.obj.locks else []]
+            },
+            "meta": self.meta,
+            "links": {
+                "self": self.self_link
+            }
+        }
+        if self.with_relationships_links:
+            resource["relationships"] = self.get_exposed_relationships()
+        return resource
 
 class DocumentStatusFacade(DocumentFacade):
     def __init__(self, *args, **kwargs):
