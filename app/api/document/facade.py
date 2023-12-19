@@ -4,7 +4,7 @@ from flask import current_app, request
 
 from app.api.abstract_facade import JSONAPIAbstractChangeloggedFacade
 from app.api.witness.facade import WitnessFacade
-from app.models import Document, WITNESS_STATUS_VALUES
+from app.models import Document, WITNESS_STATUS_VALUES, datetime_to_str
 
 clean_tags = re.compile('<.*?>')
 clean_notes = re.compile('\[\d+\]')
@@ -399,6 +399,106 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
         #print("GOING TO BE REMOVED FROM INDEX:", [{"id": self.obj.id, "index": self.get_index_name()}])
         return [{"id": self.obj.id, "index": self.get_index_name()}]
 
+class DocumentFrontFacade(DocumentFacade):
+    def __init__(self, *args, **kwargs):
+        super(DocumentFrontFacade, self).__init__(*args, **kwargs)
+        self.relationships.pop("current-lock")
+        self.relationships.pop("changes")
+
+    @property
+    def resource(self):
+        """
+        remove the thumbnail generation from the attributes
+        :return:
+        """
+        resource = {
+            **self.resource_identifier,
+            "attributes": {
+                "title": self.obj.title,
+                "creation": self.obj.creation,
+                "creation-label": self.obj.creation_label,
+                "creation-not-after": self.obj.creation_not_after,
+                "argument": self.obj.argument,
+                "address": self.obj.address,
+                "transcription": self.obj.transcription,
+                "is-published": False if self.obj.is_published is None else self.obj.is_published,
+                "currentLock": {
+                    "id": self.obj.current_lock.id,
+                    "description": self.obj.current_lock.description,
+                    "event-date": datetime_to_str(self.obj.current_lock.event_date),
+                    "expiration-date": datetime_to_str(self.obj.current_lock.expiration_date),
+                    "object-id": self.obj.current_lock.object_id,
+                    "object-type": self.obj.current_lock.object_type,
+                    "is-active": self.obj.current_lock.is_active,
+                } if self.obj.current_lock else None,
+                "witnesses": [{"id": w.id, "content": w.content, "classification-mark": w.classification_mark, "manifest_url": self.get_witness_manifest_url(w.id), "num": w.num, "status": w.status, "tradition": w.tradition} for w in self.obj.witnesses],
+                "notes": [{"id": n.id, "content": n.content, "occurences": n.occurences} for n in self.obj.notes],
+                "languages": [{"id": l.id, "code": l.code, "label": l.label} for l in self.obj.languages],
+                "collections": [
+                    {
+                        "id": c.id,
+                        "title": c.title,
+                        "description": c.description,
+                    }
+                    for c in self.obj.collections
+                ],
+                "persons": [
+                    {
+                        "person":
+                            {
+                                "id": c_h_r.person.id,
+                                "label": c_h_r.person.label,
+                                "ref": c_h_r.person.ref
+                            },
+                        "relation":
+                            {
+                                "field": c_h_r.field,
+                                "function": c_h_r.function,
+                                "id": c_h_r.id
+                            },
+                        "role":
+                            {
+                                "description": c_h_r.person_role.description,
+                                "id": c_h_r.person_role.id,
+                                "label": c_h_r.person_role.label
+                            }
+                    }
+                    for c_h_r in self.obj.persons_having_roles
+                ],
+                "placenames": [
+                    {
+                        "placename":
+                            {
+                                "id": c_h_r.placename.id,
+                                "label": c_h_r.placename.label,
+                                "lat": c_h_r.placename.lat,
+                                "long": c_h_r.placename.long,
+                                "ref": c_h_r.placename.ref
+                            },
+                        "relation":
+                            {
+                                "field": c_h_r.field,
+                                "function": c_h_r.function,
+                                "id": c_h_r.id
+                            },
+                        "role":
+                            {
+                                "description": c_h_r.placename_role.description,
+                                "id": c_h_r.placename_role.id,
+                                "label": c_h_r.placename_role.label
+                            }
+                    }
+                    for c_h_r in self.obj.placenames_having_roles
+                ],
+            },
+            "meta": self.meta,
+            "links": {
+                "self": self.self_link
+            }
+        }
+        if self.with_relationships_links:
+            resource["relationships"] = self.get_exposed_relationships()
+        return resource
 
 class DocumentSearchFacade(DocumentFacade):
     def __init__(self, *args, **kwargs):
