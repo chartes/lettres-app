@@ -3,7 +3,7 @@ from app.api.collection.facade import CollectionFacade, CollectionHierarchyOnlyF
 from app.api.person.facade import PersonFacade
 from app.api.person_has_role.facade import PersonHasRoleFacade
 from app.api.person_role.facade import PersonRoleFacade
-from app.api.document.facade import DocumentFacade, DocumentSearchFacade, DocumentBookmarkFacade, DocumentStatusFacade, DocumentLockFacade
+from app.api.document.facade import DocumentFacade, DocumentSearchFacade, DocumentBookmarkFacade, DocumentStatusFacade, DocumentLockFacade, DocumentFrontFacade
 from app.api.image.facade import ImageFacade
 from app.api.institution.facade import InstitutionFacade
 from app.api.language.facade import LanguageFacade
@@ -25,7 +25,6 @@ _FACADES = {
     # immediate facades
     "bookmark": DocumentBookmarkFacade,
     "status": DocumentStatusFacade,
-    "lock": DocumentLockFacade,
 
     "placenameHasRoleWithIds": PlacenameHasRoleIncludedFacade,
     "personHasRoleWithIds": PersonHasRoleIncludedFacade,
@@ -66,6 +65,7 @@ _FACADES = {
         "search": DocumentSearchFacade,
         "status": DocumentStatusFacade,
         "lock": DocumentLockFacade,
+        "front": DocumentFrontFacade
     },
     Image.__tablename__: {
         "default": ImageFacade,
