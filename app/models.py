@@ -451,6 +451,16 @@ class Lock(db.Model):
     def is_active(self):
         return datetime.datetime.now() < self.expiration_date
 
+    def to_document_es_part(self):
+        return {
+                "id": self.id,
+                "user_id": self.user.id,
+                "username": self.user.username,
+                "description": self.description,
+                "event_date": datetime_to_str(self.event_date)[:10],
+                "expiration_date": datetime_to_str(self.expiration_date)[:10],
+            }
+
 
 # ====================================
 # CHANGE LOG

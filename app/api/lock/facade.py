@@ -19,6 +19,9 @@ class LockFacade(JSONAPIAbstractFacade):
     def id(self):
         return self.obj.id
 
+    def to_document_es_part(self):
+        return self.obj.to_document_es_part()
+
     #@staticmethod
     #def get_resource_facade(url_prefix, id, **kwargs):
     #    e = Lock.query.filter(Lock.id == id).first()
@@ -98,27 +101,12 @@ class LockFacade(JSONAPIAbstractFacade):
         })'''
     def get_data_to_index_when_added(self, propagate):
         _res = self.resource
-        payload = {
-            "id": self.obj.id,
-            "user_id": self.obj.user.id,
-            "username": self.obj.user.username,
-            "description": self.obj.description,
-            "event_date": self.obj.event_date,
-            "expiration_date": self.obj.expiration_date
-        }
-        print("\nlock self.ressource : ", self.resource)
-        print("\nlock payload : ", payload)
+        payload = self.to_document_es_part()
         latest_lock_data = [{"id": _res["id"], "index": self.get_index_name(), "payload": payload}]
-        print("\nlock latest_lock_data : ", latest_lock_data)
         if not propagate:
-            print("not propagate")
             return
         else:
-            print("propagate")
-            from app.api.document.facade import DocumentFacade
-            document = self.obj.documents
-
-            return latest_lock_data + self.get_relationship_data_to_index(rel_name="documents")
+            return self.get_relationship_data_to_index(rel_name="documents")
 
     def reindex(self, op, propagate=True):
         if op == "update":
