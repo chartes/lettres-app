@@ -106,7 +106,7 @@ class LockFacade(JSONAPIAbstractFacade):
         if not propagate:
             return
         else:
-            return latest_lock_data + self.get_relationship_data_to_index(rel_name="documents")
+            return self.get_relationship_data_to_index(rel_name="documents")
 
     def reindex(self, op, propagate=True):
         if op == "update":
