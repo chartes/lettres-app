@@ -313,7 +313,7 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
             "transcription": remove_html_tags(self.obj.transcription),
             "address": remove_html_tags(self.obj.address),
 
-            "witnesses": [{"id": w.id, "content": w.content, "classification-mark": w.classification_mark} for w in self.obj.witnesses],
+            "witnesses": [{"id": w.id, "content": w.content, "classification-mark": w.classification_mark} for w in sorted(self.obj.witnesses, key=lambda k: k.num) if self.obj.witnesses],
             "languages": [{"id": l.id, "code": l.code} for l in self.obj.languages],
             "collections": [
                 {
@@ -442,7 +442,7 @@ class DocumentFrontFacade(DocumentFacade):
                     "object-type": self.obj.current_lock.object_type,
                     "is-active": self.obj.current_lock.is_active,
                 } if self.obj.current_lock else None,
-                "witnesses": [{"id": w.id, "content": w.content, "classification-mark": w.classification_mark, "manifest_url": self.get_witness_manifest_url(w.id), "num": w.num, "status": w.status, "tradition": w.tradition} for w in self.obj.witnesses],
+                "witnesses": [{"id": w.id, "content": w.content, "classification-mark": w.classification_mark, "manifest_url": self.get_witness_manifest_url(w.id), "num": w.num, "status": w.status, "tradition": w.tradition} for w in sorted(self.obj.witnesses, key=lambda k: k.num) if self.obj.witnesses],
                 "notes": [{"id": n.id, "content": n.content, "occurences": n.occurences} for n in self.obj.notes],
                 "languages": [{"id": l.id, "code": l.code, "label": l.label} for l in self.obj.languages],
                 "collections": [
@@ -534,7 +534,7 @@ class DocumentSearchFacade(DocumentFacade):
                 "transcription": self.obj.transcription,
                 "address": self.obj.address,
                 "is-published": False if self.obj.is_published is None else self.obj.is_published,
-                "witnesses": [{"id": w.id, "content": w.content, "classification-mark": w.classification_mark, "manifest_url": self.get_witness_manifest_url(w.id)} for w in self.obj.witnesses],
+                "witnesses": [{"id": w.id, "content": w.content, "classification-mark": w.classification_mark, "manifest_url": self.get_witness_manifest_url(w.id)} for w in sorted(self.obj.witnesses, key=lambda k: k.num) if self.obj.witnesses],
                 "senders": [
                     {
                         "id": c_h_r.person.id,
