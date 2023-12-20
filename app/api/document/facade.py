@@ -297,6 +297,15 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
             # after implementation of creation_not_before in model & data
             # if self.obj.creation_not_before:
                 # date_range["gte"] = self.obj.creation_not_before
+        locks = []
+        if len(self.obj.locks) > 0:
+            all_locks = self.obj.locks
+            active_locks = [x.to_document_es_part() for x in all_locks if x.is_active]
+            # if some locks are active, only index them
+            if len(active_locks) == 1:
+                locks = active_locks
+            else: # otherwise index all locks (supposedly only one in base)
+                locks = [x.to_document_es_part() for x in all_locks]
 
         payload = {
             "id": self.id,
@@ -392,17 +401,7 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
                 }
                 for c_h_r in self.obj.placenames_having_roles if c_h_r.placename_role.label == 'inlined'
             ],
-            "lock":
-                [
-                    {
-                        "id": self.obj.locks[0].id,
-                        "user_id": self.obj.locks[0].user.id,
-                        "username": self.obj.locks[0].user.username,
-                        "description": self.obj.locks[0].description,
-                        "event_date": datetime_to_str(self.obj.locks[0].event_date)[:10],
-                        "expiration_date": datetime_to_str(self.obj.locks[0].expiration_date)[:10],
-                    }
-                    if self.obj.locks else None]
+            "lock": locks
         }
         return [{"id": self.obj.id, "index": self.get_index_name(), "payload": payload}]
 
