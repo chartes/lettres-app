@@ -299,13 +299,14 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
                 # date_range["gte"] = self.obj.creation_not_before
         locks = []
         if len(self.obj.locks) > 0:
-            all_locks = self.obj.locks
-            active_locks = [x.to_document_es_part() for x in all_locks if x.is_active]
-            # if some locks are active, only index them
-            if len(active_locks) == 1:
-                locks = active_locks
-            else: # otherwise index all locks (supposedly only one in base)
-                locks = [x.to_document_es_part() for x in all_locks]
+            if len(self.obj.locks) == 1:
+                locks = [x.to_document_es_part() for x in self.obj.locks]
+            else:
+                #upon new lock addition on a previously locked (current or not) document,
+                #there are 2 locks (prior previous one is removed)
+                #only pick the latest
+                current_lock = [l for l in sorted(self.obj.locks, key=lambda k: k.expiration_date, reverse=True) if self.obj.locks][0]
+                locks.append(current_lock.to_document_es_part())
 
         payload = {
             "id": self.id,

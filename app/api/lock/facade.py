@@ -57,8 +57,6 @@ class LockFacade(JSONAPIAbstractFacade):
                 "expiration-date": datetime_to_str(self.obj.expiration_date),
                 "is-active": self.obj.is_active,
                 "description": self.obj.description,
-                "collections": [{'id': c.id, 'title': c.title} for c in self.obj.documents.collections if self.obj.documents.collections],
-                "witnesses": [{"id": w.id, "content": w.content, "manifest_url": self.get_witness_manifest_url(w.id)} for w in self.obj.documents.witnesses if self.obj.documents.witnesses]
             },
             "meta": self.meta,
             "links": {
@@ -92,13 +90,7 @@ class LockFacade(JSONAPIAbstractFacade):
             }
 
         }
-        '''self.relationships.update({
-            "documents": {
-                "links": self._get_links(rel_name="documents"),
-                "resource_identifier_getter": self.get_related_resource_identifiers(DocumentFacade, "documents", to_many=False),
-                "resource_getter": self.get_related_resources(DocumentFacade, "documents", to_many=False),
-            }
-        })'''
+
     def get_data_to_index_when_added(self, propagate):
         _res = self.resource
         payload = self.to_document_es_part()
@@ -108,42 +100,5 @@ class LockFacade(JSONAPIAbstractFacade):
         else:
             return self.get_relationship_data_to_index(rel_name="documents")
 
-    def reindex(self, op, propagate=True):
-        if op == "update":
-            print("reindex update")
-            # Updates of collection metadata shouldn't impact linked documents
-            self.add_to_index(True)
-        else:
-            print("reindex not update")
-            super().reindex(op, propagate)
-
-
-    '''@staticmethod
-    def update_resource(obj, obj_type, related_resources, append=False):
-        print("lock update_resource obj, obj_type, related_ressources", obj, obj_type, related_resources)
-        latest_lock = obj
-        if latest_lock.event_date is None:
-            latest_lock.event_date = datetime.datetime.now()
-            latest_lock.expiration_date = datetime.datetime.now()
-            related_resources.event_date = latest_lock.event_date
-            related_resources.expiration_date = latest_lock.expiration_date
-        #latest_lock = Lock.query.filter(Lock.id == obj.id).first()
-        print("\nupdate_resource latest_lock ", latest_lock)
-
-        from app.api.document.facade import DocumentFacade
-        document = obj.documents
-        print("lock update_resource doc, obj", document, obj)
-        DocumentFacade.update_resource(
-            document,
-            "document",
-            attributes={},
-            related_resources={"lock": latest_lock}
-        )
-        DocumentFacade("", document).reindex("update", propagate=True)
-        attributes = {}
-        return JSONAPIAbstractFacade.update_resource(
-            latest_lock,
-            obj_type,
-            attributes,
-            related_resources
-        )'''
+    def reindex(self, op, propagate):
+        super().reindex(op, propagate)
