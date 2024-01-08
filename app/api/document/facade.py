@@ -297,6 +297,16 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
             # after implementation of creation_not_before in model & data
             # if self.obj.creation_not_before:
                 # date_range["gte"] = self.obj.creation_not_before
+        locks = []
+        if len(self.obj.locks) > 0:
+            if len(self.obj.locks) == 1:
+                locks = [x.to_document_es_part() for x in self.obj.locks]
+            else:
+                #upon new lock addition on a previously locked (current or not) document,
+                #there are 2 locks (prior previous one is removed)
+                #only pick the latest
+                current_lock = [l for l in sorted(self.obj.locks, key=lambda k: k.expiration_date, reverse=True) if self.obj.locks][0]
+                locks.append(current_lock.to_document_es_part())
 
         payload = {
             "id": self.id,
@@ -391,7 +401,8 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
                     "ref": c_h_r.placename.ref
                 }
                 for c_h_r in self.obj.placenames_having_roles if c_h_r.placename_role.label == 'inlined'
-            ]
+            ],
+            "lock": locks
         }
         return [{"id": self.obj.id, "index": self.get_index_name(), "payload": payload}]
 
@@ -567,6 +578,39 @@ class DocumentSearchFacade(DocumentFacade):
             resource["relationships"] = self.get_exposed_relationships()
         return resource
 
+class DocumentLockFacade(DocumentFacade):
+    def __init__(self, *args, **kwargs):
+        super(DocumentLockFacade, self).__init__(*args, **kwargs)
+
+    @property
+    def resource(self):
+        resource = {
+            **self.resource_identifier,
+            "attributes": {
+                "is-published": False if self.obj.is_published is None else self.obj.is_published,
+                "witnesses": [{"id": w.id, "content": w.content, "classification-mark": w.classification_mark,
+                               "manifest_url": self.get_witness_manifest_url(w.id)} for w in self.obj.witnesses],
+                "collections": [{'id': c.id, 'title': c.title} for c in self.obj.collections if self.obj.collections],
+                "lock": [
+                    {
+                        "id": self.obj.locks[0].id,
+                        "is_active": self.obj.locks[0].is_active,
+                        "user_id": self.obj.locks[0].user.id,
+                        "username": self.obj.locks[0].user.username,
+                        "description": self.obj.locks[0].description,
+                        "event_date": datetime_to_str(self.obj.locks[0].event_date),
+                        "expiration_date": datetime_to_str(self.obj.locks[0].expiration_date),
+                    }
+                    if self.obj.locks else []]
+            },
+            "meta": self.meta,
+            "links": {
+                "self": self.self_link
+            }
+        }
+        if self.with_relationships_links:
+            resource["relationships"] = self.get_exposed_relationships()
+        return resource
 
 class DocumentStatusFacade(DocumentFacade):
     def __init__(self, *args, **kwargs):
