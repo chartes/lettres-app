@@ -1,12 +1,12 @@
 import sqlite3
 import xml2db
 import os
-print('os.getcwd() :', os.getcwd())
+#print('os.getcwd() :', os.getcwd())
 
-db_path = os.getcwd() + '/db/lettres.dev.sqlite'
-print('db_path : ', db_path)
-#  ['203961.xml', '203962.xml', '203963.xml']
-xml_files = ['203964_test_withBibl_withoutNS.xml']
+db_path = os.getcwd() + '/lettres.dev.sqlite'
+# TODO  ['203964.xml', '203965.xml', '203966.xml', '203967.xml', '6218232.xml', '6479798.xml']
+# DONE  ['203964.xml', '203965.xml', '203966.xml', '203967.xml', '6218232.xml', '6479798.xml']
+xml_files = ['6479798.xml']
 
 
 

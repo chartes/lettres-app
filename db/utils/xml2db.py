@@ -55,41 +55,58 @@ def insert_letter(db, cursor, xml_file):
 
     # FAKE DATA, pour insertion test
     language_id = 1  # frm
-    collection_id = 96  # Lettres de Henri IV suite
+    collection_id = 3  # Lettres de Henri IV suite
     correspondant_id = 77  # Henri IV
     correspondant_role_id = 1  # expéditeur
 
-    files_dir = '../../../Documents/LettresDoc/Numérisations/'
+    files_dir = '../../../lettres/xml/'
     file = files_dir+xml_file
-    files = [f for f in os.listdir(files_dir) if os.path.isfile(os.path.join(files_dir, f))]
-    print('files : ', files)
-    print('file : ', file)
     tree = etree.parse(file)
-    #for node in tree.iter():
-    #    print("node.tag: ", node.tag)
-    print("tree : ", tree)
-    ns = {"tei" : "http://www.tei-c.org/ns/1.0"}
-    #bibl_test = tree.getroot().findall(ns+'teiHeader')
-    #print("bibl_test :", bibl_test)
     # la référence du volume (on considère que cette réf est un temoin de type édition,
     # qu’on insérera juste avant les témoins
-    #print("tree.xpath('TEI/teiHeader/fileDesc/sourceDesc/bibl', namespaces=ns) : ", tree.xpath('//tei:teiHeader/tei:fileDesc/tei:sourceDesc/tei:bibl', namespaces=ns))
     bibl = tostring(tree.xpath('teiHeader/fileDesc/sourceDesc/bibl')[0], encoding='unicode')
-    print('bibl1 :', bibl)
     bibl = re.sub('<(/?)title>', '<\\1cite>', bibl)
     bibl = re.sub('<ref target="([^"]+)">', '<a href="\\1">', bibl)
     bibl = bibl.replace('</ref>', '</a>')
     bibl = bibl[6:-14]
-    print('bibl2 :', bibl)
 
-    for div in tree.xpath('text/body/div'):
+    for div in tree.xpath('text/body/div[not(@type)]'):
+        letter_xml_id = xml_file[:-4]+'_'+div.get('xml_id')
         letter = {}
-
         letter['id'] = div.get('id')
 
         letter['title'] = normalize_punctuation(tei2html(div.xpath('head')[0]))
         letter['title'] = letter['title'].rstrip('.')
-        letter['function'] = normalize_punctuation(tei2html(div.xpath('head')[1]))
+
+        # pour tout sauf tome 9
+        '''
+        letter['creation'] = div.xpath('dateline/date')[0].get('when')
+        if letter['creation'] is None:
+            letter['creation'] = div.xpath('dateline/date')[0].get('notBefore')
+        '''
+
+        letter_date = div.xpath('dateline/date')
+        if letter_date:
+            letter['creation'] = div.xpath('dateline/date')[0].get('when')
+            if letter['creation'] is None:
+                letter['creation'] = div.xpath('dateline/date')[0].get('notBefore')
+            letter['creation_not_after'] = div.xpath('dateline/date')[0].get('notAfter')
+            letter['creation_label'] = tei2html(div.xpath('dateline/date')[0]).lower()
+            letter['creation_label'] = letter['creation_label'].rstrip('.')
+        else:
+            letter['creation'] = None
+            letter['creation_label'] = None
+            letter['creation_not_after'] = None
+
+
+        # adresse : titre + fonction du destinataire
+        head_sub = div.xpath('head[@type="sub"]')
+        if head_sub:
+            letter['address'] = normalize_punctuation(tei2html(div.xpath('head[@type="sub"]')[0]))
+            letter['address'] = letter['address'].rstrip('.')
+            letter['address'] = letter['title'] + ', ' + letter['address'][0].lower() + letter['address'][1:]
+        else:
+            letter['address'] = letter['title']
 
         # première page avant le début de la lettre, si le saut de page ne précède pas le tout début de celle-ci
         # on teste si la div commence par un pb
@@ -112,44 +129,51 @@ def insert_letter(db, cursor, xml_file):
 
         # la liste des nœuds witness
         letter['witnesses'] = div.xpath('listWit/witness')
-        letter['creation_label'] = normalize_punctuation(tei2html(div.xpath('dateline/date')[0]))
+        #letter['creation_label'] = normalize_punctuation(tei2html(div.xpath('dateline/date')[0]))
+        # formatage très complexe des dates par ex. in Henri IV, tome 4. On laisse ainsi ? reprise de la données XML ?
+
+        '''
+        letter['creation_label'] = tei2html(div.xpath('dateline/date')[0]).lower()
         letter['creation_label'] = letter['creation_label'].rstrip('.')
+
         letter['creation'] = div.xpath('dateline/date')[0].get('when')
         if letter['creation'] is None:
             letter['creation'] = div.xpath('dateline/date')[0].get('notBefore')
         letter['creation_not_after'] = div.xpath('dateline/date')[0].get('notAfter')
+        '''
 
         letter['transcription'] = get_transcription_node(div.xpath('.')[0])
         letter['transcription'] = tei2html(letter['transcription'])
         letter['transcription'] = format_html(letter['transcription'])
 
-        print('{letter} : ', letter)
+        #print('{letter} : ', letter)
 
         # INSERTIONS
         try:
             cursor.execute(
                 "INSERT INTO document ("
                 "title,"
+                "argument,"
                 "creation,"
                 "creation_not_after,"
                 "creation_label,"
                 "transcription,"
                 "is_published,"
                 "address)"
-                "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                 (letter['title'],
+                 letter_xml_id,
                  letter['creation'],
                  letter['creation_not_after'],
                  letter['creation_label'],
                  letter['transcription'],
                  None,
-                 letter['title']))
+                 letter['address']))
         except sqlite3.IntegrityError as e:
             print(e, "document, lettre %s" % (letter['id']))
 
         # Id de la dernière lettre insérée
         document_id = cursor.lastrowid
-
 
         # édition DIHF source considérée comme témoin de base
         try:
