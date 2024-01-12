@@ -25,6 +25,8 @@ def manage_lock_addition():
                     Lock.object_id == r['data']['attributes']['object-id'],
                     Lock.object_type == r['data']['attributes']['object-type']).order_by(Lock.event_date).all()
                 active_lock = [l for l in old_locks if l.is_active]
+                # TODO: active_lock > 0 Non ? S'il y a au moins un active_lock,
+                # alors on ne devrait pas essayer d'en ajouter un autre
                 if len(active_lock) > 1:
                     raise Exception("Two locks are active at the same time on the same object: %s" % active_lock)
 
@@ -34,10 +36,10 @@ def manage_lock_addition():
             if current_user is None:
                 return error_403_privileges
             else:
-                print(current_user.id, current_user.is_admin, lock_user_id, old_locks, active_lock)
+                print(current_user.id, current_user.is_admin(), lock_user_id, old_locks, active_lock)
                 # contributor cannot add locks it does not own
                 # contributor cannot add locks if an active lock already exists
-                if not current_user.is_admin and (current_user.id != lock_user_id or len(active_lock) >= 1):
+                if not current_user.is_admin() and (current_user.id != lock_user_id or len(active_lock) >= 1):
                     return error_403_privileges
 
 
@@ -49,7 +51,6 @@ def manage_lock_addition():
                 previous_locks = Lock.query.filter(Lock.id != new_lock['data']['id'],
                                     Lock.object_id == new_lock['data']['attributes']['object-id'],
                                     Lock.object_type == new_lock['data']['attributes']['object-type']).all()
-
                 for plock in previous_locks:
                     '''plock.expiration_date = datetime.datetime.strptime(
                         new_lock['data']['attributes']['event-date'],
@@ -79,21 +80,21 @@ def manage_lock_update():
                 lock_id = r['data']['id']
                 #print('lock_id : ', lock_id)
                 lock = Lock.query.filter(Lock.id == lock_id).first()
-                print("data for update : ", current_user.id, current_user.is_admin, lock_user_id, lock_id)
+                print("data for update : ", current_user.id, current_user.is_admin(), lock_user_id, lock_id)
             except Exception as e:
                 return error_400_unhandled_error(e)
 
             if current_user is None:
                 return error_403_privileges
             else:
-                #print(current_user.id, current_user.is_admin, lock_user_id, lock)
+                #print(current_user.id, current_user.is_admin(), lock_user_id, lock)
                 #contributor cannot remove locks it does not own
-                if not current_user.is_admin and current_user.id != lock.user_id:
+                if not current_user.is_admin() and current_user.id != lock.user_id:
                     return error_403_privileges
             response = view_function(*args, **kwargs)
             #print("response", response)
             if response.status.startswith("20"):
-                lock.expiration_date = datetime.now()
+                lock.expiration_date = datetime.now()#TODO Timezone
                 #print("now : ", datetime.now())
                 #print("lock event date", lock.event_date)
                 db.session.commit()
@@ -117,7 +118,7 @@ def manage_lock_removal():
                 current_user = User.query.filter(User.id == lock_user_id).first()
                 lock_id = r['id']
                 lock = Lock.query.filter(Lock.id == lock_id).first()
-                #print("data to delete : ", current_user.id, current_user.is_admin, lock_user_id, lock_id)
+                #print("data to delete : ", current_user.id, current_user.is_admin(), lock_user_id, lock_id)
             except Exception as e:
                 return error_400_unhandled_error(e)
 
@@ -125,9 +126,9 @@ def manage_lock_removal():
             if current_user is None:
                 return error_403_privileges
             else:
-                print(current_user.id, current_user.is_admin, lock_user_id, lock)
+                print(current_user.id, current_user.is_admin(), lock_user_id, lock)
                 # contributor cannot remove locks it does not own
-                if not current_user.is_admin and current_user.id != lock.user_id:
+                if not current_user.is_admin() and current_user.id != lock.user_id:
                     return error_403_privileges
 
             response = view_function(*args, **kwargs)

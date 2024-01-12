@@ -15,6 +15,36 @@
           "type": "date_range",
           "format": "yyyy-MM-dd||yyyy-MM||yyyy"
         },
+        "lock": {
+          "properties": {
+            "id": {
+              "type" : "keyword"
+            },
+            "user_id": {
+              "type" : "keyword"
+            },
+            "username": {
+              "type": "text",
+              "analyzer": "keyword",
+              "fielddata": "true"
+            },
+            "description": {
+              "type": "text",
+              "analyzer": "keyword",
+              "fielddata": "true"
+            },
+            "event_date": {
+              "type": "text",
+              "analyzer": "keyword",
+              "fielddata": "true"
+            },
+            "expiration_date": {
+              "type": "text",
+              "analyzer": "keyword",
+              "fielddata": "true"
+            }
+          }
+        },
         "title": {
           "type": "text",
           "analyzer": "folding",

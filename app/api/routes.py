@@ -86,7 +86,7 @@ def forbid_if_nor_teacher_nor_admin(view_function):
     @wraps(view_function)
     def wrapped_f(*args, **kwargs):
         user = current_app.get_current_user()
-        if user.is_anonymous or not (user.is_teacher or user.is_admin):
+        if user.is_anonymous or not (user.is_teacher or user.is_admin): # Functions called that do not exist
             msg = "This resource is only available to teachers and admins"
             print(msg)
             return jsonify({'message': msg, 'authenticated': False}), 403

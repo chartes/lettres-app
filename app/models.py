@@ -78,7 +78,8 @@ class Document(db.Model, ChangesMixin):
     next_document = db.relationship("Document", backref=db.backref('prev_document', remote_side=id), uselist=False)
 
     locks = db.relationship("Lock",
-                           primaryjoin="and_(Document.id==foreign(Lock.object_id), Lock.object_type=='{0}')".format(__tablename__))
+                           primaryjoin="and_(Document.id==foreign(Lock.object_id), Lock.object_type=='{0}')".format(__tablename__),
+                           backref=db.backref('documents'))
 
     @property
     def current_lock(self):
@@ -440,7 +441,7 @@ class Lock(db.Model):
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     event_date = db.Column(DateTime(timezone=True), server_default=func.now())
-    expiration_date = db.Column(DateTime(timezone=True), default=lambda: datetime.datetime.now() + datetime.timedelta(days=7))
+    expiration_date = db.Column(DateTime(timezone=True), default=lambda: datetime.datetime.now() + datetime.timedelta(days=7), onupdate=datetime.datetime.now())
 
     description = db.Column(db.String, nullable=True)
 
@@ -449,6 +450,16 @@ class Lock(db.Model):
     @property
     def is_active(self):
         return datetime.datetime.now() < self.expiration_date
+
+    def to_document_es_part(self):
+        return {
+                "id": self.id,
+                "user_id": self.user.id,
+                "username": self.user.username,
+                "description": self.description,
+                "event_date": datetime_to_str(self.event_date)[:10],
+                "expiration_date": datetime_to_str(self.expiration_date)[:10],
+            }
 
 
 # ====================================
