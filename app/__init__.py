@@ -194,7 +194,7 @@ def create_app(config_name="dev", with_hardcoded_prefix=True):
             print(f"creating unsorted documents collection '{title}' ...")
             unsorted_documents_collection = models.Collection(
                 title=title,
-                description="Documents non triées",
+                description="Lettres non associées à une collection",
                 admin_id=1,
             )
             db.session.add(unsorted_documents_collection)

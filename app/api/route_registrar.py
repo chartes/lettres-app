@@ -415,9 +415,10 @@ class JSONAPIRouteRegistrar(object):
             collection_set = set([x["key"] for x in search["aggregations"]["collections"]["buckets"]])
             parent_set = set([x["key"] for x in search["aggregations"]["parents"]["buckets"]])
             collection_count = len(collection_set.union(parent_set))
+            # in case default collection is needed add cCollection in import and select with default_collection = Collection.query.filter_by(title=current_app.config["UNSORTED_DOCUMENTS_COLLECTION_TITLE"]).first()
 
-            if published:
-                collection_count -= 1 # Remove "Non-triées" from collection list
+            #if published:
+            #    collection_count -= 1 # Remove "Hors collections" from collection list
 
             response = JSONAPIResponseFactory.make_response(
                 {
