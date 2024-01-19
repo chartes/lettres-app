@@ -112,14 +112,95 @@ WHERE transcription LIKE '%' || ? || '%' OR argument LIKE '%' || ? || '%' OR add
 persNameResults = cursor.fetchall()
 persPattern = re.compile('<a class="persName" [^<]*>[^<]*</a>')
 print("\n len(persNameResults)", len(persNameResults))
-'''for res in persNameResults[:10]:
+for res in persNameResults[:10]:
     print("\n title", res[0], re.findall(persPattern, res[1]))
     print("\n argument", res[0], re.findall(persPattern, res[2]) if res[2] else 'Null')
     print("\n transcription", res[0], re.findall(persPattern, res[3]))
-    print("\n address", res[0], re.findall(persPattern, res[4]) if res[4] else 'Null')'''
+    print("\n address", res[0], re.findall(persPattern, res[4]) if res[4] else 'Null')
 
+persIDnotinDB = []
+persID = re.compile('id="(d+)"')
+for res in persNameResults:
+    print("\nres[0] :", res[0])
+    res_fieldset = [res[1], res[2], res[3], res[4]]
+    res_persnames = re.findall(persPattern, ' '.join(str(item) for item in res_fieldset))
+    res_persIds = re.findall('id="(\d+)"', ' '.join(str(item) for item in res_persnames))
+    #print("res_persnames : ", res_persnames)
+    #print("res_persnames join : ", ' '.join(str(item) for item in res_persnames))
+    #print("persName res ids : ", re.findall('id="(\d+)"', ' '.join(str(item) for item in res_persnames)) if len(res_persnames)>0 else 'None')
+    print("res_persIds", res_persIds)
+    if len(res_persIds) == 1:
+        cursor.execute("SELECT COUNT(*) from person where id = %s" % res_persIds[0])
+        (number_of_rows,) = cursor.fetchone()
+        if number_of_rows == 0:
+            persIDnotinDB.append((res[0], res_persIds[0]))
+    elif len(res_persIds) > 1:
+        for id in res_persIds:
+            cursor.execute("SELECT COUNT(*) from person where id = %s" % id)
+            (number_of_rows,) = cursor.fetchone()
+            if number_of_rows == 0:
+                persIDnotinDB.append((res[0], id))
 
-fieldset = [persNameResults[0][1], persNameResults[0][2], persNameResults[0][3], persNameResults[0][4]]
-print("persName test : ", re.findall(persPattern, ' '.join(str(item) for item in fieldset)))
+print("persIDnotinDB", persIDnotinDB)
+for error in persIDnotinDB:
+    cursor.execute("SELECT document.transcription \
+    FROM document \
+    WHERE id= %s" % error[0])
+    (transcription,) = cursor.fetchone()
+    #print("transcription", transcription)
+    persErrorPattern = re.compile('<a class="persName" id="%s">([^<]*)</a>' % error[1])
+    persErrorsTag = [x.group() for x in re.finditer(persErrorPattern, transcription)]
+    persErrorsContent = re.findall(persErrorPattern, transcription)
+    print("persErrorPattern", persErrorPattern)
+    print("test", re.findall(persErrorPattern, transcription))
+    print("test2", [x.group() for x in re.finditer(persErrorPattern, transcription)])
+    if error[1] == '13':
+        updated_transcription = transcription
+        for index, tobeReplaced in enumerate(persErrorsTag):
+            updated_transcription = updated_transcription.replace(tobeReplaced, '<a class="persName" target="_blank" href="https://www.wikidata.org/entity/Q53448" title="Henri III (1551-1589)" id="122">' + persErrorsContent[index].strip() + '</a>')
+            print("updated_transcription", updated_transcription)
+        if error[0] == 745:
+            cursor.execute("""UPDATE document
+                SET transcription = %(updated_transcription)s
+                WHERE id = %(id)s""", {'updated_transcription': updated_transcription, 'id': error[0]})
+
+param = 'class="placeName"'
+p = '%'+param+'%'
+cursor.execute("SELECT document.id, document.title, document.argument, document.transcription, document.address \
+FROM document \
+WHERE transcription LIKE '%' || ? || '%' OR argument LIKE '%' || ? || '%' OR address LIKE '%' || ? || '%' OR title LIKE '%' || ? || '%'", (p, p, p, p))
+PlaceNameResults = cursor.fetchall()
+placePattern = re.compile('<a class="placeName" [^<]*>[^<]*</a>')
+print("\n len(PlaceNameResults)", len(PlaceNameResults))
+#for res in PlaceNameResults[:10]:
+    #print("\n title", res[0], re.findall(placePattern, res[1]))
+    #print("\n argument", res[0], re.findall(placePattern, res[2]) if res[2] else 'Null')
+    #print("\n transcription", res[0], re.findall(placePattern, res[3]))
+    #print("\n address", res[0], re.findall(placePattern, res[4]) if res[4] else 'Null')
+
+placeIDnotinDB = []
+placeID = re.compile('id="(d+)"')
+for res in PlaceNameResults:
+    #print("\nres[0] :", res[0])
+    res_fieldset = [res[1], res[2], res[3], res[4]]
+    res_placenames = re.findall(placePattern, ' '.join(str(item) for item in res_fieldset))
+    res_placeIds = re.findall('id="(\d+)"', ' '.join(str(item) for item in res_placenames))
+    #print("res_placenames : ", res_placenames)
+    #print("res_placenames join : ", ' '.join(str(item) for item in res_placenames))
+    #print("placename res ids : ", re.findall('id="(\d+)"', ' '.join(str(item) for item in res_placenames)) if len(res_placenames)>0 else 'None')
+    #print("res_placeIds", res_placeIds)
+    if len(res_placeIds) == 1:
+        cursor.execute("SELECT COUNT(*) from placename where id = %s" % res_placeIds[0])
+        (number_of_rows,) = cursor.fetchone()
+        if number_of_rows == 0:
+            placeIDnotinDB.append((res[0], res_placeIds[0]))
+    elif len(res_placeIds) > 1:
+        for id in res_placeIds:
+            cursor.execute("SELECT COUNT(*) from placename where id = %s" % id)
+            (number_of_rows,) = cursor.fetchone()
+            if number_of_rows == 0:
+                placeIDnotinDB.append((res[0], id))
+
+print("placeIDnotinDB", placeIDnotinDB)
 
 db.close()
