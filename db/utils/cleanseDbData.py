@@ -142,6 +142,8 @@ for res in persNameResults:
                 persIDnotinDB.append((res[0], id))
 
 print("persIDnotinDB", persIDnotinDB)
+updatedDocPers = []
+
 for error in persIDnotinDB:
     cursor.execute("SELECT document.transcription \
     FROM document \
@@ -154,15 +156,16 @@ for error in persIDnotinDB:
     print("persErrorPattern", persErrorPattern)
     print("test", re.findall(persErrorPattern, transcription))
     print("test2", [x.group() for x in re.finditer(persErrorPattern, transcription)])
-    if error[1] == '13':
+    if error[1] == '277':
         updated_transcription = transcription
         for index, tobeReplaced in enumerate(persErrorsTag):
-            updated_transcription = updated_transcription.replace(tobeReplaced, '<a class="persName" target="_blank" href="https://www.wikidata.org/entity/Q53448" title="Henri III (1551-1589)" id="122">' + persErrorsContent[index].strip() + '</a>')
+            updated_transcription = updated_transcription.replace(tobeReplaced, '<a class="persName" target="_blank" href="https://www.wikidata.org/entity/Q3311216" title="Michel de Sèvre (†1593)" id="271">' + persErrorsContent[index].strip() + '</a>')
             print("updated_transcription", updated_transcription)
-        if error[0] == 745:
-            cursor.execute("""UPDATE document
-                SET transcription = %(updated_transcription)s
-                WHERE id = %(id)s""", {'updated_transcription': updated_transcription, 'id': error[0]})
+        cursor.execute("UPDATE document \
+            SET transcription = ? \
+            WHERE id = ?", (updated_transcription, error[0]))
+        updatedDocPers.append((error[0], error[1], 340))
+
 
 param = 'class="placeName"'
 p = '%'+param+'%'
@@ -203,4 +206,6 @@ for res in PlaceNameResults:
 
 print("placeIDnotinDB", placeIDnotinDB)
 
+print("doc and persons updated : ", updatedDocPers)
+db.commit()
 db.close()
