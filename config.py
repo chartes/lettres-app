@@ -50,7 +50,7 @@ class Config(object):
     MAIL_PORT = 25
     MAIL_USE_TLS = False
     MAIL_USE_SSL = False
-    MAIL_USERNAME = 'lettres@chartes.psl.eu'
+    MAIL_USERNAME = parse_var_env("USER_EMAIL_SENDER_EMAIL")
 
     JWT_SECRET_KEY = parse_var_env('JWT_SECRET_KEY')
     JWT_TOKEN_LOCATION = ['cookies', 'headers']
