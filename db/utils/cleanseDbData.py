@@ -173,39 +173,77 @@ cursor.execute("SELECT document.id, document.title, document.argument, document.
 FROM document \
 WHERE transcription LIKE '%' || ? || '%' OR argument LIKE '%' || ? || '%' OR address LIKE '%' || ? || '%' OR title LIKE '%' || ? || '%'", (p, p, p, p))
 PlaceNameResults = cursor.fetchall()
-placePattern = re.compile('<a class="placeName" [^<]*>[^<]*</a>')
+placePattern = re.compile(r'<a (?:class="placeName"\s*|id="\d+"\s*)*>.+?</a>')
 print("\n len(PlaceNameResults)", len(PlaceNameResults))
-#for res in PlaceNameResults[:10]:
+for res in PlaceNameResults[:10]:
     #print("\n title", res[0], re.findall(placePattern, res[1]))
     #print("\n argument", res[0], re.findall(placePattern, res[2]) if res[2] else 'Null')
-    #print("\n transcription", res[0], re.findall(placePattern, res[3]))
+    print("\n transcription", res[0], re.findall(placePattern, res[3]))
     #print("\n address", res[0], re.findall(placePattern, res[4]) if res[4] else 'Null')
 
 placeIDnotinDB = []
 placeID = re.compile('id="(d+)"')
+placeMention = re.compile('">(.+?)</a>')
 for res in PlaceNameResults:
-    #print("\nres[0] :", res[0])
+    print("\nres[0] :", res[0])
     res_fieldset = [res[1], res[2], res[3], res[4]]
     res_placenames = re.findall(placePattern, ' '.join(str(item) for item in res_fieldset))
     res_placeIds = re.findall('id="(\d+)"', ' '.join(str(item) for item in res_placenames))
-    #print("res_placenames : ", res_placenames)
-    #print("res_placenames join : ", ' '.join(str(item) for item in res_placenames))
-    #print("placename res ids : ", re.findall('id="(\d+)"', ' '.join(str(item) for item in res_placenames)) if len(res_placenames)>0 else 'None')
-    #print("res_placeIds", res_placeIds)
+    res_placeMentions = re.findall(placeMention, ' '.join(str(item) for item in res_placenames))
+    print("res_placenames : ", res_placenames)
+    print("res_placenames join : ", ' '.join(str(item) for item in res_placenames))
+    print("placename res ids : ", re.findall('id="(\d+)"', ' '.join(str(item) for item in res_placenames)) if len(res_placenames)>0 else 'None')
+    print("res_placeIds", res_placeIds)
+    print("res_placeMentions", re.findall(placeMention, ' '.join(str(item) for item in res_placenames)))
     if len(res_placeIds) == 1:
         cursor.execute("SELECT COUNT(*) from placename where id = %s" % res_placeIds[0])
         (number_of_rows,) = cursor.fetchone()
         if number_of_rows == 0:
-            placeIDnotinDB.append((res[0], res_placeIds[0]))
+            placeIDnotinDB.append((res[0], res_placeIds[0], res_placeMentions[0]))
     elif len(res_placeIds) > 1:
-        for id in res_placeIds:
+        for index, id in enumerate(res_placeIds):
             cursor.execute("SELECT COUNT(*) from placename where id = %s" % id)
             (number_of_rows,) = cursor.fetchone()
             if number_of_rows == 0:
-                placeIDnotinDB.append((res[0], id))
+                placeIDnotinDB.append((res[0], id, res_placeMentions[index]))
 
 print("placeIDnotinDB", placeIDnotinDB)
+ids = {}
+for x in placeIDnotinDB:
+    id, name = int(x[1]), x[2]
+    if len(ids.keys()) == 0 or id not in ids.keys():  # search for existing id
+        ids.update({id: {'count': 1, 'name': name}})
+    else:
+        ids[id]['count'] += 1
+        ids[id]['name'] +=', ' + name
+print("placeIDnotinDB counter", ids)
+
+updatedDocPlaces = []
+for error in placeIDnotinDB:
+    cursor.execute("SELECT document.transcription \
+    FROM document \
+    WHERE id= %s" % error[0])
+    (transcription,) = cursor.fetchone()
+    #print("transcription", transcription)
+    placeErrorPattern = re.compile('<a class="placeName" id="%s">([^<]*)</a>' % error[1])
+    placeErrorsTag = [x.group() for x in re.finditer(placeErrorPattern, transcription)]
+    placeErrorsContent = re.findall(placeErrorPattern, transcription)
+    print("placeErrorPattern", placeErrorPattern)
+    print("placeErrorsContent", re.findall(placeErrorPattern, transcription))
+    print("placeErrorsTag", [x.group() for x in re.finditer(placeErrorPattern, transcription)])
+    if error[1] == '78':
+        updated_transcription = transcription
+        for index, tobeReplaced in enumerate(placeErrorsTag):
+            updated_transcription = updated_transcription.replace(tobeReplaced, placeErrorsContent[index])
+            #print("updated_transcription", updated_transcription)
+            updatedDocPlaces.append((error[0], error[1], placeErrorsContent[index]))
+        '''cursor.execute("UPDATE document \
+            SET transcription = ? \
+            WHERE id = ?", (updated_transcription, error[0]))'''
+
+
 
 print("doc and persons updated : ", updatedDocPers)
+print("doc and places updated : ", updatedDocPlaces)
 db.commit()
 db.close()
