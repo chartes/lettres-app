@@ -12,6 +12,9 @@
               "fielddata": "true"
             }
           }
+        },
+        "ref": {
+          "type": "text"
         }
       }
     }
