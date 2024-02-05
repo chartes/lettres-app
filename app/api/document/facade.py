@@ -1,4 +1,3 @@
-import requests
 import re
 from flask import current_app, request
 
