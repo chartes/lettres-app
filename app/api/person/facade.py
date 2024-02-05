@@ -1,4 +1,4 @@
-
+from sqlalchemy import and_
 from app.api.abstract_facade import JSONAPIAbstractChangeloggedFacade, JSONAPIAbstractFacade
 from app.models import Person
 
@@ -31,7 +31,6 @@ class PersonFacade(JSONAPIAbstractChangeloggedFacade):
             rel_facade.make_resource_identifier(c_h_r.document.id, rel_facade.TYPE)
             for c_h_r in self.obj.persons_having_roles
         ]
-
         return list({object_['id']: object_ for object_ in resIds}.values())
 
     def get_document_resources(self, rel_facade=None):
@@ -40,7 +39,7 @@ class PersonFacade(JSONAPIAbstractChangeloggedFacade):
 
         resources = [] if self.obj.persons_having_roles is None else [
             rel_facade(self.url_prefix, c.document, self.with_relationships_links,
-                           self.with_relationships_data).resource
+                       self.with_relationships_data).resource
             for c in self.obj.persons_having_roles
         ]
         return list({object_.id: object_ for object_ in resources}.values())
@@ -58,18 +57,28 @@ class PersonFacade(JSONAPIAbstractChangeloggedFacade):
         rel_facade = PersonHasRoleFacade if not rel_facade else rel_facade
 
         return [] if self.obj.persons_having_roles is None else [rel_facade(self.url_prefix, e,
-                                                                                            self.with_relationships_links,
-                                                                                            self.with_relationships_data).resource
-                                                                        for e in self.obj.persons_having_roles]
+                                                                            self.with_relationships_links,
+                                                                            self.with_relationships_data).resource
+                                                                 for e in self.obj.persons_having_roles]
+
+    def get_functions_by_personId(self, ids):
+        from app.models import PersonHasRole
+        phf = (PersonHasRole.query.with_entities(PersonHasRole.function)
+               .filter(and_(PersonHasRole.person_id == ids), PersonHasRole.function.isnot(None))
+               .distinct()
+               .order_by(PersonHasRole.person_id))
+        functions = [p[0] for p in phf] if phf else []
+        print("\n functions: ", functions)
+        return functions
 
     @property
     def resource(self):
         resource = {
             **self.resource_identifier,
-            #TODO add label to ressource ? "label": self.obj.label,
             "attributes": {
                 "label": self.obj.label,
                 "ref": self.obj.ref,
+                "functions": self.get_functions_by_personId(self.obj.id)
             },
             "meta": self.meta,
             "links": {
@@ -105,12 +114,14 @@ class PersonFacade(JSONAPIAbstractChangeloggedFacade):
             "id": _res["id"],
             "type": _res["type"],
             "label": _res["attributes"]["label"],
+            "ref": _res["attributes"]["ref"],
         }
         person_data = [{"id": _res["id"], "index": self.get_index_name(), "payload": payload}]
         if not propagate:
             return person_data
         else:
-            return person_data + self.get_relationship_data_to_index(rel_name="documents") + self.get_relationship_data_to_index(
+            return person_data + self.get_relationship_data_to_index(
+                rel_name="documents") + self.get_relationship_data_to_index(
                 rel_name="roles-within-documents")
 
     def remove_from_index(self, propagate):

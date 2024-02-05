@@ -1,4 +1,4 @@
-
+from sqlalchemy import and_
 from app.api.abstract_facade import JSONAPIAbstractChangeloggedFacade, JSONAPIAbstractFacade
 from app.models import Placename
 
@@ -61,16 +61,26 @@ class PlacenameFacade(JSONAPIAbstractChangeloggedFacade):
                                                                                      self.with_relationships_data).resource
                                                                  for e in self.obj.placenames_having_roles]
 
+    def get_functions_by_placeId(self, ids):
+        from app.models import PlacenameHasRole
+        phf = (PlacenameHasRole.query.with_entities(PlacenameHasRole.function)
+               .filter(and_(PlacenameHasRole.placename_id == ids), PlacenameHasRole.function.isnot(None))
+               .distinct()
+               .order_by(PlacenameHasRole.placename_id))
+        functions = [p[0] for p in phf] if phf else []
+        print("\n functions: ", functions)
+        return functions
+
     @property
     def resource(self):
         resource = {
             **self.resource_identifier,
-            # TODO add label to ressource ? "label": self.obj.label,
             "attributes": {
                 "label": self.obj.label,
                 "long": self.obj.long,
                 "lat": self.obj.lat,
                 "ref": self.obj.ref,
+                "functions": self.get_functions_by_placeId(self.obj.id)
             },
             "meta": self.meta,
             "links": {
