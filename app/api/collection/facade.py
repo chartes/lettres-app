@@ -71,23 +71,29 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
 
     @property
     def resource(self):
-        if not self.obj.documents_including_children:
-            date_min = None
-            date_max = date_min
-        elif self.obj.published_including_children:
-            creation = [
-                doc.creation for doc in self.obj.published_including_children
-                if doc.creation
-            ]
-            date_min = min(creation) if creation else None
-            date_max = max(creation) if creation else None
+        user = current_app.get_current_user()
+        if user:
+            if not self.obj.documents_including_children:
+                date_min = None
+                date_max = date_min
+            else:
+                creation = [
+                    doc.creation for doc in self.obj.documents_including_children
+                    if doc.creation
+                ]
+                date_min = min(creation) if creation else None
+                date_max = max(creation) if creation else None
         else:
-            creation = [
-                doc.creation for doc in self.obj.documents_including_children
-                if doc.creation
-            ]
-            date_min = min(creation) if creation else None
-            date_max = max(creation) if creation else None
+            if not self.obj.published_including_children:
+                date_min = None
+                date_max = date_min
+            else:
+                creation = [
+                    doc.creation for doc in self.obj.published_including_children
+                    if doc.creation
+                ]
+                date_min = min(creation) if creation else None
+                date_max = max(creation) if creation else None
 
         resource = {
             **self.resource_identifier,
