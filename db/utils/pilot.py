@@ -3,12 +3,15 @@ import xml2db
 import os
 #print('os.getcwd() :', os.getcwd())
 
-db_path = os.getcwd() + '/lettres.dev.sqlite'
+db_path = os.getcwd() + '/db/lettres.dev.sqlite'
+
 # TODO  ['203964.xml', '203965.xml', '203966.xml', '203967.xml', '6218232.xml', '6479798.xml']
-# DONE  ['203964.xml', '203965.xml', '203966.xml', '203967.xml', '6218232.xml', '6479798.xml']
-xml_files = ['6479798.xml']
+# DONE supplément HENRI IV ['203964.xml', '203965.xml', '203966.xml', '203967.xml', '6218232.xml', '6479798.xml']
+# DONE supplément Catherine ['3202184.xml', '3202400.xml']
+xml_files = ['3202400.xml']
 
 
+print("Vérifier le chemin relatif de la base: ", f'{os.path.abspath(db_path)}')
 
 db = sqlite3.connect(db_path)
 cursor = db.cursor()

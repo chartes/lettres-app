@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import sqlite3
 import os
+import sys
+
 from lxml import etree
 from lxml.etree import tostring
 import io
@@ -55,12 +57,15 @@ def insert_letter(db, cursor, xml_file):
 
     # FAKE DATA, pour insertion test
     language_id = 1  # frm
-    collection_id = 3  # Lettres de Henri IV suite
-    correspondant_id = 77  # Henri IV
+    collection_id = 1  # Lettres de Catherine de Médicis
+    correspondant_id = 1  # Catherine de Médicis
     correspondant_role_id = 1  # expéditeur
 
-    files_dir = '../../../lettres/xml/'
+    files_dir = '../../Lettres/lettres/xml/'
     file = files_dir+xml_file
+    # Vérifier le chemin relatif (files_dir) selon l'implémentation locale
+    print("Vérifier le chemin relatif : ", f'{os.path.abspath(file)}')
+    #sys.exit()
     tree = etree.parse(file)
     # la référence du volume (on considère que cette réf est un temoin de type édition,
     # qu’on insérera juste avant les témoins
@@ -256,6 +261,11 @@ def insert_letter(db, cursor, xml_file):
                                (note_xml_id, note_id, document_id))
             except sqlite3.IntegrityError as e:
                 print(e, "update notes in document transcription, lettre %s" % (letter['id']))
+            try:
+                cursor.execute('UPDATE document SET address = replace(address, ?, ?) WHERE id = ?',
+                               (note_xml_id, note_id, document_id))
+            except sqlite3.IntegrityError as e:
+                print(e, "update notes in document address, lettre %s" % (letter['id']))
             try:
                 cursor.execute('UPDATE document SET title = replace(title, ?, ?) WHERE id = ?',
                                (note_xml_id, note_id, document_id))
