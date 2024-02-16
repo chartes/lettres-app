@@ -161,6 +161,19 @@ class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
         f_obj, errors, kwargs = WitnessFacade.get_facade('', w[0])
         return f_obj.get_iiif_manifest_url()
 
+    def get_iiif_manifest(self, id):
+        w = [x for x in self.obj.witnesses if x.id == id]
+        if len(w) == 0:
+            return None
+        # do not return a manifest if it has no images
+        canvas_ids = [img.canvas_id for img in w[0].images]
+        if len(canvas_ids) == 0:
+            return None
+        f_obj, errors, kwargs = WitnessFacade.get_facade('', w[0])
+        manifest, canvas_id = WitnessFacade.get_iiif_manifest(f_obj)
+        print("\nmanifest, canvas_id : ", manifest, canvas_id)
+        return manifest
+
     def get_iiif_collection_url(self):
         #return "https://iiif.chartes.psl.eu/collections/encpos/encpos_1892.json"
         host = request.host_url[:-1]
@@ -441,7 +454,7 @@ class DocumentFrontFacade(DocumentFacade):
                     "object-type": self.obj.current_lock.object_type,
                     "is-active": self.obj.current_lock.is_active,
                 } if self.obj.current_lock else None,
-                "witnesses": [{"id": w.id, "content": w.content, "classification-mark": w.classification_mark, "manifest_url": self.get_witness_manifest_url(w.id), "num": w.num, "status": w.status, "tradition": w.tradition} for w in sorted(self.obj.witnesses, key=lambda k: k.num) if self.obj.witnesses],
+                "witnesses": [{"id": w.id, "content": w.content, "classification-mark": w.classification_mark, "manifest_url": self.get_witness_manifest_url(w.id), "manifest": self.get_iiif_manifest(w.id), "num": w.num, "status": w.status, "tradition": w.tradition} for w in sorted(self.obj.witnesses, key=lambda k: k.num) if self.obj.witnesses],
                 "notes": [{"id": n.id, "content": n.content, "occurences": n.occurences} for n in self.obj.notes],
                 "languages": [{"id": l.id, "code": l.code, "label": l.label} for l in self.obj.languages],
                 "collections": [

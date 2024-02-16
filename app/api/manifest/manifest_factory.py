@@ -1,6 +1,5 @@
 import datetime
 import json
-import os
 import pathlib
 
 import requests
@@ -15,14 +14,14 @@ dir = pathlib.Path(__file__).parent.resolve()
 
 class ManifestFactory(object):
 
-    MANIFEST_TEMPLATE_FILENAME =  dir / "manifest_template.json"
+    MANIFEST_TEMPLATE_FILENAME = dir / "manifest_template.json"
     COLLECTION_TEMPLATE_FILENAME = dir / "collection_template.json"
 
     CACHED_MANIFESTS = {
 
     }
 
-    CACHE_DURATION = 10      # cache manifests (in seconds)
+    CACHE_DURATION = 1800    # cache manifests (in seconds)
     CACHE_ENTRY_MAX = 150    # how many manifests to cache
 
     def __init__(self):
@@ -84,8 +83,8 @@ class ManifestFactory(object):
         grouped_images = {}
         for img in ordered_images:
             # /!\ maybe tied to the manifest url naming scheme in Gallica
-            #url = img.canvas_id.rsplit("/", maxsplit=2)[0]
-            orig_manifest_url = "{url}/manifest.json".format(url=img.canvas_id)
+            url = img.canvas_id.rsplit("/", maxsplit=2)[0]
+            orig_manifest_url = "{url}/manifest.json".format(url=url)#url=img.canvas_id
 
             if orig_manifest_url not in grouped_images:
                 grouped_images[orig_manifest_url] = []
@@ -96,7 +95,7 @@ class ManifestFactory(object):
         canvases = []
         fetch_canvas = current_app.manifest_factory.fetch_canvas
         for orig_manifest_url, canvas_ids in grouped_images.items():
-            new_canvases = fetch_canvas(orig_manifest_url, canvas_ids, cache=False)
+            new_canvases = fetch_canvas(orig_manifest_url, canvas_ids, cache=True)
             canvases.extend(new_canvases)
 
         manifest["sequences"][0]["canvases"] = canvases
@@ -109,17 +108,20 @@ class ManifestFactory(object):
         #print("fetching... %s" % manifest_url, end=" ", flush=True)
         manifest = r.json()
         #print(r.status_code)
+        # gallica returns incorrect canvases height and width now and then, they are accessed this way
+        # width = int(manifest["sequences"][0]["canvases"][0]["width"])
+        # height = int(manifest["sequences"][0]["canvases"][0]["height"])
         return manifest
 
     @classmethod
     def _get_from_cache(cls, manifest_url):
+        #print("\n cls.CACHED_MANIFESTS.keys()", cls.CACHED_MANIFESTS.keys())
         if manifest_url not in cls.CACHED_MANIFESTS.keys():
             try:
                 manifest = cls._fetch(manifest_url)
             except Exception as e:
                 print("cannot get manifest", manifest_url)
                 manifest = {}
-            # CACHE 10 MANIFESTS MAX
             if len(cls.CACHED_MANIFESTS.keys()) >= cls.CACHE_ENTRY_MAX:
                 l = [(dt, url) for url, (_, dt) in cls.CACHED_MANIFESTS.items()]
                 l.sort(reverse=True)
@@ -132,14 +134,23 @@ class ManifestFactory(object):
             return manifest
         else:
             manifest, dt = cls.CACHED_MANIFESTS[manifest_url]
-            #print("get from cache")
-            # refresh the cache entry
-            duration = datetime.datetime.now() - dt
-            if duration.total_seconds() > cls.CACHE_DURATION:
-                cls.CACHED_MANIFESTS.pop(manifest_url)
-                #print("refresh cache entry")
-                return cls._get_from_cache(manifest_url)
+            # gallica returns incorrect (-1) canvases height & width now and then, test before refreshing cache
+            width = int(manifest["sequences"][0]["canvases"][0]["width"])
+            height = int(manifest["sequences"][0]["canvases"][0]["height"])
+            if (width > 0) and (height > 0):
+                #print("get from cache")
+                # refresh the cache entry
+                duration = datetime.datetime.now() - dt
+                if duration.total_seconds() > cls.CACHE_DURATION:
+                    cls.CACHED_MANIFESTS.pop(manifest_url)
+                    #print("refresh cache entry")
+                    return cls._get_from_cache(manifest_url)
+                else:
+                    # extending cache duration
+                    cls.CACHED_MANIFESTS[manifest_url] = (manifest, datetime.datetime.now())
+                    return manifest
             else:
+                # canvases height & width are incorrect, do not refresh cached manifest
                 # extending cache duration
                 cls.CACHED_MANIFESTS[manifest_url] = (manifest, datetime.datetime.now())
                 return manifest

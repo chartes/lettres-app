@@ -3,7 +3,6 @@ from flask import current_app, request
 from app.api.abstract_facade import JSONAPIAbstractChangeloggedFacade
 from app.models import Witness
 
-
 class WitnessFacade(JSONAPIAbstractChangeloggedFacade):
     """
 
@@ -21,6 +20,10 @@ class WitnessFacade(JSONAPIAbstractChangeloggedFacade):
         host = request.host_url[:-1]
         prefix = current_app.config['IIIF_URL_PREFIX']
         return f"{host}{prefix}/witnesses/{self.obj.id}/manifest"
+
+    def get_iiif_manifest(self):
+        manifest = current_app.manifest_factory.make_manifest(self.obj)
+        return manifest
 
     @property
     def resource(self):
