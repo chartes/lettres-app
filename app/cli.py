@@ -202,7 +202,7 @@ def make_cli():
                     for obj in info["model"].query.all():
                         f_obj = info["facade"](prefix, obj)
                         try:
-                            if index_name == "lettres__development__documents":
+                            if index_name == "lettres__development__documents" or index_name == "lettres__production__documents":
                                 #print("Rebuilding ", index_name)
                                 if f_obj.obj.title is not None and len(f_obj.obj.title) >0:
                                     f_obj.obj.title = remove_html_tags(f_obj.obj.title)
