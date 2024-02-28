@@ -79,12 +79,14 @@ class ManifestFactory(object):
             witness.images = []
         ordered_images = [i for i in witness.images]
         ordered_images.sort(key=lambda i: i.order_num)
+
         # group images by manifest url
         grouped_images = {}
         for img in ordered_images:
             # /!\ maybe tied to the manifest url naming scheme in Gallica
             url = img.canvas_id.rsplit("/", maxsplit=2)[0]
             orig_manifest_url = "{url}/manifest.json".format(url=url)#url=img.canvas_id
+            print("orig_manifest_url", orig_manifest_url)
 
             if orig_manifest_url not in grouped_images:
                 grouped_images[orig_manifest_url] = []
@@ -111,6 +113,7 @@ class ManifestFactory(object):
         # gallica returns incorrect canvases height and width now and then, they are accessed this way
         # width = int(manifest["sequences"][0]["canvases"][0]["width"])
         # height = int(manifest["sequences"][0]["canvases"][0]["height"])
+
         return manifest
 
     @classmethod
@@ -159,13 +162,34 @@ class ManifestFactory(object):
     def fetch_canvas(cls, manifest_url, canvas_ids, cache=False):
         if cache:
             manifest = cls._get_from_cache(manifest_url)
+            print("fetch_canvas if")
         else:
+            print("fetch_canvas else")
             manifest = cls._fetch(manifest_url)
 
         try:
             canvases = [canvas for canvas in manifest["sequences"][0]["canvases"]
                     if canvas["@id"] in canvas_ids if "sequences" in manifest]
-        except KeyError:
+
+            for canvas in canvases:
+                # gallica returns incorrect canvases height and width now and then, they are accessed this way
+                width = int(canvas["width"])
+                height = int(canvas["height"])
+
+                # test if height and width are valid, otherwise fetch from folio info.json instead
+                if (width < 0) or (height < 0):
+                    folio = canvas["@id"].rsplit("/", maxsplit=2)[-1]
+                    folio_url = manifest_url.rsplit("manifest.json")[0] + folio
+                    folio_manifest_url = "{folio_url}/info.json".format(folio_url=folio_url)
+                    rfolio = requests.get(folio_manifest_url)
+                    correct_width = int(rfolio.json()["width"])
+                    correct_height = int(rfolio.json()["height"])
+                    canvas["width"] = correct_width
+                    canvas["height"] = correct_height
+                    canvas["images"][0]["resource"]["width"] = correct_width
+                    canvas["images"][0]["resource"]["height"] = correct_height
+        except KeyError as err:
+            print("KeyError", err)
             canvases = []
 
         return canvases
