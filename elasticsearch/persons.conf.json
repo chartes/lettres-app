@@ -1,16 +1,14 @@
 {
   "mappings": {
-    "_doc": {
-      "properties": {
-        "label": {
-          "type": "text",
-          "analyzer": "folding",
-          "fields": {
-            "keyword": {
-              "type": "text",
-              "analyzer": "keyword",
-              "fielddata": "true"
-            }
+    "properties": {
+      "label": {
+        "type": "text",
+        "analyzer": "folding",
+        "fields": {
+          "keyword": {
+            "type": "text",
+            "analyzer": "keyword",
+            "fielddata": "true"
           }
         },
         "ref": {

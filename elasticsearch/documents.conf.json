@@ -1,230 +1,228 @@
 {
   "mappings": {
-    "_doc": {
-      "properties": {
-        "id": {
-          "type": "integer"
-        },
-        "is-published": {
-          "type": "boolean"
-        },
-        "creation": {
-          "type": "date"
-        },
-        "creation_range" : {
-          "type": "date_range",
-          "format": "yyyy-MM-dd||yyyy-MM||yyyy"
-        },
-        "lock": {
-          "properties": {
-            "id": {
-              "type" : "keyword"
-            },
-            "user_id": {
-              "type" : "keyword"
-            },
-            "username": {
-              "type": "text",
-              "analyzer": "keyword",
-              "fielddata": "true"
-            },
-            "description": {
-              "type": "text",
-              "analyzer": "keyword",
-              "fielddata": "true"
-            },
-            "event_date": {
-              "type": "text",
-              "analyzer": "keyword",
-              "fielddata": "true"
-            },
-            "expiration_date": {
-              "type": "text",
-              "analyzer": "keyword",
-              "fielddata": "true"
-            }
+    "properties": {
+      "id": {
+        "type": "integer"
+      },
+      "is-published": {
+        "type": "boolean"
+      },
+      "creation": {
+        "type": "date"
+      },
+      "creation_range" : {
+        "type": "date_range",
+        "format": "yyyy-MM-dd||yyyy-MM||yyyy"
+      },
+      "lock": {
+        "properties": {
+          "id": {
+            "type" : "keyword"
+          },
+          "user_id": {
+            "type" : "keyword"
+          },
+          "username": {
+            "type": "text",
+            "analyzer": "keyword",
+            "fielddata": "true"
+          },
+          "description": {
+            "type": "text",
+            "analyzer": "keyword",
+            "fielddata": "true"
+          },
+          "event_date": {
+            "type": "text",
+            "analyzer": "keyword",
+            "fielddata": "true"
+          },
+          "expiration_date": {
+            "type": "text",
+            "analyzer": "keyword",
+            "fielddata": "true"
           }
-        },
-        "title": {
-          "type": "text",
-          "analyzer": "folding",
-          "term_vector": "with_positions_offsets"
-        },
-        "argument": {
-          "type": "text",
-          "analyzer": "folding",
-          "term_vector": "with_positions_offsets"
-        },
-        "address": {
-          "type": "text",
-          "analyzer": "folding",
-          "term_vector": "with_positions_offsets"
-        },
-        "transcription": {
-          "type": "text",
-          "analyzer": "folding",
-          "term_vector": "with_positions_offsets"
-        },
-        "collections": {
-          "properties": {
-            "id": {
-              "type" : "keyword"
-            },
-            "parents": {
-              "type" : "text",
-              "fields" : {
-                "keyword" : {
-                  "type" : "keyword",
-                  "ignore_above" : 256
-                }
+        }
+      },
+      "title": {
+        "type": "text",
+        "analyzer": "folding",
+        "term_vector": "with_positions_offsets"
+      },
+      "argument": {
+        "type": "text",
+        "analyzer": "folding",
+        "term_vector": "with_positions_offsets"
+      },
+      "address": {
+        "type": "text",
+        "analyzer": "folding",
+        "term_vector": "with_positions_offsets"
+      },
+      "transcription": {
+        "type": "text",
+        "analyzer": "folding",
+        "term_vector": "with_positions_offsets"
+      },
+      "collections": {
+        "properties": {
+          "id": {
+            "type" : "keyword"
+          },
+          "parents": {
+            "type" : "text",
+            "fields" : {
+              "keyword" : {
+                "type" : "keyword",
+                "ignore_above" : 256
               }
             }
           }
-        },
-        "persons": {
-          "properties": {
-            "id": {
-              "type" : "keyword"
-            }
+        }
+      },
+      "persons": {
+        "properties": {
+          "id": {
+            "type" : "keyword"
           }
-        },
-        "senders": {
-          "properties": {
-            "facet_key":  {
-              "type" : "keyword"
-            },
-            "id": {
-              "type" : "keyword"
-            },
-            "label": {
-              "type" : "text",
-              "fields" : {
-                "keyword" : {
-                  "type" : "keyword",
-                  "ignore_above" : 256
-                },
-                "keyword_sort": {
-                  "type": "text",
-                  "analyzer": "keyword",
-                  "fielddata": "true"
-                }
+        }
+      },
+      "senders": {
+        "properties": {
+          "facet_key":  {
+            "type" : "keyword"
+          },
+          "id": {
+            "type" : "keyword"
+          },
+          "label": {
+            "type" : "text",
+            "fields" : {
+              "keyword" : {
+                "type" : "keyword",
+                "ignore_above" : 256
+              },
+              "keyword_sort": {
+                "type": "text",
+                "analyzer": "keyword",
+                "fielddata": "true"
               }
             }
           }
-        },
-        "recipients": {
-          "properties": {
-            "facet_key":  {
-              "type" : "keyword"
-            },
-            "id": {
-              "type" : "keyword"
-            },
-            "label": {
-              "type" : "text",
-              "fields" : {
-                "keyword" : {
-                  "type" : "keyword",
-                  "ignore_above" : 256
-                },
-                "keyword_sort": {
-                  "type": "text",
-                  "analyzer": "keyword",
-                  "fielddata": "true"
-                }
+        }
+      },
+      "recipients": {
+        "properties": {
+          "facet_key":  {
+            "type" : "keyword"
+          },
+          "id": {
+            "type" : "keyword"
+          },
+          "label": {
+            "type" : "text",
+            "fields" : {
+              "keyword" : {
+                "type" : "keyword",
+                "ignore_above" : 256
+              },
+              "keyword_sort": {
+                "type": "text",
+                "analyzer": "keyword",
+                "fielddata": "true"
               }
             }
           }
-        },
-        "persons_inlined": {
-          "properties": {
-            "facet_key":  {
-              "type" : "keyword"
-            },
-            "id": {
-              "type" : "keyword"
-            },
-            "label": {
-              "type" : "text",
-              "fields" : {
-                "keyword" : {
-                  "type" : "keyword",
-                  "ignore_above" : 256
-                }
+        }
+      },
+      "persons_inlined": {
+        "properties": {
+          "facet_key":  {
+            "type" : "keyword"
+          },
+          "id": {
+            "type" : "keyword"
+          },
+          "label": {
+            "type" : "text",
+            "fields" : {
+              "keyword" : {
+                "type" : "keyword",
+                "ignore_above" : 256
               }
             }
           }
-        },
-        "placenames": {
-          "properties": {
-            "id": {
-              "type": "keyword"
-            }
+        }
+      },
+      "placenames": {
+        "properties": {
+          "id": {
+            "type": "keyword"
           }
-        },
-        "location_dates_from": {
-          "properties": {
-            "facet_key":  {
-              "type" : "keyword"
-            },
-            "id": {
-              "type" : "keyword"
-            },
-            "label": {
-              "type" : "text",
-              "fields" : {
-                "keyword" : {
-                  "type" : "keyword",
-                  "ignore_above" : 256
-                },
-                "keyword_sort": {
-                  "type": "text",
-                  "analyzer": "keyword",
-                  "fielddata": "true"
-                }
+        }
+      },
+      "location_dates_from": {
+        "properties": {
+          "facet_key":  {
+            "type" : "keyword"
+          },
+          "id": {
+            "type" : "keyword"
+          },
+          "label": {
+            "type" : "text",
+            "fields" : {
+              "keyword" : {
+                "type" : "keyword",
+                "ignore_above" : 256
+              },
+              "keyword_sort": {
+                "type": "text",
+                "analyzer": "keyword",
+                "fielddata": "true"
               }
             }
           }
-        },
-        "location_dates_to": {
-          "properties": {
-            "facet_key":  {
-              "type" : "keyword"
-            },
-            "id": {
-              "type" : "keyword"
-            },
-            "label": {
-              "type" : "text",
-              "fields" : {
-                "keyword" : {
-                  "type" : "keyword",
-                  "ignore_above" : 256
-                },
-                "keyword_sort": {
-                  "type": "text",
-                  "analyzer": "keyword",
-                  "fielddata": "true"
-                }
+        }
+      },
+      "location_dates_to": {
+        "properties": {
+          "facet_key":  {
+            "type" : "keyword"
+          },
+          "id": {
+            "type" : "keyword"
+          },
+          "label": {
+            "type" : "text",
+            "fields" : {
+              "keyword" : {
+                "type" : "keyword",
+                "ignore_above" : 256
+              },
+              "keyword_sort": {
+                "type": "text",
+                "analyzer": "keyword",
+                "fielddata": "true"
               }
             }
           }
-        },
-        "locations_inlined": {
-          "properties": {
-            "facet_key":  {
-              "type" : "keyword"
-            },
-            "id": {
-              "type" : "keyword"
-            },
-            "label": {
-              "type" : "text",
-              "fields" : {
-                "keyword" : {
-                  "type" : "keyword",
-                  "ignore_above" : 256
-                }
+        }
+      },
+      "locations_inlined": {
+        "properties": {
+          "facet_key":  {
+            "type" : "keyword"
+          },
+          "id": {
+            "type" : "keyword"
+          },
+          "label": {
+            "type" : "text",
+            "fields" : {
+              "keyword" : {
+                "type" : "keyword",
+                "ignore_above" : 256
               }
             }
           }

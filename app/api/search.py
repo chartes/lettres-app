@@ -156,7 +156,8 @@ class SearchIndexManager(object):
                     #  {"creation": {"order": "desc"}}
                     *sort_criteriae
                 ],
-                "track_scores": True
+                "track_scores": True,
+                "track_total_hits": True,
             }
             #check for additionnal filters and facets
             print("\npublished check : \n", published)
@@ -285,16 +286,16 @@ class SearchIndexManager(object):
                     index = current_app.config["DEFAULT_INDEX_NAME"]
                 print("\nindex : ", index, "\nbody : \n")
                 pprint.pprint(body)
-                search = current_app.elasticsearch.search(index=index, doc_type="_doc", body=body)
+                search = current_app.elasticsearch.search(index=index, body=body)
                 # from elasticsearch import Elasticsearch
-                # scan = Elasticsearch.helpers.scan(client=current_app.elasticsearch, index=index, doc_type="_doc", body=body)
+                # scan = Elasticsearch.helpers.scan(client=current_app.elasticsearch, index=index, body=body)
 
                 from collections import namedtuple
                 results = []
                 if searchtype or highlight:
                     Result = namedtuple("Result", "index id type score highlight")
                     #print("search['hits']['total'] : ", search['hits']['total'])
-                    if search['hits']['total'] > 0:
+                    if search['hits']['total']['value'] > 0:
                         for hit in search['hits']['hits']:
                             results = [Result(str(hit['_index']), str(hit['_id']), str(hit['_source']["type"]),
                                               str(hit['_score']), hit.get('highlight'))
@@ -311,7 +312,7 @@ class SearchIndexManager(object):
 
                 buckets = []
                 after_key = None
-                count = search['hits']['total']
+                count = search['hits']['total']['value']
 
                 # print(body, len(results), search['hits']['total'], index)
                 #pprint.pprint(search)
@@ -357,12 +358,12 @@ class SearchIndexManager(object):
     @staticmethod
     def add_to_index(index, id, payload):
         # print("ADD_TO_INDEX", index, id)
-        current_app.elasticsearch.index(index=index, doc_type="_doc", id=id, body=payload)
+        current_app.elasticsearch.index(index=index, id=id, body=payload)
 
     @staticmethod
     def remove_from_index(index, id):
         # print("REMOVE_FROM_INDEX", index, id)
         try:
-            current_app.elasticsearch.delete(index=index, doc_type="_doc", id=id)
+            current_app.elasticsearch.delete(index=index,  id=id)
         except elasticsearch.exceptions.NotFoundError as e:
             print("WARNING: resource already removed from index:", str(e))

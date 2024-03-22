@@ -381,6 +381,7 @@ class JSONAPIRouteRegistrar(object):
                     "match_all": {}
                 },
                 "size": 0,
+                "track_total_hits": True,
                 "aggregations": {
                     "person_count": {
                         "cardinality": {
@@ -422,7 +423,7 @@ class JSONAPIRouteRegistrar(object):
 
             response = JSONAPIResponseFactory.make_response(
                 {
-                    "documents": search["hits"]["total"],
+                    "documents": search["hits"]["total"]["value"],
                     "persons": search["aggregations"]["person_count"]["value"],
                     "placenames": search["aggregations"]["place_count"]["value"],
                     "collections" : collection_count
