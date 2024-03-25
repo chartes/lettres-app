@@ -10,10 +10,10 @@
             "analyzer": "keyword",
             "fielddata": "true"
           }
-        },
-        "ref": {
-          "type": "text"
         }
+      },
+      "ref": {
+        "type": "text"
       }
     }
   }
