@@ -68,7 +68,7 @@ class PersonFacade(JSONAPIAbstractChangeloggedFacade):
                .distinct()
                .order_by(PersonHasRole.person_id))
         functions = [p[0] for p in phf] if phf else []
-        print("\n functions: ", functions)
+        #print("functions: ", functions)
         return functions
 
     @property
