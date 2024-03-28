@@ -23,7 +23,7 @@ Installer la version Elasticsearch conforme aux spécifications.
 Avec docker cela donne :
 
 ```bash
-docker run --name es-lettres -d -p 9200:9200  elasticsearch:6.8.22
+docker run --name es-lettres -d -p 9200:9200  elasticsearch:8.12.1
 docker exec es-lettres bash -c "bin/elasticsearch-plugin install analysis-icu"
 docker restart es-lettres
 ```
@@ -34,8 +34,7 @@ sur le port 5004, utiliser la commande :
 ```bash
 python3 manage.py db-reindex --rebuild --host=http://localhost:5004
 ```
-Cette commande s'occupe de créer les index de l'application avec les bons
-mappings.
+Cette commande crée les index de l'application sur la base des [mappings](./elasticsearch/).
 
 Pour les indexations suivantes, exécuter :
 ```bash
@@ -46,13 +45,13 @@ python3 manage.py db-reindex --host=http://localhost:5004
 
 Depuis le répertoire d'accueil de l'application, exécuter :
 
-`python3 manage.py add-user --email=myemail@email.fr --username=myusername --password=MySup3rPassw0rd!`
+`python3 manage.py add-user --email=<email@email.fr> --username=<username> --password=<userpassword>`
 
-Ajouter le flag `--admin` pour ajouter les droits d'admin au compte crée
+Ajouter le flag `--admin` pour accorder des droits d'administrateur à l'utilisateur.
 
 
 ## Documentation :
 - [Documentation de l'API](https://github.com/chartes/lettres-app/blob/master/docs/API.md)
 
 ## Lancer le front-end
-- Voir [Readme du Front-end](https://github.com/chartes/lettres-vue/blob/dev/README.md)
+- [Readme du Front-end](https://github.com/chartes/lettres-vue/blob/dev/README.md)
