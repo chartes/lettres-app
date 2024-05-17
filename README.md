@@ -41,7 +41,7 @@ Cette commande crée les index de l'application sur la base des [mappings](./ela
 
 Pour vérifier que les index ont bien été créés:
 ```bash
-curl http://localhost:9200/_cat/indices
+curl http://localhost:9200/_cat/indices?v
 ```
 
 Pour les indexations suivantes, exécuter :
