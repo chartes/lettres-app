@@ -1,11 +1,11 @@
 {
     "@id": "",
     "@type": "sc:Manifest",
-    "@context": "http://iiif.io/api/presentation/2/context.json",
+    "@context": "https://iiif.io/api/presentation/2/context.json",
     "label": "manifest",
     "attribution": "Comité des travaux historiques et scientifiques (CTHS)",
-    "license": "http://rightsstatements.org/vocab/NoC-NC/1.0/",
-    "logo": "http://cths.fr/images/logo-enc.png",
+    "license": "https://rightsstatements.org/vocab/NoC-NC/1.0/",
+    "logo": "https://cths.fr/images/logo-enc.png",
     "related": "",
     "description": "",
     "metadata": [
@@ -16,7 +16,7 @@
     ],
     "sequences": [
         {
-            "@context": "http://iiif.io/api/presentation/2/context.json",
+            "@context": "https://iiif.io/api/presentation/2/context.json",
             "@id": "",
             "@type": "sc:Sequence",
             "canvases": [

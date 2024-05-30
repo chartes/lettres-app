@@ -289,7 +289,7 @@ def tei2html(tei_node):
     """ conversion HTML 5 de certains nœuds TEI / NB: finalement lourd de retourner du texte… """
 
     tei2html = io.StringIO('''\
-        <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+        <xsl:stylesheet version="1.0" xmlns:xsl="https://www.w3.org/1999/XSL/Transform">
             <xsl:output method="text"/>
             <xsl:template match="/">
                 <xsl:apply-templates/>
@@ -344,7 +344,7 @@ def get_transcription_node(div):
     """ ramasser la seule transcription dans une div """
 
     get_transcription_node = io.StringIO('''\
-            <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+            <xsl:stylesheet version="1.0" xmlns:xsl="https://www.w3.org/1999/XSL/Transform">
                 <xsl:output method="xml"/>
                 <xsl:template match="@*|node()">
                     <xsl:copy>
