@@ -107,6 +107,8 @@ class Collection(db.Model, ChangesMixin):
 
     admin_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
+    legende_img = db.Column(db.String(200), nullable=False, default='Légende')
+
     children = db.relationship("Collection", backref=db.backref('parent', remote_side=id))
 
     @property
@@ -179,7 +181,7 @@ class Witness(db.Model, ChangesMixin):
     content = db.Column(db.String, nullable=False, index=True)
     tradition = db.Column('tradition', Enum(*TRADITION_VALUES), index=True, default=None)
     status = db.Column('status', Enum(*WITNESS_STATUS_VALUES), index=True)
-    institution_id = db.Column(db.Integer, db.ForeignKey('institution.id'))
+    institution_id = db.Column(db.Integer, db.ForeignKey('institution.id', ondelete='CASCADE'))
     classification_mark = db.Column(db.String(100))
 
 

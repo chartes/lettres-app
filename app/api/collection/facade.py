@@ -101,6 +101,7 @@ class CollectionFacade(JSONAPIAbstractChangeloggedFacade):
                 "title": self.obj.title,
                 "path": [c.title for c in self.obj.parents] + [self.obj.title],
                 "description": self.obj.description,
+                "legende_img": self.obj.legende_img,
                 "nb_docs": len(self.obj.documents_including_children),
                 "nb_pub_docs": len(self.obj.published_including_children),
                 #"parents": [c.id for c in self.obj.parents],
