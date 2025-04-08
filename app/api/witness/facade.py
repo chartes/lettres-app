@@ -35,7 +35,14 @@ class WitnessFacade(JSONAPIAbstractChangeloggedFacade):
                 "classification-mark": self.obj.classification_mark,
                 "status": self.obj.status,
                 "manifest_url": self.get_iiif_manifest_url() if len(self.obj.images) > 0 else None,
-                "num": self.obj.num if self.obj.num else 1
+                "num": self.obj.num if self.obj.num else 1,
+                "institution_id": self.obj.institution_id,
+                "institution":
+                        {
+                            "id": self.obj.institution_id,
+                            "name": self.obj.institution.name,
+                            "ref": self.obj.institution.ref
+                        } if self.obj.institution_id else None
             },
             "meta": self.meta,
             "links": {
