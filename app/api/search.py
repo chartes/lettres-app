@@ -77,7 +77,7 @@ class SearchIndexManager(object):
                     "fields": {
                         "argument": {},
                     },
-                    "number_of_fragments": 100,
+                    "number_of_fragments": 0,
                     "options": {"return_offsets": False}
                 }
             else:
@@ -209,12 +209,12 @@ class SearchIndexManager(object):
                 body["highlight"] = {
                     "type": "fvh",
                     "fields": {
-                        #"argument": {},
+                        "argument": { "number_of_fragments": 0 },
                         #"title": {},
-                        "transcription": {},
-                        "address": {}
+                        "transcription": { "number_of_fragments": 100 },
+                        "address": { "number_of_fragments": 100 }
                     },
-                    "number_of_fragments": 100,
+                    #"number_of_fragments": 100,
                     "options": {"return_offsets": False}
                 }
                 print('\nif highlight / body["highlight"] : ', body["highlight"], '\n')
