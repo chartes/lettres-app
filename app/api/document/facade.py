@@ -454,7 +454,25 @@ class DocumentFrontFacade(DocumentFacade):
                     "object-type": self.obj.current_lock.object_type,
                     "is-active": self.obj.current_lock.is_active,
                 } if self.obj.current_lock else None,
-                "witnesses": [{"id": w.id, "content": w.content, "classification-mark": w.classification_mark, "manifest_url": self.get_witness_manifest_url(w.id), "manifest": self.get_iiif_manifest(w.id), "num": w.num, "status": w.status, "tradition": w.tradition} for w in sorted(self.obj.witnesses, key=lambda k: k.num) if self.obj.witnesses],
+                "witnesses": [
+                    {
+                        "id": w.id,
+                        "content": w.content,
+                        "classification-mark": w.classification_mark,
+                        "manifest_url": self.get_witness_manifest_url(w.id),
+                        "manifest": self.get_iiif_manifest(w.id),
+                        "num": w.num,
+                        "status": w.status,
+                        "tradition": w.tradition,
+                        "institution_id": w.institution_id,
+                        "institution":
+                        {
+                            "id": w.institution_id,
+                            "name": w.institution.name,
+                            "ref": w.institution.ref
+                        } if w.institution_id else None,
+                    } for w in sorted(self.obj.witnesses, key=lambda k: k.num) if self.obj.witnesses
+                ],
                 "notes": [{"id": n.id, "content": n.content, "occurences": n.occurences} for n in self.obj.notes],
                 "languages": [{"id": l.id, "code": l.code, "label": l.label} for l in self.obj.languages],
                 "collections": [
