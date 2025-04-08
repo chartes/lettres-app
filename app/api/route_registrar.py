@@ -194,7 +194,15 @@ class JSONAPIRouteRegistrar(object):
                             )
                             # print(str(new_criteria))
                         elif not not_null_operator:
-                            if criteria:
+                            if criteria and filter_fieldname == 'object_id':
+                                # filter[field]=value
+                                new_criteria = "{table}.{field}{operator}'{criteria}'".format(
+                                    table=model.__tablename__,
+                                    field=filter_fieldname,
+                                    operator="==",
+                                    criteria="{}".format(criteria)
+                                )
+                            elif criteria:
                                 # filter[field]=value
                                 new_criteria = "{table}.{field}{operator}'{criteria}'".format(
                                     table=model.__tablename__,
