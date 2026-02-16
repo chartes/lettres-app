@@ -1,6 +1,42 @@
 import datetime
 import json
 import pathlib
+import re
+from html.parser import HTMLParser
+
+class HTMLToTextWithLinks(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.result = []
+        self.current_href = None
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "a":
+            for attr, value in attrs:
+                if attr == "href":
+                    self.current_href = value
+
+    def handle_endtag(self, tag):
+        if tag == "a" and self.current_href:
+            # Ajouter l'URL après le texte du lien
+            self.result.append(f" ({self.current_href})")
+            self.current_href = None
+
+    def handle_data(self, data):
+        self.result.append(data)
+
+    def get_text(self):
+        text = ''.join(self.result)
+        # Nettoyage des espaces
+        text = re.sub(r'\s+,', ',', text)
+        text = re.sub(r'\s+', ' ', text).strip()
+        return text
+
+
+def html_to_text_with_links(html):
+    parser = HTMLToTextWithLinks()
+    parser.feed(html)
+    return parser.get_text()
 
 import requests
 from flask import current_app, request
@@ -8,6 +44,7 @@ from operator import attrgetter
 
 from app.api.document.facade import DocumentFacade
 from app.api.witness.facade import WitnessFacade
+
 
 
 dir = pathlib.Path(__file__).parent.resolve()
@@ -68,7 +105,10 @@ class ManifestFactory(object):
         manifest["related"] = f"{api_prefix_url}/documents/{witness.document_id}"
 
         # === manifest label
-        manifest["label"] = witness.content
+        from app.api.document.facade import DocumentFacade
+        f_obj, errors, kwargs = DocumentFacade.get_resource_facade('', witness.document_id)
+        manifest["label"] = f_obj.resource["attributes"]["title"]
+        manifest["metadata"] = [{"label":"Citation","value": witness.content}]
 
         # ==== sequence @id
         seq = f"{manifest_url}/sequence/normal"
@@ -106,10 +146,46 @@ class ManifestFactory(object):
 
     @classmethod
     def _fetch(cls, manifest_url):
-        r = requests.get(manifest_url)
-        #print("fetching... %s" % manifest_url, end=" ", flush=True)
-        manifest = r.json()
-        #print(r.status_code)
+        """
+            Récupère le manifeste IIIF depuis Gallica en utilisant pyGallica.
+        """
+        match = re.search(r"(ark:/\d+/[a-z0-9]+)", manifest_url)
+        if match:
+            ark = match.group(1)
+            print("\n_fetch manifest_url / ark : ", manifest_url, ark)
+
+            try:
+                # create required headers, in particular a referer
+                referer = request.host_url[:-1]
+                headers = {
+                    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+                                  "(KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+                    "referer": referer,
+                    "Accept": "application/json"
+                }
+
+                r = requests.get(manifest_url, headers=headers)
+                manifest = r.json()
+                print("fetching... %s manifest_url, response status \n" % manifest_url, r.status_code)
+
+                # security : create sequences key if missing
+                if "sequences" not in manifest:
+                    manifest["sequences"] = [{"@id": f"{manifest_url}/sequence/normal", "canvases": []}]
+                return manifest
+
+            except Exception as e:
+                print("Error fetching manifest manifest_url / error : ", manifest_url, e)
+                return {"@id": manifest_url, "sequences": [{"@id": f"{manifest_url}/sequence/normal", "canvases": []}]}
+
+        else:
+            print("\n_fetch no ark found for manifest_url : ", manifest_url)
+            return {"@id": manifest_url, "sequences": [{"@id": f"{manifest_url}/sequence/normal", "canvases": []}]}
+
+
+        #r = requests.get(manifest_url)
+        #print("fetching... %s \n" % manifest_url, end=" ", flush=True)
+        #manifest = r.json()
+        #print("fetching... %s manifest \n" % manifest_url, manifest, r)
         # gallica returns incorrect canvases height and width now and then, they are accessed this way
         # width = int(manifest["sequences"][0]["canvases"][0]["width"])
         # height = int(manifest["sequences"][0]["canvases"][0]["height"])
@@ -122,8 +198,9 @@ class ManifestFactory(object):
         if manifest_url not in cls.CACHED_MANIFESTS.keys():
             try:
                 manifest = cls._fetch(manifest_url)
+                print("_get_from_cache try manifest_url : ", manifest_url)
             except Exception as e:
-                print("cannot get manifest", manifest_url)
+                print("_get_from_cache try cannot get manifest_url, error : ", manifest_url, e)
                 manifest = {}
             if len(cls.CACHED_MANIFESTS.keys()) >= cls.CACHE_ENTRY_MAX:
                 l = [(dt, url) for url, (_, dt) in cls.CACHED_MANIFESTS.items()]
@@ -138,8 +215,11 @@ class ManifestFactory(object):
         else:
             manifest, dt = cls.CACHED_MANIFESTS[manifest_url]
             # gallica returns incorrect (-1) canvases height & width now and then, test before refreshing cache
-            width = int(manifest["sequences"][0]["canvases"][0]["width"])
-            height = int(manifest["sequences"][0]["canvases"][0]["height"])
+            try:
+                width = int(manifest["sequences"][0]["canvases"][0]["width"])
+                height = int(manifest["sequences"][0]["canvases"][0]["height"])
+            except (KeyError, IndexError, TypeError, ValueError):
+                width = height = 0
             if (width > 0) and (height > 0):
                 #print("get from cache")
                 # refresh the cache entry
@@ -173,6 +253,8 @@ class ManifestFactory(object):
 
             for canvas in canvases:
                 # gallica returns incorrect canvases height and width now and then, they are accessed this way
+                if "[" not in canvas["label"]:
+                    canvas["label"] = f'[f. {canvas["label"]}]'
                 width = int(canvas["width"])
                 height = int(canvas["height"])
 

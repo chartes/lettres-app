@@ -546,7 +546,7 @@ class DocumentSearchFacade(DocumentFacade):
                 "transcription": self.obj.transcription,
                 "address": self.obj.address,
                 "is-published": False if self.obj.is_published is None else self.obj.is_published,
-                "witnesses": [{"id": w.id, "content": w.content, "classification-mark": w.classification_mark, "manifest_url": self.get_witness_manifest_url(w.id)} for w in sorted(self.obj.witnesses, key=lambda k: k.num) if self.obj.witnesses],
+                "witnesses": [{"id": w.id, "content": w.content, "classification-mark": w.classification_mark, "manifest_url": self.get_witness_manifest_url(w.id), "manifest": self.get_iiif_manifest(w.id)} for w in sorted(self.obj.witnesses, key=lambda k: k.num) if self.obj.witnesses],
                 "senders": [
                     {
                         "id": c_h_r.person.id,
