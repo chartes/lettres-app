@@ -47,10 +47,10 @@ class PrefixMiddleware(object):
             return self.app(environ, start_response)
 
 # Without Prefix /ecco (also update in flask_app.py & in VUE_APP var_env):
-# def create_app(config_name="dev", with_hardcoded_prefix=False):
+# def create_app(config_name="staging", with_hardcoded_prefix=False):
 
 # With Prefix /ecco (also update in flask_app.py & in VUE_APP var_env):
-def create_app(config_name="dev", with_hardcoded_prefix=True):
+def create_app(config_name="staging", with_hardcoded_prefix=True):
     """ Create the application """
     app = Flask(__name__)
     if not isinstance(config_name, str):

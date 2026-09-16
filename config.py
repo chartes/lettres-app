@@ -74,15 +74,22 @@ class Config(object):
         pass
 
 
-class DevelopmentConfig(Config):
+class LocalConfig(Config):
 
     ENV = 'development'
 
     @staticmethod
     def init_app(app):
-        print('THIS APP IS IN DEV MODE. YOU SHOULD NOT SEE THIS IN PRODUCTION.')
-        with app.app_context():
-            db_url = app.config["SQLALCHEMY_DATABASE_URI"]
+        print('THIS APP IS IN LOCAL DEV MODE. YOU SHOULD NOT SEE THIS IN PRODUCTION.')
+
+
+class StagingConfig(Config):
+
+    ENV = 'development'
+
+    @staticmethod
+    def init_app(app):
+        print('THIS APP IS IN PRE-PROD MODE. YOU SHOULD NOT SEE THIS IN PRODUCTION.')
 
 
 
@@ -94,7 +101,8 @@ class TestConfig(Config):
         print('THIS APP IS IN TEST MODE. YOU SHOULD NOT SEE THIS IN PRODUCTION.')
 
 config = {
-    "dev": DevelopmentConfig,
+    "local": LocalConfig,
+    "staging": StagingConfig,
     "prod": Config,
     "test": TestConfig
 }

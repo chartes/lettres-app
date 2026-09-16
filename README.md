@@ -17,8 +17,9 @@ pip install -r requirements.txt
 
 - Se rendre dans le sous-répertoire contenant le fichier flask_app.py et le lancer :
 ```bash
-python3 flask_app.py
+python3 flask_app.py (--config=<local/staging/prod>)
 ```
+Le fichier `<config>.env` utilisé est `staging.env` par défaut. Sur les serveurs, il peut être imposé par la variable d'environnement `SERVER_ENV_CONFIG` (prioritaire sur `--config`).
 - Lancer une requête de contrôle :
 (ex: http://127.0.0.1:5004/ecco/api/1.0/documents?page[size]=2)
 
@@ -35,7 +36,7 @@ docker restart es-lettres
 Lors de la première indexation, avec une application en local
 sur le port 5004, utiliser la commande :
 ```bash
-python3 manage.py (--config=<dev/prod>) db-reindex --rebuild --host=http://localhost:5004
+python3 manage.py (--config=<local/staging/prod>) db-reindex --rebuild --host=http://localhost:5004
 ```
 Cette commande crée les index de l'application sur la base des [mappings](./elasticsearch/)
 
@@ -46,7 +47,7 @@ curl http://localhost:9200/_cat/indices?v
 
 Pour les indexations suivantes, exécuter :
 ```bash
-python3 manage.py (--config=<dev/prod>) db-reindex --host=http://localhost:5004
+python3 manage.py (--config=<local/staging/prod>) db-reindex --host=http://localhost:5004
 ```
 
 ## Ajouter un utilisateur

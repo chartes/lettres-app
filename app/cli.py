@@ -82,7 +82,7 @@ def make_cli():
     :return: Click groum
     """
     @click.group()
-    @click.option('--config', default="dev")
+    @click.option('--config', default="staging", type=click.Choice(["local", "staging", "prod", "test"]), help="select appropriate .env file to use", show_default=True)
     def cli(config):
         """ Generates the client"""
         click.echo("Loading the application")
