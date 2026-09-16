@@ -33,11 +33,7 @@ print("selected_env_file : ", env)
 # Launching app with the selected environment #
 ###############################################
 
-# With prefix /ecco (also update in __init__.py & in VUE_APP var_env):
-flask_app = create_app(config_name=env, with_hardcoded_prefix=True)
-
-# Without prefix /ecco (also update in __init__.py & in VUE_APP var_env):
-# flask_app = create_app(config_name=env)
+flask_app = create_app(config_name=env)
 
 if __name__ == "__main__":
     flask_app.run(debug=True, port=5004, host='0.0.0.0')

@@ -46,7 +46,7 @@ class TestBaseServer(TestCase):
     def create_app(self):
         from app.api.document.facade import DocumentFacade
 
-        _app = create_app(config_name="test", with_hardcoded_prefix=True)
+        _app = create_app(config_name="test")
         with _app.app_context():
             if hasattr(current_app, "elasticsearch"):
                 _app.elasticsearch.indices.delete(

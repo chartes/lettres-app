@@ -34,23 +34,7 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
     cursor.close()
 
 
-class PrefixMiddleware(object):
-
-    def __init__(self, app, prefix=''):
-        self.app = app
-        self.prefix = prefix
-
-    def __call__(self, environ, start_response):
-        if environ['PATH_INFO'].startswith(self.prefix):
-            environ['PATH_INFO'] = environ['PATH_INFO'][len(self.prefix):]
-            environ['SCRIPT_NAME'] = self.prefix
-            return self.app(environ, start_response)
-
-# Without Prefix /ecco (also update in flask_app.py & in VUE_APP var_env):
-# def create_app(config_name="staging", with_hardcoded_prefix=False):
-
-# With Prefix /ecco (also update in flask_app.py & in VUE_APP var_env):
-def create_app(config_name="staging", with_hardcoded_prefix=True):
+def create_app(config_name="staging"):
     """ Create the application """
     app = Flask(__name__)
     if not isinstance(config_name, str):
@@ -81,9 +65,6 @@ def create_app(config_name="staging", with_hardcoded_prefix=True):
     print(app.config["SQLALCHEMY_DATABASE_URI"])
 
     # migrate = Migrate(app, db, render_as_batch=True)
-
-    if with_hardcoded_prefix:
-        app.wsgi_app = PrefixMiddleware(app.wsgi_app, prefix=app.config["APP_URL_PREFIX"])
 
     app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) if app.config['ELASTICSEARCH_URL'] else None
 

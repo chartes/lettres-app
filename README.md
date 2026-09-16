@@ -21,7 +21,7 @@ python3 flask_app.py (--config=<local/staging/prod>)
 ```
 Le fichier `<config>.env` utilisé est `staging.env` par défaut. Sur les serveurs, il peut être imposé par la variable d'environnement `SERVER_ENV_CONFIG` (prioritaire sur `--config`).
 - Lancer une requête de contrôle :
-(ex: http://127.0.0.1:5004/ecco/api/1.0/documents?page[size]=2)
+(ex: http://127.0.0.1:5004/api/1.0/documents?page[size]=2 avec --config=local)
 
 ## Indexation
 
