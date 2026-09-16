@@ -1,4 +1,5 @@
 import json
+import re
 
 import elasticsearch
 import pprint
@@ -6,6 +7,27 @@ from flask import current_app
 
 
 class SearchIndexManager(object):
+
+    @staticmethod
+    def resolve_index_name(index):
+        """Map the index request parameter to the index name(s) of the current config.
+
+        Accepts a short name (persons), a full name (ecco__persons) or a legacy
+        name including an environment segment (lettres__production__persons).
+        """
+        if not index:
+            return current_app.config["DEFAULT_INDEX_NAME"]
+        prefix = current_app.config.get("INDEX_PREFIX", "")
+        names = []
+        for name in index.split(","):
+            name = name.strip()
+            legacy = re.match(r"^[a-z0-9_]+__(?:development|production|testing)__([a-z0-9_-]+)$", name)
+            if legacy:
+                name = legacy.group(1)
+            if not name.startswith(prefix + "__"):
+                name = "{prefix}__{name}".format(prefix=prefix, name=name)
+            names.append(name)
+        return ",".join(names)
     #TODO Victor check if searchtype="fulltext" should be changed to "paratext" as default in backend
     @staticmethod
     def query_index(index, query, published=False, collectionsfacets=False, senders_facets=False, recipients_facets=False, persons_inlined_facets=False, location_dates_from_facets=False, location_dates_to_facets=False, locations_inlined_facets=False, ranges=(), groupby=None, sort_criteriae=None, searchtype=False, highlight=False, page=None, per_page=None, after=None):
@@ -282,8 +304,7 @@ class SearchIndexManager(object):
 
             #check index and launch ES search
             try:
-                if index is None or len(index) == 0:
-                    index = current_app.config["DEFAULT_INDEX_NAME"]
+                index = SearchIndexManager.resolve_index_name(index)
                 print("\nindex : ", index, "\nbody : \n")
                 pprint.pprint(body)
                 search = current_app.elasticsearch.search(index=index, body=body)

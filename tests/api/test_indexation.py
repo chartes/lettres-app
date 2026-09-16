@@ -7,7 +7,7 @@ from tests.base_server import TestBaseServer
 
 
 class TestIndexation(TestBaseServer):
-    DOC_INDEX_NAME = "lettres__testing__document"
+    DOC_INDEX_NAME = "ecco_test__documents"
 
     def load_fixtures(self):
         from tests.data.fixtures.dataset001 import load_fixtures as load_dataset001
