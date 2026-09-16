@@ -1,3 +1,4 @@
+import copy
 import datetime
 import json
 import pathlib
@@ -97,7 +98,8 @@ class ManifestFactory(object):
         f_obj, errors, kwargs = WitnessFacade.get_facade('', witness)
         manifest_url = f_obj.get_iiif_manifest_url()
 
-        manifest = dict(self.manifest_template)
+        # deep copy: the template nested structures (sequences, canvases) must not be shared between manifests
+        manifest = copy.deepcopy(self.manifest_template)
 
         # ==== manifest @id
         manifest["@id"] = manifest_url
