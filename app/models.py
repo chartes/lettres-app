@@ -181,7 +181,7 @@ class Witness(db.Model, ChangesMixin):
     content = db.Column(db.String, nullable=False, index=True)
     tradition = db.Column('tradition', Enum(*TRADITION_VALUES), index=True, default=None)
     status = db.Column('status', Enum(*WITNESS_STATUS_VALUES), index=True)
-    institution_id = db.Column(db.Integer, db.ForeignKey('institution.id', ondelete='CASCADE'))
+    institution_id = db.Column(db.Integer, db.ForeignKey('institution.id', ondelete='SET NULL'))
     classification_mark = db.Column(db.String(100))
 
 
