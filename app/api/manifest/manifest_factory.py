@@ -107,9 +107,7 @@ class ManifestFactory(object):
         manifest["related"] = f"{api_prefix_url}/documents/{witness.document_id}"
 
         # === manifest label
-        from app.api.document.facade import DocumentFacade
-        f_obj, errors, kwargs = DocumentFacade.get_resource_facade('', witness.document_id)
-        manifest["label"] = f_obj.resource["attributes"]["title"]
+        manifest["label"] = witness.document.title
         manifest["metadata"] = [{"label":"Citation","value": witness.content}]
 
         # ==== sequence @id
