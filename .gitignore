@@ -1,7 +1,8 @@
 .DS_Store
 .idea
 __pycache__
-venv
+venv*
+lettresenv
 *.pyc
 *.mwb.bak
 *.mwb
