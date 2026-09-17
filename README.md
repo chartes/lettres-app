@@ -79,20 +79,19 @@ python flask_app.py (--config=<local/staging/prod>)
 
 ## Indexation
 
-> :warning: Les commandes d'indexation sont exécutées dans l'environnement virtuel de l'application, qui doit être lancée.
+> :warning: Les commandes d'indexation sont exécutées dans l'environnement virtuel de l'application, depuis son répertoire.
+> Elles lisent directement la base de données : l'application n'a pas besoin d'être lancée.
 >
 > Les options sont indiquées entre parenthèses <em>(option)</em>. Les retirer si besoin.
->
-> `--host` est l'URL racine de l'API lancée : `http://localhost:5004` en local, l'URL publique sur les serveurs (ex. `https://dev.chartes.psl.eu/ecco`). Elle sert à construire les liens enregistrés dans les index.
 
 Lors de la première indexation, ou pour recréer les index selon les [mappings](./elasticsearch/) :
 ```bash
-python manage.py (--config=<local/staging/prod>) db-reindex --rebuild --host=http://localhost:5004
+python manage.py (--config=<local/staging/prod>) db-reindex --rebuild
 ```
 
 Pour les indexations suivantes :
 ```bash
-python manage.py (--config=<local/staging/prod>) db-reindex --host=http://localhost:5004
+python manage.py (--config=<local/staging/prod>) db-reindex
 ```
 
 Les index sont nommés `<INDEX_PREFIX>__<type>` (ex. `ecco__documents`).

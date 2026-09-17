@@ -156,9 +156,8 @@ def make_cli():
 
     @click.command("db-reindex")
     @click.option('--indexes', default="all")
-    @click.option('--host', required=True)
     @click.option('--rebuild', is_flag=True, help="truncate the index before updating its configuration")
-    def db_reindex(indexes, host, rebuild):
+    def db_reindex(indexes, rebuild):
         """
         Rebuild the elasticsearch indexes from the current database
         """
@@ -188,7 +187,6 @@ def make_cli():
 
             with app.app_context():
 
-                prefix = "{host}{api_prefix}".format(host=host, api_prefix=app.config["API_URL_PREFIX"])
                 print("Reindexing %s... " % name, end="", flush=True)
 
                 index_name = info["facade"].get_index_name()
@@ -202,7 +200,8 @@ def make_cli():
                 def actions():
                     query = info["model"].query.options(*info.get("loader_options", ()))
                     for obj in query.all():
-                        for data in info["facade"](prefix, obj).get_data_to_index_when_added(propagate=False):
+                        # the URL prefix is only used for API links, which are not indexed
+                        for data in info["facade"]("", obj).get_data_to_index_when_added(propagate=False):
                             yield {"_index": data["index"], "_id": data["id"], "_source": data["payload"]}
 
                 def bulk_index():
