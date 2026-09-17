@@ -702,6 +702,7 @@ class JSONAPIRouteRegistrar(object):
                 included_resources = None
                 if "include" in request.args:
                     included_resources = []
+                    included_keys = set()
                     for facade_obj in sorted_facade_objs:
                         included_res, errors = JSONAPIRouteRegistrar.get_included_resources(
                             request.args["include"].split(','),
@@ -712,7 +713,8 @@ class JSONAPIRouteRegistrar(object):
                             # return errors
                         # extend the included_res but avoid duplicates
                         for _res in included_res:
-                            if (_res["type"], _res["id"]) not in [(r["type"], r["id"]) for r in included_resources]:
+                            if (_res["type"], _res["id"]) not in included_keys:
+                                included_keys.add((_res["type"], _res["id"]))
                                 included_resources.append(_res)
                         # included_resources.extend(included_res)
 
@@ -904,6 +906,7 @@ class JSONAPIRouteRegistrar(object):
                 included_resources = None
                 if "include" in request.args:
                     included_resources = []
+                    included_keys = set()
                     for facade_obj in facade_objs:
                         included_res, errors = JSONAPIRouteRegistrar.get_included_resources(
                             request.args["include"].split(','),
@@ -913,7 +916,8 @@ class JSONAPIRouteRegistrar(object):
                             return errors
                         # extend the included_res but avoid duplicates
                         for _res in included_res:
-                            if (_res["type"], _res["id"]) not in [(r["type"], r["id"]) for r in included_resources]:
+                            if (_res["type"], _res["id"]) not in included_keys:
+                                included_keys.add((_res["type"], _res["id"]))
                                 included_resources.append(_res)
 
                 return JSONAPIResponseFactory.make_data_response(
@@ -1191,6 +1195,7 @@ class JSONAPIRouteRegistrar(object):
                     # get the related resources to include
                     if "include" in request.args:
                         included_resources = []
+                        included_keys = set()
                         for res in resource_data:
                             f_class = JSONAPIFacadeManager.get_facade_class_from_facade_type(res["type"])
                             f_obj, kwargs, errors = f_class.get_resource_facade(
@@ -1204,7 +1209,8 @@ class JSONAPIRouteRegistrar(object):
                             )
                             # extend the included_res but avoid duplicates
                             for _res in i_resources:
-                                if (_res["type"], _res["id"]) not in [(r["type"], r["id"]) for r in included_resources]:
+                                if (_res["type"], _res["id"]) not in included_keys:
+                                    included_keys.add((_res["type"], _res["id"]))
                                     included_resources.append(_res)
                             if errors:
                                 return errors
