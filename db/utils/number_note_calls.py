@@ -8,7 +8,7 @@ qui entourent parfois le libellé :
 Les appels déjà numérotés dont le numéro ne correspond pas à la position de la note
 sont renumérotés.
 
-Champs traités : titre, analyse, transcription, adresse (ceux que le front renumérote).
+Champs traités : titre, analyse, transcription, adresse de la lettre, contenu et cote des témoins.
 Le script peut être relancé.
 
 Usage (depuis lettres-app) :
@@ -19,7 +19,10 @@ import argparse
 import sqlite3
 import re
 
-FIELDS = ("title", "argument", "transcription", "address")
+TABLES = {
+    "document": ("id", ("title", "argument", "transcription", "address")),
+    "witness": ("document_id", ("content", "classification_mark")),
+}
 NOTE_CALL = re.compile(r'<a class="note" href="#(\d+)">(?:\uFEFF|</?span>)*\[(note|\d+)\](?:\uFEFF|</?span>)*</a>', re.I)
 
 
@@ -36,45 +39,52 @@ def main():
         notes = positions.setdefault(document_id, {})
         notes[note_id] = len(notes) + 1
 
-    documents, numbered, renumbered, unknown, examples = 0, 0, [], [], []
+    updated_rows = {table: 0 for table in TABLES}
+    numbered = {table: 0 for table in TABLES}
+    examples = {table: [] for table in TABLES}
+    renumbered, unknown = [], []
     try:
-        for row in db.execute(f"SELECT id, {', '.join(FIELDS)} FROM document").fetchall():
-            document_id, updates = row[0], {}
-            for field, html in zip(FIELDS, row[1:]):
-                if not html:
-                    continue
+        for table, (document_column, fields) in TABLES.items():
+            for row in db.execute(f"SELECT id, {document_column}, {', '.join(fields)} FROM {table}").fetchall():
+                row_id, document_id, updates = row[0], row[1], {}
+                for field, html in zip(fields, row[2:]):
+                    if not html:
+                        continue
+                    where = f"lettre {document_id}, {field}" if table == "document" else f"lettre {document_id}, témoin {row_id}, {field}"
 
-                def number(match):
-                    nonlocal numbered
-                    note_id, label = int(match.group(1)), match.group(2)
-                    index = positions.get(document_id, {}).get(note_id)
-                    if index is None:
-                        unknown.append((document_id, field, note_id))
-                        return match.group(0)
-                    call = f'<a class="note" href="#{note_id}">[{index}]</a>'
-                    if call != match.group(0):
-                        if label.lower() == "note":
-                            numbered += 1
-                        else:
-                            renumbered.append(f"lettre {document_id}, {field}, note {note_id} : [{label}] -> [{index}]")
-                    return call
+                    def number(match):
+                        note_id, label = int(match.group(1)), match.group(2)
+                        index = positions.get(document_id, {}).get(note_id)
+                        if index is None:
+                            unknown.append(f"{where}, note {note_id}")
+                            return match.group(0)
+                        call = f'<a class="note" href="#{note_id}">[{index}]</a>'
+                        if call != match.group(0):
+                            if label.lower() == "note":
+                                numbered[table] += 1
+                            else:
+                                renumbered.append(f"{where}, note {note_id} : [{label}] -> [{index}]")
+                        return call
 
-                new_html = NOTE_CALL.sub(number, html)
-                if new_html != html:
-                    updates[field] = new_html
-                    if len(examples) < 5:
-                        i = new_html.index('class="note"')
-                        examples.append(f"lettre {document_id}, {field} : ...{new_html[max(0, i - 50):i + 40]}")
-            if updates:
-                documents += 1
-                assignments = ", ".join(f"{field} = ?" for field in updates)
-                db.execute(f"UPDATE document SET {assignments} WHERE id = ?", (*updates.values(), document_id))
+                    new_html = NOTE_CALL.sub(number, html)
+                    if new_html != html:
+                        updates[field] = new_html
+                        if len(examples[table]) < 3:
+                            i = new_html.index('class="note"')
+                            examples[table].append(f"{where} : ...{new_html[max(0, i - 50):i + 40]}")
+                if updates:
+                    updated_rows[table] += 1
+                    assignments = ", ".join(f"{field} = ?" for field in updates)
+                    db.execute(f"UPDATE {table} SET {assignments} WHERE id = ?", (*updates.values(), row_id))
 
-        print(f"{numbered} appel(s) [note] numéroté(s), {len(renumbered)} appel(s) renuméroté(s), dans {documents} lettre(s)")
-        for example in examples:
-            print(f"  {example}")
+        print(f"lettres : {numbered['document']} appel(s) [note] numéroté(s) dans {updated_rows['document']} lettre(s)")
+        print(f"témoins : {numbered['witness']} appel(s) [note] numéroté(s) dans {updated_rows['witness']} témoin(s)")
+        print(f"{len(renumbered)} appel(s) mal numéroté(s) corrigé(s)")
         for change in renumbered:
             print(f"  {change}")
+        print("exemples :")
+        for example in examples["document"] + examples["witness"]:
+            print(f"  {example}")
         if unknown:
             print(f"appels vers une note absente de la lettre (non modifiés) : {unknown}")
         if args.apply:
@@ -88,6 +98,7 @@ def main():
         raise
     finally:
         db.close()
+
 
 
 if __name__ == "__main__":
