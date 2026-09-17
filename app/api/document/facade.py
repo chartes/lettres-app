@@ -15,7 +15,7 @@ def remove_html_tags(text):
     without_without_notes = without_html_content.replace("[note]","").strip() if without_html_content else None
     without_numbered_notes = re.sub(clean_notes,' ', without_without_notes) if without_without_notes else None
     without_page_breaks = re.sub(clean_page_breaks,' ', without_numbered_notes) if without_numbered_notes else None
-    cleaned = re.sub(' +', ' ', without_page_breaks) if without_page_breaks else None
+    cleaned = re.sub(' +', ' ', without_page_breaks).strip() if without_page_breaks else None
     return cleaned
 
 class DocumentFacade(JSONAPIAbstractChangeloggedFacade):
