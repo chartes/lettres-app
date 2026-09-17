@@ -9,7 +9,7 @@ lettresenv
 tests/data/lettres-test.sqlite
 app/client/node_modules/
 app/static/js/main.build.*
-*.sqlite
+*.sqlite*
 # Frontend directories and files
 
 node_modules/
