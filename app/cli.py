@@ -61,16 +61,19 @@ def load_elastic_conf(conf_name, index_name, rebuild=False):
                 print("settings : ", settings)
 
                 print("'elasticsearch/%s.conf.json' % conf_name : ", 'elasticsearch/%s.conf.json' % conf_name)
-                with open('elasticsearch/%s.conf.json' % conf_name, 'r') as f:
-                    payload = json.load(f)
-                    print("payload : ", payload)
-                    payload["settings"] = settings
-                    print("payload : ", payload)
-                    res = requests.put(url, json=payload)
-                    assert str(res.status_code).startswith("20")
+                try:
+                    with open('elasticsearch/%s.conf.json' % conf_name, 'r') as f:
+                        payload = json.load(f)
+                except FileNotFoundError:
+                    # no mappings: create the index with the shared settings (number_of_replicas...)
+                    # instead of letting the first insert create it with the ES defaults (1 replica)
+                    print("no conf...", flush=True, end=" ")
+                    payload = {}
+                payload["settings"] = settings
+                print("payload : ", payload)
+                res = requests.put(url, json=payload)
+                assert str(res.status_code).startswith("20")
 
-    except FileNotFoundError as e:
-        print("no conf...", flush=True, end=" ")
     except Exception as e:
         print("res.text error : ", str(e), flush=True, end=" ")
         raise e
