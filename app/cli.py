@@ -3,10 +3,10 @@ from datetime import datetime
 
 import click
 import json
-import re
 import pprint
 import requests
-from elasticsearch import AuthorizationException
+from elasticsearch.helpers import BulkIndexError, streaming_bulk
+from sqlalchemy.orm import selectinload
 
 from app import create_app
 from app.api.collection.facade import CollectionFacade
@@ -17,22 +17,11 @@ from app.api.language.facade import LanguageFacade
 from app.api.placename.facade import PlacenameFacade
 from app.api.user.facade import UserFacade
 from app.api.witness.facade import WitnessFacade
-from app.models import UserRole, User, Document, Collection, Language, Witness, Person, Institution, Placename
+from app.models import UserRole, User, Document, Collection, Language, Witness, Person, Institution, Placename, \
+    PersonHasRole, PlacenameHasRole, Lock
 
 app = None
 
-
-clean_tags = re.compile('<.*?>')
-clean_notes = re.compile('\[\d+\]')
-clean_page_breaks = re.compile('\[p\.?\s?\d+\]')
-def remove_html_tags(text):
-    without_unbreakable_space = text.replace('\ufeff','') if text else None
-    without_html_content = re.sub(clean_tags,'', without_unbreakable_space) if text else None
-    without_without_notes = without_html_content.replace("[note]","").strip() if without_html_content else None
-    without_numbered_notes = re.sub(clean_notes,' ', without_without_notes) if without_without_notes else None
-    without_page_breaks = re.sub(clean_page_breaks,' ', without_numbered_notes) if without_numbered_notes else None
-    cleaned = re.sub(' +', ' ', without_page_breaks) if without_page_breaks else None
-    return cleaned
 
 def add_default_users(db):
     UserRole.add_default_roles()
@@ -173,13 +162,24 @@ def make_cli():
         """
         Rebuild the elasticsearch indexes from the current database
         """
+        # relationships read by the facades when building the payloads, loaded upfront to avoid one query per object
+        # (Document.collections is a dynamic relationship and cannot be eager loaded)
+        document_loader_options = (
+            selectinload(Document.witnesses),
+            selectinload(Document.languages),
+            selectinload(Document.persons_having_roles).options(
+                selectinload(PersonHasRole.person), selectinload(PersonHasRole.person_role)),
+            selectinload(Document.placenames_having_roles).options(
+                selectinload(PlacenameHasRole.placename), selectinload(PlacenameHasRole.placename_role)),
+            selectinload(Document.locks).selectinload(Lock.user),
+        )
         indexes_info = {
             "collections": {"facade": CollectionFacade, "model": Collection},
             "languages": {"facade": LanguageFacade, "model": Language},
             "witnesses": {"facade": WitnessFacade, "model": Witness},
             "persons": {"facade": PersonFacade, "model": Person},
             "placenames": {"facade": PlacenameFacade, "model": Placename},
-            "documents": {"facade": DocumentFacade, "model": Document},
+            "documents": {"facade": DocumentFacade, "model": Document, "loader_options": document_loader_options},
             "institutions": {"facade": InstitutionFacade, "model": Institution},
             "users": {"facade": UserFacade, "model": User}
         }
@@ -199,31 +199,31 @@ def make_cli():
                     r = requests.put(url, json={"index.blocks.read_only_allow_delete": None})
                     assert (r.status_code == 200)
 
+                def actions():
+                    query = info["model"].query.options(*info.get("loader_options", ()))
+                    for obj in query.all():
+                        for data in info["facade"](prefix, obj).get_data_to_index_when_added(propagate=False):
+                            yield {"_index": data["index"], "_id": data["id"], "_source": data["payload"]}
+
+                def bulk_index():
+                    # one bulk request per chunk instead of one request per object
+                    count = 0
+                    for ok, item in streaming_bulk(app.elasticsearch, actions(), chunk_size=500):
+                        count += 1
+                    return count
+
                 try:
                     load_elastic_conf(name, index_name, rebuild=rebuild)
-
-                    for obj in info["model"].query.all():
-                        f_obj = info["facade"](prefix, obj)
-                        try:
-                            if index_name == DocumentFacade.get_index_name():
-                                #print("Rebuilding ", index_name)
-                                if f_obj.obj.title is not None and len(f_obj.obj.title) >0:
-                                    f_obj.obj.title = remove_html_tags(f_obj.obj.title)
-                                    #print('f_obj.id / f_obj.obj.title : ', f_obj.id, f_obj.obj.title)
-                                if f_obj.obj.argument is not None and len(f_obj.obj.argument) >0:
-                                    f_obj.obj.argument = remove_html_tags(f_obj.obj.argument)
-                                    #print('f_obj.id / f_obj.obj.argument : ', f_obj.id, f_obj.obj.argument)
-                                if f_obj.obj.transcription is not None and len(f_obj.obj.transcription) >0:
-                                    f_obj.obj.transcription = remove_html_tags(f_obj.obj.transcription)
-                                    #print('f_obj.id / f_obj.obj.transcription : ', f_obj.id, f_obj.obj.transcription)
-                                f_obj.reindex("insert", propagate=False)
-                            else:
-                                f_obj.reindex("insert", propagate=False)
-                        except AuthorizationException:
-                            reset_readonly()
-                            f_obj.reindex("insert", propagate=False)
-
-                    print("OK")
+                    try:
+                        count = bulk_index()
+                    except BulkIndexError as e:
+                        # index blocked (read_only_allow_delete, e.g. after a disk watermark): unblock and retry
+                        if not any(list(error.values())[0].get("error", {}).get("type") == "cluster_block_exception"
+                                   for error in e.errors):
+                            raise
+                        reset_readonly()
+                        count = bulk_index()
+                    print("OK (%s)" % count)
                 except Exception as e:
                     print("NOT OK!  ", str(e))
 
