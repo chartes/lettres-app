@@ -56,10 +56,11 @@ class PersonFacade(JSONAPIAbstractChangeloggedFacade):
         from app.api.person_has_role.facade import PersonHasRoleFacade
         rel_facade = PersonHasRoleFacade if not rel_facade else rel_facade
 
-        return [] if self.obj.persons_having_roles is None else [rel_facade(self.url_prefix, e,
-                                                                            self.with_relationships_links,
-                                                                            self.with_relationships_data).resource
-                                                                 for e in self.obj.persons_having_roles]
+        if self.obj.persons_having_roles is None:
+            return []
+        documents = self.preload_documents(self.obj.persons_having_roles)
+        return [rel_facade(self.url_prefix, e, self.with_relationships_links, self.with_relationships_data).resource
+                for e in self.obj.persons_having_roles]
 
     def get_functions_by_personId(self, ids):
         from app.models import PersonHasRole

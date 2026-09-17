@@ -56,10 +56,11 @@ class PlacenameFacade(JSONAPIAbstractChangeloggedFacade):
         from app.api.placename_has_role.facade import PlacenameHasRoleFacade
         rel_facade = PlacenameHasRoleFacade if not rel_facade else rel_facade
 
-        return [] if self.obj.placenames_having_roles is None else [rel_facade(self.url_prefix, e,
-                                                                                     self.with_relationships_links,
-                                                                                     self.with_relationships_data).resource
-                                                                 for e in self.obj.placenames_having_roles]
+        if self.obj.placenames_having_roles is None:
+            return []
+        documents = self.preload_documents(self.obj.placenames_having_roles)
+        return [rel_facade(self.url_prefix, e, self.with_relationships_links, self.with_relationships_data).resource
+                for e in self.obj.placenames_having_roles]
 
     def get_functions_by_placeId(self, ids):
         from app.models import PlacenameHasRole

@@ -1,7 +1,9 @@
 from flask import current_app, request
 
+from sqlalchemy.orm import load_only
+
 from app import db
-from app.models import Collection
+from app.models import Collection, Document
 
 
 class JSONAPIAbstractFacade(object):
@@ -12,6 +14,18 @@ class JSONAPIAbstractFacade(object):
     TYPE_PLURAL = "ABSTRACT-TYPE-PLURAL"
 
     ITEMS_PER_PAGE = 1000  # TODO: au delà il faut passer par l'api scroll d'elastic search
+
+    @staticmethod
+    def preload_documents(objs):
+        """Load the title and creation label of the documents of the given objects (eg. persons having roles)
+        in a few queries instead of one lazy load per object.
+        The returned list must be kept while the objects are used: the session only holds weak references."""
+        ids = list({obj.document_id for obj in objs if obj.document_id is not None})
+        documents = []
+        for i in range(0, len(ids), 500):
+            documents.extend(Document.query.options(load_only(Document.title, Document.creation_label))
+                             .filter(Document.id.in_(ids[i:i + 500])).all())
+        return documents
 
     def __init__(self, url_prefix, obj, with_relationships_links=True, with_relationships_data=True):
         self.obj = obj
