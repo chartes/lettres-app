@@ -1,13 +1,15 @@
-"""Remplace le libellé "[note]" des appels de notes par leur numéro.
+"""Écrit en base le numéro des appels de notes.
 
 Le front remplace à l'affichage "[note]" par la position de la note dans la liste des notes
 de la lettre (getNoteIndex, "TODO remove once [note] have been replaced in database").
 Ce script écrit ce même numéro en base, en retirant les <span> et les caractères U+FEFF
 qui entourent parfois le libellé :
     <a class="note" href="#4820"><span>[note]</span></a>  ->  <a class="note" href="#4820">[1]</a>
+Les appels déjà numérotés dont le numéro ne correspond pas à la position de la note
+sont renumérotés.
 
 Champs traités : titre, analyse, transcription, adresse (ceux que le front renumérote).
-Les appels déjà numérotés ne sont pas modifiés. Le script peut être relancé.
+Le script peut être relancé.
 
 Usage (depuis lettres-app) :
     python3 db/utils/number_note_calls.py db/lettres.staging.sqlite            # simulation
@@ -18,7 +20,7 @@ import sqlite3
 import re
 
 FIELDS = ("title", "argument", "transcription", "address")
-NOTE_CALL = re.compile(r'<a class="note" href="#(\d+)">(?:\uFEFF|</?span>)*\[note\](?:\uFEFF|</?span>)*</a>', re.I)
+NOTE_CALL = re.compile(r'<a class="note" href="#(\d+)">(?:\uFEFF|</?span>)*\[(note|\d+)\](?:\uFEFF|</?span>)*</a>', re.I)
 
 
 def main():
@@ -34,7 +36,7 @@ def main():
         notes = positions.setdefault(document_id, {})
         notes[note_id] = len(notes) + 1
 
-    documents, calls, unknown, examples = 0, 0, [], []
+    documents, numbered, renumbered, unknown, examples = 0, 0, [], [], []
     try:
         for row in db.execute(f"SELECT id, {', '.join(FIELDS)} FROM document").fetchall():
             document_id, updates = row[0], {}
@@ -43,14 +45,19 @@ def main():
                     continue
 
                 def number(match):
-                    nonlocal calls
-                    note_id = int(match.group(1))
+                    nonlocal numbered
+                    note_id, label = int(match.group(1)), match.group(2)
                     index = positions.get(document_id, {}).get(note_id)
                     if index is None:
                         unknown.append((document_id, field, note_id))
                         return match.group(0)
-                    calls += 1
-                    return f'<a class="note" href="#{note_id}">[{index}]</a>'
+                    call = f'<a class="note" href="#{note_id}">[{index}]</a>'
+                    if call != match.group(0):
+                        if label.lower() == "note":
+                            numbered += 1
+                        else:
+                            renumbered.append(f"lettre {document_id}, {field}, note {note_id} : [{label}] -> [{index}]")
+                    return call
 
                 new_html = NOTE_CALL.sub(number, html)
                 if new_html != html:
@@ -63,9 +70,11 @@ def main():
                 assignments = ", ".join(f"{field} = ?" for field in updates)
                 db.execute(f"UPDATE document SET {assignments} WHERE id = ?", (*updates.values(), document_id))
 
-        print(f"{calls} appel(s) numéroté(s) dans {documents} lettre(s)")
+        print(f"{numbered} appel(s) [note] numéroté(s), {len(renumbered)} appel(s) renuméroté(s), dans {documents} lettre(s)")
         for example in examples:
             print(f"  {example}")
+        for change in renumbered:
+            print(f"  {change}")
         if unknown:
             print(f"appels vers une note absente de la lettre (non modifiés) : {unknown}")
         if args.apply:
